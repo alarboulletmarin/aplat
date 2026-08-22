@@ -551,6 +551,7 @@
     }
     els.errMsg.textContent = S.errKind === 'big'
       ? T.errBig.replace('{mp}', dec(r.w * r.h / 1e6))
+      : S.errKind === 'cap' ? T.errCap
       : T.errGen;
 
     /* Pendant le rendu on ne met pas `disabled` : le navigateur retirerait le
@@ -769,6 +770,18 @@
      second export en parallèle du premier. */
   var exporting = false;
 
+  /* Vrai si le canevas est resté noir pur : le dessin n'a pas eu lieu. */
+  function blankCanvas(ctx, w, h) {
+    var pts = [[1, 1], [w - 2, 1], [w >> 1, h >> 1], [1, h - 2], [w - 2, h - 2]];
+    try {
+      for (var i = 0; i < pts.length; i++) {
+        var d = ctx.getImageData(pts[i][0], pts[i][1], 1, 1).data;
+        if (d[0] || d[1] || d[2]) return false;
+      }
+      return true;
+    } catch (e) { return false; }   /* pas de lecture possible : on ne conclut pas */
+  }
+
   function onExport() {
     if (exporting) return;
     var r = res();
@@ -795,8 +808,17 @@
         var ctx = c.getContext('2d', { alpha: false });
         if (!ctx) throw new Error('no 2d context');
         E.draw(ctx, job.w, job.h, job.fam, job.pal, job.dens, job.seed);
+
+        /* Certains navigateurs mobiles refusent silencieusement d'allouer un
+           canevas au-delà d'une surface donnée : le dessin ne fait rien et le
+           fichier produit est un aplat noir, que rien d'autre ne distingue d'un
+           export réussi. Aucune palette ne part du noir pur, cinq points
+           suffisent donc à le voir — et on le dit, au lieu de livrer une image
+           vide. */
+        if (blankCanvas(ctx, job.w, job.h)) { release(c); fail('cap'); return; }
+
         c.toBlob(function (b) {
-          if (!b || b.size < 128) { release(c); fail(); return; }
+          if (!b || b.size < 128) { release(c); fail('gen'); return; }
           var url = URL.createObjectURL(b);
           var a = document.createElement('a');
           a.href = url;
@@ -814,13 +836,13 @@
           S.last = { w: job.w, h: job.h, size: b.size };
           render();
         }, 'image/png');
-      } catch (e) { release(c); fail(); }
+      } catch (e) { release(c); fail('gen'); }
     }, 70);
 
-    function fail() {
+    function fail(kind) {
       exporting = false;
       S.phase = 'error';
-      S.errKind = 'gen';
+      S.errKind = kind || 'gen';
       render();
     }
     /* libère la mémoire du canevas hors écran : un 4K pèse ~33 Mo en RAM */

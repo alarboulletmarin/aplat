@@ -416,6 +416,42 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await rctx.close();
   }
 
+  // --- 15c. canevas resté noir : on doit le dire, pas livrer une image vide
+  {
+    const bctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR', acceptDownloads: true });
+    const bp = await bctx.newPage();
+    // on simule le refus silencieux d'allocation : le dessin ne fait rien
+    await bp.addInitScript(() => {
+      window.__blockDraw = true;
+      const orig = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+        const ctx = orig.call(this, type, attrs);
+        if (window.__blockDraw && this.width > 3000 && ctx && !ctx.__patched) {
+          ctx.__patched = true;
+          for (const m of ['fillRect', 'fill', 'drawImage', 'arc', 'ellipse']) {
+            const f = ctx[m];
+            ctx[m] = function () { /* refus silencieux */ };
+          }
+        }
+        return ctx;
+      };
+    });
+    await bp.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=4000x4000', { waitUntil: 'networkidle' });
+    await bp.waitForTimeout(500);
+    const dls2 = [];
+    bp.on('download', d => dls2.push(d.suggestedFilename()));
+    await bp.$eval('#btnExport', e => e.click());
+    await bp.waitForTimeout(4000);
+    const vide = await bp.evaluate(() => ({
+      err: !document.getElementById('errCard').hidden,
+      msg: document.getElementById('errMsg').textContent
+    }));
+    t(vide.err, 'export : un canevas resté noir est signalé comme une erreur');
+    t(/taille|large/i.test(vide.msg), 'export : le message dit quoi faire', vide.msg.slice(0, 60));
+    t(dls2.length === 0, 'export : aucune image vide n\'est livrée', dls2.length + ' téléchargement(s)');
+    await bctx.close();
+  }
+
   // --- 16. URL : robustesse et discrétion
   {
     const uctx = await browser.newContext({ viewport: { width: 900, height: 900 }, deviceScaleFactor: 2, locale: 'fr-FR' });

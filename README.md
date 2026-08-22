@@ -42,7 +42,7 @@ navigation, pas d'étape.
 |---|---|---|
 | **Vide** | Résolution absente ou incomplète. La maquette est remplacée par une hachure, avec « Indique une résolution ». Le bouton Télécharger est désactivé. | Saisir largeur et hauteur, ou reprendre un préréglage. |
 | **Chargement** | Trois points au centre de la maquette pendant le rendu. Le bouton passe à « Rendu en cours » et devient `aria-busy`. | Se résout seul. |
-| **Erreur** | Carte à bordure corail, triangle plein, cause exacte : au-delà de 40 Mpx on dit le nombre, sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
+| **Erreur** | Carte à bordure et triangle d'alerte, cause exacte : au-delà de 40 Mpx on dit le nombre ; si le navigateur a refusé d'allouer le canevas — ce que font les navigateurs mobiles au-delà d'une certaine surface, en rendant une image noire sans le dire — on dit d'essayer plus petit ; sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
 | **Succès** | Carte lime : dimensions produites, format, poids réel du fichier, et le geste pour passer de « téléchargé » à « dans la pellicule ». | Rien à faire, c'est fini. |
 | **Données trop longues** | Chaque libellé a son échappatoire prévue : ellipse sur les puces de réglage et les icônes de la maquette, retour à la ligne dans les cartes, colonnes qui s'étirent, `overflow-wrap` sur la résolution. Le bouton secondaire cède la place au primaire. | — |
 
