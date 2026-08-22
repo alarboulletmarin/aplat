@@ -146,10 +146,10 @@ d'entrée de gamme (`tools/perf.js`) :
 
 | action | avant | après |
 |---|---|---|
-| frappe dans le champ largeur | 67 ms | **40 ms** |
-| changement de palette | 163 ms | **33 ms** |
-| changement de famille | 52 ms | **31 ms** |
-| nouveau motif | 175 ms | **33 ms** |
+| frappe dans le champ largeur | 67 ms | **30 ms** |
+| changement de palette | 163 ms | **20 ms** |
+| changement de famille | 52 ms | **13 ms** |
+| nouveau motif | 175 ms | **12 ms** |
 
 ## Accessibilité
 

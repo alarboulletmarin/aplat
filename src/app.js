@@ -101,16 +101,21 @@
     });
   }
 
-  function applyChrome() {
+  var chromeSig = null;
+  function applyChrome(force) {
+    var box = els.stageBox, dev = els.device;
+    if (!box || !dev) return;
+    var r0 = res();
+    var sig = [S.theme, S.lang, r0.w, r0.h, window.innerWidth, window.innerHeight, box.clientWidth].join('|');
+    if (!force && sig === chromeSig) return;
+    chromeSig = sig;
+
     var root = document.documentElement;
     root.setAttribute('data-theme', S.theme);
     root.setAttribute('lang', S.lang);
     document.title = t().htmlTitle;
     var d = document.querySelector('meta[name="description"]');
     if (d) d.setAttribute('content', t().metaDesc);
-
-    var box = els.stageBox, dev = els.device;
-    if (!box || !dev) return;
 
     /* la vue reste épinglée : elle prend une part de l'écran, jamais tout */
     var narrow = window.innerWidth < 760;
@@ -119,7 +124,7 @@
       ? Math.max(214, Math.min(348, vh * 0.40))
       : Math.max(300, Math.min(600, vh * 0.62))) + 'px';
 
-    var r = res();
+    var r = r0;
     if (!r.w || !r.h) return;
     var k = kind(r.w, r.h);
     var capW = k === 'phone' ? 300 : (k === 'tablet' ? 430 : 660);
@@ -366,7 +371,7 @@
     var empty = !r.w || !r.h;
 
     renderStatic();
-    applyChrome();
+    applyChrome(false);
 
     /* — états de la scène — */
     var busy = S.phase === 'rendering';
@@ -407,17 +412,7 @@
     if (document.activeElement !== els.inH && els.inH.value !== S.hStr) els.inH.value = S.hStr;
 
     /* — lisibilité — */
-    var leg = S.leg || { mode: 'light', ratio: 5.4, veil: 0.18 };
-    var lvl = leg.ratio >= 4.5 ? 'good' : leg.ratio >= 3 ? 'ok' : 'low';
-    els.legGood.hidden = lvl !== 'good';
-    els.legOk.hidden = lvl !== 'ok';
-    els.legLow.hidden = lvl !== 'low';
-    els.legTitle.textContent = T.legibTitle + ' · ' +
-      (lvl === 'good' ? T.lvGood : lvl === 'ok' ? T.lvOk : T.lvLow);
-    var veilTxt = leg.veil > 0.02 ? T.veil.replace('{n}', String(Math.round(leg.veil * 100))) : T.noVeil;
-    els.legDetail.textContent = dec(leg.ratio) + ':1 · ' +
-      (leg.mode === 'light' ? T.labLight : T.labDark) + ' · ' + veilTxt + ' — ' +
-      (lvl === 'good' ? T.adviceGood : lvl === 'ok' ? T.adviceOk : T.adviceLow);
+    renderLeg();
 
     /* — description de l'aperçu pour les lecteurs d'écran — */
     var fam = E.FAMILIES.find(function (f) { return f.id === S.family; });
@@ -524,7 +519,7 @@
   }
 
   function paint(force) {
-    applyChrome();
+    applyChrome(force);
     if (S.phase !== 'rendering') paintPreview(force);
     paintThumbs(force);
   }

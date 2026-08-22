@@ -77,10 +77,6 @@
     function f(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
     return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
   }
-  function hexLum(h) {
-    var n = parseInt(h.slice(1), 16);
-    return lum((n >> 16) & 255, (n >> 8) & 255, n & 255);
-  }
 
   /* ---------- primitives de tracé ----------------------------------------- */
 
@@ -611,9 +607,6 @@
     FAMILIES: FAMILIES,
     RADII: RADII,
     rng: rng,
-    hash: hash,
-    lum: lum,
-    hexLum: hexLum,
     measure: measure,
     draw: draw,
     _shapes: shapes,
