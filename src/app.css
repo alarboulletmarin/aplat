@@ -59,7 +59,7 @@ html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--bg);color:var(--ink);
   font-family:Archivo,"Helvetica Neue",Helvetica,system-ui,sans-serif;
-  font-size:16px;line-height:1.45;text-wrap:pretty;-webkit-font-smoothing:antialiased;
+  font-size:16px;line-height:1.45;text-wrap:pretty;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;
 }
 /* grain papier, très léger, purement décoratif */
 body::after{
@@ -103,7 +103,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .title{position:relative;font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(54px,15vw,92px);line-height:.82;letter-spacing:-.035em;text-transform:uppercase}
 .tagline{position:relative;max-width:36ch;font-size:15px;color:var(--ink-muted)}
 
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;align-items:start}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:22px;align-items:start}
 
 /* --- Scène : maquette d'écran -------------------------------------------- */
 .stage{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:8px 0 12px}
@@ -208,13 +208,23 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .grp-blob{flex:0 0 auto;width:12px;height:12px;background:var(--deco-1);border-radius:56% 44% 40% 60% / 48% 56% 44% 52%}
 .grp-star{flex:0 0 auto;width:12px;height:12px;background:var(--deco-2);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
 
-.grid-fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px}
-.grid-pal{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px}
+.grid-fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(102px,100%),1fr));gap:9px}
+.grid-pal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(108px,100%),1fr));gap:9px}
 
-.opt{border:2px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer;text-align:left}
+/* Bordure à --line-strong et non --line : sur les puces de réglage, la bordure
+   est ce qui dit « ceci se touche ». Elle doit tenir 3:1 (WCAG 1.4.11).
+   Les bordures de cartes, elles, restent à --line : elles ne portent rien. */
+.opt{border:2px solid var(--line-strong);background:var(--field);color:var(--ink);cursor:pointer;text-align:left}
 .opt[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-2)}
-.opt-dot{flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:transparent}
+.opt-dot{position:relative;flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:transparent}
 .opt[aria-pressed="true"] .opt-dot{background:var(--accent)}
+/* Coche : en niveaux de gris, l'aplat lime et le fond de la puce sélectionnée
+   se ressemblent trop. La forme prend le relais de la couleur. */
+.opt[aria-pressed="true"] .opt-dot::after{
+  content:"";position:absolute;left:50%;top:50%;width:3px;height:6px;
+  margin:-4.5px 0 0 -2.5px;border:2px solid var(--ink);border-top:0;border-left:0;
+  transform:rotate(40deg)
+}
 
 .opt-fam{display:flex;flex-direction:column;gap:8px;padding:8px;min-height:44px;border-radius:18px}
 .opt-fam canvas{width:100%;aspect-ratio:16/10;display:block;border-radius:11px;background:var(--surface-2)}
@@ -227,7 +237,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .opt-pal-l{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--ink)}
 .opt-pal-l span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 
-.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px}
 .dens-row{display:flex;gap:8px;flex-wrap:wrap}
 .opt-dens{flex:1 1 68px;min-height:46px;padding:8px 10px;border-radius:14px;font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:5px}
 .opt-dens-d{display:flex;gap:3px}
@@ -260,7 +270,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .ico-link i+i{margin-left:-4px}
 .share-n{font-size:12.5px;color:var(--ink-muted)}
 .share-seed{font-variant-numeric:tabular-nums}
-.prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding-top:4px;border-top:1.5px solid var(--line)}
+.prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;padding-top:4px;border-top:1.5px solid var(--line)}
 .prefs h3{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px}
 .prefs-row{display:flex;gap:8px;flex-wrap:wrap}
 .opt-lang{flex:1 1 44px;min-width:44px;min-height:44px;border-radius:13px;font-weight:700;font-size:14px;text-align:center}
@@ -287,10 +297,13 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .note-retry{flex:0 0 auto;min-height:44px;padding:0 14px;cursor:pointer;border-radius:13px;border:2px solid var(--line-strong);background:transparent;color:var(--ink);font-weight:700;font-size:13.5px}
 
 .actions{display:flex;gap:10px;align-items:stretch}
-.btn-seed{flex:0 0 auto;min-width:56px;min-height:56px;padding:0 16px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
+/* Le bouton secondaire cède la place au primaire quand le libellé s'allonge :
+   il a déjà l'ellipse prévue pour ça. Sans cette ligne, un libellé traduit 30 %
+   plus long poussait « Télécharger » hors de l'écran sur un 320 px. */
+.btn-seed{flex:0 1 auto;min-width:56px;min-height:56px;padding:0 16px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
 .btn-seed i{flex:0 0 auto;width:13px;height:13px;background:var(--deco-2);border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
 .btn-seed span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn-go{flex:1 1 auto;min-height:56px;padding:0 18px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-go{flex:1 1 auto;min-width:0;min-height:56px;padding:0 18px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn-go[disabled]{opacity:.55;cursor:default}
 .ico-dl{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2.5px}
 .ico-dl i{display:block;width:10px;height:11px;background:currentColor;clip-path:polygon(50% 100%,100% 0,0 0)}

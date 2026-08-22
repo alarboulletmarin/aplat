@@ -2,11 +2,11 @@
    Le grain n'est pas décoratif : il casse les marches du voile, qui n'est plus
    tramé par le navigateur depuis qu'il est peint en bandes. */
 const { launch } = require('./pw');
-const { serve } = require('./serve');
-const PORT = 8099;
+const { start } = require('./serve');
+let PORT = 0;
 
 (async () => {
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });

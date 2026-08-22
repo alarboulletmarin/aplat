@@ -31,5 +31,10 @@ function serve(port) {
   }).listen(port);
 }
 
-module.exports = { serve, ROOT };
+function start() {
+  const srv = serve(0);
+  return { srv, port: srv.address().port };
+}
+
+module.exports = { serve, start, ROOT };
 if (require.main === module) { serve(8099); console.log('http://127.0.0.1:8099'); }

@@ -2,10 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { serve } = require('./serve');
+const { start } = require('./serve');
 
 const OUT = process.env.SHOT_OUT || path.resolve(__dirname, '../.shots');
-const PORT = 8099;
+let PORT = 0;
 
 const CASES = [
   { name: 'phone-fr-light', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=fr' },
@@ -20,7 +20,7 @@ const CASES = [
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
   const problems = [];
 

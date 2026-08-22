@@ -3,13 +3,13 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { serve } = require('./serve');
-const PORT = 8099;
+const { start } = require('./serve');
+let PORT = 0;
 const OUT = path.resolve(__dirname, '../.exports');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });

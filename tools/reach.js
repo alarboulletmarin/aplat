@@ -3,8 +3,8 @@
    vérifie la cible de 44 px. */
 const path = require('path');
 const { launch } = require('./pw');
-const { serve } = require('./serve');
-const PORT = 8099;
+const { start } = require('./serve');
+let PORT = 0;
 
 const CASES = [
   { name: 'phone 390x844', vp: { width: 390, height: 844 }, dsf: 3, mobile: true },
@@ -15,7 +15,7 @@ const CASES = [
 ];
 
 (async () => {
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
   let bad = 0;
 

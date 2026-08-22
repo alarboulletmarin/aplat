@@ -283,6 +283,7 @@
       dock.forEach(function (label, i) {
         els.mockdDock.appendChild(mockIcon('mockd-dock-i', E.RADII[(i + 2) % E.RADII.length]));
       });
+      trimMock(els.mockDesk, els.mockdIcons, 1);
     } else {
       els.mockGrid.textContent = '';
       apps.forEach(function (label, i) {
@@ -295,6 +296,22 @@
       dock.forEach(function (label, i) {
         els.mockDock.appendChild(mockIcon('mock-dock-i', E.RADII[(i + 2) % E.RADII.length]));
       });
+      trimMock(els.mockHandheld, els.mockGrid, k === 'phone' ? 4 : 6);
+    }
+  }
+
+  /* La grille d'icônes est dimensionnée en unités --mu, elles-mêmes calées sur
+     le petit côté de l'appareil. Un écran large — tablette en 4:3, ordinateur
+     en 16:9 — est proportionnellement moins haut qu'un téléphone : la grille
+     complète débordait alors par le bas et emportait le dock et la barre de
+     recherche hors du cadre. On retire des rangées jusqu'à ce que tout tienne,
+     pour que la zone basse du fond d'écran reste jugeable elle aussi. */
+  function trimMock(mock, host, step) {
+    if (!mock || !host || mock.hidden) return;
+    var guard = 0;
+    while (mock.scrollHeight > mock.clientHeight + 1 &&
+           host.children.length > step && guard++ < 12) {
+      for (var i = 0; i < step && host.lastChild; i++) host.removeChild(host.lastChild);
     }
   }
 

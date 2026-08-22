@@ -3,11 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { serve } = require('./serve');
+const { start } = require('./serve');
 
-const PORT = 8099;
+let PORT = 0;
 const OUT = path.resolve(__dirname, '../.exports');
-const RES = [
+const ALL_RES = [
   { name: 'phone', w: 1179, h: 2556 },
   { name: 'phone-hi', w: 1290, h: 2796 },
   { name: 'tablet', w: 2048, h: 2732 },
@@ -16,16 +16,18 @@ const RES = [
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
 
   const mode = process.argv[2] || 'all';
+  const RES = mode === 'phone-full' ? [ALL_RES[0]] : ALL_RES;
 
   const rows = await page.evaluate(async ({ RES, mode }) => {
     const E = window.APLAT_ENGINE;
     const fams = mode === 'quick' ? ['vagues', 'trame', 'terrazzo', 'confettis', 'tournesol'] : E.FAMILIES.map(f => f.id);
+    const dl = mode === 'quick' ? [1] : [0, 1, 2];
     const pals = mode === 'quick' ? ['lime', 'nuit'] : E.PAL_ORDER;
     const out = [];
 
@@ -36,7 +38,7 @@ const RES = [
     for (const res of RES) {
       for (const fam of fams) {
         for (const pal of pals) {
-          for (const dens of (mode === 'quick' ? [1] : [0, 1, 2])) {
+          for (const dens of dl) {
             const c = document.createElement('canvas');
             c.width = res.w; c.height = res.h;
             const ctx = c.getContext('2d', { alpha: false });

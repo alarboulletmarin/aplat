@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { serve } = require('./serve');
+const { start } = require('./serve');
 const OUT = path.resolve(__dirname, '../.shots');
-const PORT = 8099;
+let PORT = 0;
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const srv = serve(PORT);
+  const { srv, port } = start(); PORT = port;
   const browser = await launch();
 
   async function grab(name, opts, q, actions) {
