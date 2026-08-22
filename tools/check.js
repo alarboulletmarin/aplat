@@ -4,6 +4,7 @@ const path = require('path');
 
 const STEPS = [
   ['parcours complet', 'e2e.js'],
+  ['URL hostiles', 'fuzz-url.js'],
   ['contrastes', 'a11y.js'],
   ['cibles tactiles et atteignabilité', 'reach.js'],
   ['débordements et libellés +30 %', 'overflow.js'],

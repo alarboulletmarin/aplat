@@ -229,7 +229,11 @@ La page affiche « Aucun compte, aucun réseau, aucun stockage ». Ce qui le tie
 - la résolution détectée ne part pas dans le lien partagé : c'est une mesure de
   l'appareil, pas un réglage. Seule une saisie manuelle est transmise ;
 - la copie du lien ne ment pas : si le presse-papiers refuse, l'échec est dit et
-  le lien s'affiche à copier à la main.
+  le lien s'affiche à copier à la main ;
+- les paramètres d'URL sont validés sur liste blanche. 241 URL hostiles ont été
+  essayées — propriétés héritées d'`Object`, balises, `javascript:`, chiffres
+  arabes, chaînes de 500 caractères : aucune erreur, aucune injection, la page
+  rend toujours.
 
 ## Vérifications
 
@@ -251,6 +255,8 @@ npm run check        # tout enchaîner
 | `tools/shot.js` | captures et absence de requête sortante |
 | `tools/greyscale.js` | test en niveaux de gris |
 | `tools/fileurl.js` | ouverture en `file://` : requêtes, doublons de police, erreurs console |
+| `tools/fuzz-url.js` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
+| `tools/planche.js` | planche-contact des 18 familles à la résolution d'un téléphone |
 | `tools/perf.js` | coût de chaque action, processeur bridé six fois |
 | `tools/states.js` | captures des quatre états |
 | `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |
