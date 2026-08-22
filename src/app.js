@@ -429,8 +429,13 @@
     els.doneCard.hidden = !(S.phase === 'done' && !empty);
     els.errCard.hidden = S.phase !== 'error';
     if (S.last) {
-      els.doneMeta.textContent = num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' +
-        dec(S.last.size / 1048576) + ' ' + T.savedSize;
+      /* sous le mégaoctet on affiche des kilooctets : « 262 Ko » dit ce que
+         « 0,3 Mo » cache, et le poids du fichier fait partie du résultat. */
+      var b = S.last.size;
+      var poids = b < 1048576
+        ? num(Math.round(b / 1024)) + ' ' + T.savedSizeK
+        : dec(b / 1048576) + ' ' + T.savedSize;
+      els.doneMeta.textContent = num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' + poids;
     }
     els.errMsg.textContent = S.errKind === 'big'
       ? T.errBig.replace('{mp}', dec(r.w * r.h / 1e6))

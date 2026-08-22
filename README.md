@@ -181,6 +181,7 @@ npm run check        # tout enchaîner
 
 | Outil | Ce qu'il vérifie |
 |---|---|
+| `tools/e2e.js` | parcours complet : URL, déterminisme, états, téléchargement réel, clavier, mouvement réduit |
 | `tools/a11y.js` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.js` | atteignabilité et taille des cibles, de 320 à 1920 px |
 | `tools/overflow.js` | débordements, y compris libellés allongés de 30 % |
