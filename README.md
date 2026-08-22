@@ -141,6 +141,9 @@ que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
 champ de vision, pas toutes d'un coup — neuf sur dix-huit au premier affichage
 d'un téléphone.
 
+Après 400 changements de réglage enchaînés (`tools/soak.js`) : même nombre de
+nœuds, même nombre de canevas, même nombre d'écouteurs, +0,5 Mo de tas.
+
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
 d'entrée de gamme (`tools/perf.js`) :
 
@@ -257,6 +260,7 @@ npm run check        # tout enchaîner
 | `tools/fileurl.js` | ouverture en `file://` : requêtes, doublons de police, erreurs console |
 | `tools/fuzz-url.js` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `tools/planche.js` | planche-contact des 18 familles à la résolution d'un téléphone |
+| `tools/soak.js` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
 | `tools/perf.js` | coût de chaque action, processeur bridé six fois |
 | `tools/states.js` | captures des quatre états |
 | `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |

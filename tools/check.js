@@ -11,7 +11,8 @@ const STEPS = [
   ['marches du voile', 'band-test.js'],
   ['amplitude du grain', 'dither-check.js'],
   ['captures et requêtes sortantes', 'shot.js'],
-  ['ouverture en file://', 'fileurl.js']
+  ['ouverture en file://', 'fileurl.js'],
+  ['endurance', 'soak.js']
 ];
 
 let failed = 0;
