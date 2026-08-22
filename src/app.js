@@ -35,7 +35,6 @@
   var thumbs = {};
   var ctxCache = new WeakMap();
   var timers = {};
-  var lastSig = '';
 
   /* ---------- utilitaires --------------------------------------------------- */
 
@@ -143,6 +142,7 @@
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
     b.appendChild(cv);
+    cv.dataset.thumb = f.id;
     thumbs[f.id] = cv;
     var lab = el('span', 'opt-fam-l');
     lab.appendChild(el('span', 'opt-dot'));
@@ -248,9 +248,15 @@
     return s;
   }
 
+  var mockSig = null;
   function buildMock(k) {
     var T = t();
     var n = new Date();
+    /* la maquette ne dépend que du type d'appareil, de la langue et de la
+       géométrie : inutile de la reconstruire à chaque frappe */
+    var sig = [k, S.lang, els.device.style.width, els.device.style.height, n.getDate()].join('|');
+    if (sig === mockSig) return;
+    mockSig = sig;
 
     els.mockClock.textContent = S.clock || now();
     els.mockdClock.textContent = S.clock || now();
@@ -319,7 +325,10 @@
 
   function fill(key, node) { node.textContent = t()[key]; }
 
+  var staticLang = null;
   function renderStatic() {
+    if (staticLang === S.lang) return;
+    staticLang = S.lang;
     var T = t();
     document.querySelectorAll('[data-t]').forEach(function (n) {
       var v = T[n.dataset.t];
@@ -446,55 +455,94 @@
     els.btnExport.setAttribute('aria-busy', busy ? 'true' : 'false');
 
     /* — dessin — */
-    var sig = [S.lang, S.theme, S.family, S.pal, S.dens, S.seed, S.wStr, S.hStr, S.editRes, S.phase].join('|');
-    if (sig !== lastSig) { lastSig = sig; paint(); }
+    paint(false);
     syncUrl();
   }
 
   /* ---------- dessin -------------------------------------------------------- */
 
-  function paint() {
-    applyChrome();
+  /* Deux signatures distinctes : l'aperçu dépend de la résolution visée, les
+     vignettes non. Sans ça, taper un chiffre dans le champ largeur redessinait
+     les dix-huit vignettes pour rien. */
+  var sigPreview = null;
+  var sigThumb = Object.create(null);
+  var seen = Object.create(null);
+
+  function paintPreview(force) {
     var r = res();
     var c = els.previewCanvas;
+    if (!c || !r.w || !r.h) return;
+    var rect = c.getBoundingClientRect();
+    if (rect.width <= 4) return;
 
-    if (c && r.w && r.h && S.phase !== 'rendering') {
-      var rect = c.getBoundingClientRect();
-      if (rect.width > 4) {
-        var dpr = Math.min(window.devicePixelRatio || 1, 3);
-        var pw = Math.round(rect.width * dpr), ph = Math.round(rect.height * dpr);
-        if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
-        var m = E.draw(ctxOf(c), c.width, c.height, S.family, S.pal, S.dens, S.seed);
-        labelTokens(els.device, m.mode);
+    var dpr = Math.min(window.devicePixelRatio || 1, 3);
+    var pw = Math.round(rect.width * dpr), ph = Math.round(rect.height * dpr);
+    var sig = [S.family, S.pal, S.dens, S.seed, pw, ph].join('|');
+    if (!force && sig === sigPreview) return;
+    sigPreview = sig;
 
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          c.style.transition = 'none';
-          c.style.opacity = '0.35';
-          requestAnimationFrame(function () {
-            c.style.transition = 'opacity 260ms ease-out';
-            c.style.opacity = '1';
-          });
-        }
+    if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
+    var m = E.draw(ctxOf(c), pw, ph, S.family, S.pal, S.dens, S.seed);
+    labelTokens(els.device, m.mode);
 
-        var prev = S.leg;
-        if (!prev || prev.mode !== m.mode ||
-            Math.abs(prev.ratio - m.ratio) > 0.08 || Math.abs(prev.veil - m.veil) > 0.02) {
-          S.leg = m;
-          renderLeg();
-        }
-      }
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      c.style.transition = 'none';
+      c.style.opacity = '0.35';
+      requestAnimationFrame(function () {
+        c.style.transition = 'opacity 260ms ease-out';
+        c.style.opacity = '1';
+      });
     }
 
+    var prev = S.leg;
+    if (!prev || prev.mode !== m.mode ||
+        Math.abs(prev.ratio - m.ratio) > 0.08 || Math.abs(prev.veil - m.veil) > 0.02) {
+      S.leg = m;
+      renderLeg();
+    }
+  }
+
+  /* Seules les vignettes réellement à l'écran sont dessinées : sur un téléphone
+     il y en a six ou sept, pas dix-huit. Celles qui reviennent dans le champ
+     sont redessinées à ce moment-là si leurs réglages ont changé. */
+  function paintThumbs(force) {
+    var base = [S.pal, S.dens, S.seed].join('|');
+    var k = Math.max(1.5, Math.min(window.devicePixelRatio || 1, 2));
     E.FAMILIES.forEach(function (f) {
       var tc = thumbs[f.id];
-      if (!tc) return;
+      if (!tc || !seen[f.id]) return;
       var tr = tc.getBoundingClientRect();
       if (tr.width < 4) return;
-      var k = Math.max(1.5, Math.min(window.devicePixelRatio || 1, 2));
       var tw = Math.round(tr.width * k), th = Math.round(tr.height * k);
+      var sig = base + '|' + tw + 'x' + th;
+      if (!force && sigThumb[f.id] === sig) return;
+      sigThumb[f.id] = sig;
       if (tc.width !== tw || tc.height !== th) { tc.width = tw; tc.height = th; }
-      E.draw(ctxOf(tc), tc.width, tc.height, f.id, S.pal, S.dens, S.seed);
+      E.draw(ctxOf(tc), tw, th, f.id, S.pal, S.dens, S.seed);
+      tc.dataset.painted = '1';
     });
+  }
+
+  function paint(force) {
+    applyChrome();
+    if (S.phase !== 'rendering') paintPreview(force);
+    paintThumbs(force);
+  }
+
+  function watchThumbs() {
+    if (!window.IntersectionObserver) {
+      E.FAMILIES.forEach(function (f) { seen[f.id] = true; });
+      paintThumbs(true);
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var id = e.target.dataset.thumb;
+        if (id) seen[id] = e.isIntersecting;
+      });
+      paintThumbs(false);
+    }, { rootMargin: '200px 0px' });
+    E.FAMILIES.forEach(function (f) { if (thumbs[f.id]) io.observe(thumbs[f.id]); });
   }
 
   /* mise à jour ciblée du bloc lisibilité, sans relancer un rendu complet */
@@ -657,19 +705,19 @@
     var rz;
     window.addEventListener('resize', function () {
       clearTimeout(rz);
-      rz = setTimeout(function () { lastSig = ''; paint(); }, 120);
+      rz = setTimeout(function () { paint(true); }, 120);
     });
 
     if (window.ResizeObserver && els.stageBox) {
       var ro = new ResizeObserver(function () {
         clearTimeout(rz);
-        rz = setTimeout(function () { lastSig = ''; paint(); }, 90);
+        rz = setTimeout(function () { paint(true); }, 90);
       });
       ro.observe(els.stageBox);
     }
 
     var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mq.addEventListener) mq.addEventListener('change', function () { lastSig = ''; paint(); });
+    if (mq.addEventListener) mq.addEventListener('change', function () { paint(true); });
 
     setInterval(function () {
       S.clock = now();
@@ -678,9 +726,10 @@
     }, 20000);
 
     render();
+    watchThumbs();
     /* les polices changent la métrique des vignettes : on repeint une fois prêtes */
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () { lastSig = ''; paint(); });
+      document.fonts.ready.then(function () { paint(true); });
     }
   }
 

@@ -193,6 +193,85 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   t(errors.length === 0, 'aucune erreur JavaScript', errors.slice(0, 3).join(' | '));
 
+  // --- 11a. paresse : au premier affichage, seules les vignettes proches
+  //          du champ de vision sont dessinées
+  {
+    const lctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR' });
+    const lp = await lctx.newPage();
+    await lp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await lp.waitForTimeout(900);
+    const lazy = await lp.evaluate(() => {
+      let drawn = 0, total = 0;
+      for (const cv of document.querySelectorAll('canvas[data-thumb]')) { total++; if (cv.dataset.painted) drawn++; }
+      return { drawn, total };
+    });
+    t(lazy.drawn < lazy.total, 'vignettes : paresseuses au premier affichage', lazy.drawn + '/' + lazy.total + ' dessinées');
+    await lctx.close();
+  }
+
+  // --- 11b. vignettes paresseuses : dessinées à l'entrée dans le champ,
+  //          remises à jour au changement de palette, et conformes à un
+  //          recalcul indépendant par le moteur
+  {
+    await tap('[data-pal="encre"]');
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.getElementById('famAbs').scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(800);
+
+    const vign = await page.evaluate(() => {
+      const E = window.APLAT_ENGINE;
+      const q = new URLSearchParams(location.search);
+      const PAL = q.get('p'), DENS = parseInt(q.get('d'), 10), SEED = parseInt(q.get('s'), 10);
+      const out = { drawn: 0, blank: [], offscreen: 0, mismatch: [], hashes: {} };
+      const vh = innerHeight;
+      for (const cv of document.querySelectorAll('canvas[data-thumb]')) {
+        const r = cv.getBoundingClientRect();
+        if (!(r.bottom > -200 && r.top < vh + 200)) { out.offscreen++; continue; }
+        if (!cv.dataset.painted) { out.blank.push(cv.dataset.thumb); continue; }
+        const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+        const teintes = new Set();
+        let h = 2166136261;
+        for (let i = 0; i < d.length; i += 4 * 53) {
+          teintes.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]);
+          h = Math.imul(h ^ (d[i] * 65536 + d[i + 1] * 256 + d[i + 2]), 16777619) >>> 0;
+        }
+        if (teintes.size < 4) { out.blank.push(cv.dataset.thumb); continue; }
+        out.drawn++;
+        out.hashes[cv.dataset.thumb] = h;
+        // recalcul indépendant : le moteur doit produire exactement la même image
+        const ref = document.createElement('canvas');
+        ref.width = cv.width; ref.height = cv.height;
+        E.draw(ref.getContext('2d', { alpha: false }), cv.width, cv.height, cv.dataset.thumb, PAL, DENS, SEED);
+        const rd = ref.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+        let rh = 2166136261;
+        for (let i = 0; i < rd.length; i += 4 * 53) rh = Math.imul(rh ^ (rd[i] * 65536 + rd[i + 1] * 256 + rd[i + 2]), 16777619) >>> 0;
+        if (rh !== h) out.mismatch.push(cv.dataset.thumb);
+      }
+      return out;
+    });
+    t(vign.drawn >= 4 && vign.blank.length === 0, 'vignettes : celles à l\'écran sont dessinées',
+      vign.drawn + ' dessinées, ' + vign.offscreen + ' hors champ, vides: ' + (vign.blank.join(',') || 'aucune'));
+    t(vign.mismatch.length === 0, 'vignettes : conformes à un recalcul indépendant du moteur',
+      vign.mismatch.join(',') || 'toutes identiques');
+
+    await tap('[data-pal="lime"]');
+    await page.waitForTimeout(500);
+    const apres = await page.evaluate(hashes => {
+      const changed = [], same = [];
+      for (const cv of document.querySelectorAll('canvas[data-thumb]')) {
+        const id = cv.dataset.thumb;
+        if (!(id in hashes) || !cv.dataset.painted) continue;
+        const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+        let h = 2166136261;
+        for (let i = 0; i < d.length; i += 4 * 53) h = Math.imul(h ^ (d[i] * 65536 + d[i + 1] * 256 + d[i + 2]), 16777619) >>> 0;
+        (h === hashes[id] ? same : changed).push(id);
+      }
+      return { changed: changed.length, same };
+    }, vign.hashes);
+    t(apres.changed >= 4 && apres.same.length === 0, 'vignettes : remises à jour au changement de palette',
+      apres.changed + ' changées, inchangées: ' + (apres.same.join(',') || 'aucune'));
+  }
+
   // --- 12. clavier, sur une page fraîche : l'ordre de tabulation part du haut
   {
     const kctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR' });

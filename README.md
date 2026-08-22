@@ -133,6 +133,24 @@ forme jamais de blocs quand on agrandit l'image.
 
 ---
 
+## Réactivité
+
+L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
+dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
+que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
+champ de vision, pas toutes d'un coup — neuf sur dix-huit au premier affichage
+d'un téléphone.
+
+Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
+d'entrée de gamme (`tools/perf.js`) :
+
+| action | avant | après |
+|---|---|---|
+| frappe dans le champ largeur | 67 ms | **40 ms** |
+| changement de palette | 163 ms | **33 ms** |
+| changement de famille | 52 ms | **31 ms** |
+| nouveau motif | 175 ms | **33 ms** |
+
 ## Accessibilité
 
 Vérifié par `tools/a11y.js`, qui recompose les couleurs semi-transparentes sur
@@ -191,6 +209,8 @@ npm run check        # tout enchaîner
 | `tools/edges.js` | découpes agrandies sur les bords |
 | `tools/shot.js` | captures et absence de requête sortante |
 | `tools/greyscale.js` | test en niveaux de gris |
+| `tools/perf.js` | coût de chaque action, processeur bridé six fois |
+| `tools/states.js` | captures des quatre états |
 | `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |
 | `tools/geo-diff.js` · `tools/pixel-diff.js` | maquette d'origine et portage rendus côte à côte |
 
