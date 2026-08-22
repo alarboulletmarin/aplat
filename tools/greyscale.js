@@ -17,7 +17,7 @@ const OUT = path.resolve(__dirname, '../.shots');
     const ctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 3, colorScheme: scheme, locale: 'fr-FR' });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
-    await page.click('#resToggle', { force: true });
+    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(300);
     // désature toute la page
     await page.addStyleTag({ content: 'html{filter:grayscale(1) !important}' });

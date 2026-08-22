@@ -85,7 +85,7 @@ const STRETCH = `(() => {
               ['#ctaLabel', 'appel primaire'],
               ['#langList .opt', 'bouton de langue'],
               ['#themeList .opt span', 'bouton de thème'],
-              ['#resToggle', 'modifier la résolution'],
+              
               ['#shareLabel', 'copier le lien']
             ];
             for (const [sel, nom] of jamais) {

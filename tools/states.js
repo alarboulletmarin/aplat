@@ -24,7 +24,7 @@ const OUT = path.resolve(__dirname, '../.shots');
   const tap = (page, sel) => page.$eval(sel, e => e.click());
 
   await shot('vide', 'light', async p => {
-    await tap(p, '#resToggle');
+    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await p.waitForTimeout(200);
     await p.fill('#inW', '');
     await p.waitForTimeout(400);
@@ -41,7 +41,7 @@ const OUT = path.resolve(__dirname, '../.shots');
   });
 
   await shot('erreur', 'light', async p => {
-    await tap(p, '#resToggle');
+    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await p.waitForTimeout(200);
     await p.fill('#inW', '7000');
     await p.fill('#inH', '7000');

@@ -99,7 +99,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   t(fams.length === 0, 'moteur : 18 familles x 3 densités rendent une image', fams.join(' | ') || '54 combinaisons');
 
   // --- 6. état vide
-  await tap('#resToggle');
+  await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
   await page.waitForTimeout(200);
   await page.fill('#inW', '');
   await page.waitForTimeout(250);
@@ -498,7 +498,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     const sp2 = await sctx2.newPage();
     await sp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await sp2.waitForTimeout(400);
-    await sp2.$eval('#resToggle', e => e.click());
+    await sp2.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await sp2.waitForTimeout(200);
 
     await sp2.fill('#inW', '');
@@ -530,20 +530,24 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await sp2.type('#inW', '5');
     await sp2.waitForTimeout(300);
     const bas = await sp2.evaluate(() => {
-      const i = document.getElementById('inW'), h = document.getElementById('resHint');
-      const cs = getComputedStyle(i);
+      const i = document.getElementById('inW'), j = document.getElementById('inH');
+      const h = document.getElementById('resHint');
+      const cs = getComputedStyle(i), csOk = getComputedStyle(j);
       return {
         invalide: i.getAttribute('aria-invalid'),
         etat: h.dataset.state,
         message: h.textContent.trim(),
         bordure: cs.borderTopWidth,
+        bordureOk: csOk.borderTopWidth,
+        teinte: cs.borderTopColor !== csOk.borderTopColor,
         triangle: getComputedStyle(h.querySelector('i')).display
       };
     });
     t(bas.invalide === 'true', 'saisie : la valeur hors bornes est marquée aria-invalid');
-    t(bas.etat === 'erreur' && bas.triangle !== 'none' && parseFloat(bas.bordure) >= 3,
-      'saisie : l\'erreur se voit aussi — bordure épaissie et triangle, pas seulement la couleur',
-      'bordure ' + bas.bordure + ', triangle ' + bas.triangle);
+    t(bas.etat === 'erreur' && bas.triangle !== 'none' &&
+      parseFloat(bas.bordure) > parseFloat(bas.bordureOk) && bas.teinte,
+      'saisie : l\'erreur se voit aussi — trait épaissi et triangle, pas seulement la teinte',
+      'bordure ' + bas.bordure + ' contre ' + bas.bordureOk + ', triangle ' + bas.triangle);
     t(/16/.test(bas.message) && /8000/.test(bas.message), 'saisie : le message dit les bornes', bas.message);
     await sctx2.close();
   }
@@ -568,7 +572,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(churn === 0, 'régions live : rien n\'est réécrit quand rien ne change', churn + ' écritures');
 
     // et l'état vide n'affiche aucun chiffre inventé
-    await lp2.$eval('#resToggle', e => e.click());
+    await lp2.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await lp2.waitForTimeout(200);
     await lp2.fill('#inW', '');
     await lp2.waitForTimeout(400);
@@ -621,7 +625,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(!/[?&]r=/.test(propre), 'URL : la résolution détectée ne part pas dans le lien partagé', propre);
 
     // une résolution saisie à la main, elle, est transmise
-    await up.evaluate(() => document.getElementById('resToggle').click());
+    await up.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await up.waitForTimeout(200);
     await up.fill('#inW', '2560');
     await up.fill('#inH', '1440');

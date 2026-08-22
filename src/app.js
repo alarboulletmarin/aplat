@@ -334,20 +334,65 @@
       els.themeList.appendChild(b);
     });
 
-    ['pDetected', 'pPhone', 'pTablet', 'pDesk'].forEach(function (key, i) {
-      var b = el('button', 'pill');
-      b.type = 'button';
-      b.dataset.preset = key;
-      b.addEventListener('click', function () {
-        var wh = presetSize(i);
-        set({ wStr: String(wh.w), hStr: String(wh.h) });
-      });
-      els.presets.appendChild(b);
-    });
   }
 
-  function presetSize(i) {
-    return [detected, { w: 1179, h: 2556 }, { w: 2048, h: 2732 }, { w: 2560, h: 1440 }][i];
+  /* Les tailles proposées. Un préréglage identique à la résolution détectée est
+     retiré : il n'y a aucune raison de proposer deux fois la même chose. */
+  function resOptions() {
+    var T = t(), d = detected;
+    return [
+      { id: 'detected', label: T.pDetected, w: d.w, h: d.h },
+      { id: 'phone', label: T.pPhone, w: 1179, h: 2556 },
+      { id: 'tablet', label: T.pTablet, w: 2048, h: 2732 },
+      { id: 'desk', label: T.pDesk, w: 2560, h: 1440 }
+    ].filter(function (o) { return o.id === 'detected' || o.w !== d.w || o.h !== d.h; });
+  }
+
+  function onResPick(e) {
+    var v = e.target.value;
+    if (v === 'custom') {
+      S.editRes = true;
+      set({});
+      els.inW.focus();
+      els.inW.select();
+      return;
+    }
+    var o = null, list = resOptions();
+    for (var i = 0; i < list.length; i++) if (list[i].id === v) o = list[i];
+    if (o) set({ wStr: String(o.w), hStr: String(o.h), editRes: false });
+  }
+
+  /* Les <option> ne sont reconstruites que lorsque leurs libellés changent :
+     sinon le choix courant sauterait à chaque frappe. */
+  var resSig = null;
+  function renderRes(r) {
+    var T = t();
+    var opts = resOptions();
+    var matched = null;
+    for (var i = 0; i < opts.length; i++) if (opts[i].w === r.w && opts[i].h === r.h) matched = opts[i];
+
+    var items = opts.map(function (o) {
+      return { id: o.id, label: o.label + ' \u2014 ' + num(o.w) + '\u00a0\u00d7\u00a0' + num(o.h) };
+    });
+    items.push({
+      id: 'custom',
+      label: T.resCustom + (matched ? '' : '\u00a0\u00a0' + num(r.w) + '\u00a0\u00d7\u00a0' + num(r.h))
+    });
+
+    var sig = items.map(function (o) { return o.id + ':' + o.label; }).join('|');
+    if (sig !== resSig) {
+      resSig = sig;
+      els.resSelect.textContent = '';
+      items.forEach(function (o) {
+        var n = document.createElement('option');
+        n.value = o.id;
+        n.textContent = o.label;
+        els.resSelect.appendChild(n);
+      });
+    }
+    var want = S.editRes ? 'custom' : (matched ? matched.id : 'custom');
+    if (els.resSelect.value !== want) els.resSelect.value = want;
+    return !!matched;
   }
 
   /* ---------- maquette d'écran --------------------------------------------- */
@@ -464,11 +509,6 @@
       n.textContent = { light: T.tLight, dark: T.tDark, system: T.tAuto }[n.dataset.themeLabel];
       n.parentNode.title = n.textContent;
     });
-    els.presets.querySelectorAll('[data-preset]').forEach(function (n, i) {
-      var wh = presetSize(i);
-      n.textContent = T[n.dataset.preset];
-      n.setAttribute('aria-label', T[n.dataset.preset] + ' — ' + num(wh.w) + ' × ' + num(wh.h) + ' px');
-    });
   }
 
   function render() {
@@ -507,14 +547,14 @@
     mark(els.themeList, function (b) { return b.dataset.theme === S.theme; });
 
     /* — résolution — */
-    setText(els.resValue, empty ? '— × —' : num(r.w) + ' × ' + num(r.h) + ' px');
+    setText(els.resValue, empty ? '\u2014\u00a0\u00d7\u00a0\u2014' : num(r.w) + '\u00a0\u00d7\u00a0' + num(r.h) + '\u00a0px');
     setText(els.resDevice,
-      (k === 'phone' ? T.devPhone : k === 'tablet' ? T.devTablet : T.devDesk) + ' · ' +
+      (k === 'phone' ? T.devPhone : k === 'tablet' ? T.devTablet : T.devDesk) + ' \u00b7 ' +
       (r.w === detected.w && r.h === detected.h ? T.detected : T.custom));
-    setText(els.resToggle, S.editRes ? T.close : T.edit);
-    els.resToggle.setAttribute('aria-expanded', S.editRes ? 'true' : 'false');
-    els.resToggle.setAttribute('aria-label', (S.editRes ? T.close : T.edit) + ' — ' + T.resolution);
-    els.resEditor.hidden = !S.editRes;
+    var matched = renderRes(r);
+    els.resEditor.hidden = !(S.editRes || !matched);
+    if (document.activeElement !== els.inW && els.inW.value !== S.wStr) els.inW.value = S.wStr;
+    if (document.activeElement !== els.inH && els.inH.value !== S.hStr) els.inH.value = S.hStr;
     var badW = outOfRange(S.wStr), badH = outOfRange(S.hStr);
     els.inW.setAttribute('aria-invalid', badW ? 'true' : 'false');
     els.inH.setAttribute('aria-invalid', badH ? 'true' : 'false');
@@ -777,13 +817,6 @@
 
   function onSeed() { set({ seed: Math.floor(Math.random() * 99999) + 1 }); }
 
-  function onToggleRes() {
-    S.editRes = !S.editRes;
-    render();
-    if (S.editRes) els.inW.focus();
-    else els.resToggle.focus();
-  }
-
   /* Borné vers le haut dès la frappe : sinon le champ affichait 9999, la carte
      Résolution 8 000, l'URL r=8000 et le fichier 8000 px — quatre vérités pour
      une seule valeur. La borne basse, elle, ne peut pas être appliquée à la
@@ -915,7 +948,7 @@
       'mockdClock', 'mockdDay', 'mockdDayName', 'mockdMonth', 'mockdIcons', 'mockdMenu', 'mockdDock',
       'legGood', 'legOk', 'legLow', 'legTitle', 'legDetail',
       'famAbs', 'famFig', 'palList', 'densList',
-      'resValue', 'resDevice', 'resToggle', 'resEditor', 'inW', 'inH', 'presets', 'resHint', 'resHintText',
+      'resValue', 'resDevice', 'resSelect', 'resEditor', 'inW', 'inH', 'resHint', 'resHintText',
       'shareBtn', 'shareLabel', 'shareNote', 'shareFallback', 'shareUrl', 'langList', 'themeList',
       'stage', 'bar',
       'doneCard', 'doneMeta', 'errCard', 'errMsg', 'btnRetry', 'btnSeed', 'btnExport', 'ctaLabel'
@@ -931,7 +964,7 @@
       .forEach(radioKeys);
     document.addEventListener('focusin', keepFocusVisible);
 
-    els.resToggle.addEventListener('click', onToggleRes);
+    els.resSelect.addEventListener('change', onResPick);
     els.inW.addEventListener('input', function (e) {
       var v = digits(e.target.value);
       if (e.target.value !== v) e.target.value = v;

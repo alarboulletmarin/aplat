@@ -13,9 +13,9 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 const PROBES = [
   'Aplat', 'Aplat — édité par trced',
-  'Famille de motif', 'Abstraits', 'Figures', 'Palette', 'Densité', 'Résolution',
+  'Famille de motif', 'Abstraits', 'Figures', 'Palette', 'Densité', 'Résolution de l’image',
   'Vagues', 'Blobs', 'Lime & crème', 'Soleil', 'Calme', 'Moyen', 'Dense',
-  'Modifier', 'Copier le lien du motif', 'Langue', 'Thème',
+  'Copier le lien du motif', 'Langue', 'Thème', 'Partage et réglages',
   'Français', 'English', 'Clair', 'Sombre', 'Système',
   'Nouveau motif', 'Télécharger'
 ];
@@ -35,11 +35,12 @@ const COLLECT = (probes) => {
     const r = box.getBoundingClientRect();
     const cs = getComputedStyle(box);
     const bs = getComputedStyle(box);
+    const own = getComputedStyle(n);
     out[p] = {
       x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height),
       fs: cs.fontSize, fw: cs.fontWeight, ls: cs.letterSpacing, lh: cs.lineHeight,
       tt: cs.textTransform, ff: cs.fontFamily.split(',')[0].replace(/["']/g, ''),
-      color: cs.color,
+      color: own.color,
       br: bs.borderTopLeftRadius, bw: bs.borderTopWidth,
       pad: bs.paddingTop + ' ' + bs.paddingRight + ' ' + bs.paddingBottom + ' ' + bs.paddingLeft,
       bg: bs.backgroundColor

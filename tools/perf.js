@@ -15,8 +15,8 @@ let PORT = 0;
 
   const r = await page.evaluate(async () => {
     const out = {};
-    const el = document.getElementById('resToggle');
-    el.click();
+    const el = document.getElementById('resSelect');
+    el.value = 'custom'; el.dispatchEvent(new Event('change', { bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
     const inW = document.getElementById('inW');
 

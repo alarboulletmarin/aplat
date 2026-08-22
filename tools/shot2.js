@@ -34,7 +34,7 @@ let PORT = 0;
   await grab('vp-desk-target', desk, '?l=fr&r=2560x1440');
   await grab('vp-tablet-target', desk, '?l=fr&r=2048x2732');
   await grab('vp-phone-resedit', phone, '?l=fr', async p => {
-    await p.click("#resToggle", { force: true }); await p.waitForTimeout(300);
+    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForTimeout(300);
     await p.mouse.wheel(0, 2600); await p.waitForTimeout(300);
   });
 

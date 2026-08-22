@@ -16,7 +16,7 @@ const STRETCH = `(() => {
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
   await page.evaluate(STRETCH);
   await page.evaluate(() => document.querySelectorAll('[data-family]')[0].click());
-  await page.click('#resToggle', { force: true });
+  await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
   await page.waitForTimeout(300);
   const out = await page.evaluate(() => {
     const vw = document.documentElement.clientWidth;

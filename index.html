@@ -26,14 +26,15 @@
 <div class="page">
 
   <header class="hdr">
-    <span class="hdr-blob" aria-hidden="true"></span>
-    <span class="hdr-arch" aria-hidden="true"></span>
-    <div class="kicker">
-      <span class="diamond" aria-hidden="true"></span>
-      <span class="kicker-t" data-t="kicker">Aplat — édité par trced</span>
+    <div class="hdr-top">
+      <h1 class="title">Aplat</h1>
+      <span class="hdr-arch" aria-hidden="true"></span>
     </div>
-    <h1 class="title">Aplat</h1>
-    <p class="tagline" data-t="tagline">Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.</p>
+    <div class="hdr-rule" aria-hidden="true"></div>
+    <div class="hdr-foot">
+      <p class="tagline" data-t="tagline">Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.</p>
+      <p class="kicker-t" data-t="kicker">Aplat — édité par trced</p>
+    </div>
   </header>
 
   <noscript>
@@ -151,44 +152,37 @@
       </div>
 
       <div class="bento">
-        <div class="card">
-          <h2 class="card-h" id="h-dens" data-t="density">Densité</h2>
-          <div class="dens-row" id="densList" role="radiogroup" aria-labelledby="h-dens"></div>
-        </div>
+        <h2 class="card-h" id="h-dens" data-t="density">Densité</h2>
+        <div class="dens-row" id="densList" role="radiogroup" aria-labelledby="h-dens"></div>
+      </div>
 
-        <div class="card res-card">
-          <div class="res-head">
-            <h2 class="card-h" id="h-res" style="margin-bottom:0" data-t="resolution">Résolution</h2>
-            <button type="button" class="res-edit" id="resToggle" aria-expanded="false" aria-controls="resEditor">Modifier</button>
+      <div class="res-card">
+        <label class="res-label" for="resSelect">
+          <span data-t="resolution">Résolution de l’image</span>
+          <span class="res-select">
+            <select id="resSelect"></select>
+            <i aria-hidden="true"></i>
+          </span>
+        </label>
+        <p class="res-dev" id="resDevice"></p>
+        <p class="vh" id="resValue">— × —</p>
+        <div id="resEditor" hidden>
+          <div class="res-fields">
+            <label>
+              <span data-t="width">Largeur (px)</span>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="inW" autocomplete="off" aria-describedby="resHint">
+            </label>
+            <label>
+              <span data-t="height">Hauteur (px)</span>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="inH" autocomplete="off" aria-describedby="resHint">
+            </label>
           </div>
-          <p class="res-val" id="resValue">— × —</p>
-          <p class="res-dev">
-            <span class="res-dev-i" aria-hidden="true"></span>
-            <span id="resDevice"></span>
-          </p>
-          <div class="res-edit-box" id="resEditor" hidden>
-            <div class="res-fields">
-              <label>
-                <span data-t="width">Largeur (px)</span>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="inW" autocomplete="off" aria-describedby="resHint">
-              </label>
-              <label>
-                <span data-t="height">Hauteur (px)</span>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="inH" autocomplete="off" aria-describedby="resHint">
-              </label>
-            </div>
-            <p class="res-hint" id="resHint"><i aria-hidden="true"></i><span id="resHintText" data-t="resRange">De 16 à 8000 px.</span></p>
-            <div class="res-presets" id="presets" role="group" aria-labelledby="h-res"></div>
-          </div>
+          <p class="res-hint" id="resHint"><i aria-hidden="true"></i><span id="resHintText" data-t="resRange">De 16 à 8000 px.</span></p>
         </div>
       </div>
 
       <div class="share" aria-labelledby="share-h">
-        <h2 class="vh" id="share-h" data-t="shareSection">Partage et préférences</h2>
-        <p class="share-p">
-          <span class="diamond" aria-hidden="true"></span>
-          <span data-t="privacy">Aucun compte, aucun réseau, aucun stockage. Tout est calculé sur cet appareil.</span>
-        </p>
+        <h2 class="card-h" id="share-h" style="margin-bottom:0" data-t="sharing">Partage et réglages</h2>
         <button type="button" class="share-b" id="shareBtn">
           <span class="ico-link" aria-hidden="true"><i></i><i></i></span>
           <span id="shareLabel">Copier le lien du motif</span>
@@ -198,6 +192,7 @@
           <span class="vh" data-t="share">Copier le lien du motif</span>
           <input type="text" id="shareUrl" readonly spellcheck="false" autocomplete="off">
         </label>
+        <p class="share-p" data-t="privacy">Aucun compte, aucun réseau, aucun stockage. Tout est calculé sur cet appareil.</p>
 
         <div class="prefs">
           <div>
@@ -217,7 +212,7 @@
   <div class="bar" id="bar">
     <div class="bar-live" aria-live="polite">
       <div class="note note-done" id="doneCard" hidden>
-        <span class="note-done-i" aria-hidden="true"></span>
+        <span class="note-done-i" aria-hidden="true"><i></i><b></b></span>
         <div class="note-txt">
           <p class="note-t" data-t="savedTitle">Image enregistrée</p>
           <p class="note-m" id="doneMeta"></p>
@@ -236,7 +231,7 @@
 
     <div class="actions">
       <button type="button" class="btn-seed" id="btnSeed">
-        <i aria-hidden="true"></i>
+        <span class="ico-again" aria-hidden="true"><i></i><b></b></span>
         <span data-t="newSeed">Nouveau motif</span>
       </button>
       <button type="button" class="btn-go" id="btnExport">

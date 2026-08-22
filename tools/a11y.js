@@ -134,7 +134,7 @@ const PROBE = () => {
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/${c.q}`, { waitUntil: 'networkidle' });
-    await page.$eval('#resToggle', e => e.click());
+    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(200);
     await page.fill('#inW', '7000');
     await page.fill('#inH', '7000');

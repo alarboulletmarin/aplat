@@ -26,7 +26,7 @@ const CASES = [
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
-    await page.click('#resToggle', { force: true });   // ouvre l'éditeur de résolution
+    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
     await page.waitForTimeout(300);
 
     const report = await page.evaluate(() => {
