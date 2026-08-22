@@ -1,0 +1,15 @@
+{
+  "name": "Aplat — fonds d'écran génératifs",
+  "short_name": "Aplat",
+  "description": "Générateur de fonds d'écran génératifs, calculé entièrement dans le navigateur.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F2EDDD",
+  "theme_color": "#F2EDDD",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

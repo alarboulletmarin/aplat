@@ -1,0 +1,13 @@
+{
+  "name": "aplat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Générateur de fonds d'écran génératifs — 100% front, hors ligne.",
+  "scripts": {
+    "serve": "node tools/serve.js",
+    "check": "node tools/check.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F2EDDD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1729" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans stockage.">
+<meta name="referrer" content="no-referrer">
+<title>Aplat — fonds d’écran génératifs</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="assets/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="src/app.css">
+</head>
+<body>
+
+<a class="skip" href="#reglages" data-t="skip">Aller aux réglages</a>
+
+<div class="page">
+
+  <header class="hdr">
+    <span class="hdr-blob" aria-hidden="true"></span>
+    <span class="hdr-arch" aria-hidden="true"></span>
+    <div class="kicker">
+      <span class="diamond" aria-hidden="true"></span>
+      <span class="kicker-t" data-t="kicker">Aplat — édité par trced</span>
+    </div>
+    <h1 class="title">Aplat</h1>
+    <p class="tagline" data-t="tagline">Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.</p>
+  </header>
+
+  <noscript>
+    <p class="leg" data-t="noscript">Aplat calcule les motifs avec JavaScript, dans ton navigateur. Active JavaScript pour l’utiliser — rien n’est envoyé nulle part.</p>
+  </noscript>
+
+  <main class="cols">
+
+    <!-- ============ Scène : le motif derrière de vraies icônes ============ -->
+    <section class="stage" aria-labelledby="stage-h">
+      <h2 class="vh" id="stage-h" data-t="preview">Aperçu du fond d’écran</h2>
+
+      <div class="stage-box" id="stageBox">
+        <div class="device" id="device" role="img" aria-label="">
+          <canvas class="device-canvas" id="previewCanvas" aria-hidden="true"></canvas>
+
+          <!-- maquette téléphone / tablette -->
+          <div class="mock" id="mockHandheld" aria-hidden="true">
+            <div class="mock-status">
+              <span id="mockClock">00:00</span>
+              <span class="mock-status-r">
+                <span class="mock-bars"><i></i><i></i><i></i></span>
+                <span class="mock-wifi"></span>
+                <span class="mock-batt"><i></i></span>
+              </span>
+            </div>
+            <div class="mock-widget">
+              <span class="mock-daynum" id="mockDay">1</span>
+              <span class="mock-daytxt">
+                <span class="mock-dayname" id="mockDayName">lundi</span>
+                <span class="mock-month" id="mockMonth">janvier</span>
+              </span>
+              <span class="mock-wdots"><i></i><i></i><i></i><i></i></span>
+            </div>
+            <div class="mock-grid" id="mockGrid"></div>
+            <div class="mock-foot">
+              <span class="mock-search" id="mockSearch">Rechercher</span>
+              <span class="mock-dock" id="mockDock"></span>
+            </div>
+          </div>
+
+          <!-- maquette ordinateur -->
+          <div class="mockd" id="mockDesk" aria-hidden="true">
+            <div class="mockd-bar">
+              <span class="mockd-logo"></span>
+              <span id="mockdMenu" style="display:contents"></span>
+              <span class="mockd-bar-r">
+                <span class="mockd-wifi"></span>
+                <span id="mockdClock">00:00</span>
+              </span>
+            </div>
+            <div class="mockd-body">
+              <div class="mockd-icons" id="mockdIcons"></div>
+              <div class="mockd-widget">
+                <span class="mockd-dnum" id="mockdDay">1</span>
+                <span class="mockd-dtxt">
+                  <span class="mockd-dname" id="mockdDayName">lundi</span>
+                  <span class="mockd-dmonth" id="mockdMonth">janvier</span>
+                </span>
+              </div>
+            </div>
+            <div class="mockd-dock-w"><span class="mockd-dock" id="mockdDock"></span></div>
+          </div>
+
+          <!-- état vide -->
+          <div class="st-empty" id="stateEmpty" hidden>
+            <span class="st-empty-i" aria-hidden="true"></span>
+            <strong class="st-empty-t" data-t="emptyTitle">Indique une résolution</strong>
+            <span class="st-empty-b" data-t="emptyBody">Largeur et hauteur en pixels, ou reviens à la détection.</span>
+          </div>
+
+          <!-- état chargement -->
+          <div class="st-busy" id="stateBusy" hidden>
+            <span class="st-busy-d" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="vh" id="mockNote" data-t="mockNote">Maquette d’écran : heure, widget et icônes sont fictifs, ils servent à juger la lisibilité.</p>
+
+      <div class="leg" aria-live="polite">
+        <span class="leg-i" aria-hidden="true">
+          <span class="leg-good" id="legGood"></span>
+          <span class="leg-ok" id="legOk" hidden></span>
+          <span class="leg-low" id="legLow" hidden></span>
+        </span>
+        <div class="leg-txt">
+          <p class="leg-t" id="legTitle">Lisibilité des libellés · bonne</p>
+          <p class="leg-d" id="legDetail"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Réglages : trois, pas un de plus ============ -->
+    <section class="panel" id="reglages" tabindex="-1" aria-labelledby="set-h">
+      <h2 class="vh" id="set-h" data-t="family">Famille de motif</h2>
+
+      <div class="card">
+        <h2 class="card-h" id="h-family" data-t="family">Famille de motif</h2>
+        <h3 class="grp" id="h-abs">
+          <span class="grp-blob" aria-hidden="true"></span>
+          <span data-t="gAbs">Abstraits</span>
+        </h3>
+        <div class="grid-fam" id="famAbs" role="group" aria-labelledby="h-abs"></div>
+        <h3 class="grp grp2" id="h-fig">
+          <span class="grp-star" aria-hidden="true"></span>
+          <span data-t="gFig">Figures</span>
+        </h3>
+        <div class="grid-fam" id="famFig" role="group" aria-labelledby="h-fig"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-h" id="h-pal" data-t="palette">Palette</h2>
+        <div class="grid-pal" id="palList" role="group" aria-labelledby="h-pal"></div>
+      </div>
+
+      <div class="bento">
+        <div class="card">
+          <h2 class="card-h" id="h-dens" data-t="density">Densité</h2>
+          <div class="dens-row" id="densList" role="group" aria-labelledby="h-dens"></div>
+        </div>
+
+        <div class="card res-card">
+          <div class="res-head">
+            <h2 class="card-h" id="h-res" style="margin-bottom:0" data-t="resolution">Résolution</h2>
+            <button type="button" class="res-edit" id="resToggle" aria-expanded="false" aria-controls="resEditor">Modifier</button>
+          </div>
+          <p class="res-val" id="resValue">— × —</p>
+          <p class="res-dev">
+            <span class="res-dev-i" aria-hidden="true"></span>
+            <span id="resDevice"></span>
+          </p>
+          <div class="res-edit-box" id="resEditor" hidden>
+            <div class="res-fields">
+              <label>
+                <span data-t="width">Largeur (px)</span>
+                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inW" autocomplete="off">
+              </label>
+              <label>
+                <span data-t="height">Hauteur (px)</span>
+                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inH" autocomplete="off">
+              </label>
+            </div>
+            <div class="res-presets" id="presets" role="group" aria-labelledby="h-res"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="share">
+        <p class="share-p">
+          <span class="diamond" aria-hidden="true"></span>
+          <span data-t="privacy">Aucun compte, aucun réseau, aucun stockage. Tout est calculé sur cet appareil.</span>
+        </p>
+        <button type="button" class="share-b" id="shareBtn">
+          <span class="ico-link" aria-hidden="true"><i></i><i></i></span>
+          <span id="shareLabel">Copier le lien du motif</span>
+        </button>
+        <p class="share-n" id="shareNote"></p>
+
+        <div class="prefs">
+          <div>
+            <h3 id="h-lang" data-t="lang">Langue</h3>
+            <div class="prefs-row" id="langList" role="group" aria-labelledby="h-lang"></div>
+          </div>
+          <div>
+            <h3 id="h-theme" data-t="theme">Thème</h3>
+            <div class="prefs-row" id="themeList" role="group" aria-labelledby="h-theme"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Action : un seul appel primaire ============ -->
+  <div class="bar">
+    <div aria-live="polite">
+      <div class="note note-done" id="doneCard" hidden>
+        <span class="note-done-i" aria-hidden="true"></span>
+        <div class="note-txt">
+          <p class="note-t" data-t="savedTitle">Image enregistrée</p>
+          <p class="note-m" id="doneMeta"></p>
+          <p class="note-h" data-t="hint">Sur téléphone : appui long sur l’image téléchargée, puis « Ajouter aux photos ».</p>
+        </div>
+      </div>
+      <div class="note note-err" id="errCard" hidden>
+        <span class="note-err-i" aria-hidden="true"></span>
+        <div class="note-txt">
+          <p class="note-t" data-t="errTitle">Le rendu a échoué</p>
+          <p class="note-d" id="errMsg"></p>
+        </div>
+        <button type="button" class="note-retry" id="btnRetry" data-t="retry">Réessayer</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-seed" id="btnSeed">
+        <i aria-hidden="true"></i>
+        <span data-t="newSeed">Nouveau motif</span>
+      </button>
+      <button type="button" class="btn-go" id="btnExport">
+        <span class="ico-dl" aria-hidden="true"><i></i><b></b></span>
+        <span id="ctaLabel">Télécharger</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="src/i18n.js"></script>
+<script src="src/engine.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

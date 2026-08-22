@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --lime:#DFF478; --creme:#F7F3E6; --ciel:#92BAD5; --violet:#788CE3; --navy:#17243F; --corail:#FF6648;
+  --bg:#F2EDDD; --surface:#FBF8EE; --surface-2:#E7E1CD; --field:#FFFFFF;
+  --ink:#17243F; --ink-muted:#4A5773; --line:rgba(23,36,63,.16); --line-strong:rgba(23,36,63,.45);
+  --accent:#DFF478; --accent-ink:#17243F; --deco-1:#92BAD5; --deco-2:#FF6648;
+  --link:#3B4CA8; --link-hover:#17243F; --focus:#3B4CA8;
+}
+:root[data-theme="dark"]{
+  --bg:#0E1729; --surface:#17243F; --surface-2:#22314F; --field:#0B1322;
+  --ink:#F7F3E6; --ink-muted:#A9BDD4; --line:rgba(247,243,230,.2); --line-strong:rgba(247,243,230,.46);
+  --accent:#DFF478; --accent-ink:#17243F; --deco-1:#788CE3; --deco-2:#FF6648;
+  --link:#92BAD5; --link-hover:#DFF478; --focus:#DFF478;
+}
+@media (prefers-color-scheme:dark){
+  :root[data-theme="system"], :root:not([data-theme]){
+    --bg:#0E1729; --surface:#17243F; --surface-2:#22314F; --field:#0B1322;
+    --ink:#F7F3E6; --ink-muted:#A9BDD4; --line:rgba(247,243,230,.2); --line-strong:rgba(247,243,230,.46);
+    --deco-1:#788CE3; --link:#92BAD5; --link-hover:#DFF478; --focus:#DFF478;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,"Helvetica Neue",Helvetica,system-ui,sans-serif;font-size:16px;line-height:1.45;text-wrap:pretty;-webkit-font-smoothing:antialiased}
+body::after{content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.05;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px}
+button,input{font-family:inherit;font-size:inherit;color:inherit}
+button{border:0;background:none;margin:0}
+h1,h2,h3,p{margin:0}
+a{color:var(--link);text-decoration-thickness:2px;text-underline-offset:3px}
+a:hover{color:var(--link-hover)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
+input[type=number]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+@keyframes aplDot{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-3px);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}}
+</style>
+</helmet>
+
+<div data-screen-label="Vue unique" style="max-width:1100px;margin:0 auto;padding:22px 16px 0;display:flex;flex-direction:column;gap:22px;min-height:100dvh">
+
+  <header style="position:relative;display:flex;flex-direction:column;gap:10px;padding-top:2px">
+    <div aria-hidden="true" style="position:absolute;top:-10px;right:0;width:84px;height:84px;background:var(--deco-1);border-radius:62% 38% 46% 54% / 52% 58% 42% 48%"></div>
+    <div aria-hidden="true" style="position:absolute;top:52px;right:62px;width:32px;height:32px;background:var(--deco-2);border-radius:50% 50% 0 0"></div>
+    <div style="position:relative;display:flex;align-items:center;gap:8px">
+      <span aria-hidden="true" style="display:inline-block;width:11px;height:11px;background:var(--accent);border:1.5px solid var(--ink);transform:rotate(45deg)"></span>
+      <span style="font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted)">{{ t.kicker }}</span>
+    </div>
+    <h1 style="position:relative;font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(54px,15vw,92px);line-height:.82;letter-spacing:-.035em;text-transform:uppercase">Aplat</h1>
+    <p style="position:relative;max-width:36ch;font-size:15px;color:var(--ink-muted)">{{ t.tagline }}</p>
+  </header>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;align-items:start">
+
+    <section style="position:sticky;top:0;z-index:2;display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:8px 0 12px">
+      <div ref="{{ boxRef }}" style="width:100%;height:min(46vh,560px);min-height:230px;display:flex;align-items:center;justify-content:center">
+        <div ref="{{ deviceRef }}" style="position:relative;width:264px;height:540px;border-radius:34px;border:4px solid var(--ink);background:var(--surface-2);overflow:hidden;--mu:2.64px;--cols:4;--label:#F7F3E6;--label-inv:#17243F">
+          <canvas ref="{{ canvasRef }}" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
+
+          <sc-if value="{{ isHandheld }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;gap:calc(var(--mu)*3);padding:calc(var(--mu)*6) calc(var(--mu)*5) calc(var(--mu)*4);color:var(--label);font-size:calc(var(--mu)*3.4)">
+              <div style="display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:calc(var(--mu)*4)">
+                <span>{{ clock }}</span>
+                <span style="display:flex;align-items:center;gap:calc(var(--mu)*1.8)">
+                  <span style="display:flex;align-items:flex-end;gap:calc(var(--mu)*.7)">
+                    <span style="width:calc(var(--mu)*.9);height:calc(var(--mu)*1.5);background:var(--label)"></span>
+                    <span style="width:calc(var(--mu)*.9);height:calc(var(--mu)*2.3);background:var(--label)"></span>
+                    <span style="width:calc(var(--mu)*.9);height:calc(var(--mu)*3.1);background:var(--label)"></span>
+                  </span>
+                  <span style="width:calc(var(--mu)*3);height:calc(var(--mu)*3);border:calc(var(--mu)*.8) solid var(--label);border-radius:50%;border-right-color:transparent;border-bottom-color:transparent;transform:rotate(45deg)"></span>
+                  <span style="width:calc(var(--mu)*6);height:calc(var(--mu)*3.2);border:calc(var(--mu)*.7) solid var(--label);border-radius:calc(var(--mu)*1);padding:calc(var(--mu)*.55);display:flex"><span style="flex:1 1 auto;background:var(--label)"></span></span>
+                </span>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:calc(var(--mu)*4);padding:calc(var(--mu)*4);border-radius:calc(var(--mu)*6);background:color-mix(in srgb, var(--label) 15%, transparent);border:1px solid color-mix(in srgb, var(--label) 28%, transparent)">
+                <span style="font-family:Anton,Impact,sans-serif;font-size:calc(var(--mu)*12);line-height:.78">{{ dayNum }}</span>
+                <span style="display:flex;flex-direction:column;line-height:1.2;min-width:0">
+                  <span style="font-weight:700;text-transform:uppercase;letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ dayName }}</span>
+                  <span style="opacity:.82;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ monthName }}</span>
+                </span>
+                <span aria-hidden="true" style="margin-left:auto;display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--mu)*1.5)">
+                  <span style="width:calc(var(--mu)*3);height:calc(var(--mu)*3);border-radius:50%;background:var(--label);opacity:.92"></span>
+                  <span style="width:calc(var(--mu)*3);height:calc(var(--mu)*3);background:var(--label);opacity:.5"></span>
+                  <span style="width:calc(var(--mu)*3);height:calc(var(--mu)*3);background:var(--label);opacity:.5;transform:rotate(45deg)"></span>
+                  <span style="width:calc(var(--mu)*3);height:calc(var(--mu)*3);border-radius:50% 50% 50% 0;background:var(--label);opacity:.92"></span>
+                </span>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:calc(var(--mu)*4.5) calc(var(--mu)*2);margin-top:calc(var(--mu)*1)">
+                <sc-for list="{{ apps }}" as="app" hint-placeholder-count="16">
+                  <span style="display:flex;flex-direction:column;align-items:center;gap:calc(var(--mu)*1.5);min-width:0">
+                    <span style="width:calc(var(--mu)*15);height:calc(var(--mu)*15);border-radius:calc(var(--mu)*4.2);background:color-mix(in srgb, var(--label) 90%, transparent);display:flex;align-items:center;justify-content:center">
+                      <span style="width:calc(var(--mu)*6);height:calc(var(--mu)*6);background:var(--label-inv);border-radius:{{ app.r }}"></span>
+                    </span>
+                    <span style="font-size:calc(var(--mu)*3.1);line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ app.label }}</span>
+                  </span>
+                </sc-for>
+              </div>
+
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:calc(var(--mu)*3.5)">
+                <span style="align-self:center;padding:calc(var(--mu)*2) calc(var(--mu)*7);border-radius:999px;background:color-mix(in srgb, var(--label) 16%, transparent);border:1px solid color-mix(in srgb, var(--label) 26%, transparent);font-size:calc(var(--mu)*3.2)">{{ t.search }}</span>
+                <span style="display:flex;justify-content:center;gap:calc(var(--mu)*4);padding:calc(var(--mu)*3);border-radius:calc(var(--mu)*7);background:color-mix(in srgb, var(--label) 15%, transparent);border:1px solid color-mix(in srgb, var(--label) 24%, transparent)">
+                  <sc-for list="{{ dock }}" as="d" hint-placeholder-count="4">
+                    <span style="width:calc(var(--mu)*13);height:calc(var(--mu)*13);border-radius:calc(var(--mu)*3.6);background:color-mix(in srgb, var(--label) 90%, transparent);display:flex;align-items:center;justify-content:center">
+                      <span style="width:calc(var(--mu)*5);height:calc(var(--mu)*5);background:var(--label-inv);border-radius:{{ d.r }}"></span>
+                    </span>
+                  </sc-for>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;color:var(--label);font-size:calc(var(--mu)*2.6)">
+              <div style="display:flex;align-items:center;gap:calc(var(--mu)*3);padding:calc(var(--mu)*1.4) calc(var(--mu)*3);background:color-mix(in srgb, var(--label) 14%, transparent);border-bottom:1px solid color-mix(in srgb, var(--label) 20%, transparent)">
+                <span aria-hidden="true" style="width:calc(var(--mu)*2.4);height:calc(var(--mu)*2.4);background:var(--label);transform:rotate(45deg)"></span>
+                <sc-for list="{{ menu }}" as="m" hint-placeholder-count="3">
+                  <span style="font-weight:600">{{ m.label }}</span>
+                </sc-for>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:calc(var(--mu)*2.4);font-weight:700">
+                  <span style="width:calc(var(--mu)*2.6);height:calc(var(--mu)*2.6);border:calc(var(--mu)*.7) solid var(--label);border-radius:50%;border-right-color:transparent;border-bottom-color:transparent;transform:rotate(45deg)"></span>
+                  <span>{{ clock }}</span>
+                </span>
+              </div>
+              <div style="flex:1 1 auto;display:flex;padding:calc(var(--mu)*4);gap:calc(var(--mu)*4)">
+                <div style="display:flex;flex-direction:column;gap:calc(var(--mu)*4)">
+                  <sc-for list="{{ apps }}" as="app" hint-placeholder-count="5">
+                    <span style="display:flex;flex-direction:column;align-items:center;gap:calc(var(--mu)*1.2);width:calc(var(--mu)*16)">
+                      <span style="width:calc(var(--mu)*11);height:calc(var(--mu)*11);border-radius:calc(var(--mu)*2.6);background:color-mix(in srgb, var(--label) 90%, transparent);display:flex;align-items:center;justify-content:center">
+                        <span style="width:calc(var(--mu)*4.4);height:calc(var(--mu)*4.4);background:var(--label-inv);border-radius:{{ app.r }}"></span>
+                      </span>
+                      <span style="font-size:calc(var(--mu)*2.4);line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ app.label }}</span>
+                    </span>
+                  </sc-for>
+                </div>
+                <div style="margin-left:auto;align-self:flex-start;display:flex;align-items:center;gap:calc(var(--mu)*3);padding:calc(var(--mu)*3);border-radius:calc(var(--mu)*4);background:color-mix(in srgb, var(--label) 15%, transparent);border:1px solid color-mix(in srgb, var(--label) 26%, transparent)">
+                  <span style="font-family:Anton,Impact,sans-serif;font-size:calc(var(--mu)*9);line-height:.78">{{ dayNum }}</span>
+                  <span style="display:flex;flex-direction:column;line-height:1.2">
+                    <span style="font-weight:700;text-transform:uppercase;letter-spacing:.06em">{{ dayName }}</span>
+                    <span style="opacity:.82">{{ monthName }}</span>
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:center;padding-bottom:calc(var(--mu)*3)">
+                <span style="display:flex;gap:calc(var(--mu)*2.6);padding:calc(var(--mu)*2);border-radius:calc(var(--mu)*4.5);background:color-mix(in srgb, var(--label) 15%, transparent);border:1px solid color-mix(in srgb, var(--label) 24%, transparent)">
+                  <sc-for list="{{ dock }}" as="d" hint-placeholder-count="6">
+                    <span style="width:calc(var(--mu)*9);height:calc(var(--mu)*9);border-radius:calc(var(--mu)*2.4);background:color-mix(in srgb, var(--label) 90%, transparent);display:flex;align-items:center;justify-content:center">
+                      <span style="width:calc(var(--mu)*3.6);height:calc(var(--mu)*3.6);background:var(--label-inv);border-radius:{{ d.r }}"></span>
+                    </span>
+                  </sc-for>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;background:repeating-linear-gradient(135deg,var(--surface-2) 0 9px,var(--surface) 9px 18px)">
+              <span aria-hidden="true" style="width:26px;height:26px;border:3px solid var(--ink);border-radius:50% 50% 50% 0"></span>
+              <strong style="font-size:15px">{{ t.emptyTitle }}</strong>
+              <span style="font-size:13px;color:var(--ink-muted);max-width:26ch">{{ t.emptyBody }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isBusy }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--surface) 74%, transparent)">
+              <span aria-hidden="true" style="display:flex;gap:6px">
+                <span style="width:9px;height:9px;border-radius:50%;background:var(--ink);animation:aplDot 900ms ease-in-out infinite"></span>
+                <span style="width:9px;height:9px;border-radius:50%;background:var(--ink);animation:aplDot 900ms ease-in-out 140ms infinite"></span>
+                <span style="width:9px;height:9px;border-radius:50%;background:var(--ink);animation:aplDot 900ms ease-in-out 280ms infinite"></span>
+              </span>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:14px 16px">
+        <span aria-hidden="true" style="flex:0 0 auto;margin-top:3px">
+          <sc-if value="{{ legGood }}" hint-placeholder-val="{{ true }}"><span style="display:block;width:18px;height:18px;border-radius:50%;background:var(--ink)"></span></sc-if>
+          <sc-if value="{{ legOk }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:18px;height:18px;border-radius:50%;border:2.5px solid var(--ink);background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)"></span></sc-if>
+          <sc-if value="{{ legLow }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:19px;height:17px;background:var(--ink);clip-path:polygon(50% 0,100% 100%,0 100%)"></span></sc-if>
+        </span>
+        <div style="min-width:0">
+          <p style="font-weight:700;font-size:15px">{{ t.legibTitle }} · {{ legLabel }}</p>
+          <p style="font-size:13.5px;color:var(--ink-muted)">{{ legDetail }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:16px">
+
+      <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:26px;padding:16px">
+        <h2 style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px">{{ t.family }}</h2>
+        <h3 style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:7px">
+          <span aria-hidden="true" style="flex:0 0 auto;width:12px;height:12px;background:var(--deco-1);border-radius:56% 44% 40% 60% / 48% 56% 44% 52%"></span>
+          <span>{{ t.gAbs }}</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
+          <sc-for list="{{ famAbs }}" as="f" hint-placeholder-count="12">
+            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:8px;min-height:44px;text-align:left;cursor:pointer;border-radius:18px;border:2px solid var(--line);background:var(--field);border-color:{{ f.bc }};background:{{ f.bg }}">
+              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:11px;background:var(--surface-2)"></canvas>
+              <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
+                <span aria-hidden="true" style="flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:{{ f.dot }}"></span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ f.label }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+        <h3 style="font-size:12.5px;font-weight:700;color:var(--ink);margin:15px 0 8px;display:flex;align-items:center;gap:7px">
+          <span aria-hidden="true" style="flex:0 0 auto;width:12px;height:12px;background:var(--deco-2);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)"></span>
+          <span>{{ t.gFig }}</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
+          <sc-for list="{{ famFig }}" as="f" hint-placeholder-count="6">
+            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:8px;min-height:44px;text-align:left;cursor:pointer;border-radius:18px;border:2px solid var(--line);background:var(--field);border-color:{{ f.bc }};background:{{ f.bg }}">
+              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:11px;background:var(--surface-2)"></canvas>
+              <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
+                <span aria-hidden="true" style="flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:{{ f.dot }}"></span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ f.label }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:26px;padding:16px">
+        <h2 style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px">{{ t.palette }}</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px">
+          <sc-for list="{{ palList }}" as="p" hint-placeholder-count="8">
+            <button type="button" onClick="{{ p.onPick }}" aria-pressed="{{ p.pressed }}" style="display:flex;flex-direction:column;gap:9px;padding:10px;min-height:44px;text-align:left;cursor:pointer;border-radius:18px;border:2px solid var(--line);background:var(--field);border-color:{{ p.bc }};background:{{ p.bg }}">
+              <span style="display:flex;height:26px;border-radius:8px;overflow:hidden;border:1.5px solid var(--line-strong)">
+                <sc-for list="{{ p.cols }}" as="c" hint-placeholder-count="4">
+                  <span style="flex:1 1 0;background:{{ c.hex }}"></span>
+                </sc-for>
+              </span>
+              <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:{{ p.fg }}">
+                <span aria-hidden="true" style="flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:{{ p.dot }}"></span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ p.label }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+        <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:26px;padding:16px">
+          <h2 style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px">{{ t.density }}</h2>
+          <div role="group" style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ densList }}" as="d" hint-placeholder-count="3">
+              <button type="button" onClick="{{ d.onPick }}" aria-pressed="{{ d.pressed }}" style="flex:1 1 68px;min-height:46px;padding:8px 10px;cursor:pointer;border-radius:14px;border:2px solid var(--line);background:var(--field);font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:5px;border-color:{{ d.bc }};background:{{ d.bg }};color:{{ d.fg }}">
+                <span aria-hidden="true" style="display:flex;gap:3px">
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor;opacity:{{ d.o2 }}"></span>
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor;opacity:{{ d.o3 }}"></span>
+                </span>
+                <span style="font-size:13px">{{ d.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <h2 style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)">{{ t.resolution }}</h2>
+            <button type="button" onClick="{{ onToggleRes }}" aria-expanded="{{ editRes }}" style="min-height:44px;padding:0 4px;cursor:pointer;font-weight:600;font-size:14px;color:var(--link);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px">{{ resBtn }}</button>
+          </div>
+          <p style="font-family:Anton,Impact,sans-serif;font-size:clamp(24px,6.4vw,32px);line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere">{{ resLabel }}</p>
+          <p style="font-size:13.5px;color:var(--ink-muted);display:flex;align-items:center;gap:7px">
+            <span aria-hidden="true" style="flex:0 0 auto;width:10px;height:10px;background:var(--deco-1);border-radius:2px"></span>
+            <span>{{ deviceLabel }}</span>
+          </p>
+
+          <sc-if value="{{ editRes }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px;border-top:1.5px solid var(--line)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-muted)">
+                  <span>{{ t.width }}</span>
+                  <input type="number" inputmode="numeric" min="16" max="8000" value="{{ wStr }}" onChange="{{ onW }}" style="min-height:46px;padding:0 12px;border-radius:14px;border:2px solid var(--line-strong);background:var(--field);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
+                </label>
+                <label style="display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-muted)">
+                  <span>{{ t.height }}</span>
+                  <input type="number" inputmode="numeric" min="16" max="8000" value="{{ hStr }}" onChange="{{ onH }}" style="min-height:46px;padding:0 12px;border-radius:14px;border:2px solid var(--line-strong);background:var(--field);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
+                </label>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ presets }}" as="pr" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ pr.onPick }}" style="min-height:44px;padding:0 14px;cursor:pointer;border-radius:999px;border:2px solid var(--line-strong);background:var(--field);font-weight:600;font-size:13.5px">{{ pr.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1.5px dashed var(--line-strong);border-radius:26px">
+        <p style="font-size:13.5px;color:var(--ink-muted);display:flex;align-items:flex-start;gap:8px">
+          <span aria-hidden="true" style="flex:0 0 auto;margin-top:4px;width:10px;height:10px;background:var(--accent);border:1.5px solid var(--ink);transform:rotate(45deg)"></span>
+          <span>{{ t.privacy }}</span>
+        </p>
+        <button type="button" onClick="{{ onShare }}" style="min-height:48px;padding:0 16px;cursor:pointer;border-radius:16px;border:2px solid var(--line-strong);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:10px">
+          <span aria-hidden="true" style="display:flex;flex:0 0 auto"><span style="width:11px;height:11px;border:2.5px solid currentColor;border-radius:4px"></span><span style="width:11px;height:11px;border:2.5px solid currentColor;border-radius:4px;margin-left:-4px"></span></span>
+          <span>{{ shareLabel }}</span>
+        </button>
+        <p style="font-size:12.5px;color:var(--ink-muted)">{{ t.shareNote }} <span style="font-variant-numeric:tabular-nums">{{ t.seed }} {{ seed }}</span></p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding-top:4px;border-top:1.5px solid var(--line)">
+          <div>
+            <h3 style="font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px">{{ t.lang }}</h3>
+            <div role="group" style="display:flex;gap:8px">
+              <sc-for list="{{ langList }}" as="l" hint-placeholder-count="2">
+                <button type="button" onClick="{{ l.onPick }}" aria-pressed="{{ l.pressed }}" style="flex:1 1 0;min-height:44px;cursor:pointer;border-radius:13px;border:2px solid var(--line);background:var(--field);font-weight:700;font-size:14px;border-color:{{ l.bc }};background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px">{{ t.theme }}</h3>
+            <div role="group" style="display:flex;gap:8px">
+              <sc-for list="{{ themeList }}" as="th" hint-placeholder-count="3">
+                <button type="button" onClick="{{ th.onPick }}" aria-pressed="{{ th.pressed }}" title="{{ th.label }}" style="flex:1 1 0;min-height:44px;cursor:pointer;border-radius:13px;border:2px solid var(--line);background:var(--field);font-weight:600;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-color:{{ th.bc }};background:{{ th.bg }};color:{{ th.fg }}">
+                  <span aria-hidden="true" style="width:13px;height:13px;border-radius:50%;border:2.5px solid currentColor;background:{{ th.fill }}"></span>
+                  <span style="max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ th.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div style="position:sticky;bottom:0;z-index:3;margin-top:auto;padding:14px 0 calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 64%,transparent);display:flex;flex-direction:column;gap:10px">
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:20px;background:var(--accent);color:var(--accent-ink)">
+        <span aria-hidden="true" style="flex:0 0 auto;margin-top:3px;width:17px;height:17px;border-radius:50%;background:var(--accent-ink)"></span>
+        <div style="min-width:0">
+          <p style="font-weight:700;font-size:14.5px">{{ t.savedTitle }}</p>
+          <p style="font-size:13px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere">{{ savedMeta }}</p>
+          <p style="font-size:12.5px;opacity:.78;margin-top:2px">{{ t.hint }}</p>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:20px;background:var(--surface);border:2.5px solid var(--corail)">
+        <span aria-hidden="true" style="flex:0 0 auto;margin-top:3px;width:19px;height:17px;background:var(--corail);clip-path:polygon(50% 0,100% 100%,0 100%)"></span>
+        <div style="min-width:0;flex:1 1 auto">
+          <p style="font-weight:700;font-size:14.5px">{{ t.errTitle }}</p>
+          <p style="font-size:13px;color:var(--ink-muted)">{{ errMsg }}</p>
+        </div>
+        <button type="button" onClick="{{ onExport }}" style="flex:0 0 auto;min-height:44px;padding:0 14px;cursor:pointer;border-radius:13px;border:2px solid var(--line-strong);background:transparent;font-weight:700;font-size:13.5px">{{ t.retry }}</button>
+      </div>
+    </sc-if>
+    <div style="display:flex;gap:10px;align-items:stretch">
+      <button type="button" onClick="{{ onSeed }}" style="flex:0 0 auto;min-width:56px;min-height:56px;padding:0 16px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px">
+        <span aria-hidden="true" style="flex:0 0 auto;width:13px;height:13px;background:var(--deco-2);border-radius:50% 50% 50% 0;transform:rotate(-45deg)"></span>
+        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.newSeed }}</span>
+      </button>
+      <button type="button" onClick="{{ onExport }}" disabled="{{ exportOff }}" aria-busy="{{ busyAttr }}" style="flex:1 1 auto;min-height:56px;padding:0 18px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px;opacity:{{ exportOpacity }}">
+        <span aria-hidden="true" style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2.5px">
+          <span style="width:10px;height:11px;background:currentColor;clip-path:polygon(50% 100%,100% 0,0 0)"></span>
+          <span style="width:14px;height:2.5px;background:currentColor"></span>
+        </span>
+        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ ctaLabel }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;previewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;empty&quot;,&quot;loading&quot;,&quot;error&quot;,&quot;success&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Revue des états&quot;},&quot;language&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;fr&quot;,&quot;en&quot;],&quot;default&quot;:&quot;fr&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Départ&quot;},&quot;themeMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;system&quot;,&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;system&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Départ&quot;}}">
+class Component extends DCLogic {
+  PAL = {
+    lime:    {fr:'Lime & crème', en:'Lime & cream', bg:'#F7F3E6', cols:['#DFF478','#92BAD5','#17243F','#FF6648']},
+    soleil:  {fr:'Soleil',       en:'Sun',          bg:'#F6E6B4', cols:['#EFA22B','#17243F','#788CE3','#F7F3E6']},
+    argile:  {fr:'Argile',       en:'Clay',         bg:'#F0E2D2', cols:['#C9552F','#17243F','#E9B44C','#788CE3']},
+    corail:  {fr:'Corail',       en:'Coral',        bg:'#F7F3E6', cols:['#FF6648','#17243F','#DFF478','#788CE3']},
+    menthe:  {fr:'Menthe',       en:'Mint',         bg:'#E2EFE4', cols:['#4E9B7C','#17243F','#DFF478','#92BAD5']},
+    ciel:    {fr:'Ciel',         en:'Sky',          bg:'#92BAD5', cols:['#F7F3E6','#788CE3','#17243F','#DFF478']},
+    ardoise: {fr:'Ardoise',      en:'Slate',        bg:'#DFE2E6', cols:['#4A5773','#92BAD5','#DFF478','#17243F']},
+    prune:   {fr:'Prune',        en:'Plum',         bg:'#EEE0EA', cols:['#6E3B63','#788CE3','#DFF478','#F7F3E6']},
+    nuit:    {fr:'Nuit',         en:'Night',        bg:'#17243F', cols:['#788CE3','#DFF478','#92BAD5','#F7F3E6']},
+    orage:   {fr:'Orage',        en:'Storm',        bg:'#1D2140', cols:['#788CE3','#FF6648','#92BAD5','#F7F3E6']},
+    encre:   {fr:'Encre',        en:'Ink',          bg:'#101A2E', cols:['#F7F3E6','#92BAD5','#DFF478','#FF6648']}
+  };
+  FAM = [
+    {id:'vagues',    g:'abs', fr:'Vagues',           en:'Waves'},
+    {id:'blobs',     g:'abs', fr:'Blobs',            en:'Blobs'},
+    {id:'arches',    g:'abs', fr:'Arches',           en:'Arches'},
+    {id:'decoupes',  g:'abs', fr:'Découpes',         en:'Cut-outs'},
+    {id:'obliques',  g:'abs', fr:'Obliques',         en:'Diagonals'},
+    {id:'ondes',     g:'abs', fr:'Ondes',            en:'Ripples'},
+    {id:'pointille', g:'abs', fr:'Fondu pointillé',  en:'Dotted fade'},
+    {id:'trame',     g:'abs', fr:'Trame',            en:'Dither'},
+    {id:'colonnes',  g:'abs', fr:'Colonnes',         en:'Columns'},
+    {id:'ecailles',  g:'abs', fr:'Écailles',         en:'Scales'},
+    {id:'terrazzo',  g:'abs', fr:'Terrazzo',         en:'Terrazzo'},
+    {id:'confettis', g:'abs', fr:'Confettis',        en:'Confetti'},
+    {id:'fleurs',    g:'fig', fr:'Marguerites',      en:'Daisies'},
+    {id:'tournesol', g:'fig', fr:'Tournesol',        en:'Sunflower'},
+    {id:'etoiles',   g:'fig', fr:'Étoiles',          en:'Stars'},
+    {id:'rayons',    g:'fig', fr:'Rayons',           en:'Sunbeams'},
+    {id:'lunes',     g:'fig', fr:'Lunes',            en:'Moons'},
+    {id:'feuilles',  g:'fig', fr:'Feuilles',         en:'Leaves'}
+  ];
+  RADII = ['50%','3px','50% 50% 50% 0','3px 11px 3px 11px','50% 0 50% 0','2px'];
+  STR = {
+    fr:{
+      kicker:'Aplat — édité par trced', title:'Aplat',
+      tagline:'Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.',
+      search:'Rechercher',
+      legibTitle:'Lisibilité des libellés', lvGood:'bonne', lvOk:'correcte', lvLow:'faible',
+      labLight:'libellés clairs', labDark:'libellés sombres',
+      adviceGood:'Les libellés restent nets sur toute la grille.',
+      adviceOk:'Lisible, un peu juste sur les zones les plus contrastées.',
+      adviceLow:'Essaie la palette Nuit, ou une densité plus calme.',
+      veil:'voile de lisibilité {n} %', noVeil:'sans voile',
+      family:'Famille de motif', gAbs:'Abstraits', gFig:'Figures', palette:'Palette', density:'Densité',
+      dCalm:'Calme', dMid:'Moyen', dDense:'Dense',
+      resolution:'Résolution', edit:'Modifier', close:'Terminé',
+      width:'Largeur (px)', height:'Hauteur (px)',
+      detected:'détecté sur cet appareil', custom:'saisi à la main',
+      devPhone:'Téléphone', devTablet:'Tablette', devDesk:'Ordinateur',
+      pDetected:'Cet appareil', pPhone:'Téléphone', pTablet:'Tablette', pDesk:'Ordinateur',
+      newSeed:'Nouveau motif', seed:'Graine', download:'Télécharger', rendering:'Rendu en cours',
+      savedTitle:'Image enregistrée', savedSize:'Mo',
+      hint:'Sur téléphone : appui long sur l’image téléchargée, puis « Ajouter aux photos ».',
+      errTitle:'Le rendu a échoué',
+      errBig:'{mp} Mpx dépassent ce que le navigateur peut produire. Reste sous 40 Mpx.',
+      errGen:'Impossible de créer le fichier. Réessaie.', retry:'Réessayer',
+      emptyTitle:'Indique une résolution', emptyBody:'Largeur et hauteur en pixels, ou reviens à la détection.',
+      share:'Copier le lien du motif', copied:'Lien copié',
+      shareNote:'Le lien contient les réglages, rien d’autre.',
+      lang:'Langue', theme:'Thème', tLight:'Clair', tDark:'Sombre', tAuto:'Système',
+      privacy:'Aucun compte, aucun réseau, aucun stockage. Tout est calculé sur cet appareil.',
+      apps:['Appareil','Notes','Cartes','Musique','Météo','Horloge','Photos','Agenda','Fichiers','Réglages','Podcasts','Rappels','Livres','Santé','Courrier','Radio','Traduction','Boussole','Calculatrice','Dictaphone','Contacts','Atlas','Minuteur','Bloc-notes'],
+      desk:['Documents','Images','Projets','Archives','Corbeille'],
+      dock:['Téléphone','Messages','Navigateur','Musique','Réglages','Corbeille'],
+      menu:['Fichier','Édition','Affichage']
+    },
+    en:{
+      kicker:'Aplat — published by trced', title:'Aplat',
+      tagline:'Generative wallpapers, computed inside your browser. Phone, tablet, computer.',
+      search:'Search',
+      legibTitle:'Icon label legibility', lvGood:'good', lvOk:'acceptable', lvLow:'poor',
+      labLight:'light labels', labDark:'dark labels',
+      adviceGood:'Labels stay crisp across the whole grid.',
+      adviceOk:'Readable, a little tight over the busiest areas.',
+      adviceLow:'Try the Night palette, or a calmer density.',
+      veil:'legibility veil {n}%', noVeil:'no veil needed',
+      family:'Pattern family', gAbs:'Abstract', gFig:'Figures', palette:'Palette', density:'Density',
+      dCalm:'Calm', dMid:'Medium', dDense:'Dense',
+      resolution:'Resolution', edit:'Change', close:'Done',
+      width:'Width (px)', height:'Height (px)',
+      detected:'detected on this device', custom:'entered manually',
+      devPhone:'Phone', devTablet:'Tablet', devDesk:'Computer',
+      pDetected:'This device', pPhone:'Phone', pTablet:'Tablet', pDesk:'Computer',
+      newSeed:'New pattern', seed:'Seed', download:'Download', rendering:'Rendering',
+      savedTitle:'Image saved', savedSize:'MB',
+      hint:'On a phone: press and hold the downloaded image, then “Add to Photos”.',
+      errTitle:'Rendering failed',
+      errBig:'{mp} Mpx is more than the browser can produce. Stay under 40 Mpx.',
+      errGen:'The file could not be created. Please try again.', retry:'Try again',
+      emptyTitle:'Enter a resolution', emptyBody:'Width and height in pixels, or go back to detection.',
+      share:'Copy the pattern link', copied:'Link copied',
+      shareNote:'The link carries the settings, nothing else.',
+      lang:'Language', theme:'Theme', tLight:'Light', tDark:'Dark', tAuto:'System',
+      privacy:'No account, no network, no storage. Everything is computed on this device.',
+      apps:['Camera','Notes','Maps','Music','Weather','Clock','Photos','Calendar','Files','Settings','Podcasts','Reminders','Books','Health','Mail','Radio','Translate','Compass','Calculator','Voice memo','Contacts','Atlas','Timer','Notepad'],
+      desk:['Documents','Pictures','Projects','Archive','Trash'],
+      dock:['Phone','Messages','Browser','Music','Settings','Trash'],
+      menu:['File','Edit','View']
+    }
+  };
+
+  state = {
+    lang:null, theme:null, family:'vagues', pal:'lime', dens:1, seed:7314,
+    wStr:'', hStr:'', editRes:false, phase:'idle', errKind:null, last:null,
+    copied:false, clock:'', leg:null
+  };
+
+  boxRef = React.createRef();
+  deviceRef = React.createRef();
+  canvasRef = React.createRef();
+  thumbRefs = this.FAM.reduce((o,f)=>{ o[f.id] = React.createRef(); return o; }, {});
+
+  /* ---------- lifecycle ---------- */
+
+  componentDidMount(){
+    const q = new URLSearchParams(location.search);
+    const st = {};
+    const fam = q.get('m'); if (this.FAM.some(f=>f.id===fam)) st.family = fam;
+    const pal = q.get('p'); if (this.PAL[pal]) st.pal = pal;
+    const d = parseInt(q.get('d'),10); if (d>=0 && d<=2) st.dens = d;
+    const s = parseInt(q.get('s'),10); if (s>0) st.seed = s;
+    const l = q.get('l'); if (l==='fr'||l==='en') st.lang = l;
+    const dpr = window.devicePixelRatio || 1;
+    this.detected = {
+      w: Math.max(320, Math.round((window.screen && screen.width || 1170) * dpr)),
+      h: Math.max(320, Math.round((window.screen && screen.height || 2532) * dpr))
+    };
+    const r = (q.get('r')||'').split('x').map(n=>parseInt(n,10));
+    st.wStr = String(r[0]>0 ? r[0] : this.detected.w);
+    st.hStr = String(r[1]>0 ? r[1] : this.detected.h);
+    st.clock = this.now();
+    this.setState(st, ()=>{ this.applyChrome(); this.renderAll(); });
+    this.onResize = ()=>{ clearTimeout(this._rz); this._rz = setTimeout(()=>this.renderAll(), 120); };
+    window.addEventListener('resize', this.onResize);
+    this._mq = window.matchMedia('(prefers-color-scheme: dark)');
+    this._mqh = ()=>this.renderAll();
+    if (this._mq.addEventListener) this._mq.addEventListener('change', this._mqh);
+    this._clk = setInterval(()=>this.setState({clock:this.now()}), 20000);
+  }
+  componentWillUnmount(){
+    window.removeEventListener('resize', this.onResize);
+    clearInterval(this._clk); clearTimeout(this._rz);
+    if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener('change', this._mqh);
+  }
+  componentDidUpdate(){
+    this.applyChrome();
+    if (!this._ro && this.boxRef.current && window.ResizeObserver){
+      this._ro = new ResizeObserver(()=>{ clearTimeout(this._rz); this._rz = setTimeout(()=>this.renderAll(), 90); });
+      this._ro.observe(this.boxRef.current);
+    }
+    const sig = [this.lang(), this.theme(), this.state.family, this.state.pal, this.state.dens,
+                 this.state.seed, this.state.wStr, this.state.hStr, this.state.editRes].join('|');
+    if (sig !== this._sig) { this._sig = sig; this.renderAll(); }
+  }
+
+  /* ---------- resolved inputs ---------- */
+
+  lang(){ return this.state.lang || this.props.language || 'fr'; }
+  theme(){ return this.state.theme || this.props.themeMode || 'system'; }
+  t(){ return this.STR[this.lang()]; }
+  res(){ const w = parseInt(this.state.wStr,10), h = parseInt(this.state.hStr,10);
+    return {w: w>0 ? Math.min(w,8000) : 0, h: h>0 ? Math.min(h,8000) : 0}; }
+  kind(w,h){
+    if (!w || !h) return 'phone';
+    const short = Math.min(w,h);
+    if (w > h) return short >= 800 ? 'desk' : 'tablet';
+    return short <= 1200 ? 'phone' : 'tablet';
+  }
+  phase(){
+    const o = this.props.previewState;
+    if (o && o !== 'auto') return {empty:'empty', loading:'rendering', error:'error', success:'done'}[o] || 'idle';
+    return this.state.phase;
+  }
+
+  /* ---------- chrome (theme, lang, device box) ---------- */
+
+  applyChrome(){
+    const root = document.documentElement;
+    root.setAttribute('data-theme', this.theme());
+    root.setAttribute('lang', this.lang());
+    const box = this.boxRef.current, dev = this.deviceRef.current;
+    if (!box || !dev) return;
+    /* la vue reste épinglée : elle prend une part de l'écran, jamais tout */
+    const narrow = window.innerWidth < 760;
+    const vh = window.innerHeight || 800;
+    box.style.height = Math.round(narrow
+      ? Math.max(214, Math.min(348, vh*0.40))
+      : Math.max(300, Math.min(600, vh*0.62))) + 'px';
+    const {w,h} = this.res(); if (!w || !h) return;
+    const k = this.kind(w,h);
+    const capW = k === 'phone' ? 300 : (k === 'tablet' ? 430 : 660);
+    const maxW = Math.max(160, Math.min(box.clientWidth || 300, capW));
+    const maxH = Math.max(200, box.clientHeight || 420);
+    let dw = maxW, dh = dw * h / w;
+    if (dh > maxH) { dh = maxH; dw = dh * w / h; }
+    dev.style.width = Math.round(dw) + 'px';
+    dev.style.height = Math.round(dh) + 'px';
+    dev.style.borderRadius = Math.round(Math.min(dw,dh) * (k === 'phone' ? 0.13 : k === 'tablet' ? 0.055 : 0.024)) + 'px';
+    dev.style.setProperty('--mu', (Math.min(dw,dh) / 100) + 'px');
+    dev.style.setProperty('--cols', k === 'phone' ? 4 : 6);
+  }
+
+  /* ---------- generative engine ---------- */
+
+  rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  lum(r,g,b){ const f = c => { c /= 255; return c <= 0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); };
+    return 0.2126*f(r) + 0.7152*f(g) + 0.0722*f(b); }
+
+  hexLum(h){ const n = parseInt(h.slice(1),16); return this.lum((n>>16)&255, (n>>8)&255, n&255); }
+  score(l1,l2){ const mn = Math.min(l1,l2), mx = Math.max(l1,l2);
+    return Math.max(1.05/(mx+0.05), (mn+0.05)/0.068); }
+  calm(P){
+    const lb = this.hexLum(P.bg);
+    const c = [P.bg].concat(P.cols).map((hex,i)=>({hex, i, l:this.hexLum(hex), s:this.score(this.hexLum(hex), lb)}));
+    const max = c.reduce((m,x)=>Math.max(m,x.s), 0);
+    const good = c.filter(x=>x.s >= max*0.85);
+    const f = good.find(x=>x.i > 0) || good[0];
+    const others = c.filter(x=>x.hex !== f.hex).sort((a,b)=>Math.abs(a.l-f.l) - Math.abs(b.l-f.l));
+    return {hex:f.hex, tone:(others[0]||f).hex};
+  }
+  blobPath(ctx,cx,cy,r,n,rnd,jit){
+    const j = jit === undefined ? 0.6 : jit, P = [];
+    for (let i=0;i<n;i++){ const a = i/n*Math.PI*2, rr = r*(1-j/2 + j*rnd());
+      P.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]); }
+    const mid = (a,b) => [(a[0]+b[0])/2, (a[1]+b[1])/2];
+    const m0 = mid(P[n-1],P[0]);
+    ctx.beginPath(); ctx.moveTo(m0[0],m0[1]);
+    for (let i=0;i<n;i++){ const c = P[i], nx = P[(i+1)%n], m = mid(c,nx);
+      ctx.quadraticCurveTo(c[0],c[1],m[0],m[1]); }
+    ctx.closePath(); ctx.fill();
+  }
+  archPath(ctx,cx,baseY,w,h){
+    const r = w/2, hh = Math.max(h, r*1.02);
+    ctx.beginPath(); ctx.moveTo(cx-r, baseY); ctx.lineTo(cx-r, baseY-hh+r);
+    ctx.arc(cx, baseY-hh+r, r, Math.PI, 0); ctx.lineTo(cx+r, baseY); ctx.closePath(); ctx.fill();
+  }
+  daisy(ctx,cx,cy,R,n,rot,petal,core){
+    ctx.fillStyle = petal;
+    for (let i=0;i<n;i++){ const a = rot + i/n*Math.PI*2;
+      ctx.beginPath(); ctx.ellipse(cx+Math.cos(a)*R*0.56, cy+Math.sin(a)*R*0.56, R*0.46, R*0.26, a, 0, Math.PI*2); ctx.fill(); }
+    ctx.fillStyle = core; ctx.beginPath(); ctx.arc(cx,cy,R*0.32,0,Math.PI*2); ctx.fill();
+  }
+  noiseTile(){
+    if (this._noise) return this._noise;
+    const n = document.createElement('canvas'); n.width = n.height = 128;
+    const c = n.getContext('2d'), img = c.createImageData(128,128), d = img.data;
+    for (let i=0;i<d.length;i+=4){ const v = 110 + Math.random()*80;
+      d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+    c.putImageData(img,0,0); this._noise = n; return n;
+  }
+
+  hash(s){ let h = 2166136261; for (let i=0;i<s.length;i++) h = (Math.imul(h ^ s.charCodeAt(i), 16777619)) >>> 0; return h % 9973; }
+  pillPath(ctx,x,y,w,h){
+    const r = Math.min(w,h)/2;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+    else {
+      ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+      ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+      ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+      ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  starPath(ctx,cx,cy,R,pts,inner,rot){
+    ctx.beginPath();
+    for (let i=0;i<pts*2;i++){
+      const a = rot + i*Math.PI/pts, r = (i % 2) ? R*inner : R;
+      const x = cx+Math.cos(a)*r, y = cy+Math.sin(a)*r;
+      i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  leafPath(ctx,x,y,len,wid,a){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(a);
+    ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.quadraticCurveTo(len*0.42,-wid, len,0);
+    ctx.quadraticCurveTo(len*0.42, wid, 0,0);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  crescent(ctx,cx,cy,R,a,cut){
+    ctx.beginPath();
+    ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.moveTo(cx+Math.cos(a)*R*cut + R*0.9, cy+Math.sin(a)*R*cut);
+    ctx.arc(cx+Math.cos(a)*R*cut, cy+Math.sin(a)*R*cut, R*0.9, 0, Math.PI*2);
+    ctx.fill('evenodd');
+  }
+  sunflower(ctx,cx,cy,R,rnd,petal,petal2,core,seedCol){
+    const n = 13 + Math.floor(rnd()*6), rot = rnd()*Math.PI*2;
+    ctx.fillStyle = petal2;
+    for (let i=0;i<n;i++){ const a = rot + (i+0.5)/n*Math.PI*2;
+      this.leafPath(ctx, cx+Math.cos(a)*R*0.3, cy+Math.sin(a)*R*0.3, R*0.62, R*0.19, a); }
+    ctx.fillStyle = petal;
+    for (let i=0;i<n;i++){ const a = rot + i/n*Math.PI*2;
+      this.leafPath(ctx, cx+Math.cos(a)*R*0.26, cy+Math.sin(a)*R*0.26, R*0.76, R*0.25, a); }
+    ctx.fillStyle = core;
+    ctx.beginPath(); ctx.arc(cx,cy,R*0.34,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = seedCol;
+    const g = 2.39996, k = R*0.29/Math.sqrt(72), dot = Math.max(0.7, R*0.021);
+    for (let i=1;i<=72;i++){ const rr = k*Math.sqrt(i), a = i*g;
+      ctx.beginPath(); ctx.arc(cx+Math.cos(a)*rr, cy+Math.sin(a)*rr, dot, 0, Math.PI*2); ctx.fill(); }
+  }
+
+  shapes(ctx,W,H,fam,C,dens,rnd,U){
+    const col = i => C[((i % C.length) + C.length) % C.length];
+
+    if (fam === 'blobs'){
+      const n = [3,6,10][dens];
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i);
+        this.blobPath(ctx, W*(0.08+0.84*rnd()), H*(0.07+0.86*rnd()), U*(0.15+0.22*rnd()), 7+Math.floor(rnd()*3), rnd);
+      }
+      return;
+    }
+
+    if (fam === 'arches'){
+      const n = [2,3,5][dens], cw = W/n;
+      for (let j=0;j<n;j++){
+        const cx = cw*(j+0.5), up = rnd() > 0.32;
+        const base = up ? H*(0.62+0.38*rnd()) : H*(0.02+0.1*rnd());
+        const hgt = H*(0.3+0.34*rnd());
+        for (let k=0;k<3;k++){
+          ctx.fillStyle = col(j+k);
+          const w = cw*(0.94 - k*0.26);
+          if (up) this.archPath(ctx, cx, base, w, hgt - k*hgt*0.2);
+          else { ctx.save(); ctx.translate(cx, base); ctx.scale(1,-1); ctx.translate(-cx,0);
+            this.archPath(ctx, cx, 0, w, hgt - k*hgt*0.2); ctx.restore(); }
+        }
+      }
+      return;
+    }
+
+    if (fam === 'fleurs'){
+      const n = [2,3,5][dens], cw = W/n, rows = Math.max(2, Math.round(H/cw)), ch = H/rows;
+      for (let r=0;r<rows;r++) for (let c=0;c<n;c++){
+        const i = r*n + c, R = Math.min(cw,ch)*0.42*(0.78+0.34*rnd());
+        this.daisy(ctx, cw*(c+0.5)+(rnd()-0.5)*cw*0.18, ch*(r+0.5)+(rnd()-0.5)*ch*0.18,
+          R, 6+Math.floor(rnd()*3), rnd()*Math.PI, col(i), col(i+2));
+      }
+      return;
+    }
+
+    if (fam === 'tournesol'){
+      const n = [1,3,7][dens];
+      const cols = Math.max(1, Math.round(Math.sqrt(n*W/H))), rows = Math.max(1, Math.ceil(n/cols));
+      const cw = W/cols, ch = H/rows;
+      for (let i=0;i<n;i++){
+        const c = i % cols, r = Math.floor(i/cols);
+        const R = Math.min(cw,ch)*(n === 1 ? 0.46 : 0.36)*(0.88+0.26*rnd());
+        this.sunflower(ctx, cw*(c+0.5)+(rnd()-0.5)*cw*0.18, ch*(r+0.5)+(rnd()-0.5)*ch*0.18,
+          R, rnd, col(i), col(i+3), col(i+1), col(i+2));
+      }
+      return;
+    }
+
+    if (fam === 'etoiles'){
+      const n = [5,11,22][dens];
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i);
+        this.starPath(ctx, W*(0.05+0.9*rnd()), H*(0.04+0.92*rnd()),
+          U*(0.06+0.17*rnd()), 4+Math.floor(rnd()*5), 0.36+0.16*rnd(), rnd()*Math.PI*2);
+      }
+      return;
+    }
+
+    if (fam === 'rayons'){
+      const n = [8,14,24][dens];
+      const ax = W*(rnd() < 0.5 ? 0.1 : 0.9), ay = H*(rnd() < 0.5 ? 0.08 : 0.92);
+      const rot = rnd()*Math.PI*2, R = Math.hypot(W,H)*1.4, step = Math.PI*2/n;
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i);
+        const a0 = rot + i*step, a1 = a0 + step*0.97;
+        ctx.beginPath(); ctx.moveTo(ax,ay);
+        ctx.lineTo(ax+Math.cos(a0)*R, ay+Math.sin(a0)*R);
+        ctx.lineTo(ax+Math.cos(a1)*R, ay+Math.sin(a1)*R);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = col(n+1);
+      ctx.beginPath(); ctx.arc(ax,ay,U*0.12,0,Math.PI*2); ctx.fill();
+      return;
+    }
+
+    if (fam === 'ecailles'){
+      const cols = [3,5,8][dens], r = W/cols/2, step = r*0.72;
+      const rows = Math.ceil(H/step)+2;
+      for (let row=0;row<rows;row++){
+        const y = -r*0.5 + row*step, off = (row % 2) ? r : 0;
+        ctx.fillStyle = col(row);
+        for (let c=-1;c<=cols+1;c++){
+          ctx.beginPath(); ctx.arc(off + c*r*2 + r, y, r, 0, Math.PI*2); ctx.fill();
+        }
+      }
+      return;
+    }
+
+    if (fam === 'lunes'){
+      const n = [3,6,11][dens];
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i);
+        this.crescent(ctx, W*(0.1+0.8*rnd()), H*(0.06+0.88*rnd()),
+          U*(0.1+0.17*rnd()), rnd()*Math.PI*2, 0.26+0.32*rnd());
+      }
+      return;
+    }
+
+    if (fam === 'feuilles'){
+      const n = [4,9,18][dens];
+      for (let i=0;i<n;i++){
+        const x = W*(0.06+0.88*rnd()), y = H*(0.05+0.9*rnd()),
+              len = U*(0.16+0.2*rnd()), a = rnd()*Math.PI*2;
+        ctx.fillStyle = col(i);
+        this.leafPath(ctx, x, y, len, len*0.34, a);
+        ctx.fillStyle = col(i+2);
+        this.leafPath(ctx, x, y, len*0.46, len*0.14, a);
+      }
+      return;
+    }
+
+    if (fam === 'colonnes'){
+      const n = [3,5,9][dens], gap = W*0.014;
+      let x = gap, i = 0;
+      while (x < W - gap && i < 48){
+        const w = Math.max(U*0.05, (W/n)*(0.5+0.8*rnd()) - gap);
+        const h = H*(0.34+0.62*rnd());
+        ctx.fillStyle = col(i);
+        this.pillPath(ctx, x, rnd() < 0.5 ? -H*0.07 : H - h + H*0.07, w, h);
+        x += w + gap; i++;
+      }
+      return;
+    }
+
+    if (fam === 'confettis'){
+      const n = [24,55,120][dens];
+      for (let i=0;i<n;i++){
+        const s = U*(0.016+0.03*rnd());
+        ctx.fillStyle = col(i);
+        ctx.save(); ctx.translate(W*rnd(), H*rnd()); ctx.rotate(rnd()*Math.PI);
+        const k = Math.floor(rnd()*4);
+        if (k === 0){ ctx.beginPath(); ctx.arc(0,0,s,0,Math.PI*2); ctx.fill(); }
+        else if (k === 1){ this.pillPath(ctx, -s*2.2, -s*0.5, s*4.4, s); }
+        else if (k === 2){ this.starPath(ctx, 0, 0, s*1.6, 4, 0.4, 0); }
+        else { ctx.beginPath(); ctx.moveTo(0,-s*1.4); ctx.lineTo(s*1.3,s); ctx.lineTo(-s*1.3,s); ctx.closePath(); ctx.fill(); }
+        ctx.restore();
+      }
+      return;
+    }
+
+    if (fam === 'decoupes'){
+      const n = [2,3,5][dens];
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i);
+        this.blobPath(ctx, W*(0.08+0.84*rnd()), H*(0.08+0.84*rnd()),
+          U*(0.46+0.46*rnd()), 6+Math.floor(rnd()*4), rnd, 0.85);
+      }
+      return;
+    }
+
+    if (fam === 'obliques'){
+      const n = [3,6,11][dens], D = Math.hypot(W,H);
+      const a = (rnd() < 0.5 ? 1 : -1)*(Math.PI/4 + (rnd()-0.5)*0.5);
+      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(a); ctx.translate(-D/2,-D/2);
+      let y = 0, i = 0;
+      while (y < D && i < 64){
+        const h = D/n*(0.45+0.95*rnd());
+        ctx.fillStyle = col(i);
+        ctx.fillRect(-D*0.2, y, D*1.4, h);
+        y += h + D*0.007; i++;
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (fam === 'ondes'){
+      const n = [5,9,16][dens];
+      const cx = W*(0.14+0.72*rnd()), cy = H*(0.12+0.76*rnd());
+      const R = Math.hypot(Math.max(cx, W-cx), Math.max(cy, H-cy))*1.02;
+      for (let i=n;i>=1;i--){
+        ctx.fillStyle = col(i);
+        ctx.beginPath(); ctx.arc(cx, cy, R*i/n, 0, Math.PI*2); ctx.fill();
+      }
+      return;
+    }
+
+    if (fam === 'pointille'){
+      const cols = [9,15,24][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      const flip = rnd() < 0.5, diag = rnd() < 0.5, sw = rnd() < 0.5;
+      const main = col(0), accent = col(1);
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const x = s*(c+0.5), y = s*(r+0.5);
+        let t = diag ? ((sw ? W-x : x)/W*0.5 + y/(rows*s)*0.5) : y/(rows*s);
+        if (flip) t = 1-t;
+        const rr = s*0.78*Math.max(0, Math.min(1, t*1.22-0.1));
+        if (rr < s*0.04) continue;
+        ctx.fillStyle = ((r*3+c) % 9 === 0) ? accent : main;
+        ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI*2); ctx.fill();
+      }
+      return;
+    }
+
+    if (fam === 'trame'){
+      const cols = [12,20,32][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      const B = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+      const cx = W*(0.2+0.6*rnd()), cy = H*(0.14+0.72*rnd()), R = Math.hypot(W,H)*(0.5+0.32*rnd());
+      const core = col(0), fringe = col(1);
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const x = c*s, y = r*s;
+        const t = Math.max(0, Math.min(1, 1 - Math.hypot(x+s/2-cx, y+s/2-cy)/R));
+        const th = (B[r % 4][c % 4] + 0.5)/16;
+        if (t > th){ ctx.fillStyle = (t > th + 0.3) ? core : fringe; ctx.fillRect(x, y, s*1.02, s*1.02); }
+      }
+      return;
+    }
+
+    if (fam === 'terrazzo'){
+      const n = [30,70,150][dens];
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i + (i % 3));
+        this.blobPath(ctx, W*rnd(), H*rnd(), U*(0.014+0.032*rnd()), 5+Math.floor(rnd()*3), rnd, 0.95);
+      }
+      return;
+    }
+
+    const n = [4,7,11][dens];
+    for (let i=0;i<n;i++){
+      const y = H*(0.14 + 0.88*i/n), amp = H*(0.012+0.032*rnd()),
+            per = W/(0.5+1.7*rnd()), ph = rnd()*Math.PI*2, stp = Math.max(2, W/260);
+      ctx.fillStyle = col(i);
+      ctx.beginPath(); ctx.moveTo(0, y + Math.sin(ph)*amp);
+      for (let x=0;x<=W;x+=stp) ctx.lineTo(x, y + Math.sin(ph + x/per*Math.PI*2)*amp);
+      ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  draw(ctx,W,H,family,palId,dens,seed){
+    const P = this.PAL[palId] || this.PAL.lime;
+    const C = P.cols, rnd = this.rng(seed*7919 + dens*131 + this.hash(family)*23);
+    const U = Math.min(W,H);
+    ctx.save();
+    ctx.fillStyle = P.bg; ctx.fillRect(0,0,W,H);
+
+    this.shapes(ctx, W, H, family, C, dens, rnd, U);
+
+    /* measure the icon zone, then veil toward the safer label colour */
+    let L = 0.4;
+    try {
+      const y0 = Math.round(H*0.24), y1 = Math.round(H*0.92);
+      const d = ctx.getImageData(0, y0, W, Math.max(1, y1-y0)).data;
+      const px = d.length/4, step = Math.max(1, Math.floor(px/2600))*4;
+      let s = 0, k = 0;
+      for (let i=0;i<d.length;i+=step){ s += this.lum(d[i],d[i+1],d[i+2]); k++; }
+      if (k) L = s/k;
+    } catch(e){}
+
+    const mode = L > 0.5 ? 'dark' : 'light';
+    let a = 0;
+    if (mode === 'light'){ const tg = 0.17; if (L > tg) a = Math.min(0.5, (L-tg)/Math.max(0.05, L-0.02)); }
+    else { const tg = 0.68; if (L < tg) a = Math.min(0.44, (tg-L)/Math.max(0.05, 0.96-L)); }
+    if (a > 0.004){
+      const rgb = mode === 'light' ? '11,18,33' : '250,247,236';
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0, 'rgba('+rgb+','+(a*0.9).toFixed(3)+')');
+      g.addColorStop(0.2, 'rgba('+rgb+','+(a*0.78).toFixed(3)+')');
+      g.addColorStop(0.78, 'rgba('+rgb+','+(a*0.96).toFixed(3)+')');
+      g.addColorStop(1, 'rgba('+rgb+','+Math.min(0.62, a*1.14).toFixed(3)+')');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    }
+
+    const L2 = mode === 'light' ? L*(1-a) + 0.018*a : L*(1-a) + 0.95*a;
+    const ratio = mode === 'light' ? 1.05/(L2+0.05) : (L2+0.05)/0.068;
+
+    ctx.globalAlpha = 0.06; ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = ctx.createPattern(this.noiseTile(), 'repeat'); ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+    return {mode, veil:a, ratio};
+  }
+
+  /* ---------- rendering ---------- */
+
+  renderAll(){
+    this.applyChrome();
+    const {w,h} = this.res();
+    const c = this.canvasRef.current;
+    if (c && w && h){
+      const rect = c.getBoundingClientRect();
+      if (rect.width > 4){
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        c.width = Math.round(rect.width*dpr); c.height = Math.round(rect.height*dpr);
+        const ctx = c.getContext('2d', {willReadFrequently:true});
+        const m = this.draw(ctx, c.width, c.height, this.state.family, this.state.pal, this.state.dens, this.state.seed);
+        const dev = this.deviceRef.current;
+        if (dev){
+          dev.style.setProperty('--label', m.mode === 'light' ? '#F7F3E6' : '#17243F');
+          dev.style.setProperty('--label-inv', m.mode === 'light' ? '#17243F' : '#F7F3E6');
+        }
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+          c.style.transition = 'none'; c.style.opacity = '0.35';
+          requestAnimationFrame(()=>{ c.style.transition = 'opacity 260ms ease-out'; c.style.opacity = '1'; });
+        }
+        const prev = this.state.leg;
+        if (!prev || prev.mode !== m.mode || Math.abs(prev.ratio - m.ratio) > 0.08 || Math.abs(prev.veil - m.veil) > 0.02){
+          this.setState({leg:m});
+        }
+      }
+    }
+    this.FAM.forEach(f => {
+      const tc = this.thumbRefs[f.id].current; if (!tc) return;
+      const r = tc.getBoundingClientRect(); if (r.width < 4) return;
+      tc.width = Math.round(r.width*1.5); tc.height = Math.round(r.height*1.5);
+      this.draw(tc.getContext('2d', {willReadFrequently:true}), tc.width, tc.height, f.id, this.state.pal, this.state.dens, this.state.seed);
+    });
+    this.syncUrl();
+  }
+
+  syncUrl(){
+    const {w,h} = this.res();
+    const q = new URLSearchParams();
+    q.set('m', this.state.family); q.set('p', this.state.pal); q.set('d', String(this.state.dens));
+    q.set('s', String(this.state.seed)); q.set('l', this.lang());
+    if (w && h) q.set('r', w + 'x' + h);
+    try { history.replaceState(null, '', location.pathname + '?' + q.toString()); } catch(e){}
+  }
+
+  /* ---------- actions ---------- */
+
+  now(){ return new Date().toLocaleTimeString(this.lang() === 'fr' ? 'fr-FR' : 'en-US', {hour:'2-digit', minute:'2-digit'}); }
+  set = (o) => this.setState(Object.assign({phase:'idle', errKind:null, copied:false}, o));
+  onSeed = () => this.set({seed: Math.floor(Math.random()*99999) + 1});
+  onToggleRes = () => this.setState({editRes: !this.state.editRes});
+  onW = (e) => this.set({wStr: e.target.value.replace(/[^0-9]/g,'').slice(0,4)});
+  onH = (e) => this.set({hStr: e.target.value.replace(/[^0-9]/g,'').slice(0,4)});
+  onShare = () => {
+    const done = () => { this.setState({copied:true}); clearTimeout(this._cp);
+      this._cp = setTimeout(()=>this.setState({copied:false}), 2600); };
+    try { navigator.clipboard.writeText(location.href).then(done, done); } catch(e){ done(); }
+  };
+  onExport = () => {
+    const {w,h} = this.res();
+    if (!w || !h) { this.setState({editRes:true}); return; }
+    if (w*h > 40e6) { this.setState({phase:'error', errKind:'big'}); return; }
+    this.setState({phase:'rendering', errKind:null});
+    setTimeout(()=>{
+      try {
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d', {willReadFrequently:true});
+        this.draw(ctx, w, h, this.state.family, this.state.pal, this.state.dens, this.state.seed);
+        c.toBlob(b => {
+          if (!b) { this.setState({phase:'error', errKind:'gen'}); return; }
+          const url = URL.createObjectURL(b);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'aplat-' + this.state.family + '-' + this.state.pal + '-' + this.state.seed + '-' + w + 'x' + h + '.png';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(()=>URL.revokeObjectURL(url), 6000);
+          this.setState({phase:'done', last:{w, h, size:b.size}});
+        }, 'image/png');
+      } catch(e){ this.setState({phase:'error', errKind:'gen'}); }
+    }, 70);
+  };
+
+  /* ---------- template values ---------- */
+
+  num(n){ return n.toLocaleString(this.lang() === 'fr' ? 'fr-FR' : 'en-US'); }
+  dec(n){ const s = n.toFixed(1); return this.lang() === 'fr' ? s.replace('.', ',') : s; }
+
+  renderVals(){
+    const t = this.t(), lang = this.lang(), {w,h} = this.res();
+    const k = this.kind(w,h), phase = this.phase();
+    const empty = phase === 'empty' || !w || !h;
+    const leg = this.state.leg || {mode:'light', ratio:5.4, veil:0.18};
+    const lvl = leg.ratio >= 4.5 ? 'good' : leg.ratio >= 3 ? 'ok' : 'low';
+    const now = new Date();
+    const on = (o) => () => this.set(o);
+    const pick = (active) => ({
+      pressed: active ? 'true' : 'false',
+      bc: active ? 'var(--ink)' : 'var(--line)',
+      bg: active ? 'var(--surface-2)' : 'var(--field)',
+      fg: 'var(--ink)',
+      dot: active ? 'var(--accent)' : 'transparent'
+    });
+    const veilTxt = leg.veil > 0.02 ? t.veil.replace('{n}', String(Math.round(leg.veil*100))) : t.noVeil;
+
+    return {
+      t, lang,
+      boxRef: this.boxRef, deviceRef: this.deviceRef, canvasRef: this.canvasRef,
+      clock: this.state.clock || this.now(),
+      dayNum: String(now.getDate()),
+      dayName: now.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {weekday:'long'}),
+      monthName: now.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {month:'long'}),
+
+      isHandheld: !empty && phase !== 'rendering' && (k === 'phone' || k === 'tablet'),
+      isDesk: !empty && phase !== 'rendering' && k === 'desk',
+      isEmpty: empty,
+      isBusy: phase === 'rendering',
+      isDone: phase === 'done' && !empty,
+      isError: phase === 'error',
+
+      apps: (k === 'desk' ? t.desk : t.apps.slice(0, k === 'phone' ? 16 : 24))
+        .map((label,i)=>({label, r:this.RADII[i % this.RADII.length]})),
+      dock: t.dock.slice(0, k === 'desk' ? 6 : 4).map((label,i)=>({label, r:this.RADII[(i+2) % this.RADII.length]})),
+      menu: t.menu.map(label=>({label})),
+
+      legGood: lvl === 'good', legOk: lvl === 'ok', legLow: lvl === 'low',
+      legLabel: lvl === 'good' ? t.lvGood : lvl === 'ok' ? t.lvOk : t.lvLow,
+      legDetail: this.dec(leg.ratio) + ':1 · ' + (leg.mode === 'light' ? t.labLight : t.labDark)
+        + ' · ' + veilTxt + ' — ' + (lvl === 'good' ? t.adviceGood : lvl === 'ok' ? t.adviceOk : t.adviceLow),
+
+      famAbs: this.FAM.filter(f => f.g === 'abs').map(f => Object.assign({
+        label: f[lang], ref: this.thumbRefs[f.id], onPick: on({family:f.id})
+      }, pick(this.state.family === f.id))),
+      famFig: this.FAM.filter(f => f.g === 'fig').map(f => Object.assign({
+        label: f[lang], ref: this.thumbRefs[f.id], onPick: on({family:f.id})
+      }, pick(this.state.family === f.id))),
+      palList: Object.keys(this.PAL).map(id => Object.assign({
+        label: this.PAL[id][lang], onPick: on({pal:id}),
+        cols: [this.PAL[id].bg].concat(this.PAL[id].cols.slice(0,3)).map(hex=>({hex}))
+      }, pick(this.state.pal === id))),
+      densList: [t.dCalm, t.dMid, t.dDense].map((label,i) => Object.assign({
+        label, onPick: on({dens:i}), o2: i >= 1 ? 1 : 0.28, o3: i >= 2 ? 1 : 0.28
+      }, pick(this.state.dens === i))),
+
+      resLabel: empty ? '— × —' : this.num(w) + ' × ' + this.num(h) + ' px',
+      deviceLabel: (k === 'phone' ? t.devPhone : k === 'tablet' ? t.devTablet : t.devDesk) + ' · '
+        + (this.detected && w === this.detected.w && h === this.detected.h ? t.detected : t.custom),
+      resBtn: this.state.editRes ? t.close : t.edit,
+      editRes: this.state.editRes,
+      wStr: this.state.wStr, hStr: this.state.hStr,
+      onToggleRes: this.onToggleRes, onW: this.onW, onH: this.onH,
+      presets: [
+        {label: t.pDetected, wh: this.detected || {w:1170,h:2532}},
+        {label: t.pPhone, wh: {w:1179, h:2556}},
+        {label: t.pTablet, wh: {w:2048, h:2732}},
+        {label: t.pDesk, wh: {w:2560, h:1440}}
+      ].map(p => ({label: p.label, onPick: on({wStr:String(p.wh.w), hStr:String(p.wh.h)})})),
+
+      seed: String(this.state.seed),
+      onSeed: this.onSeed, onExport: this.onExport, onShare: this.onShare,
+      shareLabel: this.state.copied ? t.copied : t.share,
+      ctaLabel: phase === 'rendering' ? t.rendering : t.download,
+      exportOff: phase === 'rendering' || empty,
+      busyAttr: phase === 'rendering' ? 'true' : 'false',
+      exportOpacity: (phase === 'rendering' || empty) ? '0.55' : '1',
+      savedMeta: this.state.last
+        ? this.num(this.state.last.w) + ' × ' + this.num(this.state.last.h) + ' px · PNG · '
+          + this.dec(this.state.last.size/1048576) + ' ' + t.savedSize
+        : '',
+      errMsg: this.state.errKind === 'big'
+        ? t.errBig.replace('{mp}', this.dec(w*h/1e6))
+        : t.errGen,
+
+      langList: [{id:'fr', label:'Français'}, {id:'en', label:'English'}].map(l => Object.assign({
+        label: l.label, onPick: on({lang:l.id})
+      }, pick(lang === l.id))),
+      themeList: [
+        {id:'light', label:t.tLight, fill:'currentColor'},
+        {id:'dark', label:t.tDark, fill:'transparent'},
+        {id:'system', label:t.tAuto, fill:'linear-gradient(90deg,currentColor 50%,transparent 50%)'}
+      ].map(th => Object.assign({label:th.label, fill:th.fill, onPick: on({theme:th.id})}, pick(this.theme() === th.id)))
+    };
+  }
+}
+
+</script>
+</body>
+</html>
