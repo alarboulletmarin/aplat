@@ -278,22 +278,29 @@ npm run check        # tout enchaîner
 
 ### Fidélité mesurée
 
+Trois angles, tous automatisés et reproductibles.
+
 `tools/fidelity.js` relit les 307 déclarations et les 21 jetons des styles en
-ligne de `design/Aplat.dc.html`. Les 21 jetons et 290 déclarations se retrouvent
-tels quels ; les 17 restantes sont exactement les substitutions listées
-ci-dessus (`color-mix` précalculé en rgba, `minmax(min(…))`, `--line-strong`
-sur les puces, `animation-delay` séparé).
+ligne de `design/Aplat.dc.html`. Les 21 jetons et 287 déclarations se retrouvent
+tels quels ; les 20 restantes sont une à une les substitutions du tableau
+ci-dessus — `color-mix` précalculé en rgba, `minmax(min(…))`, `--line-strong`
+sur les puces, `--accent-ink` sur les surfaces lime, `--alert` sur la carte
+d'erreur, `animation-delay` séparé.
 
-`tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en
-local, mêmes polices, même graine — et compare 28 repères : **27 identiques**
-au pixel près (position, taille, corps, graisse, interlettrage, interligne,
-couleur, rayon, bordure, remplissage) ; le 28ᵉ écart vient du gabarit qui
-enveloppe le texte dans un élément de plus.
+`tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en local,
+mêmes polices auto-hébergées, même graine — et compare 28 repères sur position,
+taille, corps, graisse, interlettrage, interligne, couleur, rayon, bordure et
+remplissage. **21 identiques au pixel près.** Les 7 écarts sont : les trois
+boutons de thème et le bouton de langue, dont le plancher est désormais lié au
+contenu pour ne plus couper les mots ; la boîte de l'appareil, dont la bordure
+est défalquée pour que la boîte de contenu porte le rapport d'aspect visé ;
+et un artefact du gabarit, qui enveloppe le texte dans un élément de plus.
 
-`tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,9 %** des
-pixels sont identiques. Les 3,1 % restants sont, un par un, les écarts assumés :
-bordures des puces, coche de sélection, rangées d'icônes retirées de la maquette
-d'écran, cellules de la trame calées sur des bornes entières, et le grain.
+`tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,4 %** des
+pixels sont identiques. Les 3,6 % restants se lisent un par un sur la carte des
+écarts et correspondent aux corrections assumées — bordures des puces, coche de
+sélection, rangées d'icônes retirées de la maquette d'écran, cellules de la
+trame calées sur des bornes entières, largeur des boutons de thème, et le grain.
 
 ## Licences
 
