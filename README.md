@@ -157,7 +157,9 @@ Vérifié par `tools/a11y.js`, qui recompose les couleurs semi-transparentes sur
 leur pile de fonds réelle avant d'appliquer la formule WCAG, dans les deux
 thèmes et les deux langues :
 
-- texte courant ≥ 4,5:1, texte large et bordures d'éléments d'interface ≥ 3:1 ;
+- texte courant ≥ 4,5:1, texte large, bordures d'éléments d'interface et formes
+  porteuses de sens ≥ 3:1 — 73 textes, 48 bordures et le trait de la carte
+  d'erreur examinés dans chacune des six combinaisons de thème et de langue ;
 - test en niveaux de gris : la sélection passe par la bordure, le fond **et**
   une coche — jamais par la seule couleur. La densité est aussi dite par un
   motif de points, la lisibilité par trois formes distinctes (disque, demi-disque,
@@ -165,8 +167,15 @@ thèmes et les deux langues :
 - le corail est réservé aux aplats et aux formes, jamais au texte ;
 - cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, et
   atteignabilité de chaque contrôle testée sous les deux barres collantes ;
-- focus visible partout, lien d'évitement, points de repère, `aria-live` sur la
-  lisibilité et sur le résultat de l'export ;
+- focus visible partout et **jamais masqué** par les deux barres collantes : ni
+  le défilement déclenché par le focus ni `scrollIntoView` n'appliquent
+  `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
+  (WCAG 2.2, 2.4.11) ;
+- les cinq groupes de réglages sont de vrais groupes radio : un arrêt de
+  tabulation par groupe, flèches et Début/Fin. Le parcours passe de 42 arrêts
+  à 11 ;
+- lien d'évitement, points de repère, `aria-live` sur la lisibilité, sur le
+  résultat de l'export et sur la confirmation de copie ;
 - la fausse maquette d'écran est `aria-hidden` — un lecteur d'écran ne lit pas de
   faux noms d'application ; l'aperçu porte une description de ce qu'il montre ;
 - `prefers-reduced-motion` respecté : le fondu du canevas et l'animation
@@ -204,6 +213,24 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Favicon en ligne, préchargements de polices retirés | Zéro requête pour l'icône ; en `file://` les préchargements CORS échouaient et la police était téléchargée deux fois. |
 | `display: standalone` retiré du manifeste | Sans cache de service worker — que le contrat interdit — une application installée ne s'ouvrirait pas sans réseau. |
 
+## Vie privée, dans le code et pas seulement dans le texte
+
+La page affiche « Aucun compte, aucun réseau, aucun stockage ». Ce qui le tient :
+
+- une politique de sécurité en balise meta — `connect-src 'none'` coupe `fetch`,
+  `XHR`, WebSocket, EventSource et `sendBeacon`. Aucune directive ne porte sur
+  les scripts, les styles ni les images, pour que `file://` reste valide.
+  Vérifié à l'exécution : une requête sortante est refusée ;
+- zéro requête réseau : polices auto-hébergées, favicon en ligne. Une ouverture
+  en `file://` déclenche 7 requêtes, toutes locales, aucune erreur console ;
+- zéro stockage : ni `localStorage`, ni `sessionStorage`, ni IndexedDB, ni
+  cookie, ni Cache API, ni service worker. Vérifié après un parcours complet,
+  export compris ;
+- la résolution détectée ne part pas dans le lien partagé : c'est une mesure de
+  l'appareil, pas un réglage. Seule une saisie manuelle est transmise ;
+- la copie du lien ne ment pas : si le presse-papiers refuse, l'échec est dit et
+  le lien s'affiche à copier à la main.
+
 ## Vérifications
 
 ```
@@ -213,16 +240,17 @@ npm run check        # tout enchaîner
 
 | Outil | Ce qu'il vérifie |
 |---|---|
-| `tools/e2e.js` | parcours complet : URL, déterminisme, états, téléchargement réel, clavier, mouvement réduit |
+| `tools/e2e.js` | 66 contrôles : URL et sa robustesse, déterminisme, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, clavier, focus non masqué, mouvement réduit |
 | `tools/a11y.js` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.js` | atteignabilité et taille des cibles, de 320 à 1920 px |
-| `tools/overflow.js` | débordements, y compris libellés allongés de 30 % |
+| `tools/overflow.js` | débordements et troncatures sur 256 combinaisons de largeur, langue et résolution cible, avec et sans libellés allongés de 30 % |
 | `tools/export-audit.js` | poids et durée des PNG sur les 594 combinaisons |
 | `tools/band-test.js` | hauteur des marches du voile |
 | `tools/dither-check.js` | amplitude du grain sur toute la gamme tonale |
 | `tools/edges.js` | découpes agrandies sur les bords |
 | `tools/shot.js` | captures et absence de requête sortante |
 | `tools/greyscale.js` | test en niveaux de gris |
+| `tools/fileurl.js` | ouverture en `file://` : requêtes, doublons de police, erreurs console |
 | `tools/perf.js` | coût de chaque action, processeur bridé six fois |
 | `tools/states.js` | captures des quatre états |
 | `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |

@@ -419,8 +419,6 @@
 
   /* ---------- rendu de l'interface ------------------------------------------ */
 
-  function fill(key, node) { node.textContent = t()[key]; }
-
   var staticLang = null;
   function renderStatic() {
     if (staticLang === S.lang) return;

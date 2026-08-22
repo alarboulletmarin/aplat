@@ -55,18 +55,31 @@ const PROBE = () => {
   }
 
   const skip = el => el.closest('#mockHandheld, #mockDesk, .skip, noscript') !== null;
-  const out = { text: [], border: [] };
+  const out = { text: [], border: [], vus: { texte: 0, bordure: 0, forme: 0 }, temoins: [] };
 
   for (const n of document.querySelectorAll('*')) {
     if (skip(n) || n.offsetParent === null) continue;
     const cs = getComputedStyle(n);
     if (cs.visibility === 'hidden' || cs.display === 'none') continue;
 
+    // formes pleines porteuses de sens : triangle d'alerte, pastilles de niveau
+    if (n.matches('.note-err-i, .leg-good, .leg-ok, .leg-low')) {
+      const fg = parse(cs.backgroundColor);
+      if (fg && fg[3] > 0) {
+        out.vus.forme++;
+        out.temoins.push(String(n.className));
+        const bg = n.parentElement ? bgOf(n.parentElement) : [255, 255, 255, 1];
+        const r = ratio(over(fg, bg), bg);
+        if (r < 3) out.border.push({ sel: '.' + String(n.className), txt: 'forme pleine', rIn: +r.toFixed(2), rOut: +r.toFixed(2), color: cs.backgroundColor });
+      }
+    }
+
     // texte : seulement les noeuds qui portent vraiment du texte
     const own = [...n.childNodes].some(c => c.nodeType === 3 && c.textContent.trim().length > 0);
     if (own) {
       const fg = parse(cs.color);
       if (fg) {
+        out.vus.texte++;
         const bg = bgOf(n);
         const r = ratio(over(fg, bg), bg);
         const need = isLarge(cs) ? 3 : 4.5;
@@ -80,12 +93,16 @@ const PROBE = () => {
       }
     }
 
-    // bordures d'éléments interactifs : 3:1 contre les fonds adjacents
-    if (n.matches('button, input, select, textarea, [role="button"]')) {
+    /* Éléments porteurs de sens dont la bordure ou l'aplat identifie l'état :
+       les contrôles, mais aussi la carte d'erreur, dont le trait et le triangle
+       sont les seuls porteurs non textuels qui la distinguent du succès. */
+    if (n.matches('button, input, select, textarea, [role="button"], [role="radio"], .note-err')) {
       const bw = parseFloat(cs.borderTopWidth) || 0;
       if (bw > 0) {
         const bc = parse(cs.borderTopColor);
         if (bc && bc[3] > 0) {
+          out.vus.bordure++;
+          if (n.classList.contains('note-err')) out.temoins.push('note-err');
           const inside = bgOf(n);
           const outside = n.parentElement ? bgOf(n.parentElement) : inside;
           const rIn = ratio(over(bc, inside), inside);
@@ -108,7 +125,7 @@ const PROBE = () => {
 (async () => {
   const { srv, port } = start(); PORT = port;
   const browser = await launch();
-  let bad = 0;
+  let bad = 0, sawErr = false;
 
   for (const c of CASES) {
     const ctx = await browser.newContext({
@@ -117,11 +134,17 @@ const PROBE = () => {
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/${c.q}`, { waitUntil: 'networkidle' });
-    await page.click('#resToggle', { force: true });
-    await page.waitForTimeout(250);
+    await page.$eval('#resToggle', e => e.click());
+    await page.waitForTimeout(200);
+    await page.fill('#inW', '7000');
+    await page.fill('#inH', '7000');
+    await page.waitForTimeout(200);
+    await page.$eval('#btnExport', e => e.click());   // fait apparaître la carte d'erreur
+    await page.waitForTimeout(500);
     const r = await page.evaluate(PROBE);
+    if (r.temoins.indexOf('note-err') >= 0) sawErr = true;
 
-    console.log(`\n=== ${c.name} ===`);
+    console.log(`\n=== ${c.name} === (${r.vus.texte} textes, ${r.vus.bordure} bordures, ${r.vus.forme} formes ; témoins : ${[...new Set(r.temoins)].join(', ') || 'AUCUN'})`);
     if (!r.text.length) console.log('  texte : tous les rapports tiennent');
     else {
       bad += r.text.length;
@@ -148,5 +171,6 @@ const PROBE = () => {
   await browser.close();
   srv.close();
   console.log(bad ? `\n${bad} occurrences sous le seuil.` : '\nAucun manquement au contraste.');
+  if (!bad && !sawErr) { console.log('MAIS la carte d\'erreur n\'a jamais été examinée : contrôle non concluant.'); process.exitCode = 1; }
   process.exitCode = bad ? 1 : 0;
 })();
