@@ -191,6 +191,27 @@ npm run check        # tout enchaîner
 | `tools/edges.js` | découpes agrandies sur les bords |
 | `tools/shot.js` | captures et absence de requête sortante |
 | `tools/greyscale.js` | test en niveaux de gris |
+| `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |
+| `tools/geo-diff.js` · `tools/pixel-diff.js` | maquette d'origine et portage rendus côte à côte |
+
+### Fidélité mesurée
+
+`tools/fidelity.js` relit les 307 déclarations et les 21 jetons des styles en
+ligne de `design/Aplat.dc.html`. Les 21 jetons et 290 déclarations se retrouvent
+tels quels ; les 17 restantes sont exactement les substitutions listées
+ci-dessus (`color-mix` précalculé en rgba, `minmax(min(…))`, `--line-strong`
+sur les puces, `animation-delay` séparé).
+
+`tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en
+local, mêmes polices, même graine — et compare 28 repères : **27 identiques**
+au pixel près (position, taille, corps, graisse, interlettrage, interligne,
+couleur, rayon, bordure, remplissage) ; le 28ᵉ écart vient du gabarit qui
+enveloppe le texte dans un élément de plus.
+
+`tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,9 %** des
+pixels sont identiques. Les 3,1 % restants sont, un par un, les écarts assumés :
+bordures des puces, coche de sélection, rangées d'icônes retirées de la maquette
+d'écran, cellules de la trame calées sur des bornes entières, et le grain.
 
 ## Licences
 
