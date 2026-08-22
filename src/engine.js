@@ -441,48 +441,52 @@
 
   /* ---------- grain -------------------------------------------------------- */
 
-  /* Tuile de grain déterministe et quantifiée sur 5 niveaux.
-     Déterministe : la même graine rend deux fois la même image.
-     Quantifiée : le PNG reste léger (peu de valeurs distinctes à coder). */
+  /* Grain papier. Il fait deux choses : il donne la texture de la direction
+     artistique, et il trame le voile — sans lui, une marche d'un cran sur 255
+     s'étale parfois sur plusieurs centaines de lignes et se lit comme une
+     bande, surtout sur les palettes très sombres.
+
+     Trois choix, tous mesurés :
+     - mouchetis blanc / noir / transparent en source-over, et non un bruit gris
+       en overlay : l'overlay ne bouge quasiment pas sur un fond sombre, donc il
+       ne tramait rien là où c'était le plus nécessaire, tout en pesant trois
+       fois plus lourd ;
+     - amplitude de trois niveaux crête à crête, la même sur toute la gamme :
+       assez pour casser la marche, 1,2 % sur un ton moyen, invisible à l'œil ;
+     - petite tuile de 8 px, un pixel d'appareil par grain : la tuile se répète
+       dans la ligne, donc le PNG la retrouve au lieu de la recoder, et le grain
+       ne fait jamais de blocs quand on zoome. */
+
+  var GRAIN_TILE = 8, GRAIN_ALPHA = 3;   /* 3/255 */
   var _grain = null;
+
   function grainTile() {
     if (_grain) return _grain;
     var n = document.createElement('canvas');
-    n.width = n.height = 128;
+    n.width = n.height = GRAIN_TILE;
     var c = n.getContext('2d');
-    var img = c.createImageData(128, 128), d = img.data;
+    var img = c.createImageData(GRAIN_TILE, GRAIN_TILE), d = img.data;
     var r = rng(0x41504C41);
     for (var i = 0; i < d.length; i += 4) {
-      var v = 110 + Math.round(r() * 4) * 20;   /* 110 · 130 · 150 · 170 · 190 */
-      d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
+      var k = Math.floor(r() * 3);
+      if (k === 0) { d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = GRAIN_ALPHA; }
+      else if (k === 1) { d[i] = d[i + 1] = d[i + 2] = 0; d[i + 3] = GRAIN_ALPHA; }
+      else { d[i + 3] = 0; }
     }
     c.putImageData(img, 0, 0);
     _grain = n;
     return _grain;
   }
 
-  /* La cellule de grain garde la même taille relative quelle que soit la
-     résolution : l'aperçu et le fichier exporté ont exactement le même grain. */
-  function grainCell(W, H) {
-    return Math.max(1, Math.round(Math.min(W, H) / 700));
-  }
-
   function paintGrain(ctx, W, H) {
-    var cell = grainCell(W, H);
     var pat = ctx.createPattern(grainTile(), 'repeat');
     if (!pat) return;
     ctx.save();
-    ctx.globalAlpha = 0.06;
-    ctx.globalCompositeOperation = 'overlay';
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
     ctx.imageSmoothingEnabled = false;
-    if (cell !== 1) {
-      ctx.scale(cell, cell);
-      ctx.fillStyle = pat;
-      ctx.fillRect(0, 0, W / cell + 1, H / cell + 1);
-    } else {
-      ctx.fillStyle = pat;
-      ctx.fillRect(0, 0, W, H);
-    }
+    ctx.fillStyle = pat;
+    ctx.fillRect(0, 0, W, H);
     ctx.restore();
   }
 
@@ -543,6 +547,45 @@
     return out;
   }
 
+  /* ---------- voile de lisibilité ------------------------------------------ */
+
+  /* Le voile pousse le fond vers la couleur de libellé la plus sûre, juste ce
+     qu'il faut pour tenir sous les icônes.
+
+     Il est peint en bandes à opacité constante, jamais avec un
+     createLinearGradient : le navigateur tramait le dégradé pixel par pixel,
+     ce qui empêchait toute compression et triplait le poids du PNG. Avec
+     320 bandes, aucune marche ne dépasse un cran sur 255, et le grain
+     ci-dessous se charge de la casser. */
+
+  var VEIL_STOPS = [[0, 0.90], [0.2, 0.78], [0.78, 0.96], [1, 1.14]];
+  var VEIL_BANDS = 320;
+
+  function veilAlphaAt(u, a) {
+    var i = 1;
+    while (i < VEIL_STOPS.length - 1 && u > VEIL_STOPS[i][0]) i++;
+    var p = VEIL_STOPS[i - 1], q = VEIL_STOPS[i];
+    var k = q[0] === p[0] ? 0 : (u - p[0]) / (q[0] - p[0]);
+    var mul = p[1] + (q[1] - p[1]) * Math.max(0, Math.min(1, k));
+    return Math.min(0.62, a * mul);
+  }
+
+  function applyVeil(ctx, W, H, m) {
+    var a = m.veil;
+    if (!(a > 0.004)) return;
+    var rgb = m.mode === 'light' ? '11,18,33' : '250,247,236';
+    var bands = Math.max(2, Math.min(H, VEIL_BANDS));
+    var prev = 0;
+    for (var i = 0; i < bands; i++) {
+      var y0 = prev;
+      var y1 = (i === bands - 1) ? H : Math.round((i + 1) * H / bands);
+      if (y1 <= y0) continue;
+      prev = y1;
+      ctx.fillStyle = 'rgba(' + rgb + ',' + veilAlphaAt((y0 + y1) / 2 / H, a).toFixed(4) + ')';
+      ctx.fillRect(0, y0, W, y1 - y0);
+    }
+  }
+
   /* ---------- rendu complet ------------------------------------------------ */
 
   function draw(ctx, W, H, family, palId, dens, seed) {
@@ -556,19 +599,7 @@
 
     shapes(ctx, W, H, family, P.cols, dens, rng(drawSeed(family, dens, seed)), Math.min(W, H));
 
-    /* voile de lisibilité : il pousse le fond vers la couleur de libellé
-       la plus sûre, juste ce qu'il faut pour tenir 4,5:1 sous les icônes. */
-    var a = m.veil;
-    if (a > 0.004) {
-      var rgb = m.mode === 'light' ? '11,18,33' : '250,247,236';
-      var g = ctx.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, 'rgba(' + rgb + ',' + (a * 0.9).toFixed(3) + ')');
-      g.addColorStop(0.2, 'rgba(' + rgb + ',' + (a * 0.78).toFixed(3) + ')');
-      g.addColorStop(0.78, 'rgba(' + rgb + ',' + (a * 0.96).toFixed(3) + ')');
-      g.addColorStop(1, 'rgba(' + rgb + ',' + Math.min(0.62, a * 1.14).toFixed(3) + ')');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    }
-
+    applyVeil(ctx, W, H, m);
     paintGrain(ctx, W, H);
     ctx.restore();
     return m;
@@ -585,6 +616,9 @@
     hexLum: hexLum,
     measure: measure,
     draw: draw,
-    grainCell: grainCell
+    _shapes: shapes,
+    _applyVeil: applyVeil,
+    _paintGrain: paintGrain,
+    _drawSeed: drawSeed
   };
 })(typeof window !== 'undefined' ? window : this);
