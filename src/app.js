@@ -34,6 +34,7 @@
   var detected = { w: 1170, h: 2532 };
   var els = {};
   var thumbs = {};
+  var mockSig = null;
   var ctxCache = new WeakMap();
   var timers = {};
 
@@ -69,11 +70,22 @@
     return isNaN(n) || n < RES_MIN || n > RES_MAX;
   }
 
+  /* En portrait on classe sur le rapport d'aspect, pas sur le petit côté en
+     pixels : le seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796)
+     comme une tablette — largeur de scène, nombre de colonnes de la maquette et
+     libellé « Tablette · détecté » tous faux, alors que la densité de la grille
+     est précisément ce que la maquette sert à juger. Un téléphone est plus
+     étroit que 0,62 ; une tablette tourne autour de 0,75. */
   function kind(w, h) {
     if (!w || !h) return 'phone';
-    var short = Math.min(w, h);
-    if (w > h) return short >= 800 ? 'desk' : 'tablet';
-    return short <= 1200 ? 'phone' : 'tablet';
+    if (w > h) return Math.min(w, h) >= 800 ? 'desk' : 'tablet';
+    return (w / h) < 0.62 ? 'phone' : 'tablet';
+  }
+
+  /* Les régions aria-live réannoncent tout ce qu'on y réécrit, même à
+     l'identique : on n'écrit que si le texte a changé. */
+  function setText(node, str) {
+    if (node && node.textContent !== str) node.textContent = str;
   }
 
   function el(tag, cls, txt) {
@@ -202,10 +214,17 @@
     var capW = k === 'phone' ? 300 : (k === 'tablet' ? 430 : 660);
     var maxW = Math.max(160, Math.min(box.clientWidth || 300, capW));
     var maxH = Math.max(200, box.clientHeight || 420);
-    var dw = maxW, dh = dw * r.h / r.w;
-    if (dh > maxH) { dh = maxH; dw = dh * r.w / r.h; }
-    dev.style.width = Math.round(dw) + 'px';
-    dev.style.height = Math.round(dh) + 'px';
+    /* Le canevas est en inset:0 : il remplit la boîte de contenu, pas la boîte
+       de bordure. C'est donc elle qui doit porter le rapport d'aspect visé —
+       sinon l'aperçu est un format légèrement différent de celui du fichier,
+       et la mesure de lisibilité porte sur une image qui n'existe pas. */
+    var bord = 2 * (parseFloat(getComputedStyle(dev).borderTopWidth) || 0);
+    var innW = Math.max(40, maxW - bord), innH = Math.max(40, maxH - bord);
+    var cw = innW, chh = cw * r.h / r.w;
+    if (chh > innH) { chh = innH; cw = chh * r.w / r.h; }
+    var dw = Math.round(cw) + bord, dh = Math.round(chh) + bord;
+    dev.style.width = dw + 'px';
+    dev.style.height = dh + 'px';
     dev.style.borderRadius = Math.round(Math.min(dw, dh) * (k === 'phone' ? 0.13 : k === 'tablet' ? 0.055 : 0.024)) + 'px';
     dev.style.setProperty('--mu', (Math.min(dw, dh) / 100) + 'px');
     dev.style.setProperty('--cols', k === 'phone' ? 4 : 6);
@@ -341,7 +360,6 @@
     return s;
   }
 
-  var mockSig = null;
   function buildMock(k) {
     var T = t();
     var n = new Date();
@@ -469,6 +487,10 @@
     els.mockHandheld.hidden = empty || busy || k === 'desk';
     els.mockDesk.hidden = empty || busy || k !== 'desk';
     els.previewCanvas.hidden = empty;
+    /* rien à mesurer quand il n'y a pas d'image : on ne garde pas un verdict
+       qui ne porte plus sur rien */
+    if (empty) S.leg = null;
+    renderLeg();
     if (!empty && !busy) buildMock(k);
 
     /* — sélections —
@@ -485,21 +507,22 @@
     mark(els.themeList, function (b) { return b.dataset.theme === S.theme; });
 
     /* — résolution — */
-    els.resValue.textContent = empty ? '— × —' : num(r.w) + ' × ' + num(r.h) + ' px';
-    els.resDevice.textContent =
+    setText(els.resValue, empty ? '— × —' : num(r.w) + ' × ' + num(r.h) + ' px');
+    setText(els.resDevice,
       (k === 'phone' ? T.devPhone : k === 'tablet' ? T.devTablet : T.devDesk) + ' · ' +
-      (r.w === detected.w && r.h === detected.h ? T.detected : T.custom);
-    els.resToggle.textContent = S.editRes ? T.close : T.edit;
+      (r.w === detected.w && r.h === detected.h ? T.detected : T.custom));
+    setText(els.resToggle, S.editRes ? T.close : T.edit);
     els.resToggle.setAttribute('aria-expanded', S.editRes ? 'true' : 'false');
     els.resToggle.setAttribute('aria-label', (S.editRes ? T.close : T.edit) + ' — ' + T.resolution);
     els.resEditor.hidden = !S.editRes;
-    els.inW.setAttribute('aria-invalid', outOfRange(S.wStr) ? 'true' : 'false');
-    els.inH.setAttribute('aria-invalid', outOfRange(S.hStr) ? 'true' : 'false');
+    var badW = outOfRange(S.wStr), badH = outOfRange(S.hStr);
+    els.inW.setAttribute('aria-invalid', badW ? 'true' : 'false');
+    els.inH.setAttribute('aria-invalid', badH ? 'true' : 'false');
+    els.resHint.dataset.state = (badW || badH) ? 'erreur' : 'aide';
+    setText(els.resHintText, (badW || badH) ? T.resBad : T.resRange);
     if (document.activeElement !== els.inW && els.inW.value !== S.wStr) els.inW.value = S.wStr;
     if (document.activeElement !== els.inH && els.inH.value !== S.hStr) els.inH.value = S.hStr;
 
-    /* — lisibilité — */
-    renderLeg();
 
     /* — description de l'aperçu pour les lecteurs d'écran —
          Elle est portée par le canevas seul : sur le conteneur, role="img" en
@@ -526,15 +549,17 @@
     }
 
     /* — partage — */
-    els.shareLabel.textContent = S.copied ? T.copied : T.share;
+    setText(els.shareLabel, S.copied ? T.copied : T.share);
     if (S.copyFailed) {
-      els.shareNote.textContent = T.copyFail;
+      setText(els.shareNote, T.copyFail);
       els.shareFallback.hidden = false;
       if (els.shareUrl.value !== location.href) els.shareUrl.value = location.href;
     } else {
+      /* Rendre le focus avant de masquer : le navigateur le renverrait au
+         document, et l'utilisateur au clavier repartirait du haut de la page. */
+      if (!els.shareFallback.hidden && els.shareFallback.contains(document.activeElement)) els.shareBtn.focus();
       els.shareFallback.hidden = true;
-      els.shareNote.textContent = T.shareNote + ' ';
-      els.shareNote.appendChild(el('span', 'share-seed', T.seed + ' ' + S.seed));
+      setText(els.shareNote, T.shareNote + ' ' + T.seed + '\u00a0' + S.seed);
     }
 
     /* — barre d'action — */
@@ -547,7 +572,7 @@
       var poids = b < 1048576
         ? num(Math.round(b / 1024)) + ' ' + T.savedSizeK
         : dec(b / 1048576) + ' ' + T.savedSize;
-      els.doneMeta.textContent = num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' + poids;
+      setText(els.doneMeta, num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' + poids);
     }
     els.errMsg.textContent = S.errKind === 'big'
       ? T.errBig.replace('{mp}', dec(r.w * r.h / 1e6))
@@ -559,13 +584,14 @@
        reparcourir. aria-disabled le neutralise sans le rendre infocusable, et
        onExport() refuse de repartir. `disabled` reste pour l'état vide, où le
        bouton n'a rien à faire dans le parcours. */
-    els.ctaLabel.textContent = busy ? T.rendering : T.download;
+    setText(els.ctaLabel, busy ? T.rendering : T.download);
     els.btnExport.disabled = empty;
     els.btnExport.setAttribute('aria-disabled', busy ? 'true' : 'false');
     els.btnExport.setAttribute('aria-busy', busy ? 'true' : 'false');
 
     /* — dessin — */
     paint(false);
+    stickyHeights();
     syncUrl();
   }
 
@@ -578,6 +604,12 @@
   var sigThumb = Object.create(null);
   var seen = Object.create(null);
 
+  function legKey(m) {
+    if (!m) return 'rien';
+    return (m.ratio >= 4.5 ? 'g' : m.ratio >= 3 ? 'o' : 'l') + '|' +
+      dec(m.ratio) + '|' + m.mode + '|' + Math.round(m.veil * 100);
+  }
+
   function paintPreview(force) {
     var r = res();
     var c = els.previewCanvas;
@@ -587,15 +619,20 @@
 
     var dpr = Math.min(window.devicePixelRatio || 1, 3);
     var pw = Math.round(rect.width * dpr), ph = Math.round(rect.height * dpr);
-    var sig = [S.family, S.pal, S.dens, S.seed, pw, ph].join('|');
+    var motif = [S.family, S.pal, S.dens, S.seed].join('|');
+    var sig = motif + '|' + pw + 'x' + ph;
     if (!force && sig === sigPreview) return;
+    /* le fondu dit « le motif a changé » ; il n'a rien à dire quand seule la
+       fenêtre a bougé — sur téléphone, le repli de la barre d'URL pendant le
+       défilement faisait clignoter l'aperçu */
+    var motifChange = sigPreview === null || sigPreview.indexOf(motif + '|') !== 0;
     sigPreview = sig;
 
     if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
-    var m = E.draw(ctxOf(c), pw, ph, S.family, S.pal, S.dens, S.seed);
+    var m = E.draw(ctxOf(c), pw, ph, S.family, S.pal, S.dens, S.seed, r.w, r.h);
     labelTokens(els.device, m.mode);
 
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (motifChange && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       c.style.transition = 'none';
       c.style.opacity = '0.35';
       requestAnimationFrame(function () {
@@ -604,9 +641,11 @@
       });
     }
 
-    var prev = S.leg;
-    if (!prev || prev.mode !== m.mode ||
-        Math.abs(prev.ratio - m.ratio) > 0.08 || Math.abs(prev.veil - m.veil) > 0.02) {
+    /* On compare les grandeurs telles qu'elles seront écrites : un seuil
+       numérique laissait passer un franchissement du 4,5:1 — le bloc annonçait
+       « bonne » pour un fond mesuré à 4,49:1, alors que c'est précisément ce
+       seuil qu'il existe pour signaler. */
+    if (legKey(S.leg) !== legKey(m)) {
       S.leg = m;
       renderLeg();
     }
@@ -655,20 +694,30 @@
     E.FAMILIES.forEach(function (f) { if (thumbs[f.id]) io.observe(thumbs[f.id]); });
   }
 
-  /* mise à jour ciblée du bloc lisibilité, sans relancer un rendu complet */
+  /* Trois états : mesuré, rien à mesurer, et rien du tout. Aucune valeur de
+     repli : une application qui promet de mesurer la lisibilité n'affiche pas un
+     chiffre qu'elle n'a pas mesuré. */
   function renderLeg() {
     var T = t();
-    var leg = S.leg || { mode: 'light', ratio: 5.4, veil: 0.18 };
+    var leg = S.leg;
+    if (!leg) {
+      els.legGood.hidden = true;
+      els.legOk.hidden = true;
+      els.legLow.hidden = true;
+      setText(els.legTitle, T.legibTitle);
+      setText(els.legDetail, T.legWaiting);
+      return;
+    }
     var lvl = leg.ratio >= 4.5 ? 'good' : leg.ratio >= 3 ? 'ok' : 'low';
     els.legGood.hidden = lvl !== 'good';
     els.legOk.hidden = lvl !== 'ok';
     els.legLow.hidden = lvl !== 'low';
-    els.legTitle.textContent = T.legibTitle + ' · ' +
-      (lvl === 'good' ? T.lvGood : lvl === 'ok' ? T.lvOk : T.lvLow);
+    setText(els.legTitle, T.legibTitle + ' · ' +
+      (lvl === 'good' ? T.lvGood : lvl === 'ok' ? T.lvOk : T.lvLow));
     var veilTxt = leg.veil > 0.02 ? T.veil.replace('{n}', String(Math.round(leg.veil * 100))) : T.noVeil;
-    els.legDetail.textContent = dec(leg.ratio) + ':1 · ' +
+    setText(els.legDetail, dec(leg.ratio) + ':1 · ' +
       (leg.mode === 'light' ? T.labLight : T.labDark) + ' · ' + veilTxt + ' — ' +
-      (lvl === 'good' ? T.adviceGood : lvl === 'ok' ? T.adviceOk : T.adviceLow);
+      (lvl === 'good' ? T.adviceGood : lvl === 'ok' ? T.adviceOk : T.adviceLow));
   }
 
   /* ---------- URL ----------------------------------------------------------- */
@@ -735,7 +784,15 @@
     else els.resToggle.focus();
   }
 
-  function digits(v) { return String(v).replace(/[^0-9]/g, '').slice(0, 4); }
+  /* Borné vers le haut dès la frappe : sinon le champ affichait 9999, la carte
+     Résolution 8 000, l'URL r=8000 et le fichier 8000 px — quatre vérités pour
+     une seule valeur. La borne basse, elle, ne peut pas être appliquée à la
+     frappe : on passe par « 1 » pour écrire « 1179 ». Elle est signalée. */
+  function digits(v) {
+    var d = String(v).replace(/[^0-9]/g, '').slice(0, 4);
+    if (d && parseInt(d, 10) > RES_MAX) d = String(RES_MAX);
+    return d;
+  }
 
   /* Le même rappel servait de succès et d'échec : un refus de permission, un
      document non focalisé ou un navigateur sans API affichaient « Lien copié »
@@ -858,7 +915,7 @@
       'mockdClock', 'mockdDay', 'mockdDayName', 'mockdMonth', 'mockdIcons', 'mockdMenu', 'mockdDock',
       'legGood', 'legOk', 'legLow', 'legTitle', 'legDetail',
       'famAbs', 'famFig', 'palList', 'densList',
-      'resValue', 'resDevice', 'resToggle', 'resEditor', 'inW', 'inH', 'presets',
+      'resValue', 'resDevice', 'resToggle', 'resEditor', 'inW', 'inH', 'presets', 'resHint', 'resHintText',
       'shareBtn', 'shareLabel', 'shareNote', 'shareFallback', 'shareUrl', 'langList', 'themeList',
       'stage', 'bar',
       'doneCard', 'doneMeta', 'errCard', 'errMsg', 'btnRetry', 'btnSeed', 'btnExport', 'ctaLabel'
@@ -907,11 +964,28 @@
     var mq = window.matchMedia('(prefers-color-scheme: dark)');
     if (mq.addEventListener) mq.addEventListener('change', function () { paint(true); });
 
-    setInterval(function () {
+    /* L'horloge n'écrit que dans la maquette réellement affichée, et se met en
+       veille quand l'onglet passe en arrière-plan. Elle surveille aussi le
+       quantième : à minuit, l'heure changeait mais la date restait celle de la
+       veille. */
+    var lastDay = new Date().getDate();
+    function tick() {
       S.clock = now();
-      els.mockClock.textContent = S.clock;
-      els.mockdClock.textContent = S.clock;
-    }, 20000);
+      var target = els.mockDesk.hidden ? els.mockClock : els.mockdClock;
+      if (!els.mockHandheld.hidden || !els.mockDesk.hidden) setText(target, S.clock);
+      var d = new Date().getDate();
+      if (d !== lastDay) { lastDay = d; mockSig = null; render(); }
+    }
+    function startClock() {
+      clearInterval(timers.clock);
+      tick();
+      timers.clock = setInterval(tick, 20000);
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) clearInterval(timers.clock);
+      else startClock();
+    });
+    startClock();
 
     render();
     watchThumbs();

@@ -275,7 +275,15 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .res-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .res-fields label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-muted)}
 .res-fields input{min-height:46px;padding:0 12px;border-radius:14px;border:2px solid var(--line-strong);background:var(--field);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;width:100%;color:var(--ink)}
-.res-hint{font-size:12.5px;color:var(--ink-muted)}
+/* L'erreur de saisie doit se voir, pas seulement s'annoncer : bordure plus
+   épaisse, teinte d'alerte, et le texte d'aide passe en message d'erreur avec
+   son triangle. La forme et l'épaisseur portent l'information autant que la
+   couleur. */
+.res-hint{font-size:12.5px;color:var(--ink-muted);display:flex;align-items:flex-start;gap:7px}
+.res-hint i{display:none}
+.res-fields input[aria-invalid="true"]{border-color:var(--alert);border-width:3px}
+.res-hint[data-state="erreur"]{color:var(--ink);font-weight:600}
+.res-hint[data-state="erreur"] i{display:block;flex:0 0 auto;margin-top:4px;width:13px;height:12px;background:var(--alert);clip-path:polygon(50% 0,100% 100%,0 100%)}
 .res-presets{display:flex;flex-wrap:wrap;gap:8px}
 .pill{min-height:44px;padding:0 14px;cursor:pointer;border-radius:999px;border:2px solid var(--line-strong);background:var(--field);color:var(--ink);font-weight:600;font-size:13.5px}
 

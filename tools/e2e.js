@@ -452,6 +452,136 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await bctx.close();
   }
 
+  // --- 15d. l'aperçu et le fichier sont bien la même image
+  {
+    const actx = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 2, locale: 'fr-FR' });
+    const ap = await actx.newPage();
+    await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
+    await ap.waitForTimeout(600);
+    const inv = await ap.evaluate(() => {
+      const E = window.APLAT_ENGINE;
+      const cv = document.getElementById('previewCanvas');
+      const r = cv.getBoundingClientRect();
+      const arCv = r.width / r.height, arCible = 1179 / 2556;
+      let veil = 0, niveau = 0, total = 0;
+      const niv = m => m.ratio >= 4.5 ? 'bonne' : m.ratio >= 3 ? 'correcte' : 'faible';
+      for (const f of E.FAMILIES) for (const p of E.PAL_ORDER) for (const d of [0, 1, 2]) {
+        total++;
+        const a = E.measure(f.id, p, d, 7314, cv.width, cv.height);
+        const b = E.measure(f.id, p, d, 7314, 1179, 2556);
+        if (Math.round(a.veil * 100) !== Math.round(b.veil * 100)) veil++;
+        if (niv(a) !== niv(b) || a.mode !== b.mode) niveau++;
+      }
+      return { ecart: +(((arCv / arCible) - 1) * 100).toFixed(2), total, veil, niveau };
+    });
+    t(Math.abs(inv.ecart) < 0.5, 'aperçu : le canevas porte le rapport d\'aspect visé', inv.ecart + ' %');
+    t(inv.veil === 0 && inv.niveau === 0,
+      'aperçu : même voile et même verdict que le fichier, sur les 594 combinaisons',
+      inv.veil + ' voiles et ' + inv.niveau + ' verdicts divergents sur ' + inv.total);
+
+    // un téléphone récent doit être classé comme un téléphone
+    const classe = [];
+    for (const [w, h, attendu] of [[1179, 2556, 'Téléphone'], [1290, 2796, 'Téléphone'], [1440, 3200, 'Téléphone'],
+                                   [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
+      await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
+      await ap.waitForTimeout(200);
+      const got = await ap.evaluate(() => document.getElementById('resDevice').textContent.split(' · ')[0]);
+      if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
+    }
+    t(classe.length === 0, 'aperçu : le type d\'appareil est correct, téléphones récents compris', classe.join(' | ') || '6 formats');
+    await actx.close();
+  }
+
+  // --- 15e. saisie de résolution : une seule vérité affichée
+  {
+    const sctx2 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const sp2 = await sctx2.newPage();
+    await sp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await sp2.waitForTimeout(400);
+    await sp2.$eval('#resToggle', e => e.click());
+    await sp2.waitForTimeout(200);
+
+    await sp2.fill('#inW', '');
+    await sp2.type('#inW', '9999');
+    await sp2.waitForTimeout(300);
+    const clamp = await sp2.evaluate(() => ({
+      champ: document.getElementById('inW').value,
+      carte: document.getElementById('resValue').textContent,
+      url: location.search
+    }));
+    t(clamp.champ === '8000' && /8\s*000/.test(clamp.carte) && /8000x/.test(clamp.url),
+      'saisie : au-delà de la borne haute, le champ, la carte et le lien disent la même chose',
+      clamp.champ + ' / ' + clamp.carte + ' / ' + clamp.url);
+
+    // saisie mal formée : le champ montre ce que l'app utilise
+    await sp2.fill('#inW', '');
+    await sp2.type('#inW', '19e20');
+    await sp2.waitForTimeout(300);
+    const mal = await sp2.evaluate(() => ({
+      champ: document.getElementById('inW').value,
+      carte: document.getElementById('resValue').textContent
+    }));
+    t(mal.champ === '1920' && /1\s*920/.test(mal.carte),
+      'saisie : un caractère non numérique est filtré sans vider l\'état',
+      mal.champ + ' / ' + mal.carte);
+
+    // borne basse : signalée, et visible
+    await sp2.fill('#inW', '');
+    await sp2.type('#inW', '5');
+    await sp2.waitForTimeout(300);
+    const bas = await sp2.evaluate(() => {
+      const i = document.getElementById('inW'), h = document.getElementById('resHint');
+      const cs = getComputedStyle(i);
+      return {
+        invalide: i.getAttribute('aria-invalid'),
+        etat: h.dataset.state,
+        message: h.textContent.trim(),
+        bordure: cs.borderTopWidth,
+        triangle: getComputedStyle(h.querySelector('i')).display
+      };
+    });
+    t(bas.invalide === 'true', 'saisie : la valeur hors bornes est marquée aria-invalid');
+    t(bas.etat === 'erreur' && bas.triangle !== 'none' && parseFloat(bas.bordure) >= 3,
+      'saisie : l\'erreur se voit aussi — bordure épaissie et triangle, pas seulement la couleur',
+      'bordure ' + bas.bordure + ', triangle ' + bas.triangle);
+    t(/16/.test(bas.message) && /8000/.test(bas.message), 'saisie : le message dit les bornes', bas.message);
+    await sctx2.close();
+  }
+
+  // --- 15f. régions live : pas de réannonce quand rien n'a changé
+  {
+    const lctx2 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const lp2 = await lctx2.newPage();
+    await lp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await lp2.waitForTimeout(600);
+    const churn = await lp2.evaluate(async () => {
+      const cibles = ['legTitle', 'legDetail', 'shareNote', 'resValue', 'ctaLabel'];
+      let ecritures = 0;
+      const obs = new MutationObserver(ms => { ecritures += ms.length; });
+      for (const id of cibles) obs.observe(document.getElementById(id), { childList: true, characterData: true, subtree: true });
+      // trois rendus qui ne changent rien de ces textes
+      const b = document.querySelector('[data-family][aria-checked="true"]');
+      for (let i = 0; i < 3; i++) { b.click(); await new Promise(r => setTimeout(r, 120)); }
+      obs.disconnect();
+      return ecritures;
+    });
+    t(churn === 0, 'régions live : rien n\'est réécrit quand rien ne change', churn + ' écritures');
+
+    // et l'état vide n'affiche aucun chiffre inventé
+    await lp2.$eval('#resToggle', e => e.click());
+    await lp2.waitForTimeout(200);
+    await lp2.fill('#inW', '');
+    await lp2.waitForTimeout(400);
+    const vide2 = await lp2.evaluate(() => ({
+      detail: document.getElementById('legDetail').textContent,
+      titre: document.getElementById('legTitle').textContent,
+      pastilles: [...document.querySelectorAll('.leg-good, .leg-ok, .leg-low')].filter(n => !n.hidden).length
+    }));
+    t(!/:1/.test(vide2.detail) && vide2.pastilles === 0,
+      'lisibilité : aucun chiffre affiché tant qu\'il n\'y a rien à mesurer', vide2.detail.slice(0, 50));
+    await lctx2.close();
+  }
+
   // --- 16. URL : robustesse et discrétion
   {
     const uctx = await browser.newContext({ viewport: { width: 900, height: 900 }, deviceScaleFactor: 2, locale: 'fr-FR' });

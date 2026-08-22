@@ -597,9 +597,14 @@
 
   /* ---------- rendu complet ------------------------------------------------ */
 
-  function draw(ctx, W, H, family, palId, dens, seed) {
+  /* mw et mh : dimensions à utiliser pour la mesure de lisibilité, quand elles
+     diffèrent de celles du canevas. L'aperçu est dessiné dans une boîte de
+     quelques pixels plus petite que la géométrie visée — la bordure de
+     l'appareil — et doit malgré tout mesurer le format réellement exporté,
+     sans quoi le voile brûlé dans l'aperçu n'est pas celui du fichier. */
+  function draw(ctx, W, H, family, palId, dens, seed, mw, mh) {
     var P = has(PALETTES, palId) ? PALETTES[palId] : PALETTES.lime;
-    var m = measure(family, palId, dens, seed, W, H);
+    var m = measure(family, palId, dens, seed, mw > 0 ? mw : W, mh > 0 ? mh : H);
 
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);

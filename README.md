@@ -92,6 +92,12 @@ retrouver exactement la même image, sur n'importe quel appareil.
 n'importe quelle résolution. Les formes sont tracées en coordonnées relatives :
 l'aperçu et le fichier exporté sont le même dessin, à deux échelles.
 
+**L'aperçu est le fichier.** Le canevas d'aperçu porte exactement le rapport
+d'aspect de la résolution visée — la bordure de la maquette d'appareil est
+défalquée — et la mesure de lisibilité porte sur les dimensions d'export, pas
+sur celles du canevas. Vérifié sur les 594 combinaisons : même voile, même
+verdict, au pourcent près.
+
 **Le voile de lisibilité.** Après les formes, le moteur mesure la luminance
 moyenne de la zone des icônes, choisit la couleur de libellé la plus sûre
 (claire ou sombre), puis pousse le fond vers elle juste ce qu'il faut. Le
@@ -200,6 +206,10 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Polices auto-hébergées au lieu de Google Fonts | « Sans traceur, aucune donnée ne sort » : un appel à `fonts.gstatic.com` transmet l'adresse IP. |
 | Le voile en bandes et le grain en mouchetis | Poids du fichier et tramage des palettes sombres, voir plus haut. |
 | La résolution détectée est forcée en portrait sur pointeur grossier | Android fait pivoter `screen.width` avec l'appareil, pas iOS : en paysage on proposait un fond d'écran couché. |
+| Le type d'appareil est déduit du rapport d'aspect, plus du petit côté en pixels | Le seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796) comme une tablette : largeur de scène, densité de la grille d'icônes et libellé tous faux, alors que la grille est précisément ce qu'on regarde. |
+| Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée — un « e », un nombre collé avec séparateurs — alors que le champ affiche toujours le texte tapé : l'état se vidait sans que rien ne le montre. |
+| La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle : bordure épaissie et triangle d'alerte, pas seulement une couleur. |
+| Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur — 5,4:1, voile 18 % — écrit dans une région live avant toute mesure. |
 | Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` sur le canevas | Sans effet visuel au repos. |
 | Les puces de réglage deviennent des groupes radio (`role="radio"` + `aria-checked` + tabulation tournante) | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris (WCAG 2.2, 2.4.11). |
