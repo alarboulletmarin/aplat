@@ -25,6 +25,15 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 - *Caché* : langue, thème, lien de partage. En bas, sous le trait, pour qui les
   cherche.
 
+### Le parti visuel
+
+Une page imprimée, pas une pile de cartes. Le titre en pleine chasse et un filet
+de trois pixels tiennent l'en-tête ; les réglages sont dans un seul bloc cerné
+d'un trait franc et découpé par des filets ; les titres sont des titres, pas de
+petites capitales interlettrées. La sélection est un aplat inversé — encre
+pleine, texte papier — parce qu'un aplat se lit de loin, en niveaux de gris, et
+sans avoir à comparer deux nuances voisines.
+
 ### Pourquoi une seule section
 
 La valeur du produit est de **voir le rendu derrière les icônes avant de
@@ -196,57 +205,54 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 
 | Écart | Pourquoi |
 |---|---|
-| `--line-strong` passe de `.45` à `.56` en thème clair | Les bordures de champs et de boutons passaient sous 3:1. |
-| Les puces de réglage prennent `--line-strong` au lieu de `--line` | Sur une puce texte seul, la bordure est ce qui dit « ceci se touche » : 1,37:1 → 3,5:1. |
-| Une coche apparaît dans la case sélectionnée | En niveaux de gris, l'aplat lime et le fond de la puce sélectionnée se ressemblent trop. |
-| Boutons langue et thème : `min-width: 44px`, rangée qui passe à la ligne | Ils tombaient à 42 px de large sur certaines largeurs. |
-| Le bouton « Nouveau motif » peut rétrécir | Un libellé traduit 30 % plus long poussait « Télécharger » hors de l'écran sur un 320 px. |
+| `--line-strong` passe de `.45` à `.56` en thème clair | C'est le trait de toutes les puces de réglage et des champs. À `.45` il tombe à 2,7:1, sous les 3:1 exigés pour un élément d'interface. |
+| Trait de la carte d'erreur et de son triangle : jeton `--alert` | Le corail `#FF6648` tombe à 2,7:1 sur la carte. Le corail décoratif et celui des palettes ne bougent pas. |
+| Trait du bouton primaire en `--accent-ink` plutôt que `--ink` | En sombre `--ink` est la crème, qui disparaît sur l'aplat lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
+| Le carré de sélection reçoit un filet à la couleur du texte | Sur la puce inversée du thème sombre — un aplat crème — le lime tombait à 1,1:1 et disparaissait. |
+| La colonne des préférences passe de 150 à 200 px de seuil | À 150, la colonne Thème tombait à 52 px par bouton : « Système » partait seul sur une deuxième rangée, étiré sur toute la largeur. |
+| Boutons langue et thème : plancher lié au contenu | Avec un plancher fixe la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
+| Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
 | Les cinq grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
-| La grille d'icônes de la maquette perd des rangées si l'appareil est large — 16 icônes en téléphone (inchangé), 12 en tablette au lieu de 24, 3 en ordinateur au lieu de 5 | Tout y est dimensionné en unités calées sur le petit côté ; sur une tablette 4:3 ou un écran 16:9 la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
-| Polices auto-hébergées au lieu de Google Fonts | « Sans traceur, aucune donnée ne sort » : un appel à `fonts.gstatic.com` transmet l'adresse IP. |
-| Le voile en bandes et le grain en mouchetis | Poids du fichier et tramage des palettes sombres, voir plus haut. |
+| La boîte de contenu de l'appareil porte le rapport d'aspect, bordure défalquée | Le canevas est en `inset:0` : sans ça l'aperçu était un format décalé de 1,5 % et sa mesure de lisibilité portait sur une image qui n'existait pas. |
+| La grille d'icônes de la maquette perd des rangées si l'appareil est large — 16 icônes en téléphone (inchangé), 12 en tablette, 3 en ordinateur | Tout y est dimensionné en unités calées sur le petit côté ; sur un écran large la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
+| Le type d'appareil est déduit du rapport d'aspect, plus du petit côté en pixels | Le seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796) comme une tablette. |
 | La résolution détectée est forcée en portrait sur pointeur grossier | Android fait pivoter `screen.width` avec l'appareil, pas iOS : en paysage on proposait un fond d'écran couché. |
-| Le type d'appareil est déduit du rapport d'aspect, plus du petit côté en pixels | Le seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796) comme une tablette : largeur de scène, densité de la grille d'icônes et libellé tous faux, alors que la grille est précisément ce qu'on regarde. |
-| Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée — un « e », un nombre collé avec séparateurs — alors que le champ affiche toujours le texte tapé : l'état se vidait sans que rien ne le montre. |
-| La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle : bordure épaissie et triangle d'alerte, pas seulement une couleur. |
+| Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée, alors que le champ affiche toujours le texte tapé. |
+| La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle. |
 | Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur — 5,4:1, voile 18 % — écrit dans une région live avant toute mesure. |
-| Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` sur le canevas | Sans effet visuel au repos. |
 | Les puces de réglage deviennent des groupes radio (`role="radio"` + `aria-checked` + tabulation tournante) | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris (WCAG 2.2, 2.4.11). |
-| Trait de la carte d'erreur et de son triangle : jeton `--alert` en thème clair | Le corail `#FF6648` tombe à 2,7:1 sur la carte. Le corail décoratif et celui des palettes ne bougent pas. |
-| Trait des surfaces lime en `--accent-ink` plutôt que `--ink` | En sombre `--ink` est la crème, qui disparaît sur le lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
-| Point de densité éteint : cercle évidé à pleine opacité | À 28 % d'opacité il tombait à 1,8:1, alors que ces trois points sont le seul dessin qui traduit le niveau. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
-| Boutons langue et thème : plancher lié au contenu | Avec un plancher de 44 px la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
-| Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
 | Espaces insécables dans les chaînes françaises | Le texte se coupait devant « % », « : » et à l'intérieur des guillemets. |
 | Repli de copie manuelle quand le presse-papiers refuse | L'ancien code annonçait « Lien copié » même en cas d'échec, y compris quand l'API était absente. |
-| La résolution détectée ne part pas dans le lien | C'est une mesure de l'appareil, pas un réglage : le lien promet « les réglages, rien d'autre ». Son absence veut dire « la résolution de celui qui ouvre le lien ». |
-| Politique de sécurité `connect-src 'none'` en balise meta | La page promet « aucun réseau » : autant en faire une propriété du document. Aucune directive ne porte sur les scripts, les styles ni les images, pour que `file://` reste valide. |
+| La résolution détectée ne part pas dans le lien | C'est une mesure de l'appareil, pas un réglage : le lien promet « les réglages, rien d'autre ». |
+| Politique de sécurité `connect-src 'none'` en balise meta | La page promet « aucun réseau » : autant en faire une propriété du document. |
 | Favicon en ligne, préchargements de polices retirés | Zéro requête pour l'icône ; en `file://` les préchargements CORS échouaient et la police était téléchargée deux fois. |
 | `display: standalone` retiré du manifeste | Sans cache de service worker — que le contrat interdit — une application installée ne s'ouvrirait pas sans réseau. |
+| Polices auto-hébergées au lieu de Google Fonts | « Sans traceur, aucune donnée ne sort » : un appel à `fonts.gstatic.com` transmet l'adresse IP. |
+| Le voile en bandes et le grain en mouchetis | Poids du fichier et tramage des palettes sombres, voir plus haut. |
+| `color-mix()` précalculé en `rgba()` | Même résultat exact, sans dépendre du support de `color-mix`. |
+| Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` sur le canevas | Sans effet visuel au repos. |
 
-## Vie privée, dans le code et pas seulement dans le texte
+### Fidélité mesurée
 
-La page affiche « Aucun compte, aucun réseau, aucun stockage ». Ce qui le tient :
+Trois angles, tous automatisés et reproductibles.
 
-- une politique de sécurité en balise meta — `connect-src 'none'` coupe `fetch`,
-  `XHR`, WebSocket, EventSource et `sendBeacon`. Aucune directive ne porte sur
-  les scripts, les styles ni les images, pour que `file://` reste valide.
-  Vérifié à l'exécution : une requête sortante est refusée ;
-- zéro requête réseau : polices auto-hébergées, favicon en ligne. Une ouverture
-  en `file://` déclenche 7 requêtes, toutes locales, aucune erreur console ;
-- zéro stockage : ni `localStorage`, ni `sessionStorage`, ni IndexedDB, ni
-  cookie, ni Cache API, ni service worker. Vérifié après un parcours complet,
-  export compris ;
-- la résolution détectée ne part pas dans le lien partagé : c'est une mesure de
-  l'appareil, pas un réglage. Seule une saisie manuelle est transmise ;
-- la copie du lien ne ment pas : si le presse-papiers refuse, l'échec est dit et
-  le lien s'affiche à copier à la main ;
-- les paramètres d'URL sont validés sur liste blanche. 241 URL hostiles ont été
-  essayées — propriétés héritées d'`Object`, balises, `javascript:`, chiffres
-  arabes, chaînes de 500 caractères : aucune erreur, aucune injection, la page
-  rend toujours.
+`tools/fidelity.js` relit les 300 déclarations et les 22 jetons des styles en
+ligne de `design/Aplat.dc.html`. Les 22 jetons et 282 déclarations se retrouvent
+tels quels ; les 18 restantes sont une à une les substitutions du tableau
+ci-dessus.
+
+`tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en local,
+mêmes polices auto-hébergées, même graine — et compare 28 repères sur position,
+taille, corps, graisse, interlettrage, interligne, couleur, rayon, bordure et
+remplissage. **22 identiques au pixel près.** Les 6 écarts sont les boutons de
+langue et de thème, dont le plancher est lié au contenu pour ne plus couper les
+mots, et la boîte de l'appareil, dont la bordure est défalquée.
+
+`tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,9 %** des
+pixels sont identiques. Les 3,1 % restants se lisent un par un sur la carte des
+écarts.
 
 ## Vérifications
 
