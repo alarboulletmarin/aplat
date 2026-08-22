@@ -79,6 +79,35 @@ const STRETCH = `(() => {
               }
             }
 
+            // libellés qui ne doivent jamais être coupés ni élidés
+            out.truncated = [];
+            const jamais = [
+              ['#ctaLabel', 'appel primaire'],
+              ['#langList .opt', 'bouton de langue'],
+              ['#themeList .opt span', 'bouton de thème'],
+              ['#resToggle', 'modifier la résolution'],
+              ['#shareLabel', 'copier le lien']
+            ];
+            for (const [sel, nom] of jamais) {
+              for (const n of document.querySelectorAll(sel)) {
+                if (n.offsetParent === null) continue;
+                const elide = n.scrollWidth > n.clientWidth + 1;
+                /* mot coupé : on compte les boîtes de ligne réellement produites
+                   par le texte, via un Range — la hauteur du bouton ne dit rien,
+                   elle est imposée par min-height:44px. */
+                let lignes = 1;
+                const txt = [...n.childNodes].find(c => c.nodeType === 3 && c.textContent.trim());
+                if (txt) {
+                  const rg = document.createRange();
+                  rg.selectNodeContents(txt);
+                  lignes = rg.getClientRects().length || 1;
+                }
+                const mots = n.textContent.trim().split(/\s+/).length;
+                const casse = mots === 1 && lignes > 1;
+                if (elide || casse) out.truncated.push(nom + (elide ? ':élidé' : ':coupé') + ' "' + n.textContent.trim().slice(0, 18) + '"');
+              }
+            }
+
             // la maquette d'écran doit tenir dans l'appareil
             const dev = document.getElementById('device');
             for (const id of ['mockHandheld', 'mockDesk']) {
@@ -100,6 +129,7 @@ const STRETCH = `(() => {
           const tag = `${stretched ? '+30% ' : ''}${lang} ${v.name} ${tg.label}`;
           if (r.hScroll > 0) problems.push(`${tag}: défilement horizontal ${r.hScroll}px`);
           if (r.clipped.length) problems.push(`${tag}: texte coupé — ${r.clipped.slice(0, 4).join(' | ')}`);
+          if (r.truncated && r.truncated.length) problems.push(`${tag}: libellé coupé — ${r.truncated.slice(0, 3).join(' | ')}`);
           if (r.mockOverflow) problems.push(`${tag}: maquette ${r.mockOverflow.id} déborde de ${r.mockOverflow.over}px (dock à +${r.mockOverflow.dockOut}px, appareil ${r.mockOverflow.devH}px)`);
           await ctx.close();
         }

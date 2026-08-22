@@ -32,6 +32,11 @@
   --ink:#17243F; --ink-muted:#4A5773; --line:rgba(23,36,63,.16); --line-strong:rgba(23,36,63,.56);
   --accent:#DFF478; --accent-ink:#17243F; --deco-1:#92BAD5; --deco-2:#FF6648;
   --link:#3B4CA8; --link-hover:#17243F; --focus:#3B4CA8;
+  /* Le corail reste réservé aux aplats et aux formes. Pour le trait et le
+     pictogramme de la carte d'erreur, qui sont des éléments d'interface et
+     doivent tenir 3:1, on utilise une déclinaison assombrie : 3,3:1 sur le
+     fond de page, 3,7:1 sur la carte. En sombre le corail passe déjà. */
+  --alert:#E8481F;
   --surface-74:rgba(251,248,238,.74);
   color-scheme:light;
 }
@@ -40,6 +45,7 @@
   --ink:#F7F3E6; --ink-muted:#A9BDD4; --line:rgba(247,243,230,.2); --line-strong:rgba(247,243,230,.46);
   --accent:#DFF478; --accent-ink:#17243F; --deco-1:#788CE3; --deco-2:#FF6648;
   --link:#92BAD5; --link-hover:#DFF478; --focus:#DFF478;
+  --alert:#FF6648;
   --surface-74:rgba(23,36,63,.74);
   color-scheme:dark;
 }
@@ -48,6 +54,7 @@
     --bg:#0E1729; --surface:#17243F; --surface-2:#22314F; --field:#0B1322;
     --ink:#F7F3E6; --ink-muted:#A9BDD4; --line:rgba(247,243,230,.2); --line-strong:rgba(247,243,230,.46);
     --deco-1:#788CE3; --link:#92BAD5; --link-hover:#DFF478; --focus:#DFF478;
+    --alert:#FF6648;
     --surface-74:rgba(23,36,63,.74);
     color-scheme:dark;
   }
@@ -55,11 +62,15 @@
 
 /* --- Base ----------------------------------------------------------------- */
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+/* La scène et la barre d'action sont collantes : sans cette réserve, un
+   élément amené au clavier se colle au bord de la fenêtre, c'est-à-dire
+   exactement sous l'une des deux couches, et son anneau de focus disparaît.
+   Les deux hauteurs sont posées par applyChrome(). WCAG 2.2, 2.4.11. */
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--stage-h, 0px) + 12px);scroll-padding-bottom:calc(var(--bar-h, 0px) + 12px)}
 body{
   margin:0;background:var(--bg);color:var(--ink);
   font-family:Archivo,"Helvetica Neue",Helvetica,system-ui,sans-serif;
-  font-size:16px;line-height:1.45;text-wrap:pretty;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;
+  font-size:16px;line-height:1.45;text-wrap:pretty;-webkit-font-smoothing:antialiased;
 }
 /* grain papier, très léger, purement décoratif */
 body::after{
@@ -83,11 +94,13 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 }
 
 /* lien d'évitement : invisible au repos, visible au focus clavier */
-.skip{position:absolute;left:-9999px;top:0;z-index:9999}
+/* fixe et non absolu : le lien reste visible même si la page est déjà défilée */
+.skip{position:fixed;left:-9999px;top:0;z-index:9999}
+.opt,.pill,.res-edit,.share-b,.note-retry,.btn-seed,.btn-go,.res-fields input{scroll-margin-top:calc(var(--stage-h, 0px) + 12px);scroll-margin-bottom:calc(var(--bar-h, 0px) + 12px)}
 .skip:focus{
   left:12px;top:12px;padding:12px 16px;min-height:44px;display:flex;align-items:center;
   border-radius:14px;background:var(--accent);color:var(--accent-ink);
-  font-weight:700;font-size:14.5px;border:2.5px solid var(--ink);
+  font-weight:700;font-size:14.5px;border:2.5px solid var(--accent-ink);
 }
 .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
@@ -98,7 +111,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .hdr-blob{position:absolute;top:-10px;right:0;width:84px;height:84px;background:var(--deco-1);border-radius:62% 38% 46% 54% / 52% 58% 42% 48%}
 .hdr-arch{position:absolute;top:52px;right:62px;width:32px;height:32px;background:var(--deco-2);border-radius:50% 50% 0 0}
 .kicker{position:relative;display:flex;align-items:center;gap:8px}
-.diamond{display:inline-block;width:11px;height:11px;background:var(--accent);border:1.5px solid var(--ink);transform:rotate(45deg)}
+.diamond{display:inline-block;width:11px;height:11px;background:var(--accent);border:1.5px solid var(--accent-ink);transform:rotate(45deg)}
 .kicker-t{font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted)}
 .title{position:relative;font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(54px,15vw,92px);line-height:.82;letter-spacing:-.035em;text-transform:uppercase}
 .tagline{position:relative;max-width:36ch;font-size:15px;color:var(--ink-muted)}
@@ -215,12 +228,12 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
    est ce qui dit « ceci se touche ». Elle doit tenir 3:1 (WCAG 1.4.11).
    Les bordures de cartes, elles, restent à --line : elles ne portent rien. */
 .opt{border:2px solid var(--line-strong);background:var(--field);color:var(--ink);cursor:pointer;text-align:left}
-.opt[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-2)}
+.opt[aria-checked="true"]{border-color:var(--ink);background:var(--surface-2)}
 .opt-dot{position:relative;flex:0 0 auto;width:11px;height:11px;border-radius:2px;border:2px solid currentColor;background:transparent}
-.opt[aria-pressed="true"] .opt-dot{background:var(--accent)}
+.opt[aria-checked="true"] .opt-dot{background:var(--accent)}
 /* Coche : en niveaux de gris, l'aplat lime et le fond de la puce sélectionnée
    se ressemblent trop. La forme prend le relais de la couleur. */
-.opt[aria-pressed="true"] .opt-dot::after{
+.opt[aria-checked="true"] .opt-dot::after{
   content:"";position:absolute;left:50%;top:50%;width:3px;height:6px;
   margin:-4.5px 0 0 -2.5px;border:2px solid var(--ink);border-top:0;border-left:0;
   transform:rotate(40deg)
@@ -241,40 +254,51 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .dens-row{display:flex;gap:8px;flex-wrap:wrap}
 .opt-dens{flex:1 1 68px;min-height:46px;padding:8px 10px;border-radius:14px;font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:5px}
 .opt-dens-d{display:flex;gap:3px}
-.opt-dens-d i{display:block;width:5px;height:5px;border-radius:50%;background:currentColor}
-.opt-dens-d i:nth-child(2),.opt-dens-d i:nth-child(3){opacity:.28}
-.opt-dens[data-level="1"] .opt-dens-d i:nth-child(2){opacity:1}
+/* Le point éteint est un cercle évidé, pas un point atténué : à 28 %
+   d'opacité il tombait à 1,8:1, alors que ces trois points sont le seul
+   dessin qui traduit le niveau. Évidé, il est à 15:1 et se lit aussi en
+   niveaux de gris. */
+.opt-dens-d i{display:block;width:5px;height:5px;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
+.opt-dens-d i:nth-child(1){background:currentColor}
+.opt-dens[data-level="1"] .opt-dens-d i:nth-child(2){background:currentColor}
 .opt-dens[data-level="2"] .opt-dens-d i:nth-child(2),
-.opt-dens[data-level="2"] .opt-dens-d i:nth-child(3){opacity:1}
+.opt-dens[data-level="2"] .opt-dens-d i:nth-child(3){background:currentColor}
 .opt-dens-t{font-size:13px}
 
 .res-card{display:flex;flex-direction:column;gap:12px}
 .res-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .res-edit{min-height:44px;padding:0 4px;cursor:pointer;font-weight:600;font-size:14px;color:var(--link);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-.res-val{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-size:clamp(24px,6.4vw,32px);line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.res-val{font-family:Anton,Impact,sans-serif;font-size:clamp(24px,6.4vw,32px);line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .res-dev{font-size:13.5px;color:var(--ink-muted);display:flex;align-items:center;gap:7px}
 .res-dev-i{flex:0 0 auto;width:10px;height:10px;background:var(--deco-1);border-radius:2px}
 .res-edit-box{display:flex;flex-direction:column;gap:12px;padding-top:4px;border-top:1.5px solid var(--line)}
 .res-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .res-fields label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-muted)}
 .res-fields input{min-height:46px;padding:0 12px;border-radius:14px;border:2px solid var(--line-strong);background:var(--field);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;width:100%;color:var(--ink)}
+.res-hint{font-size:12.5px;color:var(--ink-muted)}
 .res-presets{display:flex;flex-wrap:wrap;gap:8px}
 .pill{min-height:44px;padding:0 14px;cursor:pointer;border-radius:999px;border:2px solid var(--line-strong);background:var(--field);color:var(--ink);font-weight:600;font-size:13.5px}
 
 .share{display:flex;flex-direction:column;gap:12px;padding:16px;border:1.5px dashed var(--line-strong);border-radius:26px}
 .share-p{font-size:13.5px;color:var(--ink-muted);display:flex;align-items:flex-start;gap:8px}
-.share-p .diamond{margin-top:4px;width:10px;height:10px}
+.share-p .diamond{flex:0 0 auto;margin-top:4px;width:10px;height:10px}
 .share-b{min-height:48px;padding:0 16px;cursor:pointer;border-radius:16px;border:2px solid var(--line-strong);background:transparent;color:var(--ink);font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:10px}
 .ico-link{display:flex;flex:0 0 auto}
 .ico-link i{display:block;width:11px;height:11px;border:2.5px solid currentColor;border-radius:4px}
 .ico-link i+i{margin-left:-4px}
 .share-n{font-size:12.5px;color:var(--ink-muted)}
+/* Repli quand le presse-papiers refuse : le lien devient sélectionnable à la
+   main, plutôt que d'annoncer une copie qui n'a pas eu lieu. */
+.share-fallback{display:block}
+.share-fallback input{width:100%;min-height:46px;padding:0 12px;border-radius:14px;border:2px solid var(--line-strong);background:var(--field);color:var(--ink);font-size:14px}
 .share-seed{font-variant-numeric:tabular-nums}
 .prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;padding-top:4px;border-top:1.5px solid var(--line)}
 .prefs h3{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px}
 .prefs-row{display:flex;gap:8px;flex-wrap:wrap}
-.opt-lang{flex:1 1 44px;min-width:44px;min-height:44px;border-radius:13px;font-weight:700;font-size:14px;text-align:center}
-.opt-theme{flex:1 1 44px;min-width:44px;min-height:44px;border-radius:13px;font-weight:600;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+/* Plancher lié au contenu : avec un plancher fixe de 44 px la rangée n'avait
+   jamais de raison de se replier et « Français » se coupait en plein mot. */
+.opt-lang{flex:1 1 auto;min-width:max-content;min-height:44px;border-radius:13px;font-weight:700;font-size:14px;text-align:center}
+.opt-theme{flex:1 1 auto;min-width:max-content;min-height:44px;border-radius:13px;font-weight:600;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
 .opt-theme i{display:block;width:13px;height:13px;border-radius:50%;border:2.5px solid currentColor}
 .opt-theme[data-theme="light"] i{background:currentColor}
 .opt-theme[data-theme="dark"] i{background:transparent}
@@ -286,8 +310,8 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .note{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:20px}
 .note-done{background:var(--accent);color:var(--accent-ink)}
 .note-done-i{flex:0 0 auto;margin-top:3px;width:17px;height:17px;border-radius:50%;background:var(--accent-ink)}
-.note-err{background:var(--surface);border:2.5px solid var(--corail)}
-.note-err-i{flex:0 0 auto;margin-top:3px;width:19px;height:17px;background:var(--corail);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.note-err{background:var(--surface);border:2.5px solid var(--alert)}
+.note-err-i{flex:0 0 auto;margin-top:3px;width:19px;height:17px;background:var(--alert);clip-path:polygon(50% 0,100% 100%,0 100%)}
 .note-txt{min-width:0}
 .note-err .note-txt{flex:1 1 auto}
 .note-t{font-weight:700;font-size:14.5px}
@@ -297,17 +321,25 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .note-retry{flex:0 0 auto;min-height:44px;padding:0 14px;cursor:pointer;border-radius:13px;border:2px solid var(--line-strong);background:transparent;color:var(--ink);font-weight:700;font-size:13.5px}
 
 .actions{display:flex;gap:10px;align-items:stretch}
-/* Le bouton secondaire cède la place au primaire quand le libellé s'allonge :
-   il a déjà l'ellipse prévue pour ça. Sans cette ligne, un libellé traduit 30 %
-   plus long poussait « Télécharger » hors de l'écran sur un 320 px. */
-.btn-seed{flex:0 1 auto;min-width:56px;min-height:56px;padding:0 16px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
+/* Le bouton secondaire cède la place au primaire. Avec des facteurs de
+   rétrécissement voisins les deux libellés étaient coupés, y compris
+   « Télécharger » dès 320 px : le seul appel primaire de l'écran devenait
+   « Téléch… ». Ici le secondaire s'efface par l'ellipse déjà prévue pendant que
+   le primaire garde son libellé entier. */
+.btn-seed{flex:0 100 auto;min-width:56px;min-height:56px;padding:0 16px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
 .btn-seed i{flex:0 0 auto;width:13px;height:13px;background:var(--deco-2);border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
 .btn-seed span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn-go{flex:1 1 auto;min-width:0;min-height:56px;padding:0 18px;cursor:pointer;border-radius:19px;border:2.5px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px}
+/* Trait en --accent-ink et non --ink : en thème sombre --ink est la crème,
+   qui se confond avec l'aplat lime. En clair les deux valeurs sont
+   identiques, le rendu de la maquette est donc inchangé. */
+.btn-go{flex:1 0 auto;min-width:0;min-height:56px;padding:0 18px;cursor:pointer;border-radius:19px;border:2.5px solid var(--accent-ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn-go[disabled]{opacity:.55;cursor:default}
 .ico-dl{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2.5px}
 .ico-dl i{display:block;width:10px;height:11px;background:currentColor;clip-path:polygon(50% 100%,100% 0,0 0)}
 .ico-dl b{display:block;width:14px;height:2.5px;background:currentColor}
 .btn-go span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-.foot{font-size:12.5px;color:var(--ink-muted);padding:0 0 18px;text-align:center}
+
+/* Le conteneur des cartes succès et erreur ne sert qu'à porter aria-live :
+   display:contents lui évite de consommer le gap de 10 px de la barre. */
+.bar-live{display:contents}

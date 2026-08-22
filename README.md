@@ -183,12 +183,26 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Une coche apparaît dans la case sélectionnée | En niveaux de gris, l'aplat lime et le fond de la puce sélectionnée se ressemblent trop. |
 | Boutons langue et thème : `min-width: 44px`, rangée qui passe à la ligne | Ils tombaient à 42 px de large sur certaines largeurs. |
 | Le bouton « Nouveau motif » peut rétrécir | Un libellé traduit 30 % plus long poussait « Télécharger » hors de l'écran sur un 320 px. |
-| Les grilles utilisent `minmax(min(320px, 100%), 1fr)` | `minmax(320px, …)` forçait une piste plus large que l'écran sur un 320 px. |
-| La grille d'icônes de la maquette perd des rangées si l'appareil est large | Sur une tablette 4:3 ou un écran 16:9, la grille complète emportait le dock et la barre de recherche hors du cadre : la zone basse du fond d'écran n'était plus jugeable. |
+| Les cinq grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
+| La grille d'icônes de la maquette perd des rangées si l'appareil est large — 16 icônes en téléphone (inchangé), 12 en tablette au lieu de 24, 3 en ordinateur au lieu de 5 | Tout y est dimensionné en unités calées sur le petit côté ; sur une tablette 4:3 ou un écran 16:9 la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
 | Polices auto-hébergées au lieu de Google Fonts | « Sans traceur, aucune donnée ne sort » : un appel à `fonts.gstatic.com` transmet l'adresse IP. |
 | Le voile en bandes et le grain en mouchetis | Poids du fichier et tramage des palettes sombres, voir plus haut. |
 | La résolution détectée est forcée en portrait sur pointeur grossier | Android fait pivoter `screen.width` avec l'appareil, pas iOS : en paysage on proposait un fond d'écran couché. |
-| Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` | Sans effet visuel au repos. |
+| Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` sur le canevas | Sans effet visuel au repos. |
+| Les puces de réglage deviennent des groupes radio (`role="radio"` + `aria-checked` + tabulation tournante) | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
+| Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris (WCAG 2.2, 2.4.11). |
+| Trait de la carte d'erreur et de son triangle : jeton `--alert` en thème clair | Le corail `#FF6648` tombe à 2,7:1 sur la carte. Le corail décoratif et celui des palettes ne bougent pas. |
+| Trait des surfaces lime en `--accent-ink` plutôt que `--ink` | En sombre `--ink` est la crème, qui disparaît sur le lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
+| Point de densité éteint : cercle évidé à pleine opacité | À 28 % d'opacité il tombait à 1,8:1, alors que ces trois points sont le seul dessin qui traduit le niveau. |
+| Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
+| Boutons langue et thème : plancher lié au contenu | Avec un plancher de 44 px la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
+| Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
+| Espaces insécables dans les chaînes françaises | Le texte se coupait devant « % », « : » et à l'intérieur des guillemets. |
+| Repli de copie manuelle quand le presse-papiers refuse | L'ancien code annonçait « Lien copié » même en cas d'échec, y compris quand l'API était absente. |
+| La résolution détectée ne part pas dans le lien | C'est une mesure de l'appareil, pas un réglage : le lien promet « les réglages, rien d'autre ». Son absence veut dire « la résolution de celui qui ouvre le lien ». |
+| Politique de sécurité `connect-src 'none'` en balise meta | La page promet « aucun réseau » : autant en faire une propriété du document. Aucune directive ne porte sur les scripts, les styles ni les images, pour que `file://` reste valide. |
+| Favicon en ligne, préchargements de polices retirés | Zéro requête pour l'icône ; en `file://` les préchargements CORS échouaient et la police était téléchargée deux fois. |
+| `display: standalone` retiré du manifeste | Sans cache de service worker — que le contrat interdit — une application installée ne s'ouvrirait pas sans réseau. |
 
 ## Vérifications
 

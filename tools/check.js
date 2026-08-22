@@ -9,7 +9,8 @@ const STEPS = [
   ['débordements et libellés +30 %', 'overflow.js'],
   ['marches du voile', 'band-test.js'],
   ['amplitude du grain', 'dither-check.js'],
-  ['captures et requêtes sortantes', 'shot.js']
+  ['captures et requêtes sortantes', 'shot.js'],
+  ['ouverture en file://', 'fileurl.js']
 ];
 
 let failed = 0;

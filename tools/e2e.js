@@ -31,9 +31,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   // --- 1. l'URL est bien lue
   const st = await page.evaluate(() => ({
-    fam: document.querySelector('[data-family][aria-pressed="true"]').dataset.family,
-    pal: document.querySelector('[data-pal][aria-pressed="true"]').dataset.pal,
-    dens: document.querySelector('[data-dens][aria-pressed="true"]').dataset.dens,
+    fam: document.querySelector('[data-family][aria-checked="true"]').dataset.family,
+    pal: document.querySelector('[data-pal][aria-checked="true"]').dataset.pal,
+    dens: document.querySelector('[data-dens][aria-checked="true"]').dataset.dens,
     res: document.getElementById('resValue').textContent,
     seed: document.getElementById('shareNote').textContent
   }));
@@ -278,11 +278,6 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     const kp = await kctx.newPage();
     await kp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await kp.waitForTimeout(300);
-    const kb = await kp.evaluate(() => {
-      const nodes = [...document.querySelectorAll('button, input, a[href]')].filter(n => n.offsetParent !== null || n.classList.contains('skip'));
-      return { count: nodes.length, noTabIndexTrap: nodes.every(n => n.tabIndex >= 0) };
-    });
-    t(kb.noTabIndexTrap, 'clavier : aucun contrôle retiré de la tabulation', kb.count + ' contrôles');
     await kp.keyboard.press('Tab');
     const f1 = await kp.evaluate(() => {
       const a = document.activeElement, cs = getComputedStyle(a);
@@ -295,6 +290,58 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await kp.waitForTimeout(200);
     t(await kp.evaluate(() => document.activeElement.id === 'reglages'), 'clavier : il mène bien aux réglages');
 
+    const kb = await kp.evaluate(() => {
+      const stops = [...document.querySelectorAll('button, input, a[href], [tabindex]')]
+        .filter(n => n.tabIndex >= 0 && (n.offsetParent !== null || n.classList.contains('skip')) && n.id !== 'reglages');
+      const groups = [...document.querySelectorAll('[role="radiogroup"]')].map(g => ({
+        id: g.id,
+        opts: g.querySelectorAll('.opt').length,
+        stops: [...g.querySelectorAll('.opt')].filter(o => o.tabIndex >= 0).length,
+        checked: g.querySelectorAll('.opt[aria-checked="true"]').length,
+        roles: [...g.querySelectorAll('.opt')].every(o => o.getAttribute('role') === 'radio')
+      }));
+      return { stops: stops.length, groups };
+    });
+    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
+    t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
+      kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
+    t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
+    t(kb.groups.filter(g => g.checked === 1).length >= 4, 'clavier : le choix courant est marqué aria-checked',
+      kb.groups.map(g => g.id + ':' + g.checked).join(' '));
+    t(kb.stops <= 22, 'clavier : parcours ramené sous 22 arrêts', kb.stops + ' arrêts (42 avant)');
+
+    // flèches : elles déplacent le choix dans le groupe
+    await kp.evaluate(() => document.querySelector('#densList .opt[aria-checked="true"]').focus());
+    const avant = await kp.evaluate(() => document.querySelector('#densList .opt[aria-checked="true"]').dataset.dens);
+    await kp.keyboard.press('ArrowRight');
+    await kp.waitForTimeout(250);
+    const apresFleche = await kp.evaluate(() => ({
+      checked: document.querySelector('#densList .opt[aria-checked="true"]').dataset.dens,
+      focused: document.activeElement.dataset.dens
+    }));
+    t(apresFleche.checked !== avant && apresFleche.checked === apresFleche.focused,
+      'clavier : la flèche déplace le choix et le focus ensemble', avant + ' -> ' + apresFleche.checked);
+
+    // WCAG 2.2 SC 2.4.11 : le focus ne doit jamais finir sous une barre collante
+    const masque = await kp.evaluate(async () => {
+      const stops = [...document.querySelectorAll('button, input, a[href]')]
+        .filter(n => n.tabIndex >= 0 && n.offsetParent !== null && !n.classList.contains('skip'));
+      const bad = [];
+      for (const n of stops) {
+        n.focus();   // le correcteur de l'app agit sur focusin
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const r = n.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        if (cy < 0 || cy > innerHeight) { bad.push((n.id || n.textContent.trim().slice(0, 14)) + ':hors-fenêtre'); continue; }
+        const hit = document.elementFromPoint(cx, cy);
+        if (!(hit === n || n.contains(hit) || n.contains(hit && hit.parentElement))) {
+          bad.push((n.id || n.textContent.trim().slice(0, 14)) + ':' + (hit ? (hit.id || String(hit.className) || hit.tagName) : 'rien'));
+        }
+      }
+      return { total: stops.length, bad };
+    });
+    t(masque.bad.length === 0, 'clavier : aucun focus masqué par les barres collantes (WCAG 2.4.11)',
+      masque.total + ' arrêts testés' + (masque.bad.length ? ' — ' + masque.bad.slice(0, 5).join(' | ') : ''));
     // le focus doit rester visible sur le bouton primaire, qui est sur aplat lime
     await kp.evaluate(() => document.getElementById('btnExport').focus());
     const f2 = await kp.evaluate(() => {
@@ -322,6 +369,160 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(small(rm.canvasTransition) && small(rm.dotDuration), 'mouvement réduit : transitions et animations coupées', JSON.stringify(rm));
     t(parseFloat(rm.canvasOpacity) === 1, 'mouvement réduit : le canevas reste opaque', rm.canvasOpacity);
     await rctx.close();
+  }
+
+  // --- 15b. course à l'export : un réglage changé pendant l'encodage ne doit
+  //          ni renommer le fichier, ni lancer un second export
+  {
+    const rctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR', acceptDownloads: true });
+    const rp = await rctx.newPage();
+    // image volontairement lourde : l'encodage dure assez pour cliquer pendant
+    await rp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=blobs&p=nuit&d=1&s=777&r=5000x5000', { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(500);
+    const dls = [];
+    rp.on('download', d => dls.push(d.suggestedFilename()));
+
+    // tout en une seule évaluation : les clics sont synchrones, donc bien
+    // pendant la fenêtre d'encodage
+    const pendant = await rp.evaluate(async () => {
+      document.getElementById('btnExport').click();
+      await new Promise(r => setTimeout(r, 120));       // le dessin a démarré
+      const busyAvant = document.getElementById('btnExport').getAttribute('aria-busy');
+      document.querySelector('[data-pal="soleil"]').click();
+      document.querySelector('[data-dens="2"]').click();
+      document.getElementById('btnExport').click();
+      document.getElementById('btnExport').click();
+      document.getElementById('btnExport').click();
+      const busyApres = document.getElementById('btnExport').getAttribute('aria-busy');
+      const voile = !document.getElementById('stateBusy').hidden;
+      return { busyAvant, busyApres, voile };
+    });
+    t(pendant.busyAvant === 'true', 'export : le bouton est marqué occupé pendant le rendu', pendant.busyAvant);
+    t(pendant.busyApres === 'true' && pendant.voile,
+      'export : un réglage changé pendant le rendu n\'efface pas l\'état occupé',
+      'aria-busy=' + pendant.busyApres + ' voile=' + pendant.voile);
+
+    await rp.waitForTimeout(9000);
+    t(dls.length === 1, 'export : un seul fichier malgré cinq clics pendant l\'encodage', dls.length + ' téléchargement(s)');
+    t(dls[0] === 'aplat-blobs-nuit-777-5000x5000.png',
+      'export : le nom du fichier décrit bien l\'image dessinée, pas les réglages changés depuis', dls[0]);
+    const apres = await rp.evaluate(() => ({
+      pal: document.querySelector('[data-pal][aria-checked="true"]').dataset.pal,
+      meta: document.getElementById('doneMeta').textContent,
+      done: !document.getElementById('doneCard').hidden
+    }));
+    t(apres.pal === 'soleil', 'export : le réglage changé pendant l\'encodage vaut pour la suite', apres.pal);
+    t(apres.done && /5\s*000/.test(apres.meta), 'export : la fiche décrit l\'image produite', apres.meta);
+    await rctx.close();
+  }
+
+  // --- 16. URL : robustesse et discrétion
+  {
+    const uctx = await browser.newContext({ viewport: { width: 900, height: 900 }, deviceScaleFactor: 2, locale: 'fr-FR' });
+    const up = await uctx.newPage();
+    const uerr = [];
+    up.on('pageerror', e => uerr.push(e.message));
+    up.on('console', m => { if (m.type() === 'error') uerr.push(m.text()); });
+
+    // une palette empruntée à la chaîne de prototypes ne doit rien casser
+    await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&p=constructor&m=blobs', { waitUntil: 'networkidle' });
+    await up.waitForTimeout(500);
+    const proto = await up.evaluate(() => ({
+      pal: (document.querySelector('[data-pal][aria-checked="true"]') || {}).dataset,
+      peint: document.getElementById('previewCanvas').width > 4,
+      url: location.search
+    }));
+    t(proto.pal && proto.pal.pal === 'lime', 'URL : palette inconnue ramenée au défaut', proto.pal && proto.pal.pal);
+    t(proto.peint, 'URL : le rendu a bien eu lieu malgré le paramètre hostile');
+    t(uerr.length === 0, 'URL : aucune erreur levée', uerr.slice(0, 2).join(' | '));
+
+    // resolution hors bornes ou incomplète : on retombe entièrement sur la détection
+    for (const [q, label] of [['r=5x5', 'trop petite'], ['r=99999x2000', 'trop grande'], ['r=1179', 'moitié manquante'], ['r=abcxdef', 'illisible']]) {
+      await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&' + q, { waitUntil: 'networkidle' });
+      await up.waitForTimeout(300);
+      const v = await up.evaluate(() => ({
+        res: document.getElementById('resValue').textContent,
+        dev: document.getElementById('resDevice').textContent,
+        url: location.search
+      }));
+      t(/détecté/.test(v.dev) && !/—/.test(v.res), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.dev);
+    }
+
+    // la résolution détectée ne part pas dans le lien
+    await up.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await up.waitForTimeout(400);
+    const propre = await up.evaluate(() => location.search);
+    t(!/[?&]r=/.test(propre), 'URL : la résolution détectée ne part pas dans le lien partagé', propre);
+
+    // une résolution saisie à la main, elle, est transmise
+    await up.evaluate(() => document.getElementById('resToggle').click());
+    await up.waitForTimeout(200);
+    await up.fill('#inW', '2560');
+    await up.fill('#inH', '1440');
+    await up.waitForTimeout(400);
+    const manuel = await up.evaluate(() => location.search);
+    t(/[?&]r=2560x1440/.test(manuel), 'URL : une résolution saisie à la main est transmise', manuel);
+    await uctx.close();
+  }
+
+  // --- 17. partage : l'échec de copie ne doit jamais s'annoncer comme un succès
+  {
+    const sctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR' });
+    const sp = await sctx.newPage();
+    await sp.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        get: () => ({ writeText: () => Promise.reject(new Error('refusé')) })
+      });
+    });
+    await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await sp.waitForTimeout(400);
+    await sp.$eval('#shareBtn', e => e.click());
+    await sp.waitForTimeout(400);
+    const echec = await sp.evaluate(() => ({
+      label: document.getElementById('shareLabel').textContent,
+      note: document.getElementById('shareNote').textContent,
+      repli: !document.getElementById('shareFallback').hidden,
+      url: document.getElementById('shareUrl').value,
+      live: !!document.getElementById('shareNote').getAttribute('aria-live')
+    }));
+    t(!/copié/i.test(echec.label), 'partage : pas de « lien copié » quand la copie échoue', echec.label);
+    t(/impossible/i.test(echec.note), 'partage : l\'échec est dit', echec.note.slice(0, 40));
+    t(echec.repli && echec.url === sp.url(), 'partage : le lien est proposé à copier à la main', echec.url ? 'champ rempli' : 'vide');
+    t(echec.live, 'partage : la note est dans une région live');
+    await sctx.close();
+
+    // et le succès reste un succès
+    const octx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR', permissions: ['clipboard-read', 'clipboard-write'] });
+    const op = await octx.newPage();
+    await op.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await op.waitForTimeout(400);
+    await op.$eval('#shareBtn', e => e.click());
+    await op.waitForTimeout(400);
+    const ok2 = await op.evaluate(() => ({
+      label: document.getElementById('shareLabel').textContent,
+      repli: !document.getElementById('shareFallback').hidden
+    }));
+    t(/copié/i.test(ok2.label) && !ok2.repli, 'partage : succès annoncé, pas de repli affiché', ok2.label);
+    await octx.close();
+  }
+
+  // --- 18. la promesse « aucun réseau » est inscrite dans le document
+  {
+    const cctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR' });
+    const cp = await cctx.newPage();
+    await cp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    const csp = await cp.evaluate(() => {
+      const m = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+      return m ? m.getAttribute('content') : null;
+    });
+    t(csp && /connect-src 'none'/.test(csp), 'réseau : connect-src none déclaré', csp || 'absente');
+    const bloque = await cp.evaluate(async () => {
+      try { await fetch('https://example.com/x'); return 'passée'; }
+      catch (e) { return 'bloquée'; }
+    });
+    t(bloque === 'bloquée', 'réseau : une requête sortante est refusée par la politique', bloque);
+    await cctx.close();
   }
 
   await browser.close();

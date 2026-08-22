@@ -40,8 +40,8 @@ const OUT = path.resolve(__dirname, '../.shots');
       const out = [];
       for (const grp of ['densList', 'langList', 'themeList', 'palList']) {
         const bs = [...document.getElementById(grp).querySelectorAll('.opt')];
-        const on = bs.find(b => b.getAttribute('aria-pressed') === 'true');
-        const off = bs.find(b => b.getAttribute('aria-pressed') === 'false');
+        const on = bs.find(b => b.getAttribute('aria-checked') === 'true');
+        const off = bs.find(b => b.getAttribute('aria-checked') === 'false');
         if (!on || !off) continue;
         const cs = n => getComputedStyle(n);
         out.push({ grp, onBorder: cs(on).borderTopColor, offBorder: cs(off).borderTopColor, onBg: cs(on).backgroundColor, offBg: cs(off).backgroundColor });

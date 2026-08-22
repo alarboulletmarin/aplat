@@ -26,6 +26,7 @@
     errKind: null,
     last: null,
     copied: false,
+    copyFailed: false,
     clock: '',
     leg: null
   };
@@ -50,9 +51,22 @@
     return c;
   }
 
+  var RES_MIN = 16, RES_MAX = 8000;
+
+  /* Les champs annoncent min="16" ; hors d'un <form> le navigateur ne l'applique
+     pas, et l'ancienne borne « > 0 » laissait exporter une image de 5 px. */
   function res() {
     var w = parseInt(S.wStr, 10), h = parseInt(S.hStr, 10);
-    return { w: w > 0 ? Math.min(w, 8000) : 0, h: h > 0 ? Math.min(h, 8000) : 0 };
+    return {
+      w: w >= RES_MIN ? Math.min(w, RES_MAX) : 0,
+      h: h >= RES_MIN ? Math.min(h, RES_MAX) : 0
+    };
+  }
+
+  function outOfRange(str) {
+    if (!str) return false;
+    var n = parseInt(str, 10);
+    return isNaN(n) || n < RES_MIN || n > RES_MAX;
   }
 
   function kind(w, h) {
@@ -69,8 +83,66 @@
     return n;
   }
 
+  /* Marque le choix d'un groupe radio et n'y laisse qu'un seul arrêt de
+     tabulation, sur l'option choisie. */
+  function mark(group, isOn) {
+    if (!group) return;
+    var opts = group.querySelectorAll('.opt');
+    var any = false;
+    for (var i = 0; i < opts.length; i++) {
+      var on = isOn(opts[i]);
+      if (on) any = true;
+      opts[i].setAttribute('role', 'radio');
+      opts[i].setAttribute('aria-checked', on ? 'true' : 'false');
+      opts[i].tabIndex = on ? 0 : -1;
+    }
+    /* un groupe sans choix courant garde une porte d'entrée au clavier */
+    if (!any && opts.length) opts[0].tabIndex = 0;
+  }
+
+  /* Flèches, Début et Fin dans un groupe radio : elles déplacent le choix,
+     comme pour des boutons radio natifs. */
+  function radioKeys(group) {
+    if (!group) return;
+    group.addEventListener('keydown', function (e) {
+      var k = e.key;
+      if (k !== 'ArrowRight' && k !== 'ArrowDown' && k !== 'ArrowLeft' &&
+          k !== 'ArrowUp' && k !== 'Home' && k !== 'End') return;
+      var opts = [].slice.call(group.querySelectorAll('.opt'));
+      var i = opts.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      var j = k === 'Home' ? 0
+        : k === 'End' ? opts.length - 1
+        : (k === 'ArrowRight' || k === 'ArrowDown') ? (i + 1) % opts.length
+        : (i - 1 + opts.length) % opts.length;
+      opts[j].focus();
+      opts[j].click();
+    });
+  }
+
+  /* Ramène l'élément qui vient de prendre le focus dans la bande libre, entre
+     la scène collante et la barre d'action. Sans ça, un élément atteint au
+     clavier se colle au bord de la fenêtre, c'est-à-dire sous l'une des deux
+     couches, et son anneau de focus disparaît (WCAG 2.2, 2.4.11). */
+  function keepFocusVisible(e) {
+    var n = e.target;
+    if (!n || !n.getBoundingClientRect || !n.closest) return;
+    if (n.closest('.bar') || n.closest('.stage')) return;   /* déjà au-dessus */
+    var cs = getComputedStyle(document.documentElement);
+    var padT = parseFloat(cs.scrollPaddingTop) || 0;
+    var padB = parseFloat(cs.scrollPaddingBottom) || 0;
+    var vh = window.innerHeight;
+    var b = n.getBoundingClientRect();
+    if (b.height > vh - padT - padB) return;   /* trop grand pour la bande */
+    if (b.top < padT) window.scrollBy(0, b.top - padT);
+    else if (b.bottom > vh - padB) window.scrollBy(0, b.bottom - (vh - padB));
+  }
+
   function set(patch) {
-    Object.assign(S, { phase: 'idle', errKind: null, copied: false }, patch);
+    /* Un réglage touché pendant un export ne doit pas effacer l'état « rendu en
+       cours » : l'export continue, avec l'instantané pris au clic. */
+    Object.assign(S, { phase: exporting ? S.phase : 'idle', errKind: null, copied: false, copyFailed: false }, patch);
     render();
   }
 
@@ -137,6 +209,22 @@
     dev.style.borderRadius = Math.round(Math.min(dw, dh) * (k === 'phone' ? 0.13 : k === 'tablet' ? 0.055 : 0.024)) + 'px';
     dev.style.setProperty('--mu', (Math.min(dw, dh) / 100) + 'px');
     dev.style.setProperty('--cols', k === 'phone' ? 4 : 6);
+    stickyHeights();
+  }
+
+  /* La feuille de style réserve la place des deux couches collantes pour que le
+     focus clavier ne finisse jamais dessous : elle a besoin de leurs hauteurs.
+     Mesuré : ni le défilement déclenché par le focus ni scrollIntoView
+     n'appliquent scroll-padding aujourd'hui. Les déclarations restent — elles
+     servent aux ancres et aux navigateurs qui les respectent — mais la
+     correction fiable est faite à la main dans keepFocusVisible(). */
+  function stickyHeights() {
+    var root = document.documentElement.style;
+    var stage = els.stage ? els.stage.offsetHeight : 0;
+    var bar = els.bar ? els.bar.offsetHeight : 0;
+    var narrow = window.innerWidth < 760;
+    root.setProperty('--stage-h', (narrow ? stage : 0) + 'px');
+    root.setProperty('--bar-h', bar + 'px');
   }
 
   /* ---------- construction des listes -------------------------------------- */
@@ -263,8 +351,11 @@
     if (sig === mockSig) return;
     mockSig = sig;
 
-    els.mockClock.textContent = S.clock || now();
-    els.mockdClock.textContent = S.clock || now();
+    /* recalculée ici et pas seulement au tick de 20 s : sinon l'heure gardait
+       le format de la langue précédente pendant vingt secondes */
+    S.clock = now();
+    els.mockClock.textContent = S.clock;
+    els.mockdClock.textContent = S.clock;
     els.mockDay.textContent = String(n.getDate());
     els.mockdDay.textContent = String(n.getDate());
     var dn = n.toLocaleDateString(locale(), { weekday: 'long' });
@@ -382,25 +473,21 @@
     els.previewCanvas.hidden = empty;
     if (!empty && !busy) buildMock(k);
 
-    /* — sélections — */
-    document.querySelectorAll('[data-family]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.family === S.family ? 'true' : 'false');
-    });
-    document.querySelectorAll('[data-pal]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.pal === S.pal ? 'true' : 'false');
-    });
-    document.querySelectorAll('[data-dens]').forEach(function (b) {
-      b.setAttribute('aria-pressed', +b.dataset.dens === S.dens ? 'true' : 'false');
-    });
-    document.querySelectorAll('[data-lang]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.lang === S.lang ? 'true' : 'false');
-    });
-    els.themeList.querySelectorAll('[data-theme]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.theme === S.theme ? 'true' : 'false');
-    });
+    /* — sélections —
+         Ces cinq groupes sont à choix unique et exclusif : ce sont des boutons
+         radio, pas des bascules. Un seul arrêt de tabulation par groupe, les
+         flèches déplacent le choix. Le parcours clavier passe de 42 arrêts à
+         une dizaine, ce qui compte d'autant plus que la page a deux barres
+         collantes. */
+    mark(els.famAbs, function (b) { return b.dataset.family === S.family; });
+    mark(els.famFig, function (b) { return b.dataset.family === S.family; });
+    mark(els.palList, function (b) { return b.dataset.pal === S.pal; });
+    mark(els.densList, function (b) { return +b.dataset.dens === S.dens; });
+    mark(els.langList, function (b) { return b.dataset.lang === S.lang; });
+    mark(els.themeList, function (b) { return b.dataset.theme === S.theme; });
 
     /* — résolution — */
-    els.resValue.textContent = empty ? '— × —' : num(r.w) + ' × ' + num(r.h) + ' px';
+    els.resValue.textContent = empty ? '— × —' : num(r.w) + ' × ' + num(r.h) + ' px';
     els.resDevice.textContent =
       (k === 'phone' ? T.devPhone : k === 'tablet' ? T.devTablet : T.devDesk) + ' · ' +
       (r.w === detected.w && r.h === detected.h ? T.detected : T.custom);
@@ -408,26 +495,49 @@
     els.resToggle.setAttribute('aria-expanded', S.editRes ? 'true' : 'false');
     els.resToggle.setAttribute('aria-label', (S.editRes ? T.close : T.edit) + ' — ' + T.resolution);
     els.resEditor.hidden = !S.editRes;
+    els.inW.setAttribute('aria-invalid', outOfRange(S.wStr) ? 'true' : 'false');
+    els.inH.setAttribute('aria-invalid', outOfRange(S.hStr) ? 'true' : 'false');
     if (document.activeElement !== els.inW && els.inW.value !== S.wStr) els.inW.value = S.wStr;
     if (document.activeElement !== els.inH && els.inH.value !== S.hStr) els.inH.value = S.hStr;
 
     /* — lisibilité — */
     renderLeg();
 
-    /* — description de l'aperçu pour les lecteurs d'écran — */
+    /* — description de l'aperçu pour les lecteurs d'écran —
+         Elle est portée par le canevas seul : sur le conteneur, role="img" en
+         faisait une feuille et retirait de l'arbre le texte de l'état vide,
+         qui est pourtant la seule consigne actionnable de l'application.
+         La note sur la maquette est rattachée par aria-describedby, elle n'est
+         donc plus recopiée ici. */
     var fam = E.FAMILIES.find(function (f) { return f.id === S.family; });
-    els.device.setAttribute('aria-label',
-      T.previewAlt
-        .replace('{family}', fam ? fam[S.lang] : S.family)
-        .replace('{palette}', E.PALETTES[S.pal][S.lang])
-        .replace('{density}', [T.dCalm, T.dMid, T.dDense][S.dens])
-        .replace('{seed}', String(S.seed)) + ' ' + T.mockNote);
+    if (empty || busy) {
+      els.previewCanvas.setAttribute('aria-hidden', 'true');
+      els.previewCanvas.removeAttribute('role');
+      els.previewCanvas.removeAttribute('aria-label');
+      els.previewCanvas.removeAttribute('aria-describedby');
+    } else {
+      els.previewCanvas.removeAttribute('aria-hidden');
+      els.previewCanvas.setAttribute('role', 'img');
+      els.previewCanvas.setAttribute('aria-describedby', 'mockNote');
+      els.previewCanvas.setAttribute('aria-label',
+        T.previewAlt
+          .replace('{family}', fam ? fam[S.lang] : S.family)
+          .replace('{palette}', E.PALETTES[S.pal][S.lang])
+          .replace('{density}', [T.dCalm, T.dMid, T.dDense][S.dens])
+          .replace('{seed}', String(S.seed)));
+    }
 
     /* — partage — */
     els.shareLabel.textContent = S.copied ? T.copied : T.share;
-    els.shareNote.textContent = T.shareNote + ' ';
-    var sd = el('span', 'share-seed', T.seed + ' ' + S.seed);
-    els.shareNote.appendChild(sd);
+    if (S.copyFailed) {
+      els.shareNote.textContent = T.copyFail;
+      els.shareFallback.hidden = false;
+      if (els.shareUrl.value !== location.href) els.shareUrl.value = location.href;
+    } else {
+      els.shareFallback.hidden = true;
+      els.shareNote.textContent = T.shareNote + ' ';
+      els.shareNote.appendChild(el('span', 'share-seed', T.seed + ' ' + S.seed));
+    }
 
     /* — barre d'action — */
     els.doneCard.hidden = !(S.phase === 'done' && !empty);
@@ -437,16 +547,22 @@
          « 0,3 Mo » cache, et le poids du fichier fait partie du résultat. */
       var b = S.last.size;
       var poids = b < 1048576
-        ? num(Math.round(b / 1024)) + ' ' + T.savedSizeK
-        : dec(b / 1048576) + ' ' + T.savedSize;
-      els.doneMeta.textContent = num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' + poids;
+        ? num(Math.round(b / 1024)) + ' ' + T.savedSizeK
+        : dec(b / 1048576) + ' ' + T.savedSize;
+      els.doneMeta.textContent = num(S.last.w) + ' × ' + num(S.last.h) + ' px · PNG · ' + poids;
     }
     els.errMsg.textContent = S.errKind === 'big'
       ? T.errBig.replace('{mp}', dec(r.w * r.h / 1e6))
       : T.errGen;
 
+    /* Pendant le rendu on ne met pas `disabled` : le navigateur retirerait le
+       focus du bouton et le renverrait au début du document, obligeant à tout
+       reparcourir. aria-disabled le neutralise sans le rendre infocusable, et
+       onExport() refuse de repartir. `disabled` reste pour l'état vide, où le
+       bouton n'a rien à faire dans le parcours. */
     els.ctaLabel.textContent = busy ? T.rendering : T.download;
-    els.btnExport.disabled = busy || empty;
+    els.btnExport.disabled = empty;
+    els.btnExport.setAttribute('aria-disabled', busy ? 'true' : 'false');
     els.btnExport.setAttribute('aria-busy', busy ? 'true' : 'false');
 
     /* — dessin — */
@@ -558,6 +674,7 @@
 
   /* ---------- URL ----------------------------------------------------------- */
 
+  var lastQuery = null;
   function syncUrl() {
     var r = res();
     var q = new URLSearchParams();
@@ -566,9 +683,16 @@
     q.set('d', String(S.dens));
     q.set('s', String(S.seed));
     q.set('l', S.lang);
-    if (r.w && r.h) q.set('r', r.w + 'x' + r.h);
+    /* La résolution détectée est une mesure de l'appareil, pas un réglage : elle
+       n'a rien à faire dans un lien partagé. Son absence veut dire « la
+       résolution de l'appareil qui ouvre le lien », ce qui sert aussi mieux le
+       destinataire. Seule une saisie manuelle est transmise. */
+    if (r.w && r.h && !(r.w === detected.w && r.h === detected.h)) q.set('r', r.w + 'x' + r.h);
     if (S.theme !== 'system') q.set('t', S.theme);
-    try { history.replaceState(null, '', location.pathname + '?' + q.toString()); } catch (e) { /* file:// */ }
+    var str = q.toString();
+    if (str === lastQuery) return;
+    lastQuery = str;
+    try { history.replaceState(null, '', location.pathname + '?' + str); } catch (e) { /* file:// */ }
   }
 
   function readUrl() {
@@ -576,8 +700,10 @@
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
     var fam = q.get('m');
     if (E.FAMILIES.some(function (f) { return f.id === fam; })) S.family = fam;
+    /* Liste blanche, jamais un accès par index : PALETTES['constructor'] est
+       « vrai » et faisait planter le premier rendu, aperçu et vignettes compris. */
     var pal = q.get('p');
-    if (E.PALETTES[pal]) S.pal = pal;
+    if (E.PAL_ORDER.indexOf(pal) >= 0) S.pal = pal;
     var d = parseInt(q.get('d'), 10);
     if (d >= 0 && d <= 2) S.dens = d;
     var s = parseInt(q.get('s'), 10);
@@ -588,9 +714,15 @@
     var th = q.get('t');
     if (th === 'light' || th === 'dark' || th === 'system') S.theme = th;
 
-    var r = (q.get('r') || '').split('x').map(function (n) { return parseInt(n, 10); });
-    S.wStr = String(r[0] > 0 ? Math.min(r[0], 8000) : detected.w);
-    S.hStr = String(r[1] > 0 ? Math.min(r[1], 8000) : detected.h);
+    /* La résolution est un couple : une moitié illisible et on retombe
+       entièrement sur la détection, plutôt que de mélanger l'écran de
+       l'expéditeur et celui du destinataire. Mêmes bornes que les champs. */
+    var parts = (q.get('r') || '').split('x');
+    var rw = parseInt(parts[0], 10), rh = parseInt(parts[1], 10);
+    var okRes = parts.length === 2 &&
+      rw >= RES_MIN && rw <= RES_MAX && rh >= RES_MIN && rh <= RES_MAX;
+    S.wStr = String(okRes ? rw : detected.w);
+    S.hStr = String(okRes ? rh : detected.h);
   }
 
   /* ---------- actions -------------------------------------------------------- */
@@ -606,25 +738,53 @@
 
   function digits(v) { return String(v).replace(/[^0-9]/g, '').slice(0, 4); }
 
+  /* Le même rappel servait de succès et d'échec : un refus de permission, un
+     document non focalisé ou un navigateur sans API affichaient « Lien copié »
+     alors que rien n'avait été copié. Le partage par URL est le seul mécanisme
+     d'état partageable du produit : annoncer une copie qui n'a pas eu lieu
+     serait un mensonge d'interface. */
   function onShare() {
-    function done() {
-      S.copied = true;
+    function finish(ok) {
+      S.copied = ok;
+      S.copyFailed = !ok;
       render();
+      if (!ok && els.shareUrl) { els.shareUrl.focus(); els.shareUrl.select(); }
       clearTimeout(timers.copy);
-      timers.copy = setTimeout(function () { S.copied = false; render(); }, 2600);
+      if (ok) timers.copy = setTimeout(function () { S.copied = false; render(); }, 2600);
     }
+    var url = location.href;
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(location.href).then(done, done);
-      } else { done(); }
-    } catch (e) { done(); }
+        navigator.clipboard.writeText(url).then(
+          function () { finish(true); },
+          function () { finish(false); }
+        );
+        return;
+      }
+    } catch (e) { /* API absente ou contexte non sécurisé */ }
+    finish(false);
   }
 
+  /* Le verrou de réentrance ne peut pas vivre dans la phase d'affichage : set()
+     la remet à « idle » et set() est le gestionnaire de tous les boutons de
+     réglage. Un clic sur une palette pendant l'encodage relançait donc un
+     second export en parallèle du premier. */
+  var exporting = false;
+
   function onExport() {
+    if (exporting) return;
     var r = res();
     if (!r.w || !r.h) { S.editRes = true; render(); els.inW.focus(); return; }
     if (r.w * r.h > 40e6) { S.phase = 'error'; S.errKind = 'big'; render(); return; }
 
+    /* Instantané pris au clic : l'encodage d'un PNG de plusieurs mégapixels dure
+       plusieurs centaines de millisecondes, pendant lesquelles l'interface reste
+       cliquable. Sans ça, un changement de palette pendant l'encodage renommait
+       un fichier déjà dessiné, et la densité — absente du nom — glissait sans
+       laisser de trace. */
+    var job = { fam: S.family, pal: S.pal, dens: S.dens, seed: S.seed, w: r.w, h: r.h };
+
+    exporting = true;
     S.phase = 'rendering';
     S.errKind = null;
     render();
@@ -633,30 +793,38 @@
       var c = null;
       try {
         c = document.createElement('canvas');
-        c.width = r.w; c.height = r.h;
+        c.width = job.w; c.height = job.h;
         var ctx = c.getContext('2d', { alpha: false });
         if (!ctx) throw new Error('no 2d context');
-        E.draw(ctx, r.w, r.h, S.family, S.pal, S.dens, S.seed);
+        E.draw(ctx, job.w, job.h, job.fam, job.pal, job.dens, job.seed);
         c.toBlob(function (b) {
-          if (!b || b.size < 128) { fail(); return; }
+          if (!b || b.size < 128) { release(c); fail(); return; }
           var url = URL.createObjectURL(b);
           var a = document.createElement('a');
           a.href = url;
           a.rel = 'noopener';
-          a.download = 'aplat-' + S.family + '-' + S.pal + '-' + S.seed + '-' + r.w + 'x' + r.h + '.png';
+          a.download = 'aplat-' + job.fam + '-' + job.pal + '-' + job.seed + '-' + job.w + 'x' + job.h + '.png';
           document.body.appendChild(a);
           a.click();
           a.remove();
           setTimeout(function () { URL.revokeObjectURL(url); }, 6000);
-          S.phase = 'done';
-          S.last = { w: r.w, h: r.h, size: b.size };
-          render();
+          /* libéré avant render() : celui-ci repeint l'aperçu et les vignettes,
+             inutile de garder un bitmap de 160 Mo vivant pendant ce temps */
           release(c);
+          exporting = false;
+          S.phase = 'done';
+          S.last = { w: job.w, h: job.h, size: b.size };
+          render();
         }, 'image/png');
-      } catch (e) { fail(); release(c); }
+      } catch (e) { release(c); fail(); }
     }, 70);
 
-    function fail() { S.phase = 'error'; S.errKind = 'gen'; render(); }
+    function fail() {
+      exporting = false;
+      S.phase = 'error';
+      S.errKind = 'gen';
+      render();
+    }
     /* libère la mémoire du canevas hors écran : un 4K pèse ~33 Mo en RAM */
     function release(cv) { if (cv) { cv.width = 1; cv.height = 1; } }
   }
@@ -671,7 +839,8 @@
       'legGood', 'legOk', 'legLow', 'legTitle', 'legDetail',
       'famAbs', 'famFig', 'palList', 'densList',
       'resValue', 'resDevice', 'resToggle', 'resEditor', 'inW', 'inH', 'presets',
-      'shareBtn', 'shareLabel', 'shareNote', 'langList', 'themeList',
+      'shareBtn', 'shareLabel', 'shareNote', 'shareFallback', 'shareUrl', 'langList', 'themeList',
+      'stage', 'bar',
       'doneCard', 'doneMeta', 'errCard', 'errMsg', 'btnRetry', 'btnSeed', 'btnExport', 'ctaLabel'
     ].forEach(function (id) { els[id] = $(id); });
 
@@ -680,6 +849,10 @@
     S.clock = now();
 
     buildLists();
+
+    [els.famAbs, els.famFig, els.palList, els.densList, els.langList, els.themeList]
+      .forEach(radioKeys);
+    document.addEventListener('focusin', keepFocusVisible);
 
     els.resToggle.addEventListener('click', onToggleRes);
     els.inW.addEventListener('input', function (e) {
@@ -700,7 +873,7 @@
     var rz;
     window.addEventListener('resize', function () {
       clearTimeout(rz);
-      rz = setTimeout(function () { paint(true); }, 120);
+      rz = setTimeout(function () { stickyHeights(); paint(true); }, 120);
     });
 
     if (window.ResizeObserver && els.stageBox) {

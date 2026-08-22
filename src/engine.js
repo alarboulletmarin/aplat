@@ -49,6 +49,10 @@
 
   /* ---------- aléatoire déterministe -------------------------------------- */
 
+  /* Accès par index sur liste blanche : PALETTES['constructor'] est « vrai »,
+     et suffisait à faire lever le rendu tout entier. */
+  function has(obj, k) { return typeof k === 'string' && Object.prototype.hasOwnProperty.call(obj, k); }
+
   function rng(seed) {
     var a = seed >>> 0;
     return function () {
@@ -153,7 +157,7 @@
     ctx.fill('evenodd');
   }
 
-  function sunflower(ctx, cx, cy, R, rnd, petal, petal2, core, seedCol) {
+  function sunflower(ctx, cx, cy, R, rnd, petal, petal2, core, seedCol, U) {
     var n = 13 + Math.floor(rnd() * 6), rot = rnd() * Math.PI * 2, i, a;
     ctx.fillStyle = petal2;
     for (i = 0; i < n; i++) {
@@ -168,7 +172,9 @@
     ctx.fillStyle = core;
     ctx.beginPath(); ctx.arc(cx, cy, R * 0.34, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = seedCol;
-    var g = 2.39996, k = R * 0.29 / Math.sqrt(72), dot = Math.max(0.7, R * 0.021);
+    /* plancher relatif : en pixels absolus il mordait dans les vignettes, dont
+       le cœur paraissait plus dense que l'image réellement exportée */
+    var g = 2.39996, k = R * 0.29 / Math.sqrt(72), dot = Math.max((U || R * 12) * 0.0008, R * 0.021);
     for (i = 1; i <= 72; i++) {
       var rr = k * Math.sqrt(i), aa = i * g;
       ctx.beginPath(); ctx.arc(cx + Math.cos(aa) * rr, cy + Math.sin(aa) * rr, dot, 0, Math.PI * 2); ctx.fill();
@@ -225,13 +231,16 @@
 
     if (fam === 'tournesol') {
       n = [1, 3, 7][dens];
-      var tcols = Math.max(1, Math.round(Math.sqrt(n * W / H))), trows = Math.max(1, Math.ceil(n / tcols));
+      /* borné par n : sinon, en densité calme (n = 1) et sur un format large,
+         la grille passait à deux colonnes et la fleur unique se retrouvait
+         centrée sur le quart gauche, la moitié droite restant nue */
+      var tcols = Math.min(n, Math.max(1, Math.round(Math.sqrt(n * W / H)))), trows = Math.max(1, Math.ceil(n / tcols));
       var tcw = W / tcols, tch = H / trows;
       for (i = 0; i < n; i++) {
         c = i % tcols; r = Math.floor(i / tcols);
         var TR = Math.min(tcw, tch) * (n === 1 ? 0.46 : 0.36) * (0.88 + 0.26 * rnd());
         sunflower(ctx, tcw * (c + 0.5) + (rnd() - 0.5) * tcw * 0.18, tch * (r + 0.5) + (rnd() - 0.5) * tch * 0.18,
-          TR, rnd, col(i), col(i + 3), col(i + 1), col(i + 2));
+          TR, rnd, col(i), col(i + 3), col(i + 1), col(i + 2), U);
       }
       return;
     }
@@ -499,17 +508,21 @@
     return _probe;
   }
 
-  var PROBE_SHORT = 320, PROBE_MAX = 1100;
+  /* On borne la surface de la sonde, pas son grand côté : borner le grand côté
+     écrasait le rapport d'aspect au-delà de 3,44:1, si bien qu'un format
+     panoramique était mesuré sur une autre composition que celle exportée — le
+     voile brûlé dans le PNG et le contraste annoncé portaient alors sur une
+     image qui n'existait pas. */
+  var PROBE_AREA = 200000, PROBE_SIDE_MAX = 4000;
 
   function measure(family, palId, dens, seed, w, h) {
-    var P = PALETTES[palId] || PALETTES.lime;
+    var P = has(PALETTES, palId) ? PALETTES[palId] : PALETTES.lime;
     var ar = (w > 0 && h > 0) ? w / h : 0.5;
     var key = family + '|' + palId + '|' + dens + '|' + seed + '|' + Math.round(ar * 1000);
     if (_probeCache[key]) return _probeCache[key];
 
-    var PW, PH;
-    if (ar >= 1) { PH = PROBE_SHORT; PW = Math.min(PROBE_MAX, Math.max(24, Math.round(PROBE_SHORT * ar))); }
-    else { PW = PROBE_SHORT; PH = Math.min(PROBE_MAX, Math.max(24, Math.round(PROBE_SHORT / ar))); }
+    var PH = Math.max(24, Math.min(PROBE_SIDE_MAX, Math.round(Math.sqrt(PROBE_AREA / ar))));
+    var PW = Math.max(24, Math.min(PROBE_SIDE_MAX, Math.round(PH * ar)));
 
     var c = probeCanvas(PW, PH);
     var ctx = c.getContext('2d', { willReadFrequently: true });
@@ -585,7 +598,7 @@
   /* ---------- rendu complet ------------------------------------------------ */
 
   function draw(ctx, W, H, family, palId, dens, seed) {
-    var P = PALETTES[palId] || PALETTES.lime;
+    var P = has(PALETTES, palId) ? PALETTES[palId] : PALETTES.lime;
     var m = measure(family, palId, dens, seed, W, H);
 
     ctx.save();

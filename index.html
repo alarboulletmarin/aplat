@@ -2,6 +2,11 @@
 <html lang="fr" data-theme="system">
 <head>
 <meta charset="utf-8">
+<!-- La page promet « aucun réseau » : cette politique en fait une propriété du
+     document et non une simple phrase. connect-src coupe fetch, XHR, WebSocket,
+     EventSource et sendBeacon. Aucune directive ne porte sur les scripts, les
+     styles ni les images, pour que l'ouverture en file:// reste valide. -->
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F2EDDD" media="(prefers-color-scheme: light)">
@@ -9,11 +14,9 @@
 <meta name="description" content="Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans stockage.">
 <meta name="referrer" content="no-referrer">
 <title>Aplat — fonds d’écran génératifs</title>
-<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Crect width='64' height='64' rx='14' fill='%2317243F'/%3E %3Cpath d='M32 12 52 32 32 52 12 32Z' fill='%23DFF478'/%3E %3Cpath d='M32 20 44 32 32 44 20 32Z' fill='%2317243F'/%3E %3Ccircle cx='32' cy='32' r='5' fill='%23FF6648'/%3E %3C/svg%3E" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="preload" href="assets/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="src/app.css">
 </head>
 <body>
@@ -40,12 +43,12 @@
   <main class="cols">
 
     <!-- ============ Scène : le motif derrière de vraies icônes ============ -->
-    <section class="stage" aria-labelledby="stage-h">
+    <section class="stage" id="stage" aria-labelledby="stage-h">
       <h2 class="vh" id="stage-h" data-t="preview">Aperçu du fond d’écran</h2>
 
       <div class="stage-box" id="stageBox">
-        <div class="device" id="device" role="img" aria-label="">
-          <canvas class="device-canvas" id="previewCanvas" aria-hidden="true"></canvas>
+        <div class="device" id="device">
+          <canvas class="device-canvas" id="previewCanvas" role="img" aria-label="" aria-describedby="mockNote"></canvas>
 
           <!-- maquette téléphone / tablette -->
           <div class="mock" id="mockHandheld" aria-hidden="true">
@@ -126,7 +129,7 @@
 
     <!-- ============ Réglages : trois, pas un de plus ============ -->
     <section class="panel" id="reglages" tabindex="-1" aria-labelledby="set-h">
-      <h2 class="vh" id="set-h" data-t="family">Famille de motif</h2>
+      <h2 class="vh" id="set-h" data-t="settings">Réglages</h2>
 
       <div class="card">
         <h2 class="card-h" id="h-family" data-t="family">Famille de motif</h2>
@@ -134,23 +137,23 @@
           <span class="grp-blob" aria-hidden="true"></span>
           <span data-t="gAbs">Abstraits</span>
         </h3>
-        <div class="grid-fam" id="famAbs" role="group" aria-labelledby="h-abs"></div>
+        <div class="grid-fam" id="famAbs" role="radiogroup" aria-labelledby="h-abs"></div>
         <h3 class="grp grp2" id="h-fig">
           <span class="grp-star" aria-hidden="true"></span>
           <span data-t="gFig">Figures</span>
         </h3>
-        <div class="grid-fam" id="famFig" role="group" aria-labelledby="h-fig"></div>
+        <div class="grid-fam" id="famFig" role="radiogroup" aria-labelledby="h-fig"></div>
       </div>
 
       <div class="card">
         <h2 class="card-h" id="h-pal" data-t="palette">Palette</h2>
-        <div class="grid-pal" id="palList" role="group" aria-labelledby="h-pal"></div>
+        <div class="grid-pal" id="palList" role="radiogroup" aria-labelledby="h-pal"></div>
       </div>
 
       <div class="bento">
         <div class="card">
           <h2 class="card-h" id="h-dens" data-t="density">Densité</h2>
-          <div class="dens-row" id="densList" role="group" aria-labelledby="h-dens"></div>
+          <div class="dens-row" id="densList" role="radiogroup" aria-labelledby="h-dens"></div>
         </div>
 
         <div class="card res-card">
@@ -167,19 +170,21 @@
             <div class="res-fields">
               <label>
                 <span data-t="width">Largeur (px)</span>
-                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inW" autocomplete="off">
+                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inW" autocomplete="off" aria-describedby="resHint">
               </label>
               <label>
                 <span data-t="height">Hauteur (px)</span>
-                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inH" autocomplete="off">
+                <input type="number" inputmode="numeric" min="16" max="8000" step="1" id="inH" autocomplete="off" aria-describedby="resHint">
               </label>
             </div>
+            <p class="res-hint" id="resHint" data-t="resRange">De 16 à 8000 px.</p>
             <div class="res-presets" id="presets" role="group" aria-labelledby="h-res"></div>
           </div>
         </div>
       </div>
 
-      <div class="share">
+      <div class="share" aria-labelledby="share-h">
+        <h2 class="vh" id="share-h" data-t="shareSection">Partage et préférences</h2>
         <p class="share-p">
           <span class="diamond" aria-hidden="true"></span>
           <span data-t="privacy">Aucun compte, aucun réseau, aucun stockage. Tout est calculé sur cet appareil.</span>
@@ -188,16 +193,20 @@
           <span class="ico-link" aria-hidden="true"><i></i><i></i></span>
           <span id="shareLabel">Copier le lien du motif</span>
         </button>
-        <p class="share-n" id="shareNote"></p>
+        <p class="share-n" id="shareNote" aria-live="polite"></p>
+        <label class="share-fallback" id="shareFallback" hidden>
+          <span class="vh" data-t="share">Copier le lien du motif</span>
+          <input type="text" id="shareUrl" readonly spellcheck="false" autocomplete="off">
+        </label>
 
         <div class="prefs">
           <div>
             <h3 id="h-lang" data-t="lang">Langue</h3>
-            <div class="prefs-row" id="langList" role="group" aria-labelledby="h-lang"></div>
+            <div class="prefs-row" id="langList" role="radiogroup" aria-labelledby="h-lang"></div>
           </div>
           <div>
             <h3 id="h-theme" data-t="theme">Thème</h3>
-            <div class="prefs-row" id="themeList" role="group" aria-labelledby="h-theme"></div>
+            <div class="prefs-row" id="themeList" role="radiogroup" aria-labelledby="h-theme"></div>
           </div>
         </div>
       </div>
@@ -205,8 +214,8 @@
   </main>
 
   <!-- ============ Action : un seul appel primaire ============ -->
-  <div class="bar">
-    <div aria-live="polite">
+  <div class="bar" id="bar">
+    <div class="bar-live" aria-live="polite">
       <div class="note note-done" id="doneCard" hidden>
         <span class="note-done-i" aria-hidden="true"></span>
         <div class="note-txt">
