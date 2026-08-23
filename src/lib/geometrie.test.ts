@@ -10,7 +10,10 @@
  * mise en page et se vérifie dans `tools/overflow.js`.
  */
 import { describe, expect, it } from 'vitest'
-import { BORDURE_APPAREIL, geometrieAppareil, hauteurScene, jetonsLibelle } from './geometrie'
+import {
+  BORDURE_APPAREIL, geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle,
+  PAYSAGE_COURT, paysageCourt,
+} from './geometrie'
 
 const BOITE = { largeur: 340, hauteur: 420 }
 
@@ -60,6 +63,55 @@ describe('hauteur de la scène', () => {
       expect(hauteurScene(fenetre)).toBeLessThan(fenetre.hauteur)
       expect(hauteurScene(fenetre)).toBeGreaterThanOrEqual(214)
     }
+  })
+
+  it('ne reconnaît le paysage court que couché et bas', () => {
+    expect(paysageCourt({ largeur: 844, hauteur: 390 })).toBe(true)
+    expect(paysageCourt({ largeur: 1180, hauteur: 550 })).toBe(true)
+    expect(paysageCourt({ largeur: 390, hauteur: 844 })).toBe(false)
+    expect(paysageCourt({ largeur: 1440, hauteur: 900 })).toBe(false)
+    expect(paysageCourt({ largeur: 1440, hauteur: PAYSAGE_COURT + 1 })).toBe(false)
+  })
+
+  /* Le défaut que ce test tient fermé : en paysage, la scène gardait son
+     plancher de 300 px, et le bas du téléphone comme le verdict passaient sous
+     la barre d'action. La réserve doit suffire à la barre compacte (56 px),
+     au verdict et aux marges de la scène. */
+  it('laisse la place de la barre et du verdict en paysage court', () => {
+    for (const fenetre of [
+      { largeur: 844, hauteur: 390 },
+      { largeur: 932, hauteur: 430 },
+      { largeur: 1180, hauteur: 550 },
+      { largeur: 740, hauteur: 360 },
+    ]) {
+      const reste = fenetre.hauteur - hauteurScene(fenetre)
+      expect(reste, `${fenetre.largeur}x${fenetre.hauteur}`).toBeGreaterThanOrEqual(140)
+    }
+  })
+
+  it('ne touche pas aux fenêtres debout ni aux grands écrans', () => {
+    expect(hauteurScene({ largeur: 390, hauteur: 844 })).toBe(338)
+    expect(hauteurScene({ largeur: 1440, hauteur: 900 })).toBe(558)
+    expect(hauteurScene({ largeur: 834, hauteur: 1112 })).toBe(600)
+  })
+})
+
+describe('hauteur de la vignette', () => {
+  it('reste entre 120 et 180 px, proportionnée à la fenêtre', () => {
+    expect(hauteurVignette({ largeur: 390, hauteur: 844 })).toBe(180)
+    expect(hauteurVignette({ largeur: 320, hauteur: 568 })).toBe(125)
+    expect(hauteurVignette({ largeur: 300, hauteur: 400 })).toBe(120)
+  })
+
+  it('rend au moins la moitié de l’écran aux grilles, sur un téléphone', () => {
+    /* La recette : sur iPhone en portrait, une fois défilé, il doit rester au
+       moins 55 % de la hauteur pour les motifs. La scène repliée vaut la
+       vignette, ses marges (32 px) et le verdict d'une ligne (57 px) ; la
+       barre d'action en vaut 84. */
+    const fenetre = { largeur: 390, hauteur: 844 }
+    const scene = hauteurVignette(fenetre) + 32 + 57
+    const libre = (fenetre.hauteur - scene - 84) / fenetre.hauteur
+    expect(libre).toBeGreaterThan(0.55)
   })
 })
 

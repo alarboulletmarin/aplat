@@ -12,7 +12,15 @@ const VIEWS = [
   { name: 'phone 430', w: 430, h: 932, dsf: 3 },
   { name: 'tablet 768', w: 768, h: 1024, dsf: 2 },
   { name: 'tablet 834', w: 834, h: 1112, dsf: 2 },
+  /* 1024 x 1366 : la grille de familles y passe à quatre pistes, et c'est la
+     première largeur où « Marguerites » ne tenait plus sur une ligne. */
+  { name: 'tablet 1024', w: 1024, h: 1366, dsf: 2 },
+  /* Deux fenêtres couchées et basses : c'est là que la barre d'action passe en
+     variante compacte et que les gabarits changent le plus. */
+  { name: 'phone paysage 844', w: 844, h: 390, dsf: 3 },
+  { name: 'desk court 1180', w: 1180, h: 550, dsf: 2 },
   { name: 'desk 1280', w: 1280, h: 900, dsf: 2 },
+  { name: 'desk 1440', w: 1440, h: 900, dsf: 2 },
   { name: 'desk 1920', w: 1920, h: 1080, dsf: 1 }
 ];
 
@@ -69,12 +77,12 @@ const STRETCH = `(() => {
             await page.waitForTimeout(150);
           }
 
-          const r = await page.evaluate(() => {
+          const r = await page.evaluate((stretched) => {
             const out = { hScroll: 0, clipped: [], mockOverflow: null };
             out.hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
 
             // texte coupé : scrollWidth > clientWidth sans ellipsis prévue
-            for (const n of document.querySelectorAll('button, .carte-h, .grp, .verdict-t, .verdict-d, .res-val, .res-appareil, .partage-n, .note-t, .note-m, .note-h, .prefs h3, .accroche')) {
+            for (const n of document.querySelectorAll('button, .carte-h, .grp, .verdict-t, .verdict-d, .res-val, .res-appareil, .partage-n, .note-t, .note-m, .note-h, .prefs h2, .accroche')) {
               const cs = getComputedStyle(n);
               if (n.offsetParent === null) continue;
               const okX = cs.textOverflow === 'ellipsis' || cs.overflowX !== 'visible';
@@ -112,6 +120,21 @@ const STRETCH = `(() => {
               }
             }
 
+            /* Libellés de carte : jamais élidés, deux lignes au plus.
+               « Marguerites » tronqué en « Margueri… » ne nomme plus rien. Ils
+               ont le droit de revenir à la ligne, c'est même la sortie prévue ;
+               avec les libellés allongés de 30 % on ne juge plus le nombre de
+               lignes, seulement l'absence d'ellipse. */
+            out.cartes = [];
+            for (const n of document.querySelectorAll('.opt-famille-l > span:last-child, .opt-palette-l > span:last-child')) {
+              if (n.offsetParent === null) continue;
+              const cs = getComputedStyle(n);
+              const elide = cs.textOverflow === 'ellipsis' || n.scrollWidth > n.clientWidth + 1;
+              const lignes = Math.round(n.getBoundingClientRect().height / (parseFloat(cs.lineHeight) || 16));
+              if (elide) out.cartes.push('élidé "' + n.textContent.trim().slice(0, 18) + '"');
+              else if (!stretched && lignes > 2) out.cartes.push(lignes + ' lignes "' + n.textContent.trim().slice(0, 18) + '"');
+            }
+
             // la maquette d'écran doit tenir dans l'appareil
             const dev = document.getElementById('appareil');
             for (const id of ['maquette', 'maquette-bureau']) {
@@ -128,12 +151,13 @@ const STRETCH = `(() => {
               }
             }
             return out;
-          });
+          }, stretched);
 
           const tag = `${stretched ? '+30% ' : ''}${lang} ${v.name} ${tg.label}`;
           if (r.hScroll > 0) problems.push(`${tag}: défilement horizontal ${r.hScroll}px`);
           if (r.clipped.length) problems.push(`${tag}: texte coupé sur ${r.clipped.slice(0, 4).join(' | ')}`);
           if (r.truncated && r.truncated.length) problems.push(`${tag}: libellé coupé sur ${r.truncated.slice(0, 3).join(' | ')}`);
+          if (r.cartes && r.cartes.length) problems.push(`${tag}: libellé de carte ${r.cartes.slice(0, 3).join(' | ')}`);
           if (r.maqOverflow) problems.push(`${tag}: maquette ${r.maqOverflow.id} déborde de ${r.maqOverflow.over}px (dock à +${r.maqOverflow.dockOut}px, appareil ${r.maqOverflow.devH}px)`);
           await ctx.close();
         }

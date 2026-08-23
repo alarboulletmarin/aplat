@@ -24,11 +24,15 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 |---|---|---|
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | en haut, épinglé ; le bouton en bas, dans la zone du pouce |
 | Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
-| Caché | langue, thème, lien de partage, version | en bas du bloc, sous un filet |
+| Caché | lien de partage | en bas du bloc, sous un filet |
+| Caché | langue, thème, version, licence, source | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
 Un seul appel primaire. **Télécharger** ne partage sa place avec rien : le
 bouton secondaire s'efface entièrement quand la largeur manque plutôt que de le
-faire rétrécir.
+faire rétrécir. C'est aussi pourquoi « Surprends-moi », qui tire une famille,
+une palette et une graine, est dans la carte Famille et non dans la barre : à
+320 px, un troisième bouton mangeait l'appel primaire. Le secondaire de la
+barre, « Variante », ne change que la graine, et son libellé le dit en un mot.
 
 ---
 
@@ -158,6 +162,33 @@ Les grilles sont en `repeat(auto-fit, minmax(min(Xpx, 100%), 1fr))`. Le
 largeur plus grande que l'écran sous 336 px et la page défile
 horizontalement.
 
+**Paysage court.** Une fenêtre couchée de moins de 560 px de haut n'a plus la
+hauteur d'un écran debout : l'en-tête se replie, la barre d'action passe en
+variante compacte (cibles toujours à 44 px, c'est le rembourrage qui cède), et
+la hauteur de la scène cesse d'être une fraction de l'écran pour devenir ce qui
+reste une fois la barre et le verdict servis. Sans ça, le bas du téléphone et
+le verdict passaient sous la barre, à toute position de défilement. Le seuil
+est écrit deux fois, dans `@media (orientation: landscape)` d'`ecrans.css` et
+dans `PAYSAGE_COURT` de `lib/geometrie.ts` : les deux basculent ensemble ou pas
+du tout.
+
+**Repli au défilement.** Sur téléphone en portrait, la scène collante, le
+verdict et la barre prenaient les deux tiers de l'écran : il ne restait presque
+rien pour choisir parmi dix-huit familles et onze palettes. Dès que la page
+défile, l'aperçu se replie en vignette et le verdict se condense sur une ligne,
+dépliable au doigt ; les grilles récupèrent 58 % de la hauteur au lieu de 37 %.
+Le repli passe par l'échelle et non par la géométrie : la boîte de l'appareil
+garde la taille qu'elle aurait dépliée, le motif n'est donc pas redessiné et la
+maquette ne se réajuste pas. Deux seuils, 140 px pour replier et 56 px pour
+déplier : avec un seul, le repli raccourcit le document, la position retombe
+sous le seuil, et l'aperçu clignote.
+
+**Deux natures de réglage, deux endroits.** Le panneau ne contient que ce qui
+agit sur le fichier téléchargé : famille, palette, densité, résolution. La
+langue et le thème sont dans le pied de page, à côté de la version et du lien
+vers la source, parce qu'ils ne changent que l'affichage. La règle tient en une
+phrase, et se vérifie d'un coup d'œil.
+
 Pas de navigation : il n'y a qu'une section.
 
 ---
@@ -174,6 +205,13 @@ La sélection est un **aplat inversé** (encre pleine, texte papier) et non une
 nuance : un aplat se lit de loin, en niveaux de gris, sans comparer deux teintes
 voisines. Le petit carré lime confirme, il ne décide pas ; il porte un filet à la
 couleur du texte, sans quoi il disparaîtrait sur la puce crème du thème sombre.
+
+L'historique des motifs suit la même économie de clavier, avec une nuance :
+c'est une **barre d'outils**, pas un groupe radio. Un seul arrêt de tabulation
+pour les dix vignettes, les flèches déplacent le focus, mais elles ne
+restaurent rien : ce sont dix actions distinctes, pas dix options d'un même
+réglage. Le motif en cours s'y reconnaît au trait épaissi et à l'aplat, comme
+une puce choisie.
 
 ### Les champs
 
@@ -211,11 +249,25 @@ Chaque écran a cinq états, tous dessinés.
 | **Chargement** | trois points au centre, bouton en « Rendu en cours » et `aria-busy` |
 | **Erreur** | carte à trait d'alerte et triangle, **la cause exacte**, bouton Réessayer |
 | **Succès** | carte lime : dimensions, format, poids réel, et le geste pour finir |
-| **Données trop longues** | ellipse sur les puces et les icônes de la maquette, retour à la ligne dans les cartes, `overflow-wrap` sur les valeurs, rangées retirées de la maquette |
+| **Données trop longues** | libellés de carte sur deux lignes, jamais élidés ; ellipse sur les icônes de la maquette ; `overflow-wrap` sur les valeurs ; rangées retirées de la maquette |
 
 Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas de
 problème. Et il n'affiche rien tant qu'il n'a rien mesuré : une application qui
 promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
+
+Trois bandes, et rien entre les deux : **bonne** au-dessus de 4,5:1, le seuil AA
+du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
+**insuffisante** en dessous.
+
+Au bout de la même rangée, une bascule **Assombri** simule le fond d'écran tel
+qu'un thème sombre l'assombrit, et le verdict se recalcule pour cette condition.
+Elle ne touche pas au fichier : le voile y est déjà brûlé, calculé pour le fond
+tel quel, et c'est le système qui assombrit à l'affichage. Le détail le dit en
+toutes lettres, et l'interface annonce l'assombrissement comme approché, faute
+qu'aucune plateforme n'en publie la force. Le mot affiché est le nom de la bande, pris tel
+quel dans le dictionnaire : un titre ne peut plus rassurer là où le corps
+nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme la borne
+qui la définit.
 
 ---
 
@@ -301,6 +353,8 @@ ne se coupe jamais.
 
 - Dark patterns, fausse urgence, frictions asymétriques.
 - Gamification : ni badge, ni série, ni barre de progression culpabilisante.
+- Un historique sans fin. Dix entrées, un bouton pour tout effacer, et pas de
+  « voir plus » : on revient sur ses pas, on ne remonte pas une archive.
 - Onboarding en modales, tour guidé, pop-up de bienvenue.
 - Plus d'un appel primaire par écran.
 - Emoji.

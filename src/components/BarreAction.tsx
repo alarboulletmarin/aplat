@@ -20,9 +20,11 @@ export interface Fichier {
  *
  * Un seul appel primaire par écran : télécharger.
  *
- * Le bouton secondaire (une nouvelle graine) cède la place au primaire quand
- * la largeur manque : mieux vaut « Nouveau motif » tronqué que « Télécharger »
- * coupé en deux.
+ * Le bouton secondaire tire une nouvelle graine : le même motif, redessiné
+ * autrement. Il ne change ni la famille ni la palette, et son libellé le dit
+ * en un mot, « Variante » ; c'est « Surprends-moi », dans le panneau, qui
+ * change tout. Il cède la place au primaire quand la largeur manque : mieux
+ * vaut le secondaire tronqué que « Télécharger » coupé en deux.
  */
 export function BarreAction({
   cadre,
@@ -97,7 +99,13 @@ export function BarreAction({
       </div>
 
       <div className="actions">
-        <button type="button" id="btn-graine" className="btn-graine" onClick={onGraine}>
+        <button
+          type="button"
+          id="btn-graine"
+          className="btn-graine"
+          title={T.nouveauTitre}
+          onClick={onGraine}
+        >
           <span className="ico-encore" aria-hidden="true">
             <i />
             <b />

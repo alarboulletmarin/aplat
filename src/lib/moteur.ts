@@ -936,9 +936,56 @@ export function dessiner(
   return mesure
 }
 
-/** Le niveau de lisibilité, tel que l'interface le nomme. */
-export function niveau(mesure: Mesure): 'bonne' | 'correcte' | 'faible' {
-  if (mesure.contraste >= 4.5) return 'bonne'
-  if (mesure.contraste >= 3) return 'correcte'
-  return 'faible'
+/**
+ * Le niveau de lisibilité, tel que l'interface le nomme.
+ *
+ * Les bornes sont celles de WCAG, et les mots doivent le dire. « Correcte »
+ * pour 3,5:1 laissait entendre qu'un seuil était tenu, alors qu'un libellé
+ * d'icône est du petit texte et réclame 4,5:1 : la bande du milieu s'appelle
+ * donc « juste », et celle du bas « insuffisante ». Le mot affiché est ce nom,
+ * pris tel quel dans le dictionnaire : il ne peut plus s'en écarter.
+ */
+export type Niveau = 'bonne' | 'juste' | 'insuffisante'
+
+/** Le seuil AA du texte courant, et celui des éléments d'interface. */
+export const SEUIL_AA = 4.5
+export const SEUIL_UI = 3
+
+export function niveau(mesure: Mesure): Niveau {
+  if (mesure.contraste >= SEUIL_AA) return 'bonne'
+  if (mesure.contraste >= SEUIL_UI) return 'juste'
+  return 'insuffisante'
+}
+
+/**
+ * L'assombrissement qu'un système applique au fond d'écran en thème sombre.
+ *
+ * Aucune plateforme ne publie sa valeur : 0,4 est une approximation, et
+ * l'interface le dit plutôt que de laisser croire à une mesure. Ce qui compte
+ * est le sens de la variation, qui ne dépend pas de la valeur exacte : un
+ * libellé clair y gagne, un libellé sombre y perd.
+ */
+export const ASSOMBRISSEMENT = 0.4
+
+/**
+ * La même mesure, telle qu'elle se lirait sur un fond assombri.
+ *
+ * Le fichier, lui, ne change pas : le voile qui y est brûlé a été calculé pour
+ * le fond tel quel, et c'est un système d'exploitation qui assombrit à
+ * l'affichage. On ne touche donc ni à `libelles` ni à `voile` ; seul le rapport
+ * de contraste est recalculé, et `niveau()` suit tout seul.
+ *
+ * Le calcul remonte à la luminance d'après voile en inversant la formule qui
+ * l'a produite, l'assombrit, puis redescend. Un aplat noir posé à l'opacité `a`
+ * multiplie chaque canal sRGB par `1 - a` ; la luminance relative, elle, passe
+ * par la puissance 2,4 de la linéarisation, d'où l'exposant.
+ */
+export function assombrir(mesure: Mesure, force = ASSOMBRISSEMENT): Mesure {
+  const clair = mesure.libelles === 'clair'
+  const avant = clair ? 1.05 / mesure.contraste - 0.05 : mesure.contraste * 0.068 - 0.05
+  const apres = Math.max(0, avant) * (1 - force) ** 2.4
+  return {
+    ...mesure,
+    contraste: clair ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068,
+  }
 }

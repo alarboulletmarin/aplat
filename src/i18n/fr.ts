@@ -5,15 +5,15 @@
  * et l'anglais doit s'y conformer clé pour clé.
  *
  * Les gabarits laissent 30 % de marge. Selon l'endroit, un libellé long revient
- * à la ligne (puces de famille et de palette), replie sa rangée (langue,
- * thème), s'étire avec sa colonne (cartes), ou s'élide (icônes de la maquette,
- * bouton secondaire).
+ * à la ligne sans jamais s'élider (puces de famille et de palette, deux lignes
+ * au plus), replie sa rangée (langue, thème), s'étire avec sa colonne (cartes),
+ * ou s'élide (icônes de la maquette, bouton secondaire).
  */
 export const fr = {
   document: {
     titre: 'Aplat\u00a0: fonds d’écran génératifs',
     description:
-      'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans donnée enregistrée.',
+      'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans rien envoyer.',
   },
   entete: {
     evitement: 'Aller aux réglages',
@@ -29,17 +29,23 @@ export const fr = {
     videTitre: 'Indique une résolution',
     videCorps: 'Largeur et hauteur en pixels, ou reviens à la détection.',
   },
+  /* Trois bandes, trois mots, et rien entre les deux. Les clés portent le nom
+     du niveau rendu par `niveau()` : le composant y puise directement, si bien
+     que le qualificatif affiché ne peut pas s'écarter du rapport mesuré. Le
+     titre disait « correcte » pour 3,5:1, sous le seuil AA du petit texte
+     qu'est un libellé d'icône, pendant que le corps disait « un peu juste ». */
   lisibilite: {
     titre: 'Lisibilité des libellés',
     attente: 'Rien à mesurer tant qu’il n’y a pas d’image.',
     bonne: 'bonne',
-    correcte: 'correcte',
-    faible: 'faible',
+    juste: 'juste',
+    insuffisante: 'insuffisante',
     libellesClairs: 'libellés clairs',
     libellesSombres: 'libellés sombres',
-    conseilBonne: 'Les libellés restent nets sur toute la grille.',
-    conseilCorrecte: 'Lisible, un peu juste sur les zones les plus contrastées.',
-    conseilFaible: 'Essaie la palette Nuit, ou une densité plus calme.',
+    conseilBonne: 'Au-dessus du seuil AA de 4,5:1 : les libellés restent nets sur toute la grille.',
+    conseilJuste:
+      'Sous le seuil AA de 4,5:1, au-dessus de 3:1 : une palette plus sombre ou une densité plus calme regagne la marge.',
+    conseilInsuffisante: 'Sous 3:1 : essaie la palette Nuit, ou une densité plus calme.',
     voile: 'voile de lisibilité {n} %',
     sansVoile: 'sans voile',
     /* Assemblés ici et non dans le composant : la ponctuation d'un titre ou
@@ -47,6 +53,16 @@ export const fr = {
        trois mesures parce que la virgule est déjà prise par la décimale
        française, « 4,5:1 ». */
     titreNiveau: 'Lisibilité des libellés\u00a0: {niveau}',
+    /* La forme repliée, sur une ligne. Le mot d'abord, le chiffre ensuite :
+       c'est le mot qui décide, le chiffre qui l'appuie. */
+    resume: 'Lisibilité {niveau}, {contraste}:1',
+    /* L'aperçu assombri. Le mot « approché » n'est pas une précaution
+       oratoire : aucune plateforme ne publie la force de son assombrissement,
+       et le produit ne prétend pas mesurer ce qu'il estime. */
+    assombri: 'Assombri',
+    assombriTitre: 'Simule le fond assombri d’un thème sombre, sans changer le fichier',
+    assombriNote:
+      'Aperçu assombri, comme un thème sombre le ferait, à peu près. Le fichier téléchargé, lui, ne change pas.',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {
@@ -55,6 +71,11 @@ export const fr = {
     groupeAbstraits: 'Abstraits',
     groupeFigures: 'Figures',
     palette: 'Palette',
+    /* Deux gestes voisins, deux libellés qui ne peuvent pas se confondre :
+       « Autre variante » redessine le même motif avec une autre graine,
+       « Surprends-moi » tire une autre famille et une autre palette. */
+    surprise: 'Surprends-moi',
+    surpriseTitre: 'Tire au hasard une famille, une palette et une graine',
     densite: 'Densité',
     calme: 'Calme',
     moyen: 'Moyen',
@@ -78,18 +99,27 @@ export const fr = {
     presetTablette: 'Tablette',
     presetOrdinateur: 'Ordinateur',
   },
+  historique: {
+    titre: 'Derniers motifs',
+    vide: 'Les motifs que tu regardes s’ajoutent ici, dix au plus.',
+    effacer: 'Effacer',
+    note:
+      'Gardés sur cet appareil, dans le navigateur : quatre réglages par motif, ni image ni identifiant.',
+    motif: '{famille}, {palette}, graine {graine}',
+  },
   partage: {
-    titre: 'Partage et réglages',
+    titre: 'Partage',
     copier: 'Copier le lien du motif',
     copie: 'Lien copié',
     echec: 'Copie impossible. Le lien est ci-dessous, à copier à la main.',
     note: 'Le lien contient les réglages, rien d’autre.',
     graine: 'Graine',
-    /* La formule doit rester exacte : le Service Worker met bien quelque
-       chose en cache, à savoir les fichiers de l'application, jamais un
-       réglage ni une image. */
+    /* La formule doit rester exacte des deux côtés : le Service Worker met
+       bien quelque chose en cache, à savoir les fichiers de l'application, et
+       l'historique garde bien quelque chose, à savoir dix fois quatre
+       réglages. Une promesse plus large que le produit ne vaut rien. */
     confidentialite:
-      'Aucun compte, aucun réseau, aucune donnée enregistrée. Tout est calculé sur cet appareil ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
+      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur : quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   preferences: {
     langue: 'Langue',
@@ -99,7 +129,11 @@ export const fr = {
     systeme: 'Système',
   },
   barre: {
-    nouveau: 'Nouveau motif',
+    /* Un mot, parce que la place manque à 320 px et qu'un libellé secondaire
+       tronqué en « Autre… » ne dit plus rien. Le titre porte la phrase
+       entière, et contient le mot visible : l'un ne contredit pas l'autre. */
+    nouveau: 'Variante',
+    nouveauTitre: 'Redessine le même motif avec une autre graine',
     telecharger: 'Télécharger',
     rendu: 'Rendu en cours',
     enregistre: 'Image enregistrée',

@@ -23,6 +23,7 @@ export function ChoixFamille({
   textes,
   revision,
   onChoisir,
+  onSurprise,
 }: {
   valeur: IdFamille
   palette: IdPalette
@@ -32,6 +33,8 @@ export function ChoixFamille({
   textes: Textes
   revision: number
   onChoisir: (famille: IdFamille) => void
+  /** Tire une famille, une palette et une graine d'un coup. */
+  onSurprise: () => void
 }) {
   const abstraits = FAMILLES.filter((f) => f.groupe === 'abs')
   const figures = FAMILLES.filter((f) => f.groupe === 'fig')
@@ -68,9 +71,25 @@ export function ChoixFamille({
 
   return (
     <div className="carte">
-      <h2 className="carte-h" id="h-famille">
-        {textes.reglages.famille}
-      </h2>
+      {/* « Surprends-moi » est ici et non dans la barre d'action : il change le
+          fichier téléchargé, sa place est donc dans le panneau, et c'est
+          au-dessus des dix-huit familles qu'on a envie d'en tirer une au
+          hasard. La barre garde un seul appel primaire. */}
+      <div className="carte-titre">
+        <h2 className="carte-h" id="h-famille">
+          {textes.reglages.famille}
+        </h2>
+        <button
+          type="button"
+          id="btn-surprise"
+          className="btn-surprise"
+          title={textes.reglages.surpriseTitre}
+          onClick={onSurprise}
+        >
+          <span className="ico-etincelle" aria-hidden="true" />
+          <span>{textes.reglages.surprise}</span>
+        </button>
+      </div>
       <h3 className="groupe" id="h-abstraits">
         <span className="groupe-arche" aria-hidden="true" />
         <span>{textes.reglages.groupeAbstraits}</span>

@@ -16,7 +16,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,
+  ASSOMBRISSEMENT, assombrir,
   FAMILLES, graineDeDessin, luminance, niveau, ORDRE_PALETTES, PALETTES, palette,
+  SEUIL_AA, SEUIL_UI,
 } from './moteur'
 
 describe('aléatoire', () => {
@@ -157,11 +159,69 @@ describe('voile', () => {
   })
 })
 
+describe('fond assombri', () => {
+  it('ne touche ni à la couleur de libellé ni au voile', () => {
+    /* Le fichier ne change pas : le voile y est déjà brûlé, et c'est le
+       système qui assombrit à l'affichage. */
+    const mesure = { libelles: 'clair' as const, voile: 0.31, contraste: 3.9 }
+    const sombre = assombrir(mesure)
+    expect(sombre.libelles).toBe(mesure.libelles)
+    expect(sombre.voile).toBe(mesure.voile)
+  })
+
+  it('fait gagner un libellé clair et perdre un libellé sombre', () => {
+    const clair = { libelles: 'clair' as const, voile: 0.31, contraste: 3.9 }
+    const fonce = { libelles: 'sombre' as const, voile: 0.2, contraste: 8 }
+    expect(assombrir(clair).contraste).toBeGreaterThan(clair.contraste)
+    expect(assombrir(fonce).contraste).toBeLessThan(fonce.contraste)
+  })
+
+  it('ne bouge rien quand la force est nulle', () => {
+    const mesure = { libelles: 'clair' as const, voile: 0.31, contraste: 3.9 }
+    expect(assombrir(mesure, 0).contraste).toBeCloseTo(mesure.contraste, 6)
+  })
+
+  it('reste borné, jusqu’au noir complet', () => {
+    for (const libelles of ['clair', 'sombre'] as const) {
+      for (const contraste of [1.01, 3, 4.5, 21]) {
+        for (const force of [0, 0.2, ASSOMBRISSEMENT, 0.9, 1]) {
+          const r = assombrir({ libelles, voile: 0, contraste }, force).contraste
+          expect(Number.isFinite(r), `${libelles} ${contraste} ${force}`).toBe(true)
+          expect(r, `${libelles} ${contraste} ${force}`).toBeGreaterThan(0)
+          expect(r, `${libelles} ${contraste} ${force}`).toBeLessThanOrEqual(21.1)
+        }
+      }
+    }
+  })
+
+  it('reste monotone : plus on assombrit, plus un libellé clair gagne', () => {
+    const mesure = { libelles: 'clair' as const, voile: 0, contraste: 3.9 }
+    let precedent = 0
+    for (const force of [0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8]) {
+      const r = assombrir(mesure, force).contraste
+      expect(r, String(force)).toBeGreaterThan(precedent)
+      precedent = r
+    }
+  })
+})
+
 describe('niveau de lisibilité', () => {
   it('suit les seuils WCAG, sans arrondi complaisant', () => {
     expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.5 })).toBe('bonne')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.49 })).toBe('correcte')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 3 })).toBe('correcte')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 2.99 })).toBe('faible')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.49 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 3 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 2.99 })).toBe('insuffisante')
+  })
+
+  /* Le défaut que ce test tient fermé : le titre disait « correcte » pour
+     3,5:1, un rapport pourtant sous le seuil AA du petit texte. Un mot qui
+     rassure au-dessous du seuil vaut moins que pas de mot du tout. */
+  it('ne dit « bonne » qu’au-dessus du seuil AA du petit texte', () => {
+    for (const contraste of [1, 2.5, 2.99, 3, 3.5, 4.49]) {
+      expect(niveau({ libelles: 'clair', voile: 0, contraste }), String(contraste))
+        .not.toBe('bonne')
+    }
+    expect(SEUIL_AA).toBe(4.5)
+    expect(SEUIL_UI).toBe(3)
   })
 })

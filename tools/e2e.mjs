@@ -195,11 +195,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   }));
   t(th.attr === 'sombre' && th.url.includes('t=sombre'), 'thème : bascule et mémorisation dans l\'URL', th.bg);
 
-  /* --- 15. rien d'écrit sur l'appareil
-     L'application est installable : un cache existe donc, et l'annoncer
-     absent serait faux. Ce qu'on vérifie, c'est ce qu'il contient (les
-     fichiers de l'application, jamais un réglage ni une image) et qu'aucun
-     des mécanismes de stockage adressables ne porte quoi que ce soit. */
+  /* --- 15. ce qui est écrit sur l'appareil, et rien d'autre
+     Deux choses existent, et les annoncer absentes serait faux : le cache du
+     Service Worker, parce que l'application est installable, et l'historique
+     des motifs. On vérifie donc leur contenu, pas leur absence. Le cache ne
+     porte que les fichiers de l'application ; l'historique ne porte que dix
+     fois quatre réglages, sans image, sans horodatage, sans identifiant, sans
+     URL. Les autres mécanismes, eux, restent vides. */
   await page.evaluate(() => navigator.serviceWorker && navigator.serviceWorker.ready).catch(() => {});
   await page.waitForTimeout(600);
   const store = await page.evaluate(async () => {
@@ -212,14 +214,30 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }
     let bases = [];
     try { bases = (await indexedDB.databases()).map(b => b.name); } catch (e) { bases = []; }
+    const cles = Object.keys(localStorage);
     return {
-      ls: localStorage.length, ss: sessionStorage.length,
-      cookie: document.cookie.length, bases, entrees
+      cles, ss: sessionStorage.length,
+      cookie: document.cookie.length, bases, entrees,
+      motifs: localStorage.getItem('aplat:motifs')
     };
   });
-  t(store.ls === 0 && store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
-    'vie privée : rien d\'écrit sur l\'appareil',
-    `local ${store.ls}, session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
+  t(store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
+    'vie privée : ni session, ni cookie, ni base indexée',
+    `session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
+  const clesEnTrop = store.cles.filter(c => c !== 'aplat:motifs');
+  t(clesEnTrop.length === 0,
+    'vie privée : le stockage local ne porte que l\'historique des motifs',
+    store.cles.join(', ') || 'aucune clé');
+  {
+    let liste = null;
+    try { liste = JSON.parse(store.motifs || '[]'); } catch (e) { liste = null; }
+    const tableau = Array.isArray(liste) ? liste : null;
+    const champs = new Set(tableau ? tableau.flatMap(e => Object.keys(e || {})) : ['?']);
+    const suspect = /https?:|\d{10,}|[a-f0-9]{16,}/i.test(store.motifs || '');
+    t(tableau !== null && tableau.length <= 10 && [...champs].every(c => 'mpds'.includes(c)) && !suspect,
+      'vie privée : l\'historique ne porte que quatre réglages par motif, dix au plus',
+      `${tableau ? tableau.length : '?'} entrées, champs ${[...champs].join('')}, ${(store.motifs || '').length} octets`);
+  }
   const horsSite = store.entrees.filter(u => !u.startsWith('http://127.0.0.1:' + PORT));
   const avecEtat = store.entrees.filter(u => /[?&](m|p|d|s|r|t)=/.test(u));
   t(store.entrees.length > 0 && horsSite.length === 0 && avecEtat.length === 0,
@@ -398,11 +416,17 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       return {
         canvasTransition: getComputedStyle(c).transitionDuration,
         canvasOpacity: getComputedStyle(c).opacity,
-        dotDuration: dots ? getComputedStyle(dots).animationDuration : null
+        dotDuration: dots ? getComputedStyle(dots).animationDuration : null,
+        /* Le repli de l'aperçu au défilement : la boîte et l'échelle de
+           l'appareil sont les deux seules transitions ajoutées depuis. */
+        boiteTransition: getComputedStyle(document.getElementById('scene-boite')).transitionDuration,
+        appareilTransition: getComputedStyle(document.getElementById('appareil')).transitionDuration
       };
     });
     const small = v => !v || parseFloat(v) <= 0.01;
-    t(small(rm.canvasTransition) && small(rm.dotDuration), 'mouvement réduit : transitions et animations coupées', JSON.stringify(rm));
+    t(small(rm.canvasTransition) && small(rm.dotDuration) &&
+      small(rm.boiteTransition) && small(rm.appareilTransition),
+      'mouvement réduit : transitions et animations coupées, repli compris', JSON.stringify(rm));
     t(parseFloat(rm.canvasOpacity) === 1, 'mouvement réduit : le canevas reste opaque', rm.canvasOpacity);
     await rctx.close();
   }
@@ -501,7 +525,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       const r = cv.getBoundingClientRect();
       const arCv = r.width / r.height, arCible = 1179 / 2556;
       let veil = 0, niveau = 0, total = 0;
-      const niv = m => m.contraste >= 4.5 ? 'bonne' : m.contraste >= 3 ? 'correcte' : 'faible';
+      const niv = m => m.contraste >= 4.5 ? 'bonne' : m.contraste >= 3 ? 'juste' : 'insuffisante';
       for (const f of M.FAMILLES) for (const p of M.ORDRE_PALETTES) for (const d of [0, 1, 2]) {
         total++;
         const a = M.mesurer(f.id, p, d, 7314, cv.width, cv.height);
@@ -616,7 +640,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const vide2 = await lp2.evaluate(() => ({
       detail: document.getElementById('verdict-detail').textContent,
       titre: document.getElementById('verdict-titre').textContent,
-      pastilles: document.querySelectorAll('.verdict-bonne, .verdict-correcte, .verdict-faible').length
+      pastilles: document.querySelectorAll('.verdict-bonne, .verdict-juste, .verdict-insuffisante').length
     }));
     t(!/:1/.test(vide2.detail) && vide2.pastilles === 0,
       'lisibilité : aucun chiffre affiché tant qu\'il n\'y a rien à mesurer', vide2.detail.slice(0, 50));
@@ -730,6 +754,258 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     t(bloque === 'bloquée', 'réseau : une requête sortante est refusée par la politique', bloque);
     await cctx.close();
+  }
+
+  /* --- 19. le mot du verdict suit toujours la bande du rapport mesuré
+     Le titre annonçait « correcte » pour 3,5:1 pendant que le corps disait
+     « un peu juste » : deux mots pour une seule mesure, et le plus rassurant
+     des deux sous le seuil AA du petit texte. On relit ici le rapport affiché,
+     on en déduit la bande, et on exige le mot et la forme de cette bande.
+     La bande basse ne se produit pas : le voile ramène toute combinaison
+     au-dessus de 3:1. Elle est éprouvée dans `src/lib/moteur.test.ts`. */
+  {
+    const MOTS = {
+      fr: { bonne: 'bonne', juste: 'juste', insuffisante: 'insuffisante' },
+      en: { bonne: 'good', juste: 'borderline', insuffisante: 'insufficient' }
+    };
+    const MOTIFS = [
+      { q: 'm=vagues&p=soleil&d=0', attendu: 'bonne' },
+      { q: 'm=vagues&p=ciel&d=2', attendu: 'juste' },
+      { q: 'm=marguerites&p=nuit&d=2', attendu: null }
+    ];
+    const vctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const vp = await vctx.newPage();
+    for (const langue of ['fr', 'en']) {
+      for (const motif of MOTIFS) {
+        await vp.goto(`http://127.0.0.1:${PORT}/?l=${langue}&s=4242&r=1179x2556&${motif.q}`, { waitUntil: 'networkidle' });
+        await vp.waitForTimeout(300);
+        const lu = await vp.evaluate(() => {
+          const forme = document.querySelector('.verdict-i > span');
+          return {
+            titre: document.getElementById('verdict-titre').textContent,
+            detail: document.getElementById('verdict-detail').textContent,
+            forme: forme ? forme.className : ''
+          };
+        });
+        // « 3,9:1 » en français, « 3.9:1 » en anglais
+        const trouve = lu.detail.match(/(\d+[.,]\d+):1/);
+        const rapport = trouve ? parseFloat(trouve[1].replace(',', '.')) : NaN;
+        /* Le rapport est affiché arrondi au dixième : à moins d'un demi
+           dixième d'une borne, les deux bandes voisines sont recevables. */
+        const bande = rapport >= 4.5 ? 'bonne' : rapport >= 3 ? 'juste' : 'insuffisante';
+        const voisine = Math.abs(rapport - 4.5) < 0.05 ? 'juste'
+          : Math.abs(rapport - 3) < 0.05 ? 'insuffisante' : bande;
+        const mots = [...new Set([MOTS[langue][bande], MOTS[langue][voisine]])];
+        t(Number.isFinite(rapport), `verdict ${langue} ${motif.q} : le détail donne un rapport`, lu.detail.slice(0, 40));
+        t(mots.some(m => lu.titre.toLowerCase().endsWith(m)),
+          `verdict ${langue} ${motif.q} : le titre porte le mot de la bande`,
+          `${rapport}:1 -> attendu « ${mots.join(' ou ')} », lu « ${lu.titre} »`);
+        t(lu.forme === 'verdict-' + bande || lu.forme === 'verdict-' + voisine,
+          `verdict ${langue} ${motif.q} : la forme suit la bande`,
+          `${bande} -> ${lu.forme}`);
+        if (motif.attendu) {
+          t(lu.forme === 'verdict-' + motif.attendu,
+            `verdict ${langue} ${motif.q} : la bande attendue est atteinte`, lu.forme);
+        }
+      }
+    }
+    await vctx.close();
+  }
+
+  /* --- 20. deux gestes voisins, deux effets distincts
+     « Variante » ne touche que la graine, « Surprends-moi » tire aussi la
+     famille et la palette. Deux boutons qui feraient la même chose ne
+     mériteraient pas deux libellés. */
+  {
+    const sctx3 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const sp = await sctx3.newPage();
+    const etat = () => sp.evaluate(() => ({
+      fam: document.querySelector('[data-famille][aria-checked="true"]').dataset.famille,
+      pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
+      dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
+      graine: new URLSearchParams(location.search).get('s')
+    }));
+    await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await sp.waitForTimeout(400);
+
+    const depart = await etat();
+    await sp.$eval('#btn-graine', e => e.click());
+    await sp.waitForTimeout(300);
+    const apresGraine = await etat();
+    t(apresGraine.fam === depart.fam && apresGraine.pal === depart.pal && apresGraine.dens === depart.dens,
+      'variante : ni la famille ni la palette ni la densité ne bougent',
+      `${apresGraine.fam}/${apresGraine.pal}/d${apresGraine.dens}`);
+    t(apresGraine.graine !== depart.graine, 'variante : la graine change',
+      `${depart.graine} -> ${apresGraine.graine}`);
+
+    /* Dix tirages : le tirage exclut la valeur courante, aucun ne doit donc
+       laisser la famille ou la palette en place, ni répéter la densité. */
+    let familleFigee = 0, paletteFigee = 0, densiteBougee = 0, graineFigee = 0;
+    let avant = apresGraine;
+    for (let i = 0; i < 10; i++) {
+      await sp.$eval('#btn-surprise', e => e.click());
+      await sp.waitForTimeout(220);
+      const apres = await etat();
+      if (apres.fam === avant.fam) familleFigee++;
+      if (apres.pal === avant.pal) paletteFigee++;
+      if (apres.dens !== avant.dens) densiteBougee++;
+      if (apres.graine === avant.graine) graineFigee++;
+      avant = apres;
+    }
+    t(familleFigee === 0 && paletteFigee === 0,
+      'surprends-moi : famille et palette changent à chaque tirage',
+      `${familleFigee} familles et ${paletteFigee} palettes figées sur 10`);
+    t(graineFigee === 0, 'surprends-moi : la graine change aussi', graineFigee + ' graines figées sur 10');
+    t(densiteBougee === 0, 'surprends-moi : la densité ne bouge pas, c\'est un goût',
+      densiteBougee + ' densités changées sur 10');
+
+    const libelles = await sp.evaluate(() => ({
+      variante: document.querySelector('#btn-graine span:last-child').textContent.trim(),
+      surprise: document.querySelector('#btn-surprise span:last-child').textContent.trim()
+    }));
+    t(libelles.variante !== libelles.surprise && libelles.variante.length > 0,
+      'les deux gestes portent deux libellés distincts',
+      `« ${libelles.variante} » et « ${libelles.surprise} »`);
+    await sctx3.close();
+  }
+
+  /* --- 21. l'aperçu assombri change le verdict, jamais le fichier
+     Un thème sombre assombrit le fond d'écran : les libellés clairs y gagnent.
+     L'aperçu doit le montrer et le verdict le dire, mais le PNG téléchargé
+     porte le voile calculé pour le fond tel quel, et ne bouge pas d'un octet. */
+  {
+    const dctx = await browser.newContext({
+      viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
+    });
+    const dp = await dctx.newPage();
+    await dp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(400);
+
+    const lire = () => dp.evaluate(() => ({
+      detail: document.getElementById('verdict-detail').textContent,
+      titre: document.getElementById('verdict-titre').textContent,
+      presse: document.getElementById('btn-assombri').getAttribute('aria-pressed'),
+      voile: !!document.querySelector('.apercu-assombri'),
+      empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96)
+    }));
+    const clair = await lire();
+    await dp.$eval('#btn-assombri', e => e.click());
+    await dp.waitForTimeout(400);
+    const sombre = await lire();
+
+    const rapport = (texte) => parseFloat((texte.match(/(\d+[.,]\d+):1/) || [0, '0'])[1].replace(',', '.'));
+    t(clair.presse === 'false' && sombre.presse === 'true',
+      'assombri : la bascule dit son état', `${clair.presse} -> ${sombre.presse}`);
+    t(!clair.voile && sombre.voile, 'assombri : l\'aplat est peint sur l\'aperçu');
+    t(rapport(sombre.detail) > rapport(clair.detail),
+      'assombri : le rapport annoncé monte pour des libellés clairs',
+      `${rapport(clair.detail)}:1 -> ${rapport(sombre.detail)}:1`);
+    t(/ne change pas/.test(sombre.detail) && !/ne change pas/.test(clair.detail),
+      'assombri : le détail dit que le fichier ne change pas', sombre.detail.slice(-60));
+    t(clair.empreinte === sombre.empreinte,
+      'assombri : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
+
+    /* Et le fichier, pour de vrai. */
+    const [dl2] = await Promise.all([
+      dp.waitForEvent('download', { timeout: 30000 }),
+      dp.$eval('#btn-export', e => e.click())
+    ]);
+    const chemin = path.join(OUT, 'assombri-' + dl2.suggestedFilename());
+    await dl2.saveAs(chemin);
+    await dp.$eval('#btn-assombri', e => e.click());
+    await dp.waitForTimeout(400);
+    const [dl3] = await Promise.all([
+      dp.waitForEvent('download', { timeout: 30000 }),
+      dp.$eval('#btn-export', e => e.click())
+    ]);
+    const chemin2 = path.join(OUT, 'clair-' + dl3.suggestedFilename());
+    await dl3.saveAs(chemin2);
+    t(fs.readFileSync(chemin).equals(fs.readFileSync(chemin2)),
+      'assombri : le PNG téléchargé est le même, octet pour octet',
+      fs.statSync(chemin).size + ' o contre ' + fs.statSync(chemin2).size + ' o');
+    await dctx.close();
+  }
+
+  /* --- 22. l'historique : ce qu'il retient, ce qu'il rend, ce qu'il oublie
+     La seule mémoire de l'application. Elle doit se remplir de ce qu'on a
+     vraiment regardé, tenir un rechargement, rendre un motif d'un appui, se
+     vider d'un bouton, et ne jamais dépasser dix. */
+  {
+    const hctx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
+    const hp = await hctx.newPage();
+    const lu = () => hp.evaluate(() => ({
+      vignettes: document.querySelectorAll('#liste-historique button').length,
+      stockage: JSON.parse(localStorage.getItem('aplat:motifs') || '[]'),
+      vide: !!document.querySelector('.historique-vide')
+    }));
+
+    await hp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242', { waitUntil: 'networkidle' });
+    await hp.waitForTimeout(400);
+    const neuf = await lu();
+    t(neuf.vignettes === 0 && neuf.vide && neuf.stockage.length === 0,
+      'historique : rien tant que rien n\'a été regardé', JSON.stringify(neuf.stockage));
+
+    /* Un motif traversé en un clin d'oeil ne compte pas : sans ce délai,
+       parcourir les familles remplirait la liste de motifs jamais regardés. */
+    await hp.$eval('[data-famille="blobs"]', e => e.click());
+    await hp.waitForTimeout(500);
+    await hp.$eval('[data-famille="arches"]', e => e.click());
+    await hp.waitForTimeout(500);
+    const traverse = await lu();
+    t(traverse.stockage.length === 0,
+      'historique : un motif traversé ne s\'enregistre pas', traverse.stockage.length + ' entrées');
+
+    await hp.waitForTimeout(2600);
+    const regarde = await lu();
+    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'arches',
+      'historique : un motif regardé s\'enregistre', JSON.stringify(regarde.stockage));
+
+    /* Dix-huit familles regardées : la liste s'arrête à dix, la plus ancienne
+       tombe, et rien ne se répète. */
+    await hp.evaluate(() => {
+      const dix = ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes',
+        'pointille', 'trame', 'colonnes', 'ecailles', 'terrazzo', 'confettis'];
+      localStorage.setItem('aplat:motifs',
+        JSON.stringify(dix.map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))));
+    });
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(500);
+    const relu = await lu();
+    t(relu.vignettes === 10, 'historique : dix au plus, même si le stockage en porte douze',
+      relu.vignettes + ' vignettes');
+
+    const cible = await hp.evaluate(() => {
+      const b = document.querySelectorAll('#liste-historique button')[3];
+      b.click();
+      return b.getAttribute('aria-label');
+    });
+    await hp.waitForTimeout(400);
+    const apres = await hp.evaluate(() => location.search);
+    t(/m=decoupes/.test(apres), 'historique : un appui restaure le motif',
+      `${cible} -> ${apres}`);
+
+    await hp.$eval('#btn-oublier', e => e.click());
+    await hp.waitForTimeout(300);
+    const efface = await hp.evaluate(() => ({
+      cle: localStorage.getItem('aplat:motifs'),
+      vignettes: document.querySelectorAll('#liste-historique button').length
+    }));
+    t(efface.cle === null && efface.vignettes === 0,
+      'historique : le bouton efface la clé, pas seulement l\'affichage',
+      String(efface.cle));
+
+    /* Un stockage se trafique à la main : ce qui en sort est traité comme une
+       barre d'adresse, avec les mêmes listes blanches. */
+    await hp.evaluate(() => localStorage.setItem('aplat:motifs',
+      '[{"m":"constructor","p":"lime","d":1,"s":1},{"m":"vagues","p":"lime","d":9,"s":1},{"m":"vagues","p":"lime","d":1,"s":7},"texte",42]'));
+    const errAvant = errors.length;
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(500);
+    const hostile = await lu();
+    t(hostile.vignettes === 1 && errors.length === errAvant,
+      'historique : un stockage trafiqué ne passe pas, et ne casse rien',
+      hostile.vignettes + ' vignette retenue sur 5 entrées');
+    await hctx.close();
   }
 
   await browser.close();

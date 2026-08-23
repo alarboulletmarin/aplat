@@ -7,7 +7,7 @@ export const en: Textes = {
   document: {
     titre: 'Aplat: generative wallpapers',
     description:
-      'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing stored.',
+      'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing sent.',
   },
   entete: {
     evitement: 'Skip to settings',
@@ -27,16 +27,22 @@ export const en: Textes = {
     titre: 'Icon label legibility',
     attente: 'Nothing to measure until there is an image.',
     bonne: 'good',
-    correcte: 'acceptable',
-    faible: 'poor',
+    juste: 'borderline',
+    insuffisante: 'insufficient',
     libellesClairs: 'light labels',
     libellesSombres: 'dark labels',
-    conseilBonne: 'Labels stay crisp across the whole grid.',
-    conseilCorrecte: 'Readable, a little tight over the busiest areas.',
-    conseilFaible: 'Try the Night palette, or a calmer density.',
+    conseilBonne: 'Above the 4.5:1 AA threshold: labels stay crisp across the whole grid.',
+    conseilJuste:
+      'Below the 4.5:1 AA threshold, above 3:1: a darker palette or a calmer density buys back the margin.',
+    conseilInsuffisante: 'Below 3:1: try the Night palette, or a calmer density.',
     voile: 'legibility veil {n}%',
     sansVoile: 'no veil needed',
     titreNiveau: 'Icon label legibility: {niveau}',
+    resume: 'Legibility {niveau}, {contraste}:1',
+    assombri: 'Dimmed',
+    assombriTitre: 'Simulates the dimmed background of a dark theme, without changing the file',
+    assombriNote:
+      'Preview dimmed, roughly as a dark theme would. The downloaded file itself does not change.',
     detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {
@@ -45,6 +51,8 @@ export const en: Textes = {
     groupeAbstraits: 'Abstract',
     groupeFigures: 'Figures',
     palette: 'Palette',
+    surprise: 'Surprise me',
+    surpriseTitre: 'Draws a random family, palette and seed',
     densite: 'Density',
     calme: 'Calm',
     moyen: 'Medium',
@@ -68,15 +76,23 @@ export const en: Textes = {
     presetTablette: 'Tablet',
     presetOrdinateur: 'Computer',
   },
+  historique: {
+    titre: 'Recent patterns',
+    vide: 'The patterns you look at land here, ten at most.',
+    effacer: 'Clear',
+    note:
+      'Kept on this device, in the browser: four settings per pattern, no image and no identifier.',
+    motif: '{famille}, {palette}, seed {graine}',
+  },
   partage: {
-    titre: 'Sharing and settings',
+    titre: 'Sharing',
     copier: 'Copy the pattern link',
     copie: 'Link copied',
     echec: 'Copying failed. The link is below, ready to copy by hand.',
     note: 'The link carries the settings, nothing else.',
     graine: 'Seed',
     confidentialite:
-      'No account, no network, nothing stored. Everything is computed on this device; offline, the browser only keeps the application’s own files.',
+      'No account, no network. The last ten patterns are kept on this device, in the browser: four settings each, no image and no identifier, clearable with one button. Nothing else is stored; offline, the browser only keeps the application’s own files.',
   },
   preferences: {
     langue: 'Language',
@@ -86,7 +102,8 @@ export const en: Textes = {
     systeme: 'System',
   },
   barre: {
-    nouveau: 'New pattern',
+    nouveau: 'Variation',
+    nouveauTitre: 'Redraws the same pattern with a new seed',
     telecharger: 'Download',
     rendu: 'Rendering',
     enregistre: 'Image saved',

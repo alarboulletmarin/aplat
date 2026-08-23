@@ -6,8 +6,9 @@ Des fonds d'écran génératifs, exportés à la résolution exacte de l'apparei
 Tout est calculé dans le navigateur.
 
 Gratuit, sans compte, sans pub, sans traceur, sans serveur. Aucune donnée ne
-sort de l'appareil et rien n'y est enregistré : ce qui est partageable tient
-dans l'URL. Installable, et pleinement utilisable hors ligne.
+sort de l'appareil : ce qui est partageable tient dans l'URL, et la seule
+chose écrite sur l'appareil est la liste des dix derniers motifs regardés,
+effaçable d'un bouton. Installable, et pleinement utilisable hors ligne.
 
 ---
 
@@ -25,9 +26,12 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 - *Primaire* : le motif vu derrière de vraies icônes, et le bouton Télécharger.
   C'est là qu'on décide, c'est là qu'on finit.
 - *Secondaire* : les trois réglages (famille, palette, densité) et la
-  résolution, déjà détectée, repliée tant qu'on n'y touche pas.
-- *Caché* : langue, thème, lien de partage, version. En bas, sous le trait,
-  pour qui les cherche.
+  résolution, déjà détectée, repliée tant qu'on n'y touche pas. Deux raccourcis
+  de hasard, aux effets distincts : « Variante », dans la barre, ne change que
+  la graine ; « Surprends-moi », dans la carte Famille, tire aussi une famille
+  et une palette.
+- *Caché* : le lien de partage, en bas du bloc ; puis, dans le pied de page,
+  la langue, le thème, la version et la source. Pour qui les cherche.
 
 ### Pourquoi une seule section
 
@@ -37,6 +41,11 @@ exactement ça : on réglerait à l'aveugle, puis on irait vérifier. L'aperçu 
 donc épinglé en haut de l'écran et les réglages défilent dessous ; sur
 ordinateur, les deux sont côte à côte. Pas d'onglet, pas de barre de navigation,
 pas d'étape.
+
+Le panneau de réglages ne contient que ce qui agit sur le fichier téléchargé :
+famille, palette, densité, résolution. La langue et le thème sont dans le pied
+de page, à côté de la version et du lien vers la source, parce qu'ils ne
+changent que l'affichage.
 
 Le parti visuel et les règles d'interface sont dans
 [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
@@ -51,11 +60,25 @@ Le parti visuel et les règles d'interface sont dans
 | **Chargement** | Trois points au centre de la maquette pendant le rendu. Le bouton passe à « Rendu en cours » et devient `aria-busy`. | Se résout seul. |
 | **Erreur** | Carte à trait d'alerte et triangle, cause exacte : au-delà de 40 Mpx on dit le nombre ; si le navigateur a refusé d'allouer le canevas (ce que font les navigateurs mobiles au-delà d'une certaine surface, en rendant une image noire sans le dire), on dit d'essayer plus petit ; sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
 | **Succès** | Carte lime : dimensions produites, format, poids réel du fichier, et le geste pour passer de « téléchargé » à « dans la pellicule ». | Rien à faire, c'est fini. |
-| **Données trop longues** | Chaque libellé a son échappatoire prévue : ellipse sur les puces de réglage et les icônes de la maquette, retour à la ligne dans les cartes, colonnes qui s'étirent, `overflow-wrap` sur les valeurs. Le bouton secondaire cède la place au primaire. | Sans objet. |
+| **Données trop longues** | Chaque libellé a son échappatoire prévue : les libellés de carte reviennent à la ligne, sur deux lignes s'il le faut, et ne s'élident jamais ; ellipse sur les icônes de la maquette ; colonnes qui s'étirent ; `overflow-wrap` sur les valeurs. Le bouton secondaire cède la place au primaire. | Sans objet. |
 
 Le verdict de lisibilité est affiché en permanence, pas seulement en cas de
 problème : rapport de contraste mesuré, couleur de libellé retenue, force du
-voile appliqué, et une phrase qui dit quoi faire si c'est juste.
+voile appliqué, et une phrase qui dit quoi faire si c'est juste. Le
+qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
+4,5:1, le seuil AA du petit texte qu'est un libellé d'icône ; **juste** entre
+3:1 et 4,5:1 ; **insuffisante** en dessous. Chaque bande a sa forme, disque
+plein, disque à moitié, triangle.
+
+Une bascule **Assombri**, au bout de la rangée du verdict, simule le fond
+d'écran tel qu'un thème sombre l'assombrit : les libellés clairs y gagnent, les
+sombres y perdent, et le rapport annoncé suit. Le fichier téléchargé, lui, ne
+change pas d'un octet, ce qu'une vérification compare pour de bon.
+
+Sur téléphone en portrait, l'aperçu se replie en vignette dès qu'on défile, et
+le verdict se condense sur une ligne, dépliable au doigt : les grilles passent
+de 37 % à 58 % de la hauteur de l'écran. Le repli se fait à l'échelle, pas à la
+géométrie, si bien que le motif n'est pas redessiné pour l'occasion.
 
 ---
 
@@ -121,8 +144,18 @@ suffisait à faire lever le rendu tout entier.
 ## Ce qui est enregistré, et ce qui ne l'est pas
 
 Aucun compte, aucun réseau à l'exécution, aucune mesure d'audience. Ni cookie,
-ni `localStorage`, ni `sessionStorage`, ni base indexée : les réglages vivent
-dans la barre d'adresse, et rien d'autre ne survit à la fermeture de l'onglet.
+ni `sessionStorage`, ni base indexée. Les réglages du motif affiché vivent dans
+la barre d'adresse.
+
+**Une seule clé de `localStorage`**, `aplat:motifs` : les dix derniers motifs
+regardés, quatre réglages chacun. Ni image (le rendu est déterministe, le
+moteur les redessine), ni horodatage, ni identifiant, ni URL, ni compteur de
+visites. Rien qui distingue un appareil d'un autre, rien qui décrive une
+session. Deux cents octets pour cinq entrées, et un bouton « Effacer » dans la
+carte « Derniers motifs ». Un motif n'y entre qu'après être resté deux secondes
+et demie à l'écran : parcourir les familles ne remplit pas la liste. Ce que
+cette clé contient exactement est vérifié à chaque `npm run check`, champ par
+champ.
 
 L'application étant installable, un cache existe, celui du Service Worker. Il
 ne contient **que les fichiers de l'application** : le document, le script, la
@@ -219,16 +252,19 @@ thèmes et les deux langues :
   demi-disque, triangle), le thème un disque plein, vide ou à moitié, l'erreur
   un triangle. Jamais la couleur seule ;
 - le corail est réservé aux aplats et aux formes, jamais au texte ;
-- cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, et
-  atteignabilité de chacun des 43 contrôles testée sous les deux barres
-  collantes ;
+- cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, fenêtres
+  couchées comprises, et atteignabilité de chaque contrôle testée sous les deux
+  barres collantes. Plus exigeant encore : chacun doit se dégager
+  *entièrement* des deux couches à quelque position de défilement, ce que les
+  cartes de motif ne faisaient pas sur un petit téléphone avant le repli ;
 - focus visible partout et **jamais masqué** par ces deux barres : ni le
   défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
   (WCAG 2.2, 2.4.11) ;
-- les cinq groupes de réglages sont de vrais groupes radio : un arrêt de
-  tabulation par groupe, flèches et Début/Fin. Le parcours passe de 42 arrêts
-  à 11 ;
+- les cinq groupes de réglages sont de vrais groupes radio, et l'historique une
+  barre d'outils : un arrêt de tabulation par groupe, flèches et Début/Fin.
+  Seize arrêts en tout, historique plein compris, là où les puces seules en
+  feraient une soixantaine ;
 - lien d'évitement, points de repère, `aria-live` sur la lisibilité, sur le
   résultat de l'export et sur la confirmation de copie, sans rien y réécrire
   quand rien ne change ;
@@ -249,9 +285,11 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Trait du bouton primaire en `--accent-encre` plutôt que `--encre` | En sombre `--encre` est la crème, qui disparaît sur l'aplat lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
 | Le carré de sélection reçoit un filet à la couleur du texte | Sur la puce inversée du thème sombre (un aplat crème), le lime tombait à 1,1:1 et disparaissait. |
 | La colonne des préférences passe de 150 à 200 px de seuil | À 150, la colonne Thème tombait à 52 px par bouton : « Système » partait seul sur une deuxième rangée, étiré sur toute la largeur. |
+| Les libellés de carte reviennent à la ligne au lieu de s'élider | « Marguerites » tronqué en « Margueri… » ne nomme plus rien, et la piste d'une grille à quatre colonnes est trop étroite pour lui dès 1024 px de fenêtre. |
 | Boutons langue et thème : plancher lié au contenu | Avec un plancher fixe la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
 | Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
 | Les grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
+| Langue et thème sont dans le pied de page, pas dans le panneau | Ils ne changent rien au fichier téléchargé. Mêlés à la famille et à la palette, ils laissaient croire qu'un thème sombre s'exportait. |
 | Le pied de page prend 44 px de haut par élément | Le lien vers la source n'est pas une mention légale en petit : l'AGPL en fait une obligation, et une obligation doit être cliquable. |
 | La boîte de contenu de l'appareil porte le rapport d'aspect, bordure défalquée | Le canevas est en `inset:0` : sans ça l'aperçu était un format décalé de 1,5 % et sa mesure de lisibilité portait sur une image qui n'existait pas. |
 | La grille d'icônes de la maquette perd des rangées si l'appareil est large | Tout y est dimensionné en unités calées sur le petit côté ; sur un écran large la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
@@ -260,7 +298,10 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée, alors que le champ affiche toujours le texte tapé. |
 | La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle. |
 | Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur (5,4:1, voile 18 %), écrit dans une région live avant toute mesure. |
-| Les puces de réglage deviennent des groupes radio | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
+| Le qualificatif de lisibilité tient à trois bandes nommées, et le composant le prend dans le dictionnaire par le nom du niveau | Le titre disait « correcte » pour 3,5:1 pendant que le corps disait « un peu juste » : deux mots pour une seule mesure, et le plus rassurant des deux sous le seuil AA du petit texte. |
+| L'historique garde quatre réglages par motif, jamais une vignette | Le rendu est déterministe : une image enregistrée ne serait qu'un cache de calcul, mille fois plus lourd, et ferait du stockage autre chose qu'une liste de réglages. |
+| La promesse de confidentialité a été réécrite en même temps que l'historique est arrivé | « Aucune donnée enregistrée » est devenu faux le jour où quelque chose l'a été. Un test l'interdit maintenant dans les deux langues. |
+| Les puces de réglage deviennent des groupes radio, et l'historique une barre d'outils | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Un arrêt de tabulation par groupe au lieu d'un par puce ; seize en tout, historique plein compris. Dans l'historique les flèches déplacent le focus sans restaurer : ce sont dix actions, pas dix options d'un même réglage. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
 | Espaces insécables dans les chaînes françaises | Le texte se coupait devant « % », « : » et à l'intérieur des guillemets. |

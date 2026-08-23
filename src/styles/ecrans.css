@@ -74,13 +74,26 @@
   background: var(--fond);
   padding: 8px 0 12px;
 }
+/* La hauteur vient de `hauteurScene`, posée en style en ligne : elle tient
+   compte de la barre d'action, que la feuille de style ne sait pas mesurer.
+   Celle d'ici ne sert qu'avant la première mesure. Pas de `min-height` : elle
+   empêcherait l'aperçu de se replier en vignette au défilement.
+
+   La transition dit d'où vient la vignette. `prefers-reduced-motion` la coupe,
+   par la règle générale de `base.css`. */
 .scene-boite {
   width: 100%;
   height: min(46vh, 560px);
-  min-height: 230px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: height 220ms ease;
+}
+/* Replié, l'appareil est mis à l'échelle depuis le haut : sa boîte de mise en
+   page garde la taille dépliée, seul le rendu rétrécit. Le canevas n'est donc
+   pas redessiné et la maquette ne se réajuste pas. */
+.scene-boite-repliee {
+  align-items: flex-start;
 }
 .appareil {
   position: relative;
@@ -105,6 +118,8 @@
   --l26: rgba(247, 243, 230, 0.26);
   --l28: rgba(247, 243, 230, 0.28);
   --l90: rgba(247, 243, 230, 0.9);
+  transform-origin: top center;
+  transition: transform 220ms ease;
 }
 .appareil-canevas {
   position: absolute;
@@ -112,6 +127,15 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+/* L'aplat qui simule le fond assombri d'un thème sombre. Son opacité vient de
+   `ASSOMBRISSEMENT`, en style en ligne : une seule valeur, dans le moteur, qui
+   sert à la fois à peindre et à recalculer le rapport de contraste. */
+.apercu-assombri {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
 }
 
 /* maquette téléphone / tablette */
@@ -513,10 +537,16 @@
 }
 
 /* --- Verdict de lisibilité ---------------------------------------------------- */
-/* Trois formes, jamais trois couleurs : disque plein, disque à moitié,
-   triangle. Le niveau se lit en niveaux de gris comme en couleur. */
+/* Trois bandes, trois formes, jamais trois couleurs : disque plein au-dessus
+   de 4,5:1, disque à moitié entre 3:1 et 4,5:1, triangle en dessous. Elles
+   partagent la même encre : le niveau se lit en niveaux de gris comme en
+   couleur, et la forme change en même temps que le mot. */
+/* La bascule d'assombrissement tient au bout de la rangée tant que le texte
+   garde trente caractères de large ; sous cette largeur elle passe à la ligne
+   plutôt que d'étrangler le détail en colonne de six mots. */
 .verdict {
   display: flex;
+  flex-wrap: wrap;
   gap: 11px;
   align-items: flex-start;
   border-top: 2px solid var(--encre);
@@ -533,7 +563,7 @@
   border-radius: 50%;
   background: var(--encre);
 }
-.verdict-correcte {
+.verdict-juste {
   display: block;
   width: 17px;
   height: 17px;
@@ -541,7 +571,7 @@
   background: linear-gradient(90deg, var(--encre) 50%, transparent 50%);
   box-shadow: inset 0 0 0 2.5px var(--encre);
 }
-.verdict-faible {
+.verdict-insuffisante {
   display: block;
   width: 19px;
   height: 17px;
@@ -549,7 +579,92 @@
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 .verdict-txt {
+  flex: 1 1 30ch;
   min-width: 0;
+}
+/* Le verdict replié : une ligne, dépliable au doigt. Le chevron dit qu'il y a
+   quelque chose dessous, et tourne quand c'est ouvert. Le détail prend toute
+   la largeur sous la rangée, la bascule d'assombrissement en occupe le bout. */
+.verdict-replie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.verdict-replie .verdict-bascule {
+  flex: 1 1 12ch;
+  min-width: 0;
+}
+.verdict-replie .verdict-d {
+  flex: 1 0 100%;
+}
+.verdict-bascule {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--encre);
+}
+.verdict-bascule .verdict-i {
+  margin-top: 0;
+}
+.verdict-chevron {
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 13px;
+  height: 8px;
+  background: var(--encre);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transition: transform 180ms ease;
+}
+.verdict-bascule[aria-expanded='true'] .verdict-chevron {
+  transform: rotate(180deg);
+}
+/* La bascule d'assombrissement : un aplat inversé quand elle est enfoncée,
+   comme les puces de choix. En niveaux de gris, l'état se lit au remplissage,
+   jamais à la teinte. */
+.btn-assombri {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 13px;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  scroll-margin-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
+}
+.btn-assombri[aria-pressed='true'] {
+  border-color: var(--encre);
+  background: var(--encre);
+  color: var(--papier);
+}
+.verdict-replie .btn-assombri {
+  align-self: center;
+}
+/* Un croissant : un anneau dont deux quarts manquent, tourné. Il ne dépend que
+   de `currentColor`, et suit donc l'inversion sans rien savoir du fond. */
+.ico-lune {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  /* Un disque plein dans lequel un second disque, décalé en haut à droite,
+     mord. Le dégradé radial ne sert pas de dégradé : ses deux arrêts sont
+     collés, il découpe. */
+  background: radial-gradient(circle 7px at 12.5px 1.5px, transparent 98%, currentColor 100%);
 }
 .verdict-t {
   font-weight: 700;
@@ -587,6 +702,18 @@
   font-size: 16.5px;
   font-weight: 700;
   letter-spacing: -0.012em;
+  margin-bottom: 14px;
+}
+/* Le titre d'une carte et l'action qui porte sur elle, sur la même ligne. La
+   rangée se replie quand la largeur manque, et le titre garde le dessus. */
+.carte-titre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.carte-titre .carte-h {
   margin-bottom: 14px;
 }
 .groupe {
@@ -632,6 +759,23 @@
 .bento {
   padding: 18px;
 }
+
+/* --- Derniers motifs -------------------------------------------------------- */
+/* Dix vignettes au plus, dans une grille qui se replie. Pas de défilement
+   horizontal : une liste bornée n'a pas besoin d'être cachée. */
+.historique {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 8px;
+}
+.historique-vide,
+.historique-n {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.historique-n {
+  margin-top: 11px;
+}
 .rangee-densite {
   display: flex;
   gap: 8px;
@@ -665,27 +809,6 @@
   gap: 12px;
   padding: 18px;
 }
-/* 200 px et non 150 : à 150, la colonne Thème tombait à 52 px par bouton et
-   « Système » passait seul sur une deuxième rangée, étiré sur toute la largeur.
-   Au-delà du seuil les deux colonnes tiennent, en dessous on passe à une seule
-   colonne pleine largeur ; dans les deux cas les trois boutons sont alignés. */
-.prefs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 14px;
-  padding-top: 13px;
-  border-top: 2px solid var(--filet);
-}
-.prefs h3 {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.prefs-rangee {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 /* --- Barre d'action : un seul appel primaire ------------------------------------ */
 /* Fond plein et filet franc, plutôt qu'un dégradé qui laisse le texte
@@ -710,20 +833,117 @@
 /* Le lien vers la source n'est pas une mention légale en petit : l'AGPL en
    fait une obligation, et une obligation doit être cliquable. D'où une cible
    de 44 px de haut comme partout ailleurs, malgré la petite taille du texte. */
+/* Réserve de fin de défilement. La barre d'action est collante : tant que le
+   bas exact du document n'est pas atteint, elle recouvre ce qui passe dessous,
+   et le dernier réglage du pied s'y coupait. La hauteur mesurée de la barre
+   comprend déjà `env(safe-area-inset-bottom)`, qu'elle porte dans son propre
+   rembourrage : la réserve suit donc l'encoche de l'appareil sans la compter
+   deux fois. */
 .pied {
-  padding: 0 0 8px;
+  padding: 0 0 calc(10px + var(--barre-h, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+/* Les réglages de l'application, séparés de ceux du motif : ce qui est dans le
+   panneau agit sur le fichier téléchargé, ce qui est ici ne change que
+   l'affichage. Le filet marque la coupure.
+
+   200 px et non 150 : à 150, la colonne Thème tombait à 52 px par bouton et
+   « Système » passait seul sur une deuxième rangée, étiré sur toute la largeur.
+   Au-delà du seuil les deux colonnes tiennent, en dessous on passe à une seule
+   colonne pleine largeur ; dans les deux cas les trois boutons sont alignés. */
+.prefs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 14px 18px;
+  padding-top: 14px;
+  border-top: 2px solid var(--filet);
+}
+.prefs h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--encre);
+  margin-bottom: 8px;
+}
+.prefs-rangee {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pied-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0 14px;
   align-items: center;
-  font-size: 12.5px;
-  color: var(--encre-douce);
 }
-.pied > * {
+.pied-meta > * {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
 }
 .pied-version {
   font-variant-numeric: tabular-nums;
+}
+
+/* --- Paysage court : la hauteur est la ressource rare ------------------------ */
+/* Une fenêtre couchée de moins de 560 px de haut ne peut pas porter le même
+   en-tête ni la même barre d'action qu'un écran debout. La barre passe en
+   variante compacte, l'en-tête se replie, et la hauteur rendue revient à
+   l'aperçu et au panneau. Les cibles restent à 44 px : c'est le rembourrage
+   qui cède, jamais la surface au doigt.
+
+   Le seuil est le même que `PAYSAGE_COURT` dans `lib/geometrie.ts`, qui calcule
+   la hauteur de la scène en supposant la barre déjà réduite. Les deux valeurs
+   basculent ensemble ou pas du tout. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .page {
+    padding-top: 12px;
+    gap: 14px;
+  }
+  .titre {
+    font-size: clamp(40px, 7.5vw, 62px);
+  }
+  .entete-arche {
+    width: clamp(20px, 3.6vw, 30px);
+    height: clamp(30px, 5.6vw, 44px);
+  }
+  .entete-filet {
+    margin-top: 8px;
+  }
+  .entete-pied {
+    padding-top: 8px;
+  }
+  .accroche {
+    font-size: 14px;
+  }
+
+  .scene {
+    padding: 6px 0 8px;
+    gap: 8px;
+  }
+
+  .barre {
+    padding: 5px 0 calc(5px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+  .btn-graine,
+  .btn-export {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+  .btn-graine {
+    min-width: 44px;
+    padding: 0 13px;
+    font-size: 14px;
+  }
+  .btn-export {
+    padding: 0 14px;
+    font-size: 15.5px;
+  }
+  .note {
+    padding: 9px 13px;
+  }
 }

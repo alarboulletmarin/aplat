@@ -29,17 +29,62 @@ export interface Geometrie {
 export const BORDURE_APPAREIL = 4
 
 /**
+ * La hauteur au-delà de laquelle une fenêtre couchée n'est plus « courte » :
+ * la même valeur que le `max-height` de la règle `@media (orientation:
+ * landscape)` d'`ecrans.css`. Les deux doivent basculer ensemble, sinon la
+ * scène est calculée pour une barre d'action que la feuille de style n'a pas
+ * encore réduite.
+ */
+export const PAYSAGE_COURT = 560
+
+/**
+ * Ce que la scène doit laisser sous elle en paysage court : la barre d'action
+ * compacte, l'encoche de l'appareil, le verdict de lisibilité et les marges de
+ * la scène. Une hauteur, pas une fraction : à 390 px de haut, 62 % de l'écran
+ * ne laissent pas de quoi poser une barre de 56 px.
+ */
+const RESERVE_PAYSAGE = 168
+
+/** Vrai quand la fenêtre est couchée et trop basse pour la mise en page pleine. */
+export function paysageCourt(fenetre: Boite): boolean {
+  return fenetre.largeur > fenetre.hauteur && fenetre.hauteur <= PAYSAGE_COURT
+}
+
+/**
  * La hauteur réservée à la scène. Elle prend une part de l'écran, jamais tout :
  * les réglages doivent rester atteignables sans que l'aperçu disparaisse.
+ *
+ * En paysage court, la part cesse d'être une fraction pour devenir un reste.
+ * L'aperçu y était rogné par la barre d'action : un plancher de 300 px sur une
+ * fenêtre de 390 px de haut ne laisse rien au verdict ni à la barre, et le bas
+ * du téléphone, dock compris, passait dessous. On le redimensionne plutôt que
+ * de le laisser couper.
  */
 export function hauteurScene(fenetre: Boite): number {
-  const etroit = fenetre.largeur < 760
   const h = fenetre.hauteur || 800
+  if (paysageCourt(fenetre)) {
+    return Math.round(Math.max(150, Math.min(420, h - RESERVE_PAYSAGE)))
+  }
+  const etroit = fenetre.largeur < 760
   return Math.round(
     etroit
       ? Math.max(214, Math.min(348, h * 0.4))
       : Math.max(300, Math.min(600, h * 0.62)),
   )
+}
+
+/**
+ * La hauteur de l'aperçu une fois replié en vignette, au défilement.
+ *
+ * Sur téléphone en portrait, la scène collante, le verdict et la barre
+ * d'action occupaient ensemble les deux tiers de l'écran : il ne restait
+ * presque rien pour choisir parmi dix-huit familles et onze palettes. Replié,
+ * l'aperçu garde de quoi juger la silhouette du motif, et rend le reste aux
+ * grilles.
+ */
+export function hauteurVignette(fenetre: Boite): number {
+  const h = fenetre.hauteur || 800
+  return Math.round(Math.max(120, Math.min(180, h * 0.22)))
 }
 
 /**

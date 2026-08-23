@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { mesurer, type Densite, type IdFamille, type IdPalette, type Langue, type Motif } from './lib/moteur'
+import {
+  FAMILLES, mesurer, ORDRE_PALETTES,
+  type Densite, type IdFamille, type IdPalette, type Langue, type Motif,
+} from './lib/moteur'
 import { depuisSaisie, detecter, MPX_MAX, typeAppareil } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
 import { textes as dictionnaire } from './i18n'
+import { useDefilement } from './hooks/useDefilement'
+import { useHistorique } from './hooks/useHistorique'
 import { useFocusDegage } from './hooks/useFocusDegage'
 import { useHauteursCollantes } from './hooks/useHauteursCollantes'
 import { useRevisionFenetre } from './hooks/useRevisionFenetre'
@@ -13,6 +18,7 @@ import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
 import { ChoixDensite, ChoixFamille, ChoixPalette } from './components/Reglages'
+import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
 import { BarreAction, type Echec, type Fichier, type Phase } from './components/BarreAction'
@@ -102,8 +108,21 @@ export function App() {
     }))
   }, [])
 
+  /* La seule mémoire de l'application. Elle n'entre pas dans `Reglages` : ce
+     qui est dans l'URL décrit le motif affiché, l'historique décrit ceux d'avant. */
+  const { liste: historique, oublier } = useHistorique(motif)
+
+  /* Le repli de la scène est décidé ici et non dans `Scene` : la réserve de
+     défilement des deux barres collantes en dépend, et c'est `App` qui la
+     publie. */
+  const defile = useDefilement()
+
   useFocusDegage()
-  useHauteursCollantes(scene, barre, `${revision}|${ephemere.phase}|${reglages.langue}|${vide}`)
+  useHauteursCollantes(
+    scene,
+    barre,
+    `${revision}|${ephemere.phase}|${reglages.langue}|${vide}|${defile}`,
+  )
 
   /* --- thème, langue et métadonnées du document ---
      `data-theme` ne porte que le thème résolu : « système » est un choix, pas
@@ -144,6 +163,23 @@ export function App() {
   /* --- actions --- */
 
   const nouvelleGraine = () => changer({ graine: Math.floor(Math.random() * GRAINE_MAX) + 1 })
+
+  /* « Surprends-moi » : famille, palette et graine d'un coup. Le tirage exclut
+     la valeur courante des deux listes, sinon un clic sur deux ne changerait
+     rien de visible et le bouton passerait pour cassé. La densité ne bouge pas :
+     c'est un goût, pas un motif. */
+  const surprendre = () => {
+    const tirer = <T,>(liste: readonly T[], sauf: T): T => {
+      const restantes = liste.filter((valeur) => valeur !== sauf)
+      const choix = restantes.length ? restantes : liste
+      return choix[Math.floor(Math.random() * choix.length)]
+    }
+    changer({
+      famille: tirer(FAMILLES.map((f) => f.id), reglages.famille),
+      palette: tirer(ORDRE_PALETTES, reglages.palette),
+      graine: Math.floor(Math.random() * GRAINE_MAX) + 1,
+    })
+  }
 
   const copier = () => {
     const fin = (reussi: boolean) => {
@@ -236,6 +272,7 @@ export function App() {
             langue={reglages.langue}
             textes={T}
             calculEnCours={ephemere.phase === 'calcul'}
+            defile={defile}
             revision={revision}
           />
 
@@ -253,6 +290,7 @@ export function App() {
               textes={T}
               revision={revision}
               onChoisir={(famille: IdFamille) => changer({ famille })}
+              onSurprise={surprendre}
             />
             <ChoixPalette
               valeur={reglages.palette}
@@ -264,6 +302,22 @@ export function App() {
               valeur={reglages.densite}
               textes={T}
               onChoisir={(densite: Densite) => changer({ densite })}
+            />
+            <Historique
+              liste={historique}
+              courant={motif}
+              langue={reglages.langue}
+              textes={T}
+              revision={revision}
+              onRestaurer={(restaure: Motif) =>
+                changer({
+                  famille: restaure.famille,
+                  palette: restaure.palette,
+                  densite: restaure.densite,
+                  graine: restaure.graine,
+                })
+              }
+              onOublier={oublier}
             />
             <ChoixResolution
               largeurSaisie={reglages.largeurSaisie}
@@ -285,18 +339,22 @@ export function App() {
               lien={lien}
               copie={ephemere.copie}
               echecCopie={ephemere.echecCopie}
-              langue={reglages.langue}
-              theme={reglages.theme}
               graine={reglages.graine}
               textes={T}
               onCopier={copier}
-              onLangue={(langue: Langue) => changer({ langue })}
-              onTheme={(theme: Theme) => changer({ theme })}
             />
           </section>
         </main>
 
-        <Pied textes={T} />
+        {/* Langue et thème vivent ici : ils ne changent rien au fichier
+            téléchargé, et le panneau ne contient que ce qui agit sur lui. */}
+        <Pied
+          langue={reglages.langue}
+          theme={reglages.theme}
+          textes={T}
+          onLangue={(langue: Langue) => changer({ langue })}
+          onTheme={(theme: Theme) => changer({ theme })}
+        />
 
         <BarreAction
           cadre={barre}

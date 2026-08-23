@@ -20,7 +20,17 @@ const OUT = path.resolve(ICI, '../.shots');
   for (const scheme of ['light', 'dark']) {
     const ctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 3, colorScheme: scheme, locale: 'fr-FR' });
     const page = await ctx.newPage();
-    await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+    /* Un historique plein : l'entrée courante s'y reconnaît au trait épaissi
+       et à l'aplat, deux marques qui doivent tenir sans la couleur. */
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('aplat:motifs', JSON.stringify(
+          ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes']
+            .map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))
+        ));
+      } catch (e) { /* stockage refusé */ }
+    });
+    await page.goto(`http://127.0.0.1:${PORT}/?l=fr&m=vagues&p=lime&d=1&s=1`, { waitUntil: 'networkidle' });
     await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(300);
     // désature toute la page
@@ -28,6 +38,8 @@ const OUT = path.resolve(ICI, '../.shots');
     await page.waitForTimeout(200);
 
     for (const [name, sel] of [
+      ['verdict', '.verdict'],
+      ['historique', '#liste-historique'],
       ['densite', '#liste-densite'],
       ['langue', '#liste-langue'],
       ['theme', '#liste-theme'],

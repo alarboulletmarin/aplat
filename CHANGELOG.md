@@ -15,10 +15,30 @@ d'écran derrière mes icônes ?**
   une maquette de téléphone, avec l'heure, un widget et une grille d'icônes
   factices : on juge la lisibilité réelle avant de télécharger, pas après. Sur
   téléphone l'aperçu est épinglé en haut et les réglages défilent dessous ; sur
-  ordinateur les deux sont côte à côte.
+  ordinateur les deux sont côte à côte. Sur une fenêtre couchée et basse,
+  l'en-tête se replie et la barre d'action passe en variante compacte, pour que
+  l'aperçu entier, dock compris, tienne au-dessus d'elle.
+- **L'aperçu se replie en vignette dès qu'on défile**, et le verdict de
+  lisibilité passe sur une ligne, dépliable au doigt. Sur un iPhone en
+  portrait, les grilles de motifs disposent alors de 58 % de la hauteur au lieu
+  de 37 %. L'aperçu se déplie en remontant.
+- **Le panneau ne contient que ce qui agit sur l'image.** Langue et thème sont
+  dans le pied de page, à côté de la version et du lien vers la source : ils ne
+  changent que l'affichage, pas le fichier téléchargé.
 - **Trois réglages, pas un de plus** : famille de motif (dix-huit, réparties
   en abstraits et figures), palette (onze) et densité (trois). Chaque famille
   montre sa propre vignette, calculée avec la palette et la densité courantes.
+  Leur nom revient à la ligne plutôt que de s'élider : « Marguerites » tronqué
+  en « Margueri… » ne nomme plus rien.
+- **Deux raccourcis de hasard, aux effets distincts.** « Variante », dans la
+  barre, redessine le même motif avec une autre graine. « Surprends-moi », dans
+  la carte Famille, tire aussi une famille et une palette, jamais celles qui
+  sont déjà à l'écran. La densité ne bouge dans aucun des deux : c'est un goût,
+  pas un motif.
+- **Les dix derniers motifs reviennent d'un appui.** Une carte de vignettes,
+  sous la densité, garde ce qu'on a regardé et le rend d'un geste. Les
+  vignettes ne sont pas enregistrées, elles sont recalculées : le rendu est
+  déterministe, quatre réglages y suffisent.
 - **La résolution est détectée**, pas demandée. Elle reste modifiable, avec
   trois préréglages et une saisie libre entre 16 et 8000 px. La maquette prend
   la forme de l'appareil visé : téléphone, tablette ou ordinateur, déduits du
@@ -27,7 +47,13 @@ d'écran derrière mes icônes ?**
   contraste mesuré, la couleur de libellé retenue, la force du voile appliqué,
   et une phrase qui dit quoi faire s'il est juste. Il n'affiche rien tant qu'il
   n'a rien mesuré, parce qu'une application qui promet de mesurer n'affiche pas
-  un chiffre de repli.
+  un chiffre de repli. Le qualificatif tient à trois bandes nommées, avec leur
+  forme : bonne au-dessus de 4,5:1, le seuil AA du petit texte qu'est un
+  libellé d'icône ; juste entre 3:1 et 4,5:1 ; insuffisante en dessous.
+- **Un aperçu assombri, sur demande.** Une bascule simule le fond d'écran tel
+  qu'un thème sombre l'assombrit, et le verdict se recalcule pour cette
+  condition : un libellé clair y gagne, un libellé sombre y perd. Le fichier
+  téléchargé ne change pas, et le détail le dit.
 - **Un seul appel primaire** : Télécharger. Le bouton dit ensuite les dimensions
   produites, le format, le poids réel du fichier, et le geste qui fait passer de
   « téléchargé » à « dans la pellicule ».
@@ -48,11 +74,15 @@ d'écran derrière mes icônes ?**
   mouchetis d'un pixel d'appareil, les vagues sont échantillonnées assez fin
   pour un écran 4K et les cellules de la trame calées sur des bornes entières.
 
-### Ajouté : rien ne sort de l'appareil, rien n'y est enregistré
+### Ajouté : rien ne sort de l'appareil, et ce qui y reste est nommé
 
-- **Rien n'est enregistré** : ni compte, ni cookie, ni stockage local, ni base
-  indexée. Les réglages tiennent dans l'URL, et rien d'autre ne survit à la
-  fermeture de l'onglet.
+- **Une seule chose est enregistrée** : les dix derniers motifs regardés,
+  quatre réglages chacun, dans le stockage local du navigateur. Ni image, ni
+  horodatage, ni identifiant, ni URL, ni compteur de visites. Deux cents octets
+  pour cinq entrées, un bouton pour tout effacer, et un motif n'y entre
+  qu'après être resté deux secondes et demie à l'écran. Ni compte, ni cookie,
+  ni base indexée par ailleurs ; les réglages du motif affiché, eux, tiennent
+  dans l'URL.
 - **Rien n'est envoyé.** La politique de sécurité du document coupe `fetch`,
   XHR, WebSocket, EventSource et `sendBeacon` ; les polices sont auto-hébergées,
   parce qu'un appel à un CDN transmet une adresse IP.
@@ -80,8 +110,9 @@ d'écran derrière mes icônes ?**
   de points, la lisibilité trois formes distinctes, l'erreur un triangle.
 - Cibles tactiles de 44 px, actions fréquentes dans la zone du pouce, focus
   visible et jamais masqué par les deux barres collantes.
-- Les cinq groupes de réglages sont de vrais groupes radio : le parcours clavier
-  passe de 42 arrêts à 11.
+- Les cinq groupes de réglages sont de vrais groupes radio, et l'historique une
+  barre d'outils : seize arrêts de tabulation en tout, historique plein
+  compris, là où les puces seules en feraient une soixantaine.
 - `prefers-reduced-motion` respecté.
 
 ### Ajouté : deux langues, à parité stricte

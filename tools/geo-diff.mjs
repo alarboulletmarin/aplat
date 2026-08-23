@@ -12,13 +12,19 @@ const REF = process.env.REF_DIR ||
   '/tmp/claude-0/-home-user-aplat/8f5dcbc4-f656-52ad-aa59-e5dc203b1088/scratchpad/refsite';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain', '.md': 'text/plain' };
 
+/* Les sondes sont les libellés présents des deux côtés. Trois de la maquette
+   d'origine n'y sont plus : « Partage et réglages » est devenu « Partage »
+   quand langue et thème sont partis au pied de page, et « Nouveau motif » est
+   devenu « Variante » le jour où « Surprends-moi » est apparu. Ces écarts sont
+   voulus ; les sonder ferait échouer la comparaison sur une divergence connue
+   au lieu d'une dérive de gabarit. */
 const PROBES = [
   'Aplat',
   'Famille de motif', 'Abstraits', 'Figures', 'Palette', 'Densité', 'Résolution de l’image',
   'Vagues', 'Blobs', 'Lime & crème', 'Soleil', 'Calme', 'Moyen', 'Dense',
-  'Copier le lien du motif', 'Langue', 'Thème', 'Partage et réglages',
+  'Copier le lien du motif', 'Langue', 'Thème',
   'Français', 'English', 'Clair', 'Sombre', 'Système',
-  'Nouveau motif', 'Télécharger'
+  'Télécharger'
 ];
 
 const COLLECT = (probes) => {
