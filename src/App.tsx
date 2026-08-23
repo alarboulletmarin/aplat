@@ -7,6 +7,7 @@ import {
 } from './lib/moteur'
 import { depuisSaisie, detecter, MPX_MAX, typeAppareil } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
+import { lienAccueil } from './lib/route'
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
 import { nombre } from './lib/format'
 import { textes as dictionnaire } from './i18n'
@@ -159,6 +160,16 @@ export function App() {
   )
   const lien = `${window.location.origin}${window.location.pathname}?${requete}`
 
+  /* La marque, en haut, ramène à la présentation avec la langue et le thème
+     déjà posés : revenir sur « / » ne doit pas coûter le choix qu'on vient de
+     faire. Aucun paramètre de motif n'y entre, sinon `redirection()` renverrait
+     le lien ici même. */
+  const retour = lienAccueil(
+    reglages.theme === 'systeme'
+      ? { l: reglages.langue }
+      : { l: reglages.langue, t: reglages.theme },
+  )
+
   useEffect(() => {
     if (window.location.search.slice(1) === requete) return
     try {
@@ -270,7 +281,7 @@ export function App() {
       </a>
 
       <div className="page">
-        <Entete cadre={entete} textes={T} resolution={etiquetteResolution} />
+        <Entete cadre={entete} textes={T} accueil={retour} resolution={etiquetteResolution} />
 
         <main className="colonnes">
           <Scene

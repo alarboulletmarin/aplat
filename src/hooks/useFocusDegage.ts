@@ -12,13 +12,23 @@ import { useEffect } from 'react'
  * aux ancres et aux navigateurs qui les respectent), mais ni le défilement
  * déclenché par le focus ni `scrollIntoView` ne les appliquent aujourd'hui :
  * la correction fiable se fait ici.
+ *
+ * Les trois couches collantes sont écartées : ce qu'elles contiennent est
+ * DANS une couche, jamais dessous, et défiler ne l'en dégagerait pas d'un
+ * pixel. L'en-tête les a rejointes le jour où sa marque est devenue un lien.
+ * Le navigateur ramène déjà la page sur la position statique de l'en-tête
+ * quand la marque prend le focus ; ajouter à ce défilement soixante pixels de
+ * plus, pour dégager un lien qui n'a rien à dégager, ne faisait que rallonger
+ * le saut.
  */
 export function useFocusDegage(): void {
   useEffect(() => {
     const surFocus = (evenement: FocusEvent) => {
       const cible = evenement.target
       if (!(cible instanceof HTMLElement)) return
-      if (cible.closest('.barre') || cible.closest('.scene')) return /* déjà au-dessus */
+      if (cible.closest('.barre') || cible.closest('.scene') || cible.closest('.entete')) {
+        return /* dans une couche collante, pas dessous */
+      }
 
       const style = getComputedStyle(document.documentElement)
       const hautReserve = Number.parseFloat(style.scrollPaddingTop) || 0

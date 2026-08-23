@@ -21,6 +21,13 @@ interface Preset {
  * Les tailles proposées. Un préréglage identique à la résolution détectée est
  * retiré : il n'y a aucune raison de proposer deux fois la même chose.
  *
+ * Les quatre premières nomment un appareil, la dernière une taille. Le 4K est
+ * là parce qu'on le demande par son nom : l'écran d'ordinateur s'arrête à
+ * 2 560 × 1 440, et rien ne disait qu'on pouvait aller plus haut alors que la
+ * saisie manuelle monte à 8 000 px. Le motif n'est jamais agrandi, il est
+ * recalculé : ces 3 840 × 2 160 valent exactement ce que vaut un fichier de
+ * cette taille, pas un fichier plus petit étiré.
+ *
  * Non exportée : rien d'autre n'en a l'usage, et un module qui exporte autre
  * chose que des composants perd le rafraîchissement à chaud.
  */
@@ -31,6 +38,7 @@ function presets(textes: Textes, detecte: Resolution): Preset[] {
     { id: 'telephone', libelle: T.presetTelephone, largeur: 1179, hauteur: 2556 },
     { id: 'tablette', libelle: T.presetTablette, largeur: 2048, hauteur: 2732 },
     { id: 'ordinateur', libelle: T.presetOrdinateur, largeur: 2560, hauteur: 1440 },
+    { id: 'uhd', libelle: T.presetUHD, largeur: 3840, hauteur: 2160 },
   ].filter(
     (p) =>
       p.id === 'detectee' || p.largeur !== detecte.largeur || p.hauteur !== detecte.hauteur,

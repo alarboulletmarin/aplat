@@ -15,6 +15,11 @@
    Ce qui change, c'est la place. L'application tient dans un écran et compte
    ses pixels ; la page d'accueil se déroule, et peut donc donner au nom du
    produit toute la largeur, ce qui est le seul geste de marque qu'il y ait.
+
+   L'enseigne est l'exception à l'échelle : sa marque et son mot sont ceux de
+   l'en-tête de l'application, au pixel près, et par la même déclaration. C'est
+   le même logo, à la même place, dans les deux documents ; le voir changer de
+   taille au passage de l'un à l'autre était un accident, pas une intention.
    ========================================================================== */
 
 .accueil {
@@ -52,17 +57,11 @@
   color: var(--encre);
   text-decoration: none;
 }
-.marque-nav {
-  width: 30px;
-  height: 30px;
-}
-.enseigne-mot {
-  font-family: var(--display);
-  font-size: 25px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
+/* Le mot n'a plus de règle ici : il est dessiné avec `.titre`, dans
+   `ecrans.css`, parce que la marque et le nom sont le même objet dans les deux
+   documents. Et il garde son `min-width: auto` de puce flexible : à 320 px il
+   ne reste que douze pixels entre lui et les bascules, et l'autoriser à se
+   comprimer lui coupait ses dernières lettres au lieu de le laisser tenir. */
 .enseigne-droite {
   display: flex;
   align-items: center;

@@ -75,6 +75,7 @@ export const en: Textes = {
   entete: {
     evitement: 'Skip to settings',
     titre: 'Aplat',
+    accueil: 'Back to the overview',
     accroche:
       'Generative wallpapers, computed inside your browser. Phone, tablet, computer.',
     mention: 'No account, no network.',
@@ -140,6 +141,7 @@ export const en: Textes = {
     presetTelephone: 'Phone',
     presetTablette: 'Tablet',
     presetOrdinateur: 'Computer',
+    presetUHD: '4K',
   },
   historique: {
     titre: 'Recent patterns',
