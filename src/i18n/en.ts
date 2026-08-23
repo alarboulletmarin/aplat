@@ -71,7 +71,7 @@ export const en: Textes = {
     presetOrdinateur: 'Computer',
   },
   partage: {
-    titre: 'Sharing and settings',
+    titre: 'Sharing',
     copier: 'Copy the pattern link',
     copie: 'Link copied',
     echec: 'Copying failed. The link is below, ready to copy by hand.',

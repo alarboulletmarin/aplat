@@ -88,7 +88,7 @@ export const fr = {
     presetOrdinateur: 'Ordinateur',
   },
   partage: {
-    titre: 'Partage et réglages',
+    titre: 'Partage',
     copier: 'Copier le lien du motif',
     copie: 'Lien copié',
     echec: 'Copie impossible. Le lien est ci-dessous, à copier à la main.',

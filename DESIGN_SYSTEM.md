@@ -24,7 +24,8 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 |---|---|---|
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | en haut, épinglé ; le bouton en bas, dans la zone du pouce |
 | Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
-| Caché | langue, thème, lien de partage, version | en bas du bloc, sous un filet |
+| Caché | lien de partage | en bas du bloc, sous un filet |
+| Caché | langue, thème, version, licence, source | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
 Un seul appel primaire. **Télécharger** ne partage sa place avec rien : le
 bouton secondaire s'efface entièrement quand la largeur manque plutôt que de le
@@ -178,6 +179,12 @@ garde la taille qu'elle aurait dépliée, le motif n'est donc pas redessiné et 
 maquette ne se réajuste pas. Deux seuils, 140 px pour replier et 56 px pour
 déplier : avec un seul, le repli raccourcit le document, la position retombe
 sous le seuil, et l'aperçu clignote.
+
+**Deux natures de réglage, deux endroits.** Le panneau ne contient que ce qui
+agit sur le fichier téléchargé : famille, palette, densité, résolution. La
+langue et le thème sont dans le pied de page, à côté de la version et du lien
+vers la source, parce qu'ils ne changent que l'affichage. La règle tient en une
+phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 

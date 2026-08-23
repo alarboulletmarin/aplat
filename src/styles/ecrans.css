@@ -716,27 +716,6 @@
   gap: 12px;
   padding: 18px;
 }
-/* 200 px et non 150 : à 150, la colonne Thème tombait à 52 px par bouton et
-   « Système » passait seul sur une deuxième rangée, étiré sur toute la largeur.
-   Au-delà du seuil les deux colonnes tiennent, en dessous on passe à une seule
-   colonne pleine largeur ; dans les deux cas les trois boutons sont alignés. */
-.prefs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 14px;
-  padding-top: 13px;
-  border-top: 2px solid var(--filet);
-}
-.prefs h3 {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.prefs-rangee {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
 /* --- Barre d'action : un seul appel primaire ------------------------------------ */
 /* Fond plein et filet franc, plutôt qu'un dégradé qui laisse le texte
@@ -770,13 +749,44 @@
 .pied {
   padding: 0 0 calc(10px + var(--barre-h, 0px));
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 14px;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
   font-size: 12.5px;
   color: var(--encre-douce);
 }
-.pied > * {
+/* Les réglages de l'application, séparés de ceux du motif : ce qui est dans le
+   panneau agit sur le fichier téléchargé, ce qui est ici ne change que
+   l'affichage. Le filet marque la coupure.
+
+   200 px et non 150 : à 150, la colonne Thème tombait à 52 px par bouton et
+   « Système » passait seul sur une deuxième rangée, étiré sur toute la largeur.
+   Au-delà du seuil les deux colonnes tiennent, en dessous on passe à une seule
+   colonne pleine largeur ; dans les deux cas les trois boutons sont alignés. */
+.prefs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 14px 18px;
+  padding-top: 14px;
+  border-top: 2px solid var(--filet);
+}
+.prefs h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--encre);
+  margin-bottom: 8px;
+}
+.prefs-rangee {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pied-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+  align-items: center;
+}
+.pied-meta > * {
   display: inline-flex;
   align-items: center;
   min-height: 44px;

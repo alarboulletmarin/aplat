@@ -296,18 +296,22 @@ export function App() {
               lien={lien}
               copie={ephemere.copie}
               echecCopie={ephemere.echecCopie}
-              langue={reglages.langue}
-              theme={reglages.theme}
               graine={reglages.graine}
               textes={T}
               onCopier={copier}
-              onLangue={(langue: Langue) => changer({ langue })}
-              onTheme={(theme: Theme) => changer({ theme })}
             />
           </section>
         </main>
 
-        <Pied textes={T} />
+        {/* Langue et thème vivent ici : ils ne changent rien au fichier
+            téléchargé, et le panneau ne contient que ce qui agit sur lui. */}
+        <Pied
+          langue={reglages.langue}
+          theme={reglages.theme}
+          textes={T}
+          onLangue={(langue: Langue) => changer({ langue })}
+          onTheme={(theme: Theme) => changer({ theme })}
+        />
 
         <BarreAction
           cadre={barre}

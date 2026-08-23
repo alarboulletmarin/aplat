@@ -26,8 +26,8 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
   C'est là qu'on décide, c'est là qu'on finit.
 - *Secondaire* : les trois réglages (famille, palette, densité) et la
   résolution, déjà détectée, repliée tant qu'on n'y touche pas.
-- *Caché* : langue, thème, lien de partage, version. En bas, sous le trait,
-  pour qui les cherche.
+- *Caché* : le lien de partage, en bas du bloc ; puis, dans le pied de page,
+  la langue, le thème, la version et la source. Pour qui les cherche.
 
 ### Pourquoi une seule section
 
@@ -37,6 +37,11 @@ exactement ça : on réglerait à l'aveugle, puis on irait vérifier. L'aperçu 
 donc épinglé en haut de l'écran et les réglages défilent dessous ; sur
 ordinateur, les deux sont côte à côte. Pas d'onglet, pas de barre de navigation,
 pas d'étape.
+
+Le panneau de réglages ne contient que ce qui agit sur le fichier téléchargé :
+famille, palette, densité, résolution. La langue et le thème sont dans le pied
+de page, à côté de la version et du lien vers la source, parce qu'ils ne
+changent que l'affichage.
 
 Le parti visuel et les règles d'interface sont dans
 [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
@@ -263,6 +268,7 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Boutons langue et thème : plancher lié au contenu | Avec un plancher fixe la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
 | Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
 | Les grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
+| Langue et thème sont dans le pied de page, pas dans le panneau | Ils ne changent rien au fichier téléchargé. Mêlés à la famille et à la palette, ils laissaient croire qu'un thème sombre s'exportait. |
 | Le pied de page prend 44 px de haut par élément | Le lien vers la source n'est pas une mention légale en petit : l'AGPL en fait une obligation, et une obligation doit être cliquable. |
 | La boîte de contenu de l'appareil porte le rapport d'aspect, bordure défalquée | Le canevas est en `inset:0` : sans ça l'aperçu était un format décalé de 1,5 % et sa mesure de lisibilité portait sur une image qui n'existait pas. |
 | La grille d'icônes de la maquette perd des rangées si l'appareil est large | Tout y est dimensionné en unités calées sur le petit côté ; sur un écran large la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
