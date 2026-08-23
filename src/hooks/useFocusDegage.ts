@@ -15,9 +15,11 @@ import { useEffect } from 'react'
  *
  * Les trois couches collantes sont écartées : ce qu'elles contiennent est
  * DANS une couche, jamais dessous, et défiler ne l'en dégagerait pas d'un
- * pixel. L'en-tête les a rejointes le jour où sa marque est devenue un lien :
- * sans cette sortie, un retour au clavier sur la marque faisait sauter la page
- * de la hauteur de la bande, pour rien.
+ * pixel. L'en-tête les a rejointes le jour où sa marque est devenue un lien.
+ * Le navigateur ramène déjà la page sur la position statique de l'en-tête
+ * quand la marque prend le focus ; ajouter à ce défilement soixante pixels de
+ * plus, pour dégager un lien qui n'a rien à dégager, ne faisait que rallonger
+ * le saut.
  */
 export function useFocusDegage(): void {
   useEffect(() => {

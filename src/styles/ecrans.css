@@ -56,6 +56,15 @@
   color: var(--encre);
   text-decoration: none;
 }
+/* L'anneau de focus se resserre sur la cible au lieu de s'en écarter de trois
+   pixels. C'est le seul contrôle de la page dont la cible déborde vers le HAUT
+   de la fenêtre : l'en-tête est collé à `top: 0`, et un anneau posé trois
+   pixels plus haut que les cinq qui restent au-dessus du lien sortait de
+   l'écran par le bord. À zéro, il tient dans la bande, à trois pixels de la
+   marque, et reste à trois pixels du filet. */
+.entete-marque:focus-visible {
+  outline-offset: 0;
+}
 /* La marque : une arche lime dans un carré navy, mordue à sa base par une
    seconde arche. Elle garde ses deux couleurs dans les deux thèmes, comme
    toute marque, et un filet la détache du fond sombre. */
@@ -1174,6 +1183,14 @@
   .entete-marque {
     gap: 9px;
     margin: -7px 0;
+  }
+  /* Quarante-quatre pixels de cible sur trente de marque, dans une bande de
+     cinquante-cinq : il ne reste rien au-dessus du lien, et l'anneau passe
+     dedans. Il y encadre la marque de quatre pixels, et mord de trois sur ses
+     bords ; c'est le prix d'un anneau entier plutôt qu'un anneau coupé par le
+     haut de l'écran. */
+  .entete-marque:focus-visible {
+    outline-offset: -3px;
   }
   .marque {
     width: 30px;
