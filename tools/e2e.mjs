@@ -398,11 +398,17 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       return {
         canvasTransition: getComputedStyle(c).transitionDuration,
         canvasOpacity: getComputedStyle(c).opacity,
-        dotDuration: dots ? getComputedStyle(dots).animationDuration : null
+        dotDuration: dots ? getComputedStyle(dots).animationDuration : null,
+        /* Le repli de l'aperçu au défilement : la boîte et l'échelle de
+           l'appareil sont les deux seules transitions ajoutées depuis. */
+        boiteTransition: getComputedStyle(document.getElementById('scene-boite')).transitionDuration,
+        appareilTransition: getComputedStyle(document.getElementById('appareil')).transitionDuration
       };
     });
     const small = v => !v || parseFloat(v) <= 0.01;
-    t(small(rm.canvasTransition) && small(rm.dotDuration), 'mouvement réduit : transitions et animations coupées', JSON.stringify(rm));
+    t(small(rm.canvasTransition) && small(rm.dotDuration) &&
+      small(rm.boiteTransition) && small(rm.appareilTransition),
+      'mouvement réduit : transitions et animations coupées, repli compris', JSON.stringify(rm));
     t(parseFloat(rm.canvasOpacity) === 1, 'mouvement réduit : le canevas reste opaque', rm.canvasOpacity);
     await rctx.close();
   }

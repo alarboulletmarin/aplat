@@ -2,7 +2,9 @@
 
 import { useRef, type CSSProperties } from 'react'
 import { famille, palette, type Langue, type Mesure, type Motif } from '../lib/moteur'
-import { geometrieAppareil, hauteurScene, jetonsLibelle } from '../lib/geometrie'
+import {
+  geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
+} from '../lib/geometrie'
 import type { Resolution, TypeAppareil } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
 import { useTaille, useTailleFenetre } from '../hooks/useTaille'
@@ -21,6 +23,17 @@ import { Verdict } from './Verdict'
  * C'est le seul endroit de la page qui répond à la question posée (« mes
  * icônes resteront-elles lisibles ? »), et c'est pour ça qu'il est collant sur
  * téléphone : on règle en dessous, on juge au-dessus, sans faire l'aller-retour.
+ *
+ * Collant, mais pas encombrant : dès que la page défile, l'aperçu se replie en
+ * vignette et le verdict se condense sur une ligne. À trois, la scène, le
+ * verdict et la barre d'action prenaient les deux tiers d'un écran de
+ * téléphone, et il ne restait presque rien pour choisir parmi dix-huit
+ * familles et onze palettes.
+ *
+ * Le repli passe par l'échelle et non par la géométrie : la boîte de
+ * l'appareil garde la taille qu'elle aurait dépliée, si bien que le motif
+ * n'est pas redessiné, que la maquette ne se réajuste pas, et que la
+ * transition ne coûte qu'une composition.
  */
 export function Scene({
   cadre,
@@ -31,6 +44,7 @@ export function Scene({
   langue,
   textes,
   calculEnCours,
+  defile,
   revision,
 }: {
   cadre: React.RefObject<HTMLElement | null>
@@ -41,6 +55,8 @@ export function Scene({
   langue: Langue
   textes: Textes
   calculEnCours: boolean
+  /** La page a défilé au-delà du seuil de repli. */
+  defile: boolean
   revision: number
 }) {
   const boite = useRef<HTMLDivElement>(null)
@@ -49,13 +65,38 @@ export function Scene({
   const instant = useHorloge(langue)
 
   const vide = !resolution.largeur || !resolution.hauteur
-  const geometrie = geometrieAppareil(tailleBoite, resolution, type)
+
+  /* Replier l'aperçu n'a de sens que là où la scène recouvre la page,
+     c'est-à-dire sous 760 px : au-delà elle tient dans sa colonne et ne prend
+     la place de personne.
+
+     Le verdict, lui, se condense aussi en paysage court, où la hauteur est
+     comptée : trois lignes de détail y valent le quart de l'écran. Il reste à
+     un appui. */
+  const replie = defile && fenetre.largeur < 760
+  const verdictReplie = replie || paysageCourt(fenetre)
+
+  /* La hauteur dépliée sert de référence à la géométrie, y compris pendant le
+     repli : c'est ce qui garde le canevas et la maquette hors de la
+     transition. La boîte, elle, se contracte pour rendre la place. */
+  const hauteurPleine = hauteurScene(fenetre)
+  const hauteurBoite = replie
+    ? Math.min(hauteurVignette(fenetre), hauteurPleine)
+    : hauteurPleine
+  const geometrie = geometrieAppareil(
+    { largeur: tailleBoite.largeur, hauteur: hauteurPleine },
+    resolution,
+    type,
+  )
+  const echelle =
+    replie && geometrie ? Math.min(1, hauteurBoite / geometrie.hauteur) : 1
 
   const style: CSSProperties = geometrie
     ? ({
         width: `${geometrie.largeur}px`,
         height: `${geometrie.hauteur}px`,
         borderRadius: `${geometrie.rayon}px`,
+        ...(echelle < 1 ? { transform: `scale(${echelle.toFixed(4)})` } : {}),
         '--mu': `${geometrie.module}px`,
         '--colonnes': geometrie.colonnes,
         ...(mesure ? jetonsLibelle(mesure.libelles) : {}),
@@ -87,10 +128,10 @@ export function Scene({
       </h2>
 
       <div
-        className="scene-boite"
+        className={`scene-boite${replie ? ' scene-boite-repliee' : ''}`}
         id="scene-boite"
         ref={boite}
-        style={{ height: `${hauteurScene(fenetre)}px` }}
+        style={{ height: `${hauteurBoite}px` }}
       >
         <div className="appareil" id="appareil" style={style}>
           {!vide && (
@@ -140,7 +181,12 @@ export function Scene({
         {textes.scene.note}
       </p>
 
-      <Verdict mesure={vide ? null : mesure} textes={textes} langue={langue} />
+      <Verdict
+        mesure={vide ? null : mesure}
+        textes={textes}
+        langue={langue}
+        replie={verdictReplie}
+      />
     </section>
   )
 }

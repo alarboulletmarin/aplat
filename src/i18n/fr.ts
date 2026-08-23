@@ -53,6 +53,9 @@ export const fr = {
        trois mesures parce que la virgule est déjà prise par la décimale
        française, « 4,5:1 ». */
     titreNiveau: 'Lisibilité des libellés\u00a0: {niveau}',
+    /* La forme repliée, sur une ligne. Le mot d'abord, le chiffre ensuite :
+       c'est le mot qui décide, le chiffre qui l'appuie. */
+    resume: 'Lisibilité {niveau}, {contraste}:1',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {

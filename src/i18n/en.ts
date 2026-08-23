@@ -38,6 +38,7 @@ export const en: Textes = {
     voile: 'legibility veil {n}%',
     sansVoile: 'no veil needed',
     titreNiveau: 'Icon label legibility: {niveau}',
+    resume: 'Legibility {niveau}, {contraste}:1',
     detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {

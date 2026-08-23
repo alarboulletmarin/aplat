@@ -18,6 +18,10 @@ d'écran derrière mes icônes ?**
   ordinateur les deux sont côte à côte. Sur une fenêtre couchée et basse,
   l'en-tête se replie et la barre d'action passe en variante compacte, pour que
   l'aperçu entier, dock compris, tienne au-dessus d'elle.
+- **L'aperçu se replie en vignette dès qu'on défile**, et le verdict de
+  lisibilité passe sur une ligne, dépliable au doigt. Sur un iPhone en
+  portrait, les grilles de motifs disposent alors de 58 % de la hauteur au lieu
+  de 37 %. L'aperçu se déplie en remontant.
 - **Trois réglages, pas un de plus** : famille de motif (dix-huit, réparties
   en abstraits et figures), palette (onze) et densité (trois). Chaque famille
   montre sa propre vignette, calculée avec la palette et la densité courantes.

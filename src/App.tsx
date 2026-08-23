@@ -6,6 +6,7 @@ import { depuisSaisie, detecter, MPX_MAX, typeAppareil } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
 import { textes as dictionnaire } from './i18n'
+import { useDefilement } from './hooks/useDefilement'
 import { useFocusDegage } from './hooks/useFocusDegage'
 import { useHauteursCollantes } from './hooks/useHauteursCollantes'
 import { useRevisionFenetre } from './hooks/useRevisionFenetre'
@@ -102,8 +103,17 @@ export function App() {
     }))
   }, [])
 
+  /* Le repli de la scène est décidé ici et non dans `Scene` : la réserve de
+     défilement des deux barres collantes en dépend, et c'est `App` qui la
+     publie. */
+  const defile = useDefilement()
+
   useFocusDegage()
-  useHauteursCollantes(scene, barre, `${revision}|${ephemere.phase}|${reglages.langue}|${vide}`)
+  useHauteursCollantes(
+    scene,
+    barre,
+    `${revision}|${ephemere.phase}|${reglages.langue}|${vide}|${defile}`,
+  )
 
   /* --- thème, langue et métadonnées du document ---
      `data-theme` ne porte que le thème résolu : « système » est un choix, pas
@@ -236,6 +246,7 @@ export function App() {
             langue={reglages.langue}
             textes={T}
             calculEnCours={ephemere.phase === 'calcul'}
+            defile={defile}
             revision={revision}
           />
 

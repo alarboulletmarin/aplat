@@ -18,6 +18,7 @@ const ETAPES = [
   ['URL hostiles', 'fuzz-url.mjs'],
   ['contrastes', 'a11y.mjs'],
   ['cibles tactiles et atteignabilité', 'reach.mjs'],
+  ['repli au défilement', 'repli.mjs'],
   ['débordements et libellés +30 %', 'overflow.mjs'],
   ['marches du voile', 'band-test.mjs'],
   ['amplitude du grain', 'dither-check.mjs'],

@@ -61,6 +61,11 @@ qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
 3:1 et 4,5:1 ; **insuffisante** en dessous. Chaque bande a sa forme, disque
 plein, disque à moitié, triangle.
 
+Sur téléphone en portrait, l'aperçu se replie en vignette dès qu'on défile, et
+le verdict se condense sur une ligne, dépliable au doigt : les grilles passent
+de 37 % à 58 % de la hauteur de l'écran. Le repli se fait à l'échelle, pas à la
+géométrie, si bien que le motif n'est pas redessiné pour l'occasion.
+
 ---
 
 ## Démarrer
@@ -223,9 +228,11 @@ thèmes et les deux langues :
   demi-disque, triangle), le thème un disque plein, vide ou à moitié, l'erreur
   un triangle. Jamais la couleur seule ;
 - le corail est réservé aux aplats et aux formes, jamais au texte ;
-- cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, et
-  atteignabilité de chacun des 43 contrôles testée sous les deux barres
-  collantes ;
+- cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, fenêtres
+  couchées comprises, et atteignabilité de chaque contrôle testée sous les deux
+  barres collantes. Plus exigeant encore : chacun doit se dégager
+  *entièrement* des deux couches à quelque position de défilement, ce que les
+  cartes de motif ne faisaient pas sur un petit téléphone avant le repli ;
 - focus visible partout et **jamais masqué** par ces deux barres : ni le
   défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`

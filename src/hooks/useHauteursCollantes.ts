@@ -20,7 +20,14 @@ export function useHauteursCollantes(
       style.setProperty('--barre-h', `${barre.current?.offsetHeight ?? 0}px`)
     }
     poser()
+    /* La scène se replie avec une transition : sa hauteur d'arrivée n'est
+       connue qu'une fois celle-ci finie. On mesure donc deux fois, sans quoi
+       la réserve de défilement reste celle de l'état précédent. */
+    const differe = setTimeout(poser, 300)
     window.addEventListener('resize', poser)
-    return () => window.removeEventListener('resize', poser)
+    return () => {
+      clearTimeout(differe)
+      window.removeEventListener('resize', poser)
+    }
   }, [scene, barre, revision])
 }

@@ -168,6 +168,17 @@ est écrit deux fois, dans `@media (orientation: landscape)` d'`ecrans.css` et
 dans `PAYSAGE_COURT` de `lib/geometrie.ts` : les deux basculent ensemble ou pas
 du tout.
 
+**Repli au défilement.** Sur téléphone en portrait, la scène collante, le
+verdict et la barre prenaient les deux tiers de l'écran : il ne restait presque
+rien pour choisir parmi dix-huit familles et onze palettes. Dès que la page
+défile, l'aperçu se replie en vignette et le verdict se condense sur une ligne,
+dépliable au doigt ; les grilles récupèrent 58 % de la hauteur au lieu de 37 %.
+Le repli passe par l'échelle et non par la géométrie : la boîte de l'appareil
+garde la taille qu'elle aurait dépliée, le motif n'est donc pas redessiné et la
+maquette ne se réajuste pas. Deux seuils, 140 px pour replier et 56 px pour
+déplier : avec un seul, le repli raccourcit le document, la position retombe
+sous le seuil, et l'aperçu clignote.
+
 Pas de navigation : il n'y a qu'une section.
 
 ---
