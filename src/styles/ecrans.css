@@ -1,0 +1,715 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+/* ==========================================================================
+   Un seul écran : la scène, les réglages, la barre d'action. Pas de
+   navigation — il n'y a pas de deuxième section à atteindre.
+   ========================================================================== */
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100dvh;
+}
+
+/* --- En-tête ---------------------------------------------------------------- */
+.entete-haut {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+/* L'arche : une forme du vocabulaire, posée là pour tenir le titre. Elle
+   habille et repère, elle ne porte aucune information. */
+.entete-arche {
+  flex: 0 0 auto;
+  width: clamp(28px, 7vw, 44px);
+  height: clamp(44px, 11vw, 68px);
+  background: var(--deco-1);
+  border-radius: 999px 999px 0 0;
+}
+.entete-filet {
+  height: 3px;
+  background: var(--encre);
+  margin-top: 11px;
+}
+.entete-pied {
+  padding-top: 11px;
+}
+.titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(56px, 15.5vw, 98px);
+  line-height: 0.76;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+.accroche {
+  max-width: 44ch;
+  font-size: 15px;
+  color: var(--encre-douce);
+}
+
+.colonnes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+/* --- Scène : le motif derrière de vraies icônes ------------------------------ */
+.scene {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--fond);
+  padding: 8px 0 12px;
+}
+.scene-boite {
+  width: 100%;
+  height: min(46vh, 560px);
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.appareil {
+  position: relative;
+  width: 264px;
+  height: 540px;
+  border-radius: 34px;
+  border: 4px solid var(--encre);
+  background: var(--surface-2);
+  overflow: hidden;
+  /* --mu : le module de la maquette, calé sur le petit côté de l'appareil.
+     Toute la maquette s'y rapporte, elle est donc juste à n'importe quelle
+     taille d'aperçu. */
+  --mu: 2.64px;
+  --colonnes: 4;
+  --libelle: #f7f3e6;
+  --libelle-inv: #17243f;
+  --l14: rgba(247, 243, 230, 0.14);
+  --l15: rgba(247, 243, 230, 0.15);
+  --l16: rgba(247, 243, 230, 0.16);
+  --l20: rgba(247, 243, 230, 0.2);
+  --l24: rgba(247, 243, 230, 0.24);
+  --l26: rgba(247, 243, 230, 0.26);
+  --l28: rgba(247, 243, 230, 0.28);
+  --l90: rgba(247, 243, 230, 0.9);
+}
+.appareil-canevas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* maquette téléphone / tablette */
+.maq {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--mu) * 3);
+  padding: calc(var(--mu) * 6) calc(var(--mu) * 5) calc(var(--mu) * 4);
+  color: var(--libelle);
+  font-size: calc(var(--mu) * 3.4);
+}
+.maq-etat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: calc(var(--mu) * 4);
+}
+.maq-etat-d {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mu) * 1.8);
+}
+.maq-barres {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--mu) * 0.7);
+}
+.maq-barres i {
+  display: block;
+  width: calc(var(--mu) * 0.9);
+  background: var(--libelle);
+}
+.maq-barres i:nth-child(1) {
+  height: calc(var(--mu) * 1.5);
+}
+.maq-barres i:nth-child(2) {
+  height: calc(var(--mu) * 2.3);
+}
+.maq-barres i:nth-child(3) {
+  height: calc(var(--mu) * 3.1);
+}
+.maq-wifi {
+  width: calc(var(--mu) * 3);
+  height: calc(var(--mu) * 3);
+  border: calc(var(--mu) * 0.8) solid var(--libelle);
+  border-radius: 50%;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(45deg);
+}
+.maq-pile {
+  width: calc(var(--mu) * 6);
+  height: calc(var(--mu) * 3.2);
+  border: calc(var(--mu) * 0.7) solid var(--libelle);
+  border-radius: calc(var(--mu) * 1);
+  padding: calc(var(--mu) * 0.55);
+  display: flex;
+}
+.maq-pile i {
+  flex: 1 1 auto;
+  background: var(--libelle);
+}
+
+.maq-widget {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mu) * 4);
+  padding: calc(var(--mu) * 4);
+  border-radius: calc(var(--mu) * 6);
+  background: var(--l15);
+  border: 1px solid var(--l28);
+}
+.maq-quantieme {
+  font-family: var(--display);
+  font-size: calc(var(--mu) * 12);
+  line-height: 0.78;
+}
+.maq-date {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
+.maq-jour {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.maq-mois {
+  opacity: 0.82;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.maq-points {
+  margin-left: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--mu) * 1.5);
+}
+.maq-points i {
+  display: block;
+  width: calc(var(--mu) * 3);
+  height: calc(var(--mu) * 3);
+  background: var(--libelle);
+}
+.maq-points i:nth-child(1) {
+  border-radius: 50%;
+  opacity: 0.92;
+}
+.maq-points i:nth-child(2) {
+  opacity: 0.5;
+}
+.maq-points i:nth-child(3) {
+  opacity: 0.5;
+  transform: rotate(45deg);
+}
+.maq-points i:nth-child(4) {
+  border-radius: 50% 50% 50% 0;
+  opacity: 0.92;
+}
+
+.maq-grille {
+  display: grid;
+  grid-template-columns: repeat(var(--colonnes), 1fr);
+  gap: calc(var(--mu) * 4.5) calc(var(--mu) * 2);
+  margin-top: calc(var(--mu) * 1);
+}
+.maq-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--mu) * 1.5);
+  min-width: 0;
+}
+.maq-app-i {
+  width: calc(var(--mu) * 15);
+  height: calc(var(--mu) * 15);
+  border-radius: calc(var(--mu) * 4.2);
+  background: var(--l90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maq-app-i i {
+  display: block;
+  width: calc(var(--mu) * 6);
+  height: calc(var(--mu) * 6);
+  background: var(--libelle-inv);
+}
+.maq-app-t {
+  font-size: calc(var(--mu) * 3.1);
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.maq-pied {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--mu) * 3.5);
+}
+.maq-recherche {
+  align-self: center;
+  padding: calc(var(--mu) * 2) calc(var(--mu) * 7);
+  border-radius: 999px;
+  background: var(--l16);
+  border: 1px solid var(--l26);
+  font-size: calc(var(--mu) * 3.2);
+}
+.maq-dock {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--mu) * 4);
+  padding: calc(var(--mu) * 3);
+  border-radius: calc(var(--mu) * 7);
+  background: var(--l15);
+  border: 1px solid var(--l24);
+}
+.maq-dock-i {
+  width: calc(var(--mu) * 13);
+  height: calc(var(--mu) * 13);
+  border-radius: calc(var(--mu) * 3.6);
+  background: var(--l90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maq-dock-i i {
+  display: block;
+  width: calc(var(--mu) * 5);
+  height: calc(var(--mu) * 5);
+  background: var(--libelle-inv);
+}
+
+/* maquette ordinateur */
+.maqo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--libelle);
+  font-size: calc(var(--mu) * 2.6);
+}
+.maqo-barre {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mu) * 3);
+  padding: calc(var(--mu) * 1.4) calc(var(--mu) * 3);
+  background: var(--l14);
+  border-bottom: 1px solid var(--l20);
+}
+.maqo-logo {
+  width: calc(var(--mu) * 2.4);
+  height: calc(var(--mu) * 2.4);
+  background: var(--libelle);
+  transform: rotate(45deg);
+}
+.maqo-menu {
+  font-weight: 600;
+}
+.maqo-barre-d {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mu) * 2.4);
+  font-weight: 700;
+}
+.maqo-wifi {
+  width: calc(var(--mu) * 2.6);
+  height: calc(var(--mu) * 2.6);
+  border: calc(var(--mu) * 0.7) solid var(--libelle);
+  border-radius: 50%;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(45deg);
+}
+.maqo-corps {
+  flex: 1 1 auto;
+  display: flex;
+  padding: calc(var(--mu) * 4);
+  gap: calc(var(--mu) * 4);
+}
+.maqo-icones {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--mu) * 4);
+}
+.maqo-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--mu) * 1.2);
+  width: calc(var(--mu) * 16);
+}
+.maqo-app-i {
+  width: calc(var(--mu) * 11);
+  height: calc(var(--mu) * 11);
+  border-radius: calc(var(--mu) * 2.6);
+  background: var(--l90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maqo-app-i i {
+  display: block;
+  width: calc(var(--mu) * 4.4);
+  height: calc(var(--mu) * 4.4);
+  background: var(--libelle-inv);
+}
+.maqo-app-t {
+  font-size: calc(var(--mu) * 2.4);
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.maqo-widget {
+  margin-left: auto;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mu) * 3);
+  padding: calc(var(--mu) * 3);
+  border-radius: calc(var(--mu) * 4);
+  background: var(--l15);
+  border: 1px solid var(--l26);
+}
+.maqo-quantieme {
+  font-family: var(--display);
+  font-size: calc(var(--mu) * 9);
+  line-height: 0.78;
+}
+.maqo-date {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.maqo-jour {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.maqo-mois {
+  opacity: 0.82;
+}
+.maqo-dock-b {
+  display: flex;
+  justify-content: center;
+  padding-bottom: calc(var(--mu) * 3);
+}
+.maqo-dock {
+  display: flex;
+  gap: calc(var(--mu) * 2.6);
+  padding: calc(var(--mu) * 2);
+  border-radius: calc(var(--mu) * 4.5);
+  background: var(--l15);
+  border: 1px solid var(--l24);
+}
+.maqo-dock-i {
+  width: calc(var(--mu) * 9);
+  height: calc(var(--mu) * 9);
+  border-radius: calc(var(--mu) * 2.4);
+  background: var(--l90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maqo-dock-i i {
+  display: block;
+  width: calc(var(--mu) * 3.6);
+  height: calc(var(--mu) * 3.6);
+  background: var(--libelle-inv);
+}
+
+/* états de la scène */
+.etat-vide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: repeating-linear-gradient(135deg, var(--surface-2) 0 9px, var(--surface) 9px 18px);
+}
+.etat-vide-i {
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--encre);
+  border-radius: 50% 50% 50% 0;
+}
+.etat-vide-t {
+  font-size: 15px;
+}
+.etat-vide-b {
+  font-size: 13px;
+  color: var(--encre-douce);
+  max-width: 26ch;
+}
+.etat-calcul {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-74);
+}
+.etat-calcul-p {
+  display: flex;
+  gap: 6px;
+}
+/* L'unique animation de l'interface : elle dit qu'un calcul est en cours. */
+.etat-calcul-p i {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--encre);
+  animation: aplat-point 900ms ease-in-out infinite;
+}
+.etat-calcul-p i:nth-child(2) {
+  animation-delay: 140ms;
+}
+.etat-calcul-p i:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+/* --- Verdict de lisibilité ---------------------------------------------------- */
+/* Trois formes, jamais trois couleurs : disque plein, disque à moitié,
+   triangle. Le niveau se lit en niveaux de gris comme en couleur. */
+.verdict {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  border-top: 2px solid var(--encre);
+  padding-top: 11px;
+}
+.verdict-i {
+  flex: 0 0 auto;
+  margin-top: 4px;
+}
+.verdict-bonne {
+  display: block;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--encre);
+}
+.verdict-correcte {
+  display: block;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--encre) 50%, transparent 50%);
+  box-shadow: inset 0 0 0 2.5px var(--encre);
+}
+.verdict-faible {
+  display: block;
+  width: 19px;
+  height: 17px;
+  background: var(--encre);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.verdict-txt {
+  min-width: 0;
+}
+.verdict-t {
+  font-weight: 700;
+  font-size: 15px;
+}
+.verdict-d {
+  font-size: 13.5px;
+  color: var(--encre-douce);
+}
+
+/* --- Réglages ------------------------------------------------------------------ */
+/* Un seul bloc, cerné d'un trait franc, découpé par des filets — plutôt que
+   quatre cartes flottantes. C'est le découpage d'une page imprimée. */
+.panneau {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--encre);
+  border-radius: 26px;
+  overflow: hidden;
+}
+.carte {
+  padding: 18px;
+}
+.carte + .carte,
+.bento,
+.res-carte,
+.partage {
+  border-top: 2px solid var(--filet);
+}
+.carte-h {
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  margin-bottom: 14px;
+}
+.groupe {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--encre);
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.groupe-2 {
+  margin: 17px 0 9px;
+}
+/* Deux formes du vocabulaire : l'arche pour les abstraits, l'étoile à pointes
+   pour les figures. Elles repèrent le groupe, le mot le nomme. */
+.groupe-arche {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 9px;
+  background: var(--deco-1);
+  border-radius: 999px 999px 0 0;
+}
+.groupe-etoile {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  background: var(--deco-2);
+  border-radius: 50% 50% 50% 0;
+}
+
+.grille-familles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(102px, 100%), 1fr));
+  gap: 9px;
+}
+.grille-palettes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(108px, 100%), 1fr));
+  gap: 9px;
+}
+
+.bento {
+  padding: 18px;
+}
+.rangee-densite {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.res-carte {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.res-label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.res-label > span:first-child {
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+.res-appareil {
+  font-size: 13.5px;
+  color: var(--encre-douce);
+}
+
+.partage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+}
+/* 200 px et non 150 : à 150, la colonne Thème tombait à 52 px par bouton et
+   « Système » passait seul sur une deuxième rangée, étiré sur toute la largeur.
+   Au-delà du seuil les deux colonnes tiennent, en dessous on passe à une seule
+   colonne pleine largeur — dans les deux cas les trois boutons sont alignés. */
+.prefs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 14px;
+  padding-top: 13px;
+  border-top: 2px solid var(--filet);
+}
+.prefs h3 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.prefs-rangee {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* --- Barre d'action : un seul appel primaire ------------------------------------ */
+/* Fond plein et filet franc, plutôt qu'un dégradé qui laisse le texte
+   transparaître à moitié. */
+.barre {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin-top: auto;
+  padding: 13px 0 calc(13px + env(safe-area-inset-bottom));
+  background: var(--fond);
+  border-top: 2px solid var(--encre);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.barre-live {
+  display: contents;
+}
+
+/* --- Pied de page ---------------------------------------------------------------- */
+.pied {
+  padding: 0 0 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+.pied-version {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,121 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { defineConfig, type Plugin } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+
+const { version } = JSON.parse(readFileSync('./package.json', 'utf8'))
+
+/**
+ * Le commit d'où sort ce build, pour que le pied de page puisse pointer la
+ * source *exacte* du JavaScript servi — c'est ce que l'AGPL appelle la
+ * « Corresponding Source », et un lien vers `main` ne la désigne pas.
+ *
+ * Un build depuis une archive n'a pas de dépôt git : on renvoie une chaîne
+ * vide plutôt que d'échouer, et l'application n'affiche alors que la version.
+ */
+function commit() {
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * La page promet « aucun réseau » : cette politique en fait une propriété du
+ * document et non une simple phrase. `connect-src 'none'` coupe fetch, XHR,
+ * WebSocket, EventSource et sendBeacon — l'application n'en émet aucun, le
+ * moteur ne calcule qu'ici. Aucune directive ne porte sur les scripts, les
+ * styles ni les images : la restriction doit dire quelque chose de vrai, pas
+ * décorer.
+ *
+ * Injectée au build seulement. En développement, Vite parle à la page par un
+ * WebSocket pour le rechargement à chaud, que cette même règle couperait ; la
+ * politique n'a de sens que sur le fichier livré.
+ */
+function politiqueDeSecurite(): Plugin {
+  return {
+    name: 'aplat-csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return {
+        html,
+        tags: [
+          {
+            tag: 'meta',
+            attrs: {
+              'http-equiv': 'Content-Security-Policy',
+              content:
+                "connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'",
+            },
+            injectTo: 'head-prepend',
+          },
+        ],
+      }
+    },
+  }
+}
+
+export default defineConfig({
+  base: '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __APP_COMMIT__: JSON.stringify(commit()),
+  },
+  plugins: [
+    politiqueDeSecurite(),
+    react(),
+    VitePWA({
+      // 'prompt' plutôt que 'autoUpdate' : l'utilisateur décide quand
+      // recharger, via la barre affichée par <MiseAJour />.
+      registerType: 'prompt',
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'polices/*.woff2'],
+      manifest: {
+        name: 'Aplat — fonds d’écran génératifs',
+        short_name: 'Aplat',
+        description:
+          'Des fonds d’écran génératifs calculés dans le navigateur, exportés à la résolution exacte de l’appareil.',
+        lang: 'fr',
+        dir: 'ltr',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
+        background_color: '#F2EDDD',
+        theme_color: '#F2EDDD',
+        categories: ['graphics', 'personalization', 'utilities'],
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icon-512-maskable.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        // `woff2` : les deux familles sont auto-hébergées, une application
+        // hors ligne qui perdrait son display serait à moitié installée.
+        // `txt` couvre THIRD-PARTY.txt et les licences OFL des polices, qui
+        // doivent rester lisibles hors ligne comme le reste.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,txt,woff2}'],
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
+      },
+      devOptions: {
+        enabled: false,
+      },
+    }),
+  ],
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+  },
+})

@@ -1,13 +1,54 @@
 {
   "name": "aplat",
-  "version": "1.0.0",
   "private": true,
-  "description": "Générateur de fonds d'écran génératifs — 100% front, hors ligne.",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Des fonds d'écran génératifs calculés dans le navigateur, exportés à la résolution exacte de l'appareil.",
+  "license": "AGPL-3.0-only",
+  "author": "Andréa Larboullet Marin (https://github.com/alarboulletmarin)",
+  "homepage": "https://github.com/alarboulletmarin/aplat#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alarboulletmarin/aplat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alarboulletmarin/aplat/issues"
+  },
+  "keywords": [
+    "fond-ecran",
+    "wallpaper",
+    "art-generatif",
+    "generative-art",
+    "canvas",
+    "pwa",
+    "offline-first",
+    "local-first",
+    "react"
+  ],
   "scripts": {
-    "serve": "node tools/serve.js",
+    "dev": "vite",
+    "build": "npm run notices && tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "icons": "node scripts/generate-icons.mjs",
+    "notices": "node scripts/generate-notices.mjs",
     "check": "node tools/check.js"
   },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
   "devDependencies": {
-    "playwright": "^1.49.0"
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "playwright": "^1.49.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^3.2.4"
   }
 }
