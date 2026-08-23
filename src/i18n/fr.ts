@@ -15,6 +15,89 @@ export const fr = {
     description:
       'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans rien envoyer.',
   },
+  /* La page d'accueil, sur « / ». Elle a son propre titre et sa propre
+     description : elle présente le projet, l'application le fait tourner, et
+     les deux ne se cherchent pas dans les mêmes mots.
+
+     Le tutoiement est celui de l'application. Une présentation en « vous »
+     suivie d'un outil en « tu » ferait entendre deux voix pour un seul
+     produit, et c'est la voix de l'outil qui compte. */
+  accueil: {
+    document: {
+      titre: 'Aplat : fonds d’écran génératifs',
+      description:
+        'Un motif, une palette, une densité. Aplat calcule ton fond d’écran dans ton navigateur et te le rend à la résolution exacte de ton écran. Sans compte, sans réseau.',
+    },
+    enseigne: {
+      evitement: 'Aller au contenu',
+      ouvrir: 'Ouvrir l’app',
+    },
+    /* Les deux bascules de l'en-tête. Chacune montre ce qu'un appui donnera,
+       jamais l'état où l'on est : un bouton est un geste, et « Sombre » sur
+       fond clair ne dit pas si c'est le thème actuel ou celui qui vient.
+
+       Le libellé de langue est écrit dans la langue d'arrivée, avec son
+       attribut `lang` : une synthèse vocale française qui lit « English »
+       à la française donnerait un mot que personne ne reconnaît. */
+    bascule: {
+      versClair: 'Passer au thème clair',
+      versSombre: 'Passer au thème sombre',
+      langueCode: 'EN',
+      langueVers: 'Switch to English',
+      langueCible: 'en',
+    },
+    heros: {
+      surtitre: 'Fonds d’écran génératifs',
+      accroche:
+        'Un motif, une palette, une densité. Calculé dans ton navigateur, téléchargé en pleine résolution.',
+      primaire: 'Générer mon fond d’écran',
+      secondaire: 'Voir des exemples',
+      mention: 'Sans compte, sans envoi, sans stockage. PNG jusqu’à 40 Mpx.',
+      /* Sous la maquette : ce qu'on regarde, en toutes lettres. La maquette
+         change de motif toute seule, et une image qui tourne sans être nommée
+         passe pour une décoration. */
+      legende: '{famille}, palette {palette}',
+    },
+    /* Les quatre chiffres du bandeau. Ils ne sont pas écrits ici : le
+       composant les lit dans le moteur, si bien qu'une famille ajoutée les
+       corrige d'elle-même. Seuls les mots sont de la langue. */
+    chiffres: {
+      motifs: 'motifs',
+      palettes: 'palettes',
+      densites: 'densités',
+      graines: 'graines',
+    },
+    galerie: {
+      titre: 'Ce que ça donne',
+      note: 'Des rendus vrais, calculés à l’instant, dans cette page. Touche une image pour relancer sa graine.',
+      relancer: '{famille}, palette {palette}. Relancer la graine.',
+      ouvrir: 'Ouvrir ce motif dans l’app',
+    },
+    ecrans: {
+      titre: 'De la poche au bureau',
+      note: 'La résolution de ton écran est détectée toute seule. Ou tu saisis la tienne.',
+    },
+    promesses: {
+      unTitre: 'Rien ne sort d’ici',
+      unCorps:
+        'Aucun compte, aucun serveur, aucune mesure d’audience. Le pixel est calculé sur ton appareil, puis oublié.',
+      deuxTitre: 'Une graine, un lien',
+      deuxCorps:
+        'Le lien porte tes réglages. Tu retrouves exactement la même image, ou tu l’envoies à quelqu’un.',
+      troisTitre: 'Tes libellés restent lisibles',
+      troisCorps:
+        'Aplat mesure le contraste sous la grille d’icônes et pose un voile, juste ce qu’il faut.',
+      sansVoile: 'sans voile',
+      avecVoile: 'voile automatique',
+    },
+    appel: {
+      titre: 'Prends une graine',
+      corps: 'Trois choix, un clic, un PNG. Ton fond d’écran est à quinze secondes.',
+    },
+    pied: {
+      mention: 'Calculé dans le navigateur, aucune donnée collectée',
+    },
+  },
   entete: {
     evitement: 'Aller aux réglages',
     titre: 'Aplat',

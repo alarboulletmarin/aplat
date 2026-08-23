@@ -10,10 +10,36 @@
          peinture, la couleur de la barre du navigateur suit la même valeur. -->
     <meta name="theme-color" content="#F2EDDD" />
     <meta name="referrer" content="no-referrer" />
+    <!--
+      Le titre et la description sont ceux de la page d'accueil, servie à la
+      racine : c'est ce document que voit un moteur de recherche ou un aperçu
+      de lien, avant que le moindre script ne tourne. React les remplace par
+      ceux de l'application quand le chemin est « /app ».
+    -->
     <meta
       name="description"
-      content="Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans rien envoyer."
+      content="Un motif, une palette, une densité. Aplat calcule ton fond d’écran dans ton navigateur et te le rend à la résolution exacte de ton écran. Sans compte, sans réseau."
     />
+
+    <!--
+      L'aperçu des liens partagés. Le titre et la description sont ceux du
+      document, à la lettre : un aperçu qui promet autre chose que la page
+      est un mensonge, même petit.
+
+      Pas d'`og:image`. Elle se donne en adresse absolue, et le domaine n'est
+      pas connu au build ; une adresse fausse vaut moins qu'une absence, qui
+      laisse les plateformes retomber sur l'icône du site. Le jour où le
+      domaine sera écrit quelque part, la vignette se dessinera avec le moteur,
+      comme le reste.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aplat" />
+    <meta property="og:title" content="Aplat : fonds d’écran génératifs" />
+    <meta
+      property="og:description"
+      content="Un motif, une palette, une densité. Aplat calcule ton fond d’écran dans ton navigateur et te le rend à la résolution exacte de ton écran. Sans compte, sans réseau."
+    />
+    <meta name="twitter:card" content="summary" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

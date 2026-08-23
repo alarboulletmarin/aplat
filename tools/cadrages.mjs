@@ -25,7 +25,7 @@ let PORT = 0;
   async function grab(name, opts, q, actions) {
     const ctx = await browser.newContext(opts);
     const page = await ctx.newPage();
-    await page.goto(`http://127.0.0.1:${PORT}/${q}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${PORT}/app${q}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(400);
     if (actions) await actions(page);
     await page.screenshot({ path: path.join(OUT, `${name}.png`) });

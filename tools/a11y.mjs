@@ -133,7 +133,7 @@ const PROBE = () => {
       colorScheme: c.scheme, locale: c.q.includes('en') ? 'en-US' : 'fr-FR'
     });
     const page = await ctx.newPage();
-    await page.goto(`http://127.0.0.1:${PORT}/${c.q}`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${PORT}/app${c.q}`, { waitUntil: 'networkidle' });
     await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(200);
     await page.fill('#res-largeur', '7000');

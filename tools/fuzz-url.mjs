@@ -31,7 +31,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
       const q = '?' + k + '=' + encodeURIComponent(v);
       let ok;
       try {
-        await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
+        await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(90);
         ok = await page.evaluate(() => ({
           peint: (document.getElementById('apercu') || {}).dataset?.peint === '1' || !!document.getElementById('etat-vide'),
@@ -52,7 +52,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
                    '?m=&p=&d=&s=&l=&r=&t=',
                    '?r=99999x99999&d=999&s=-1&l=zz&t=zz&p=zz&m=zz']) {
     n++;
-    await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
+    await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(150);
     const ok = await page.evaluate(() => ({
       peint: document.getElementById('apercu').width > 4,

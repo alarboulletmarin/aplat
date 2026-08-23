@@ -268,6 +268,61 @@ phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
+### La page d'accueil
+
+Elle est sur `/`, l'application sur `/app`. Ce n'est pas une deuxième section
+ajoutée à l'écran unique : c'est un autre document, avec sa mise en page, sa
+feuille de style et son propre point d'entrée. L'application n'en sait rien.
+
+Le vocabulaire est celui de l'application, à une échelle près : les mêmes
+arches, les mêmes seuils épais, la même display condensée contre la même
+grotesque neutre, les mêmes jetons. Ce qui change, c'est la place. L'écran
+unique compte ses pixels ; l'accueil se déroule, et peut donc donner au nom du
+produit toute la largeur, ce qui est le seul geste de marque qu'il y ait.
+
+Trois règles la tiennent, et ce sont celles du produit :
+
+- **Un seul appel primaire.** Il est répété au bas de la page, parce que
+  quelqu'un qui a lu jusqu'au bout ne doit pas remonter chercher la porte. Le
+  libellé y est mot pour mot celui du héros : ce n'est pas une autre offre. Le
+  bouton secondaire, lui, ne va nulle part, il descend d'une section.
+- **Aucune animation qui ne dise rien.** Pas de carrousel, pas de motif qui
+  tourne tout seul, pas d'apparition au défilement. La seule chose qui bouge
+  est une vignette de la galerie quand on la touche, et elle dit ce que
+  « Variante » dit dans l'application : une autre graine, le même motif.
+- **Aucune capture d'écran.** Chaque image de la page sort du moteur, au
+  chargement, dans le navigateur qui la lit : la maquette de téléphone, les
+  douze motifs, la maquette de bureau, et la comparaison du voile. La maquette
+  vient du même fichier que celle de l'application, et les couleurs de ses
+  libellés de la même sonde de lisibilité. Rien ici ne peut donc promettre un
+  rendu que l'application ne donnerait pas.
+
+Les quatre chiffres du bandeau sont lus dans le moteur, jamais recopiés : une
+famille ajoutée les corrige d'elle-même.
+
+### La bascule
+
+Langue et thème, dans l'enseigne épinglée de l'accueil. Ce sont des boutons,
+pas des puces de choix : deux états, dont l'un est toujours celui qu'on quitte.
+
+Chacun montre donc **ce qu'un appui donnera**, jamais l'état où l'on est. Un
+bouton marqué « Sombre » sur fond clair ne dit pas s'il annonce le thème actuel
+ou celui qui vient ; « Passer au thème sombre », qui est son nom accessible
+entier, le dit. Le disque garde la forme des puces du pied de page de
+l'application, plein pour le clair et vide pour le sombre, et il se lit en
+niveaux de gris. Le mot ne l'accompagne qu'au-dessus de 560 px ; en dessous, le
+nom accessible le porte seul.
+
+Le libellé de langue est écrit dans la langue d'arrivée, avec son attribut
+`lang` : une synthèse vocale française qui lirait « English » à la française
+donnerait un mot que personne ne reconnaît. Son nom accessible commence par le
+code visible, pour qu'une commande vocale « clique sur EN » atteigne le bouton
+qui porte ce mot.
+
+Le thème n'y a que deux positions. « Système » reste dans le pied de page de
+l'application, là où trois choix ont la place de tenir : une bascule à trois
+positions n'est plus une bascule.
+
 ---
 
 ## 7. Les composants
@@ -436,5 +491,6 @@ ne se coupe jamais.
 - Plus d'un appel primaire par écran.
 - Emoji.
 - Bibliothèque de composants ou de style.
-- Une deuxième section.
+- Une deuxième section dans l'application. La page d'accueil est un autre
+  document, sur une autre adresse ; l'écran unique reste unique.
 - Tiret cadratin, tiret demi-cadratin, point médian (section 11).

@@ -30,7 +30,7 @@ const OUT = path.resolve(ICI, '../.shots');
         ));
       } catch (e) { /* stockage refusé */ }
     });
-    await page.goto(`http://127.0.0.1:${PORT}/?l=fr&m=vagues&p=lime&d=1&s=1`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${PORT}/app?l=fr&m=vagues&p=lime&d=1&s=1`, { waitUntil: 'networkidle' });
     await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(300);
     // désature toute la page

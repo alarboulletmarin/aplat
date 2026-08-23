@@ -115,20 +115,55 @@ index.html                    le document, et le thème résolu avant la peintur
 vite.config.ts                build, PWA, politique de sécurité
 eslint.config.js              les règles des hooks React, que tsc ne voit pas
 vercel.json                   les en-têtes de cache qui décident des mises à jour
-src/main.tsx                  point d'entrée
+src/main.tsx                  point d'entrée, et le choix des deux pages
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
+src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
 src/lib/{resolution,url,export,geometrie,format,build}.ts
 src/components/               l'interface, un fichier par pièce
+src/components/accueil/       la page d'accueil, un fichier par section
 src/hooks/                    horloge, tailles, focus, ajustement
 src/i18n/{fr,en,index}.ts     les libellés, à parité stricte
-src/styles/                   tokens, reset, base, composants, écrans
+src/styles/                   tokens, reset, base, composants, écrans, accueil
 public/polices/*.woff2        Anton et Archivo, auto-hébergées
 scripts/                      icônes de la PWA, notices de licence
 design/Aplat.dc.html          la maquette de référence
 tools/*.mjs                   vérifications headless (hors livraison)
 .github/workflows/ci.yml      la CI : `verify` et `check`, en parallèle
 ```
+
+## Deux adresses
+
+`/` présente le projet. `/app` le fait tourner.
+
+La page d'accueil n'est pas une deuxième section de l'application : c'est un
+autre document, et l'application reste l'écran unique décrit plus haut. Elle ne
+montre pas non plus de captures d'écran. Chacune de ses images sort du moteur,
+au chargement, dans le navigateur qui la lit : la maquette de téléphone du
+haut, les douze motifs de la galerie, la maquette de bureau et la comparaison
+du voile. Il n'y a donc rien à tenir à jour, et rien qui puisse promettre un
+rendu que l'application ne donnerait pas.
+
+Elle garde les règles de l'application, parce que c'est le même produit : un
+seul appel primaire, répété en bas de page mais jamais dédoublé ; aucune
+animation qui ne dise ni une origine, ni un état, ni une continuité ; et rien
+d'écrit sur l'appareil, l'état tenant dans l'adresse. Cet état se réduit à la
+langue et au thème, qui sont aussi ses deux boutons, dans l'enseigne épinglée :
+quelqu'un qui arrive sur une page dans une langue qu'il ne lit pas doit trouver
+la bascule avant le premier paragraphe. Le lien vers l'application les emporte,
+personne ne choisit sa langue deux fois.
+
+Aplat a vécu à la racine. Les liens partagés de cette époque, `/?m=vagues&…`,
+sont reconduits vers `/app` avec leur requête intacte, avant le moindre rendu :
+la promesse « copier le lien suffit à retrouver exactement la même image » ne
+s'annule pas parce que le produit s'est doté d'une porte d'entrée. Une adresse
+nue, ou qui ne porte que la langue et le thème, reste sur l'accueil.
+
+Le manifeste installe l'application sur `/app`, dans une portée qui reste la
+racine : une application installée s'ouvre sur l'outil, pas sur sa
+présentation. Son `id` n'a pas bougé, ce qui est précisément la raison pour
+laquelle il était posé en dur : les installations existantes ont suivi au lieu
+de se dédoubler.
 
 ## L'URL porte l'état
 
@@ -137,6 +172,10 @@ tools/*.mjs                   vérifications headless (hors livraison)
 `m` famille, `p` palette, `d` densité (de 0 à 2), `s` graine, `l` langue,
 `r` résolution (seulement si elle a été saisie à la main),
 `t` thème (seulement s'il n'est pas « système »).
+
+`l` et `t` valent pour les deux pages : la présentation n'a pas de motif à
+relire, mais elle a une langue et un thème, et `?l=en&t=sombre` dit la même
+chose des deux côtés.
 
 Rien d'autre n'est transmis. Copier le lien suffit à retrouver exactement la
 même image, sur n'importe quel appareil. Une URL forgée ne peut produire qu'un
@@ -341,13 +380,14 @@ pixels sont identiques. Les 3,1 % restants se lisent un par un sur la carte des
 ## Vérifications
 
 ```bash
-npm run verify   # typographie, types, lint, 69 tests unitaires, build
+npm run verify   # typographie, types, lint, tests unitaires, build
 npm run check    # build, puis 98 contrôles dans Chromium
 ```
 
 | Outil | Ce qu'il vérifie |
 |---|---|
 | `tools/typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
+| `tools/accueil.mjs` | la page d'accueil : les deux adresses, les liens partagés d'avant, les deux bascules, les toiles qui se peignent toutes, les cibles et la hiérarchie des titres |
 | `tools/e2e.mjs` | 80 contrôles : URL et sa robustesse, déterminisme, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, contenu du cache, clavier, focus non masqué, mouvement réduit |
 | `tools/pwa.mjs` | 18 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé (page, motif, vignettes, polices et téléchargement réel) |
 | `tools/a11y.mjs` | contrastes réels sur le DOM, deux thèmes, deux langues |

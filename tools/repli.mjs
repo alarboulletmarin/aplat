@@ -71,7 +71,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await page.addInitScript(plein => {
       try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
     }, PLEIN);
-    await page.goto(`http://127.0.0.1:${port}/?l=fr`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${port}/app?l=fr`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
 
     // 1. en haut de page, l'aperçu est déplié

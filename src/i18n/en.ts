@@ -9,6 +9,69 @@ export const en: Textes = {
     description:
       'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing sent.',
   },
+  accueil: {
+    document: {
+      titre: 'Aplat: generative wallpapers',
+      description:
+        'One pattern, one palette, one density. Aplat computes your wallpaper inside your browser and hands it back at your screen’s exact resolution. No account, no network.',
+    },
+    enseigne: {
+      evitement: 'Skip to content',
+      ouvrir: 'Open the app',
+    },
+    bascule: {
+      versClair: 'Switch to the light theme',
+      versSombre: 'Switch to the dark theme',
+      langueCode: 'FR',
+      langueVers: 'Passer en français',
+      langueCible: 'fr',
+    },
+    heros: {
+      surtitre: 'Generative wallpapers',
+      accroche:
+        'One pattern, one palette, one density. Computed inside your browser, downloaded at full resolution.',
+      primaire: 'Make my wallpaper',
+      secondaire: 'See examples',
+      mention: 'No account, nothing sent, nothing stored. PNG up to 40 Mpx.',
+      legende: '{famille}, {palette} palette',
+    },
+    chiffres: {
+      motifs: 'patterns',
+      palettes: 'palettes',
+      densites: 'densities',
+      graines: 'seeds',
+    },
+    galerie: {
+      titre: 'What it looks like',
+      note: 'Real renders, computed right now, on this page. Tap an image to reroll its seed.',
+      relancer: '{famille}, {palette} palette. Reroll the seed.',
+      ouvrir: 'Open this pattern in the app',
+    },
+    ecrans: {
+      titre: 'From pocket to desk',
+      note: 'Your screen resolution is detected on its own. Or you type your own.',
+    },
+    promesses: {
+      unTitre: 'Nothing leaves this page',
+      unCorps:
+        'No account, no server, no analytics. The pixel is computed on your device, then forgotten.',
+      deuxTitre: 'One seed, one link',
+      deuxCorps:
+        'The link carries your settings. You get exactly the same image back, or you send it to someone.',
+      troisTitre: 'Your icon labels stay legible',
+      troisCorps:
+        'Aplat measures the contrast under the icon grid and lays down a scrim, just enough.',
+      sansVoile: 'no scrim',
+      avecVoile: 'automatic scrim',
+    },
+    appel: {
+      titre: 'Take a seed',
+      corps: 'Three choices, one click, one PNG. Your wallpaper is fifteen seconds away.',
+    },
+    pied: {
+      mention: 'Computed in the browser, no data collected',
+    },
+  },
   entete: {
     evitement: 'Skip to settings',
     titre: 'Aplat',

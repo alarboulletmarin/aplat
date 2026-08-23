@@ -914,11 +914,44 @@ export function dessiner(
   ctx: Ctx, W: number, H: number, motif: Motif,
   mesureW = 0, mesureH = 0,
 ): Mesure {
-  const P = palette(motif.palette)
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
     mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H,
   )
+  rendre(ctx, W, H, motif, mesure, true)
+  return mesure
+}
+
+/**
+ * Le même rendu, voile de lisibilité en moins.
+ *
+ * Il ne sert qu'à une chose : montrer côte à côte, sur la page d'accueil, ce
+ * que le voile change sous une grille d'icônes. Il passe par le même `rendre`
+ * que le rendu complet plutôt que de refaire l'ordre des couches ailleurs :
+ * une copie de cet ordre finirait par diverger, et la démonstration montrerait
+ * alors autre chose que ce que le produit fait.
+ *
+ * Aucun export ne l'emprunte : le fichier téléchargé porte toujours son voile.
+ */
+export function dessinerSansVoile(
+  ctx: Ctx, W: number, H: number, motif: Motif,
+  mesureW = 0, mesureH = 0,
+): Mesure {
+  const mesure = mesurer(
+    motif.famille, motif.palette, motif.densite, motif.graine,
+    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H,
+  )
+  rendre(ctx, W, H, motif, mesure, false)
+  return mesure
+}
+
+/* L'ordre des couches, écrit une fois : le fond, les formes, le voile, le
+   grain. Le grain passe en dernier parce qu'il doit aussi casser les bandes du
+   voile, et non seulement celles des aplats. */
+function rendre(
+  ctx: Ctx, W: number, H: number, motif: Motif, mesure: Mesure, voile: boolean,
+): void {
+  const P = palette(motif.palette)
 
   ctx.save()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -930,10 +963,9 @@ export function dessiner(
   formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
     alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
 
-  peindreVoile(ctx, W, H, mesure)
+  if (voile) peindreVoile(ctx, W, H, mesure)
   peindreGrain(ctx, W, H)
   ctx.restore()
-  return mesure
 }
 
 /**

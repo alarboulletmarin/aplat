@@ -34,7 +34,7 @@ const OUT = path.resolve(ICI, '../.shots');
       colorScheme: scheme, locale: 'fr-FR', acceptDownloads: true
     });
     const page = await ctx.newPage();
-    await page.goto(`http://127.0.0.1:${PORT}/?l=fr&r=1179x2556`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${PORT}/app?l=fr&r=1179x2556`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
     if (prep) await prep(page);
     await page.screenshot({ path: path.join(OUT, 'etat-' + nom + '.png') });

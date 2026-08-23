@@ -85,9 +85,15 @@ export default defineConfig({
         dir: 'ltr',
         // `id` posé explicitement : sans lui, l'identité de l'application
         // installée dépend de `start_url`, et changer l'un reviendrait à
-        // installer une seconde application à côté de la première.
+        // installer une seconde application à côté de la première. C'est
+        // exactement ce qui s'est joué au moment où la page d'accueil a pris
+        // la racine : `start_url` est passé à `/app`, `id` n'a pas bougé, et
+        // les installations existantes ont suivi au lieu de se dédoubler.
         id: '/',
-        start_url: '/',
+        // L'application, pas sa présentation : une application installée
+        // s'ouvre sur l'outil. La page d'accueil reste à la racine, pour les
+        // navigateurs.
+        start_url: '/app',
         scope: '/',
         display: 'standalone',
         // 'any' et non 'portrait' : la maquette d'appareil est déduite du
@@ -115,6 +121,8 @@ export default defineConfig({
         // `txt` couvre THIRD-PARTY.txt et les licences OFL des polices, qui
         // doivent rester lisibles hors ligne comme le reste.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,txt,woff2}'],
+        // Le même document sert les deux adresses : `/app` n'est pas un
+        // fichier, c'est le chemin que `route.ts` lit au démarrage.
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
       },

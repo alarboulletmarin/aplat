@@ -21,6 +21,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 |---|---|
 | `typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
 | `e2e.mjs` | 123 contrôles dans un vrai navigateur : lecture et écriture de l'URL, déterminisme du rendu, les quatre états, téléchargement réel avec lecture de l'en-tête PNG, course à l'export, échec de copie, contenu du cache **et de l'historique local**, clavier, focus non masqué, mouvement réduit, aperçu assombri comparé octet pour octet |
+| `accueil.mjs` | la page d'accueil, sur « / » : les deux adresses et la reconduite des liens partagés du temps où l'application vivait à la racine, les deux bascules (adresse écrite, document retourné, nom accessible qui dit ce qu'un appui donnera), les quinze toiles qui finissent toutes par se peindre, une vignette touchée qui redessine, les cibles de 44 px et la hiérarchie des titres |
 | `pwa.mjs` | manifeste, icônes à la taille annoncée, Service Worker activé. Puis réseau coupé : page, motif, vignettes, polices et téléchargement réel |
 | `fuzz-url.mjs` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `a11y.mjs` | contrastes calculés sur le DOM, couleurs semi-transparentes recomposées sur leur pile de fonds, deux thèmes, deux langues |

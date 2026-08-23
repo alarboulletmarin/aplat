@@ -45,7 +45,7 @@ const PLEIN = JSON.stringify(
       try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
     }, PLEIN);
 
-    await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${PORT}/app?l=fr`, { waitUntil: 'networkidle' });
     await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
     await page.waitForTimeout(300);
 

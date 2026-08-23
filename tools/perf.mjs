@@ -10,7 +10,7 @@ let PORT = 0;
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });   // téléphone d'entrée de gamme
-  await page.goto(`http://127.0.0.1:${PORT}/?l=fr&r=1179x2556`, { waitUntil: 'networkidle' });
+  await page.goto(`http://127.0.0.1:${PORT}/app?l=fr&r=1179x2556`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
 
   const r = await page.evaluate(async () => {
