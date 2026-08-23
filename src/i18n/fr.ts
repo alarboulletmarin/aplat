@@ -56,6 +56,13 @@ export const fr = {
     /* La forme repliée, sur une ligne. Le mot d'abord, le chiffre ensuite :
        c'est le mot qui décide, le chiffre qui l'appuie. */
     resume: 'Lisibilité {niveau}, {contraste}:1',
+    /* L'aperçu assombri. Le mot « approché » n'est pas une précaution
+       oratoire : aucune plateforme ne publie la force de son assombrissement,
+       et le produit ne prétend pas mesurer ce qu'il estime. */
+    assombri: 'Assombri',
+    assombriTitre: 'Simule le fond assombri d’un thème sombre, sans changer le fichier',
+    assombriNote:
+      'Aperçu assombri, comme un thème sombre le ferait, à peu près. Le fichier téléchargé, lui, ne change pas.',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {

@@ -128,6 +128,15 @@
   height: 100%;
   display: block;
 }
+/* L'aplat qui simule le fond assombri d'un thème sombre. Son opacité vient de
+   `ASSOMBRISSEMENT`, en style en ligne : une seule valeur, dans le moteur, qui
+   sert à la fois à peindre et à recalculer le rapport de contraste. */
+.apercu-assombri {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
 
 /* maquette téléphone / tablette */
 .maq {
@@ -532,8 +541,12 @@
    de 4,5:1, disque à moitié entre 3:1 et 4,5:1, triangle en dessous. Elles
    partagent la même encre : le niveau se lit en niveaux de gris comme en
    couleur, et la forme change en même temps que le mot. */
+/* La bascule d'assombrissement tient au bout de la rangée tant que le texte
+   garde trente caractères de large ; sous cette largeur elle passe à la ligne
+   plutôt que d'étrangler le détail en colonne de six mots. */
 .verdict {
   display: flex;
+  flex-wrap: wrap;
   gap: 11px;
   align-items: flex-start;
   border-top: 2px solid var(--encre);
@@ -566,12 +579,24 @@
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 .verdict-txt {
+  flex: 1 1 30ch;
   min-width: 0;
 }
 /* Le verdict replié : une ligne, dépliable au doigt. Le chevron dit qu'il y a
-   quelque chose dessous, et tourne quand c'est ouvert. */
+   quelque chose dessous, et tourne quand c'est ouvert. Le détail prend toute
+   la largeur sous la rangée, la bascule d'assombrissement en occupe le bout. */
 .verdict-replie {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.verdict-replie .verdict-bascule {
+  flex: 1 1 12ch;
+  min-width: 0;
+}
+.verdict-replie .verdict-d {
+  flex: 1 0 100%;
 }
 .verdict-bascule {
   display: flex;
@@ -599,8 +624,47 @@
 .verdict-bascule[aria-expanded='true'] .verdict-chevron {
   transform: rotate(180deg);
 }
-.verdict-replie .verdict-d {
-  margin-top: 7px;
+/* La bascule d'assombrissement : un aplat inversé quand elle est enfoncée,
+   comme les puces de choix. En niveaux de gris, l'état se lit au remplissage,
+   jamais à la teinte. */
+.btn-assombri {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 13px;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  scroll-margin-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
+}
+.btn-assombri[aria-pressed='true'] {
+  border-color: var(--encre);
+  background: var(--encre);
+  color: var(--papier);
+}
+.verdict-replie .btn-assombri {
+  align-self: center;
+}
+/* Un croissant : un anneau dont deux quarts manquent, tourné. Il ne dépend que
+   de `currentColor`, et suit donc l'inversion sans rien savoir du fond. */
+.ico-lune {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  /* Un disque plein dans lequel un second disque, décalé en haut à droite,
+     mord. Le dégradé radial ne sert pas de dégradé : ses deux arrêts sont
+     collés, il découpe. */
+  background: radial-gradient(circle 7px at 12.5px 1.5px, transparent 98%, currentColor 100%);
 }
 .verdict-t {
   font-weight: 700;

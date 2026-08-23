@@ -39,6 +39,10 @@ export const en: Textes = {
     sansVoile: 'no veil needed',
     titreNiveau: 'Icon label legibility: {niveau}',
     resume: 'Legibility {niveau}, {contraste}:1',
+    assombri: 'Dimmed',
+    assombriTitre: 'Simulates the dimmed background of a dark theme, without changing the file',
+    assombriNote:
+      'Preview dimmed, roughly as a dark theme would. The downloaded file itself does not change.',
     detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {

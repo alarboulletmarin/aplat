@@ -851,6 +851,63 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await sctx3.close();
   }
 
+  /* --- 21. l'aperçu assombri change le verdict, jamais le fichier
+     Un thème sombre assombrit le fond d'écran : les libellés clairs y gagnent.
+     L'aperçu doit le montrer et le verdict le dire, mais le PNG téléchargé
+     porte le voile calculé pour le fond tel quel, et ne bouge pas d'un octet. */
+  {
+    const dctx = await browser.newContext({
+      viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
+    });
+    const dp = await dctx.newPage();
+    await dp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(400);
+
+    const lire = () => dp.evaluate(() => ({
+      detail: document.getElementById('verdict-detail').textContent,
+      titre: document.getElementById('verdict-titre').textContent,
+      presse: document.getElementById('btn-assombri').getAttribute('aria-pressed'),
+      voile: !!document.querySelector('.apercu-assombri'),
+      empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96)
+    }));
+    const clair = await lire();
+    await dp.$eval('#btn-assombri', e => e.click());
+    await dp.waitForTimeout(400);
+    const sombre = await lire();
+
+    const rapport = (texte) => parseFloat((texte.match(/(\d+[.,]\d+):1/) || [0, '0'])[1].replace(',', '.'));
+    t(clair.presse === 'false' && sombre.presse === 'true',
+      'assombri : la bascule dit son état', `${clair.presse} -> ${sombre.presse}`);
+    t(!clair.voile && sombre.voile, 'assombri : l\'aplat est peint sur l\'aperçu');
+    t(rapport(sombre.detail) > rapport(clair.detail),
+      'assombri : le rapport annoncé monte pour des libellés clairs',
+      `${rapport(clair.detail)}:1 -> ${rapport(sombre.detail)}:1`);
+    t(/ne change pas/.test(sombre.detail) && !/ne change pas/.test(clair.detail),
+      'assombri : le détail dit que le fichier ne change pas', sombre.detail.slice(-60));
+    t(clair.empreinte === sombre.empreinte,
+      'assombri : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
+
+    /* Et le fichier, pour de vrai. */
+    const [dl2] = await Promise.all([
+      dp.waitForEvent('download', { timeout: 30000 }),
+      dp.$eval('#btn-export', e => e.click())
+    ]);
+    const chemin = path.join(OUT, 'assombri-' + dl2.suggestedFilename());
+    await dl2.saveAs(chemin);
+    await dp.$eval('#btn-assombri', e => e.click());
+    await dp.waitForTimeout(400);
+    const [dl3] = await Promise.all([
+      dp.waitForEvent('download', { timeout: 30000 }),
+      dp.$eval('#btn-export', e => e.click())
+    ]);
+    const chemin2 = path.join(OUT, 'clair-' + dl3.suggestedFilename());
+    await dl3.saveAs(chemin2);
+    t(fs.readFileSync(chemin).equals(fs.readFileSync(chemin2)),
+      'assombri : le PNG téléchargé est le même, octet pour octet',
+      fs.statSync(chemin).size + ' o contre ' + fs.statSync(chemin2).size + ' o');
+    await dctx.close();
+  }
+
   await browser.close();
   srv.close();
 

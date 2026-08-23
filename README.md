@@ -69,6 +69,11 @@ qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
 3:1 et 4,5:1 ; **insuffisante** en dessous. Chaque bande a sa forme, disque
 plein, disque à moitié, triangle.
 
+Une bascule **Assombri**, au bout de la rangée du verdict, simule le fond
+d'écran tel qu'un thème sombre l'assombrit : les libellés clairs y gagnent, les
+sombres y perdent, et le rapport annoncé suit. Le fichier téléchargé, lui, ne
+change pas d'un octet, ce qu'une vérification compare pour de bon.
+
 Sur téléphone en portrait, l'aperçu se replie en vignette dès qu'on défile, et
 le verdict se condense sur une ligne, dépliable au doigt : les grilles passent
 de 37 % à 58 % de la hauteur de l'écran. Le repli se fait à l'échelle, pas à la

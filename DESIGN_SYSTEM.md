@@ -250,7 +250,14 @@ promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
 
 Trois bandes, et rien entre les deux : **bonne** au-dessus de 4,5:1, le seuil AA
 du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
-**insuffisante** en dessous. Le mot affiché est le nom de la bande, pris tel
+**insuffisante** en dessous.
+
+Au bout de la même rangée, une bascule **Assombri** simule le fond d'écran tel
+qu'un thème sombre l'assombrit, et le verdict se recalcule pour cette condition.
+Elle ne touche pas au fichier : le voile y est déjà brûlé, calculé pour le fond
+tel quel, et c'est le système qui assombrit à l'affichage. Le détail le dit en
+toutes lettres, et l'interface annonce l'assombrissement comme approché, faute
+qu'aucune plateforme n'en publie la force. Le mot affiché est le nom de la bande, pris tel
 quel dans le dictionnaire : un titre ne peut plus rassurer là où le corps
 nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme la borne
 qui la définit.

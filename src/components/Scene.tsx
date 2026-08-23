@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef, type CSSProperties } from 'react'
-import { famille, palette, type Langue, type Mesure, type Motif } from '../lib/moteur'
+import { useRef, useState, type CSSProperties } from 'react'
+import {
+  ASSOMBRISSEMENT, assombrir, famille, palette,
+  type Langue, type Mesure, type Motif,
+} from '../lib/moteur'
 import {
   geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
 } from '../lib/geometrie'
@@ -63,6 +66,9 @@ export function Scene({
   const tailleBoite = useTaille(boite)
   const fenetre = useTailleFenetre()
   const instant = useHorloge(langue)
+  /* Une aide à la lecture, pas un réglage : elle ne part ni dans l'URL ni dans
+     le fichier, et repart à zéro au rechargement. */
+  const [assombri, setAssombri] = useState(false)
 
   const vide = !resolution.largeur || !resolution.hauteur
 
@@ -145,6 +151,17 @@ export function Scene({
             />
           )}
 
+          {/* L'assombrissement est peint par-dessus le motif et sous la
+              maquette : ce sont bien les libellés sur un fond assombri qu'on
+              juge. Le fichier téléchargé, lui, ne le porte pas. */}
+          {!vide && assombri && (
+            <span
+              className="apercu-assombri"
+              aria-hidden="true"
+              style={{ background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})` }}
+            />
+          )}
+
           {!vide && !calculEnCours && type !== 'ordinateur' && (
             <MaquetteTelephone
               textes={textes}
@@ -182,10 +199,13 @@ export function Scene({
       </p>
 
       <Verdict
-        mesure={vide ? null : mesure}
+        mesure={vide || !mesure ? null : assombri ? assombrir(mesure) : mesure}
         textes={textes}
         langue={langue}
         replie={verdictReplie}
+        bascule={!replie}
+        assombri={assombri}
+        onAssombrir={() => setAssombri((precedent) => !precedent)}
       />
     </section>
   )
