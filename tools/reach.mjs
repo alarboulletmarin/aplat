@@ -1,6 +1,12 @@
 /* Chaque contrôle doit être atteignable au doigt : on cherche une position de
    défilement où le centre du contrôle répond bien au test de pointage, et on
-   vérifie la cible de 44 px. */
+   vérifie la cible de 44 px.
+
+   Puis on vérifie que la scène collante, une fois collée en haut, tient
+   entière au-dessus de la barre d'action. Sans ça, l'aperçu et le verdict de
+   lisibilité restent coupés quelle que soit la position de défilement : c'est
+   ce qui se passait en paysage, où la scène était calculée pour un écran
+   debout. */
 import path from 'node:path'
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
@@ -10,7 +16,9 @@ const CASES = [
   { name: 'phone 390x844', vp: { width: 390, height: 844 }, dsf: 3, mobile: true },
   { name: 'phone 360x640', vp: { width: 360, height: 640 }, dsf: 3, mobile: true },
   { name: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true },
+  { name: 'phone paysage 844x390', vp: { width: 844, height: 390 }, dsf: 3, mobile: true },
   { name: 'tablet 834x1112', vp: { width: 834, height: 1112 }, dsf: 2, mobile: true },
+  { name: 'desktop court 1180x550', vp: { width: 1180, height: 550 }, dsf: 2, mobile: false },
   { name: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false }
 ];
 
@@ -60,6 +68,26 @@ const CASES = [
       return out;
     });
 
+    // la scène collée doit tenir entière au-dessus de la barre d'action
+    const couvert = await page.evaluate(() => {
+      const maxY = document.documentElement.scrollHeight - innerHeight;
+      scrollTo(0, Math.min(maxY, 1200));
+      const scene = document.querySelector('.scene').getBoundingClientRect();
+      const barre = document.querySelector('.barre').getBoundingClientRect();
+      const appareil = document.getElementById('appareil').getBoundingClientRect();
+      const verdict = document.querySelector('.verdict').getBoundingClientRect();
+      scrollTo(0, 0);
+      /* Sous 760 px la scène est collante et recouvre la page ; au-delà elle
+         tient dans sa colonne et ne recouvre plus rien, mais la barre la
+         recouvre toujours, elle. */
+      return {
+        collee: Math.round(scene.top) <= 1,
+        apercu: Math.round(appareil.bottom - barre.top),
+        verdict: Math.round(verdict.bottom - barre.top)
+      };
+    });
+    const sousLaBarre = couvert.collee && (couvert.apercu > 1 || couvert.verdict > 1);
+
     const unreachable = report.filter(r => !r.ok);
     const small = report.filter(r => r.ok && (r.h < 44 || r.w < 44));
     console.log(`\n=== ${c.name} : ${report.length} contrôles ===`);
@@ -67,6 +95,12 @@ const CASES = [
     else console.log('  atteignables: tous');
     if (small.length) console.log('  < 44 px: ' + small.map(r => `${r.id}(${r.w}x${r.h})`).join(', '));
     else console.log('  cibles >= 44 px: toutes');
+    if (sousLaBarre) {
+      bad++;
+      console.log(`  SCÈNE COUPÉE PAR LA BARRE: aperçu ${couvert.apercu} px, verdict ${couvert.verdict} px dessous`);
+    } else {
+      console.log(`  scène collée : entière au-dessus de la barre (aperçu ${-couvert.apercu} px, verdict ${-couvert.verdict} px de marge)`);
+    }
     await ctx.close();
   }
 

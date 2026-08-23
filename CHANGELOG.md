@@ -15,7 +15,9 @@ d'écran derrière mes icônes ?**
   une maquette de téléphone, avec l'heure, un widget et une grille d'icônes
   factices : on juge la lisibilité réelle avant de télécharger, pas après. Sur
   téléphone l'aperçu est épinglé en haut et les réglages défilent dessous ; sur
-  ordinateur les deux sont côte à côte.
+  ordinateur les deux sont côte à côte. Sur une fenêtre couchée et basse,
+  l'en-tête se replie et la barre d'action passe en variante compacte, pour que
+  l'aperçu entier, dock compris, tienne au-dessus d'elle.
 - **Trois réglages, pas un de plus** : famille de motif (dix-huit, réparties
   en abstraits et figures), palette (onze) et densité (trois). Chaque famille
   montre sa propre vignette, calculée avec la palette et la densité courantes.

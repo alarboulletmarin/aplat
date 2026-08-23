@@ -158,6 +158,16 @@ Les grilles sont en `repeat(auto-fit, minmax(min(Xpx, 100%), 1fr))`. Le
 largeur plus grande que l'écran sous 336 px et la page défile
 horizontalement.
 
+**Paysage court.** Une fenêtre couchée de moins de 560 px de haut n'a plus la
+hauteur d'un écran debout : l'en-tête se replie, la barre d'action passe en
+variante compacte (cibles toujours à 44 px, c'est le rembourrage qui cède), et
+la hauteur de la scène cesse d'être une fraction de l'écran pour devenir ce qui
+reste une fois la barre et le verdict servis. Sans ça, le bas du téléphone et
+le verdict passaient sous la barre, à toute position de défilement. Le seuil
+est écrit deux fois, dans `@media (orientation: landscape)` d'`ecrans.css` et
+dans `PAYSAGE_COURT` de `lib/geometrie.ts` : les deux basculent ensemble ou pas
+du tout.
+
 Pas de navigation : il n'y a qu'une section.
 
 ---

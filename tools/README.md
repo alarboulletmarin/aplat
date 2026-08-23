@@ -24,8 +24,8 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | `pwa.mjs` | manifeste, icônes à la taille annoncée, Service Worker activé. Puis réseau coupé : page, motif, vignettes, polices et téléchargement réel |
 | `fuzz-url.mjs` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `a11y.mjs` | contrastes calculés sur le DOM, couleurs semi-transparentes recomposées sur leur pile de fonds, deux thèmes, deux langues |
-| `reach.mjs` | cherche une position de défilement où chaque contrôle répond au pointage, sous les deux barres collantes, puis vérifie la cible de 44 px |
-| `overflow.mjs` | débordements sur 8 largeurs × 2 langues × 4 résolutions cibles, avec et sans libellés allongés de 30 % |
+| `reach.mjs` | cherche une position de défilement où chaque contrôle répond au pointage, sous les deux barres collantes, puis vérifie la cible de 44 px et que la scène collée tient entière au-dessus de la barre d'action |
+| `overflow.mjs` | débordements sur 10 cadrages (dont deux fenêtres couchées) × 2 langues × 4 résolutions cibles, avec et sans libellés allongés de 30 % |
 | `band-test.mjs` | hauteur des marches du voile sur 32 cas |
 | `dither-check.mjs` | amplitude du grain du `#101A2E` au `#FFFFFF` |
 | `shot.mjs` | captures et absence de requête sortante |

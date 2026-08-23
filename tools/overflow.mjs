@@ -12,6 +12,10 @@ const VIEWS = [
   { name: 'phone 430', w: 430, h: 932, dsf: 3 },
   { name: 'tablet 768', w: 768, h: 1024, dsf: 2 },
   { name: 'tablet 834', w: 834, h: 1112, dsf: 2 },
+  /* Deux fenêtres couchées et basses : c'est là que la barre d'action passe en
+     variante compacte et que les gabarits changent le plus. */
+  { name: 'phone paysage 844', w: 844, h: 390, dsf: 3 },
+  { name: 'desk court 1180', w: 1180, h: 550, dsf: 2 },
   { name: 'desk 1280', w: 1280, h: 900, dsf: 2 },
   { name: 'desk 1920', w: 1920, h: 1080, dsf: 1 }
 ];

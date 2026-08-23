@@ -74,10 +74,13 @@
   background: var(--fond);
   padding: 8px 0 12px;
 }
+/* La hauteur vient de `hauteurScene`, posée en style en ligne : elle tient
+   compte de la barre d'action, que la feuille de style ne sait pas mesurer.
+   Celle d'ici ne sert qu'avant la première mesure. Pas de `min-height` : elle
+   empêcherait l'aperçu de se replier en vignette au défilement. */
 .scene-boite {
   width: 100%;
   height: min(46vh, 560px);
-  min-height: 230px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -710,8 +713,14 @@
 /* Le lien vers la source n'est pas une mention légale en petit : l'AGPL en
    fait une obligation, et une obligation doit être cliquable. D'où une cible
    de 44 px de haut comme partout ailleurs, malgré la petite taille du texte. */
+/* Réserve de fin de défilement. La barre d'action est collante : tant que le
+   bas exact du document n'est pas atteint, elle recouvre ce qui passe dessous,
+   et le dernier réglage du pied s'y coupait. La hauteur mesurée de la barre
+   comprend déjà `env(safe-area-inset-bottom)`, qu'elle porte dans son propre
+   rembourrage : la réserve suit donc l'encoche de l'appareil sans la compter
+   deux fois. */
 .pied {
-  padding: 0 0 8px;
+  padding: 0 0 calc(10px + var(--barre-h, 0px));
   display: flex;
   flex-wrap: wrap;
   gap: 0 14px;
@@ -726,4 +735,64 @@
 }
 .pied-version {
   font-variant-numeric: tabular-nums;
+}
+
+/* --- Paysage court : la hauteur est la ressource rare ------------------------ */
+/* Une fenêtre couchée de moins de 560 px de haut ne peut pas porter le même
+   en-tête ni la même barre d'action qu'un écran debout. La barre passe en
+   variante compacte, l'en-tête se replie, et la hauteur rendue revient à
+   l'aperçu et au panneau. Les cibles restent à 44 px : c'est le rembourrage
+   qui cède, jamais la surface au doigt.
+
+   Le seuil est le même que `PAYSAGE_COURT` dans `lib/geometrie.ts`, qui calcule
+   la hauteur de la scène en supposant la barre déjà réduite. Les deux valeurs
+   basculent ensemble ou pas du tout. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .page {
+    padding-top: 12px;
+    gap: 14px;
+  }
+  .titre {
+    font-size: clamp(40px, 7.5vw, 62px);
+  }
+  .entete-arche {
+    width: clamp(20px, 3.6vw, 30px);
+    height: clamp(30px, 5.6vw, 44px);
+  }
+  .entete-filet {
+    margin-top: 8px;
+  }
+  .entete-pied {
+    padding-top: 8px;
+  }
+  .accroche {
+    font-size: 14px;
+  }
+
+  .scene {
+    padding: 6px 0 8px;
+    gap: 8px;
+  }
+
+  .barre {
+    padding: 5px 0 calc(5px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+  .btn-graine,
+  .btn-export {
+    min-height: 44px;
+    border-radius: 14px;
+  }
+  .btn-graine {
+    min-width: 44px;
+    padding: 0 13px;
+    font-size: 14px;
+  }
+  .btn-export {
+    padding: 0 14px;
+    font-size: 15.5px;
+  }
+  .note {
+    padding: 9px 13px;
+  }
 }
