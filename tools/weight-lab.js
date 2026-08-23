@@ -9,6 +9,7 @@ let PORT = 0;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await poser(page);
 
   const rows = await page.evaluate(async () => {
     const M = window.MOTEUR;

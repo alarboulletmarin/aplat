@@ -14,6 +14,7 @@ const OUT = path.resolve(__dirname, '../.shots');
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await poser(page);
 
   const pal = process.argv[2] || 'lime';
   const dens = parseInt(process.argv[3] || '1', 10);

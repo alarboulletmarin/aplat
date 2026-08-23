@@ -21,6 +21,7 @@ const ALL_RES = [
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await poser(page);
 
   const mode = process.argv[2] || 'all';
   const RES = mode === 'phone-full' ? [ALL_RES[0]] : ALL_RES;
