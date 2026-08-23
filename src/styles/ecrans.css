@@ -640,6 +640,18 @@
   letter-spacing: -0.012em;
   margin-bottom: 14px;
 }
+/* Le titre d'une carte et l'action qui porte sur elle, sur la même ligne. La
+   rangée se replie quand la largeur manque, et le titre garde le dessus. */
+.carte-titre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.carte-titre .carte-h {
+  margin-bottom: 14px;
+}
 .groupe {
   font-size: 13px;
   font-weight: 700;

@@ -64,6 +64,11 @@ export const fr = {
     groupeAbstraits: 'Abstraits',
     groupeFigures: 'Figures',
     palette: 'Palette',
+    /* Deux gestes voisins, deux libellés qui ne peuvent pas se confondre :
+       « Autre variante » redessine le même motif avec une autre graine,
+       « Surprends-moi » tire une autre famille et une autre palette. */
+    surprise: 'Surprends-moi',
+    surpriseTitre: 'Tire au hasard une famille, une palette et une graine',
     densite: 'Densité',
     calme: 'Calme',
     moyen: 'Moyen',
@@ -108,7 +113,11 @@ export const fr = {
     systeme: 'Système',
   },
   barre: {
-    nouveau: 'Nouveau motif',
+    /* Un mot, parce que la place manque à 320 px et qu'un libellé secondaire
+       tronqué en « Autre… » ne dit plus rien. Le titre porte la phrase
+       entière, et contient le mot visible : l'un ne contredit pas l'autre. */
+    nouveau: 'Variante',
+    nouveauTitre: 'Redessine le même motif avec une autre graine',
     telecharger: 'Télécharger',
     rendu: 'Rendu en cours',
     enregistre: 'Image enregistrée',

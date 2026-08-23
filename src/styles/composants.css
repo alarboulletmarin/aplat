@@ -14,6 +14,7 @@
 .res-champs input,
 .partage-b,
 .note-reessayer,
+.btn-surprise,
 .btn-graine,
 .btn-export {
   scroll-margin-top: calc(var(--scene-h, 0px) + 12px);
@@ -200,6 +201,39 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* --- Surprends-moi ---------------------------------------------------------
+   Une action secondaire, dans la carte qu'elle change. Pas dans la barre : la
+   barre n'a qu'un appel primaire, et à 320 px un troisième bouton mangeait
+   « Télécharger ». */
+.btn-surprise {
+  flex: 0 0 auto;
+  min-height: 44px;
+  margin-bottom: 14px;
+  padding: 0 13px;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Une étincelle à quatre branches : le vocabulaire de la page est fait de
+   formes pleines découpées, pas d'emoji ni de jeu d'icônes. */
+.ico-etincelle {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  background: var(--deco-2);
+  clip-path: polygon(
+    50% 0%, 60% 40%, 100% 50%, 60% 60%,
+    50% 100%, 40% 60%, 0% 50%, 40% 40%
+  );
 }
 
 /* --- Résolution ------------------------------------------------------------ */

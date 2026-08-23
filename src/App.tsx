@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { mesurer, type Densite, type IdFamille, type IdPalette, type Langue, type Motif } from './lib/moteur'
+import {
+  FAMILLES, mesurer, ORDRE_PALETTES,
+  type Densite, type IdFamille, type IdPalette, type Langue, type Motif,
+} from './lib/moteur'
 import { depuisSaisie, detecter, MPX_MAX, typeAppareil } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
@@ -155,6 +158,23 @@ export function App() {
 
   const nouvelleGraine = () => changer({ graine: Math.floor(Math.random() * GRAINE_MAX) + 1 })
 
+  /* « Surprends-moi » : famille, palette et graine d'un coup. Le tirage exclut
+     la valeur courante des deux listes, sinon un clic sur deux ne changerait
+     rien de visible et le bouton passerait pour cassé. La densité ne bouge pas :
+     c'est un goût, pas un motif. */
+  const surprendre = () => {
+    const tirer = <T,>(liste: readonly T[], sauf: T): T => {
+      const restantes = liste.filter((valeur) => valeur !== sauf)
+      const choix = restantes.length ? restantes : liste
+      return choix[Math.floor(Math.random() * choix.length)]
+    }
+    changer({
+      famille: tirer(FAMILLES.map((f) => f.id), reglages.famille),
+      palette: tirer(ORDRE_PALETTES, reglages.palette),
+      graine: Math.floor(Math.random() * GRAINE_MAX) + 1,
+    })
+  }
+
   const copier = () => {
     const fin = (reussi: boolean) => {
       setEphemere((precedent) => ({ ...precedent, copie: reussi, echecCopie: !reussi }))
@@ -264,6 +284,7 @@ export function App() {
               textes={T}
               revision={revision}
               onChoisir={(famille: IdFamille) => changer({ famille })}
+              onSurprise={surprendre}
             />
             <ChoixPalette
               valeur={reglages.palette}

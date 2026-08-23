@@ -794,6 +794,63 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await vctx.close();
   }
 
+  /* --- 20. deux gestes voisins, deux effets distincts
+     « Variante » ne touche que la graine, « Surprends-moi » tire aussi la
+     famille et la palette. Deux boutons qui feraient la même chose ne
+     mériteraient pas deux libellés. */
+  {
+    const sctx3 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const sp = await sctx3.newPage();
+    const etat = () => sp.evaluate(() => ({
+      fam: document.querySelector('[data-famille][aria-checked="true"]').dataset.famille,
+      pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
+      dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
+      graine: new URLSearchParams(location.search).get('s')
+    }));
+    await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await sp.waitForTimeout(400);
+
+    const depart = await etat();
+    await sp.$eval('#btn-graine', e => e.click());
+    await sp.waitForTimeout(300);
+    const apresGraine = await etat();
+    t(apresGraine.fam === depart.fam && apresGraine.pal === depart.pal && apresGraine.dens === depart.dens,
+      'variante : ni la famille ni la palette ni la densité ne bougent',
+      `${apresGraine.fam}/${apresGraine.pal}/d${apresGraine.dens}`);
+    t(apresGraine.graine !== depart.graine, 'variante : la graine change',
+      `${depart.graine} -> ${apresGraine.graine}`);
+
+    /* Dix tirages : le tirage exclut la valeur courante, aucun ne doit donc
+       laisser la famille ou la palette en place, ni répéter la densité. */
+    let familleFigee = 0, paletteFigee = 0, densiteBougee = 0, graineFigee = 0;
+    let avant = apresGraine;
+    for (let i = 0; i < 10; i++) {
+      await sp.$eval('#btn-surprise', e => e.click());
+      await sp.waitForTimeout(220);
+      const apres = await etat();
+      if (apres.fam === avant.fam) familleFigee++;
+      if (apres.pal === avant.pal) paletteFigee++;
+      if (apres.dens !== avant.dens) densiteBougee++;
+      if (apres.graine === avant.graine) graineFigee++;
+      avant = apres;
+    }
+    t(familleFigee === 0 && paletteFigee === 0,
+      'surprends-moi : famille et palette changent à chaque tirage',
+      `${familleFigee} familles et ${paletteFigee} palettes figées sur 10`);
+    t(graineFigee === 0, 'surprends-moi : la graine change aussi', graineFigee + ' graines figées sur 10');
+    t(densiteBougee === 0, 'surprends-moi : la densité ne bouge pas, c\'est un goût',
+      densiteBougee + ' densités changées sur 10');
+
+    const libelles = await sp.evaluate(() => ({
+      variante: document.querySelector('#btn-graine span:last-child').textContent.trim(),
+      surprise: document.querySelector('#btn-surprise span:last-child').textContent.trim()
+    }));
+    t(libelles.variante !== libelles.surprise && libelles.variante.length > 0,
+      'les deux gestes portent deux libellés distincts',
+      `« ${libelles.variante} » et « ${libelles.surprise} »`);
+    await sctx3.close();
+  }
+
   await browser.close();
   srv.close();
 

@@ -25,7 +25,10 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 - *Primaire* : le motif vu derrière de vraies icônes, et le bouton Télécharger.
   C'est là qu'on décide, c'est là qu'on finit.
 - *Secondaire* : les trois réglages (famille, palette, densité) et la
-  résolution, déjà détectée, repliée tant qu'on n'y touche pas.
+  résolution, déjà détectée, repliée tant qu'on n'y touche pas. Deux raccourcis
+  de hasard, aux effets distincts : « Variante », dans la barre, ne change que
+  la graine ; « Surprends-moi », dans la carte Famille, tire aussi une famille
+  et une palette.
 - *Caché* : le lien de partage, en bas du bloc ; puis, dans le pied de page,
   la langue, le thème, la version et la source. Pour qui les cherche.
 

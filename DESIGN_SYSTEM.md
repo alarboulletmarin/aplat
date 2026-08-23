@@ -29,7 +29,10 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 
 Un seul appel primaire. **Télécharger** ne partage sa place avec rien : le
 bouton secondaire s'efface entièrement quand la largeur manque plutôt que de le
-faire rétrécir.
+faire rétrécir. C'est aussi pourquoi « Surprends-moi », qui tire une famille,
+une palette et une graine, est dans la carte Famille et non dans la barre : à
+320 px, un troisième bouton mangeait l'appel primaire. Le secondaire de la
+barre, « Variante », ne change que la graine, et son libellé le dit en un mot.
 
 ---
 

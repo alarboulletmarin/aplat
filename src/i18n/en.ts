@@ -47,6 +47,8 @@ export const en: Textes = {
     groupeAbstraits: 'Abstract',
     groupeFigures: 'Figures',
     palette: 'Palette',
+    surprise: 'Surprise me',
+    surpriseTitre: 'Draws a random family, palette and seed',
     densite: 'Density',
     calme: 'Calm',
     moyen: 'Medium',
@@ -88,7 +90,8 @@ export const en: Textes = {
     systeme: 'System',
   },
   barre: {
-    nouveau: 'New pattern',
+    nouveau: 'Variation',
+    nouveauTitre: 'Redraws the same pattern with a new seed',
     telecharger: 'Download',
     rendu: 'Rendering',
     enregistre: 'Image saved',
