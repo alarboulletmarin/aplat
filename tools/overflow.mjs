@@ -70,7 +70,7 @@ const STRETCH = `(() => {
             hasTouch: v.w < 900, isMobile: v.w < 900
           });
           const page = await ctx.newPage();
-          await page.goto(`http://127.0.0.1:${PORT}/?l=${lang}${tg.q}`, { waitUntil: 'networkidle' });
+          await page.goto(`http://127.0.0.1:${PORT}/app?l=${lang}${tg.q}`, { waitUntil: 'networkidle' });
           await page.waitForTimeout(200);
           if (stretched) {
             await page.evaluate(STRETCH);

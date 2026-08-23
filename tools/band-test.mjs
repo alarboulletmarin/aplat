@@ -11,7 +11,7 @@ let PORT = 0;
   const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
-  await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await page.goto(`http://127.0.0.1:${PORT}/app?l=fr`, { waitUntil: 'networkidle' });
   await poser(page);
 
   const out = await page.evaluate(async () => {

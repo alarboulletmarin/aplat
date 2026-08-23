@@ -88,7 +88,7 @@ export function hauteurScene(fenetre: Boite): number {
  *
  * Sur téléphone en portrait, la scène collante, le verdict et la barre
  * d'action occupaient ensemble les deux tiers de l'écran : il ne restait
- * presque rien pour choisir parmi dix-huit familles et onze palettes. Replié,
+ * presque rien pour choisir parmi trente-deux familles et onze palettes. Replié,
  * l'aperçu garde de quoi juger la silhouette du motif, et rend le reste aux
  * grilles.
  */

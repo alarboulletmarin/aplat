@@ -58,7 +58,7 @@ if (!existsSync(REF)) {
   }
 
   await shot(`http://127.0.0.1:${refPort}/`, 6000, 'px-ref.png');
-  await shot(`http://127.0.0.1:${port}/?l=fr`, 1500, 'px-mine.png');
+  await shot(`http://127.0.0.1:${port}/app?l=fr`, 1500, 'px-mine.png');
 
   // diff dans une page vierge
   const ctx = await browser.newContext({ viewport: { width: W, height: H } });

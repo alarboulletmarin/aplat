@@ -30,7 +30,7 @@ import { Verdict } from './Verdict'
  * Collant, mais pas encombrant : dès que la page défile, l'aperçu se replie en
  * vignette et le verdict se condense sur une ligne. À trois, la scène, le
  * verdict et la barre d'action prenaient les deux tiers d'un écran de
- * téléphone, et il ne restait presque rien pour choisir parmi dix-huit
+ * téléphone, et il ne restait presque rien pour choisir parmi trente-deux
  * familles et onze palettes.
  *
  * Le repli passe par l'échelle et non par la géométrie : la boîte de

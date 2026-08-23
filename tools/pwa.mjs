@@ -42,7 +42,12 @@ function taillePNG(fichier) {
   try { manifeste = await rep.json(); } catch (e) { /* signalé ci-dessous */ }
   t(!!manifeste.name && !!manifeste.short_name, 'manifeste : nommé', manifeste.short_name);
   t(manifeste.display === 'standalone', 'manifeste : affichage autonome', manifeste.display);
-  t(manifeste.start_url === '/' && manifeste.scope === '/', 'manifeste : portée à la racine');
+  /* La portée reste la racine, elle couvre les deux pages. Le démarrage, lui,
+     vise l'application : une application installée s'ouvre sur l'outil, pas sur
+     sa présentation. */
+  t(manifeste.start_url === '/app' && manifeste.scope === '/',
+    'manifeste : démarre sur l\u2019app, portée à la racine',
+    manifeste.start_url + ' dans ' + manifeste.scope);
   t(!!manifeste.theme_color && !!manifeste.background_color, 'manifeste : couleurs de démarrage');
   t(manifeste.lang === 'fr' && !!manifeste.description, 'manifeste : décrit, et dans une langue');
 
@@ -66,7 +71,7 @@ function taillePNG(fichier) {
   t(mauvaises.length === 0, 'icônes : présentes et à la taille annoncée', mauvaises.join(' | ') || icones.length + ' fichiers');
 
   // --- 2. le Service Worker prend la main
-  await page.goto(base + '/?l=fr', { waitUntil: 'networkidle' });
+  await page.goto(base + '/app?l=fr', { waitUntil: 'networkidle' });
   const enregistre = await page.evaluate(async () => {
     if (!navigator.serviceWorker) return 'pas de Service Worker';
     const inscription = await navigator.serviceWorker.ready;

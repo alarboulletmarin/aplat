@@ -1,4 +1,4 @@
-/* Planche-contact : les 18 familles rendues à la résolution d'un téléphone,
+/* Planche-contact : les familles rendues à la résolution d'un téléphone,
    réduites côte à côte. Sert à juger d'un coup d'œil ce que produit le moteur. */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -17,7 +17,7 @@ const OUT = path.resolve(ICI, '../.shots');
   const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-  await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await page.goto(`http://127.0.0.1:${PORT}/app?l=fr`, { waitUntil: 'networkidle' });
   await poser(page);
 
   const pal = process.argv[2] || 'lime';

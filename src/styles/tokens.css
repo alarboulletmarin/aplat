@@ -90,6 +90,11 @@
   --focus: #3b4ca8;
   --alerte: #e8481f;
 
+  /* L'ombre portée sans flou de la page d'accueil : un aplat décalé, pas une
+     profondeur. Elle suit l'encre, donc elle se retourne avec le thème ; une
+     ombre navy sur un fond navy ne se voit pas. */
+  --ombre-plate: rgba(23, 36, 63, 0.13);
+
   color-scheme: light;
 }
 
@@ -115,6 +120,8 @@
   --lien-survol: #dff478;
   --focus: #dff478;
   --alerte: #ff6648;
+
+  --ombre-plate: rgba(247, 243, 230, 0.14);
 
   color-scheme: dark;
 }

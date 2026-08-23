@@ -1,0 +1,668 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+/* Référence : DESIGN_SYSTEM.md, section 2 (le parti visuel), section 5
+   (formes, rayons, filets) et section 6 (gabarits). */
+
+/* ==========================================================================
+   La page d'accueil, sur « / ». L'application est sous « /app » et garde
+   `ecrans.css` pour elle.
+
+   Le vocabulaire est celui de l'application, à une échelle près : les mêmes
+   arches, les mêmes seuils épais, la même display condensée contre la même
+   grotesque neutre, les mêmes jetons de couleur. Rien n'est déclaré en dur
+   ici, pas même l'ombre portée, qui doit se retourner avec le thème.
+
+   Ce qui change, c'est la place. L'application tient dans un écran et compte
+   ses pixels ; la page d'accueil se déroule, et peut donc donner au nom du
+   produit toute la largeur, ce qui est le seul geste de marque qu'il y ait.
+   ========================================================================== */
+
+.accueil {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 34px);
+}
+
+/* --- L'enseigne ------------------------------------------------------------
+   La seule chose qui ne défile pas. Les marges négatives annulent le
+   rembourrage de `.accueil` : l'aplat de fond va d'un bord à l'autre quand
+   l'enseigne est épinglée, sinon on verrait la page passer dessous par les
+   côtés. */
+.enseigne {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 calc(clamp(16px, 4vw, 34px) * -1);
+  padding: 10px clamp(16px, 4vw, 34px);
+  background: var(--fond);
+  border-bottom: 2px solid var(--encre);
+}
+/* Quarante-quatre pixels de haut : c'est un lien, et la règle des cibles ne
+   souffre pas d'exception, pas même pour la marque. */
+.enseigne-marque {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+  color: var(--encre);
+  text-decoration: none;
+}
+.marque-nav {
+  width: 30px;
+  height: 30px;
+}
+.enseigne-mot {
+  font-family: var(--display);
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.enseigne-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+/* Le seul lien de la page qui ne se souligne pas : le filet d'accent sous lui
+   fait le même travail, et il est celui de l'appel primaire. */
+.enseigne-app {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px 1px;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 14.5px;
+  text-decoration: none;
+  border-bottom: 2.5px solid var(--accent);
+  white-space: nowrap;
+}
+.enseigne-app:hover {
+  color: var(--encre);
+  border-bottom-color: var(--encre);
+}
+
+/* --- Les deux bascules -----------------------------------------------------
+   Langue et thème, en boutons et non en groupes radio : deux états, dont l'un
+   est toujours celui qu'on quitte. Chacune montre ce qu'un appui donnera.
+   Quarante-quatre pixels de côté, comme toute cible du produit. */
+.bascules {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bascule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 16px 16px 5px 5px;
+  background: transparent;
+  color: var(--encre);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.bascule:hover {
+  border-color: var(--encre);
+  background: var(--surface);
+}
+.bascule-langue {
+  letter-spacing: 0.04em;
+}
+/* Le disque dit le thème visé par son remplissage, plein pour le clair, vide
+   pour le sombre. La même forme que les puces du pied de page de
+   l'application, et elle se lit en niveaux de gris. */
+.bascule-theme i {
+  display: block;
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+}
+.bascule-theme[data-vers='clair'] i {
+  background: currentColor;
+}
+.bascule-theme[data-vers='sombre'] i {
+  background: transparent;
+}
+/* Le mot n'apparaît que là où il y a la place. En dessous, le nom accessible
+   du bouton le porte seul : « Passer au thème sombre », en entier. */
+.bascule-mot {
+  display: none;
+  font-weight: 600;
+}
+@media (min-width: 560px) {
+  .bascule-mot {
+    display: inline;
+  }
+}
+
+/* --- La frise d'arches -----------------------------------------------------
+   Le filet à barres de l'en-tête de l'application, déroulé. Il sépare les
+   sections : la page n'a pas d'autre trait horizontal que celui-ci et les
+   seuils des cartes. Les dernières arches sont rognées sur un écran étroit,
+   ce que la frise assume : c'est un bord de motif, pas une liste. */
+.frise {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 7px;
+  height: 26px;
+  overflow: hidden;
+  border-bottom: 3px solid var(--encre);
+}
+.frise i {
+  flex: 0 0 22px;
+  border-radius: 11px 11px 0 0;
+}
+
+/* --- Titres de section ----------------------------------------------------- */
+.surtitre {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--encre-douce);
+  margin-bottom: 12px;
+}
+.section-tete {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+/* La display serrée à 0,86 dépasse sa propre boîte par le bas : les cédilles
+   et les jambages venaient mordre la frise posée juste dessous. Le rembourrage
+   rend au titre la hauteur que l'interlignage lui retire. */
+.section-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(38px, 7vw, 74px);
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  padding-bottom: 0.1em;
+}
+.section-note {
+  font-size: 13.5px;
+  color: var(--encre-douce);
+  max-width: 34ch;
+}
+
+/* --- Le héros --------------------------------------------------------------- */
+.heros {
+  padding: clamp(24px, 5vw, 48px) 0 clamp(28px, 5vw, 44px);
+}
+.heros-corps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(28px, 4vw, 48px);
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: clamp(20px, 3vw, 30px);
+}
+.heros-mots {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.4vw, 26px);
+}
+/* Le nom du produit tient la place d'une image : c'est le seul geste
+   typographique de la marque, et il est déjà celui de l'application. */
+.heros-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(76px, 17vw, 208px);
+  line-height: 0.74;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+.heros-accroche {
+  max-width: 30ch;
+  font-size: clamp(19px, 2.4vw, 26px);
+  line-height: 1.28;
+  letter-spacing: -0.016em;
+  font-weight: 500;
+}
+.heros-appels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.heros-mention {
+  font-size: 13.5px;
+  color: var(--encre-douce);
+}
+
+/* L'appel primaire : le même aplat lime, le même seuil de 2,5 px et le même
+   arrondi que le bouton Télécharger de l'application. Au survol il se décale
+   et pose son ombre, ce qui dit qu'il est le geste de la page. */
+.appel-primaire {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 0 24px;
+  border-radius: 19px;
+  border: 2.5px solid var(--encre);
+  background: var(--accent);
+  color: var(--accent-encre);
+  font-weight: 700;
+  font-size: 17.5px;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.appel-primaire:hover {
+  color: var(--accent-encre);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--encre);
+}
+.appel-second {
+  display: inline-flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 18px;
+  border-radius: 19px;
+  border: 2px solid var(--filet-franc);
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 15.5px;
+  text-decoration: none;
+}
+.appel-second:hover {
+  color: var(--encre);
+  border-color: var(--encre);
+}
+
+.heros-ecran {
+  flex: 0 0 auto;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+}
+.heros-legende {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--encre-douce);
+}
+.pastille {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--deco-2);
+}
+
+/* --- Les maquettes ---------------------------------------------------------
+   `.appareil` vient d'`ecrans.css` : même boîte, même maquette, même sonde de
+   lisibilité que dans l'application. Seule la géométrie change, parce qu'ici
+   il y a de la place. L'ombre est un aplat décalé, sans flou : une ombre
+   floue serait la première profondeur de tout le produit. */
+.appareil-telephone,
+.appareil-bureau {
+  height: auto;
+  box-shadow: 13px 13px 0 var(--ombre-plate);
+}
+.appareil-telephone {
+  width: min(278px, 64vw);
+  aspect-ratio: 1179 / 2556;
+  border-radius: calc(var(--mu) * 12);
+}
+.appareil-bureau {
+  width: 100%;
+  aspect-ratio: 2560 / 1440;
+  border-width: 3px;
+  border-radius: calc(var(--mu) * 2.4);
+}
+
+/* --- Les quatre chiffres ---------------------------------------------------
+   Lus dans le moteur, jamais recopiés : une famille ajoutée les corrige
+   d'elle-même. */
+.chiffres {
+  list-style: none;
+  margin: clamp(28px, 5vw, 50px) 0 0;
+  padding: 0;
+  border-top: 3px solid var(--encre);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+}
+.chiffre {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 14px 14px 0;
+}
+.chiffre-n {
+  font-family: var(--display);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.chiffre-m {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+
+/* --- La galerie -------------------------------------------------------------
+   Douze motifs calculés dans la page. Chaque vignette est un bouton qui retire
+   sa graine : c'est la seule chose qui bouge ici, et elle ne bouge que sur
+   demande. */
+.galerie,
+.ecrans {
+  padding: clamp(30px, 6vw, 70px) 0 0;
+}
+.tuiles {
+  list-style: none;
+  margin: clamp(16px, 2.5vw, 24px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: clamp(10px, 1.6vw, 16px);
+}
+.tuile {
+  display: block;
+  width: 100%;
+  padding: 0;
+  position: relative;
+  border: 2px solid var(--encre);
+  border-radius: 28px 28px 6px 6px;
+  overflow: hidden;
+  background: var(--surface-2);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.tuile:hover {
+  transform: translateY(-3px);
+}
+.tuile-toile {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+.tuile-pied {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--papier);
+  border-top: 2px solid var(--encre);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.tuile-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tuile-palette {
+  color: var(--encre-douce);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* --- Les formats ------------------------------------------------------------
+   La résolution détectée d'abord : c'est une mesure vraie, faite sur
+   l'appareil qui lit la page, et elle dit mieux qu'une phrase que rien n'est à
+   saisir. */
+.ecrans .appareil-bureau {
+  margin-top: clamp(18px, 3vw, 28px);
+}
+.formats {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 13px;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+}
+.format {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.format-mot {
+  font-weight: 600;
+}
+.format-detecte {
+  color: var(--encre);
+  font-weight: 700;
+}
+
+/* --- Les trois promesses ---------------------------------------------------- */
+.promesses {
+  padding: clamp(30px, 6vw, 70px) 0 clamp(30px, 5vw, 54px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  gap: clamp(18px, 3vw, 30px);
+  align-items: start;
+}
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-top: 3px solid var(--encre);
+  padding-top: 14px;
+}
+.carte-n {
+  font-family: var(--display);
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  color: var(--deco-2);
+}
+.carte-n-deux {
+  color: var(--deco-1);
+}
+.carte-n-trois {
+  color: var(--violet);
+}
+.carte-t {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.carte-p {
+  font-size: 14.5px;
+  color: var(--encre-douce);
+  max-width: 34ch;
+}
+
+/* La démonstration du voile : deux fois le même motif, la même grille de
+   libellés dessus, et l'un des deux se lit. Seule la couche de voile change
+   d'une vignette à l'autre ; les couleurs de libellé viennent de la même
+   sonde, sinon la comparaison montrerait deux différences à la fois. */
+.voile-paire {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 4px;
+}
+.voile-cote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.voile-boite {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 2px solid var(--filet-franc);
+  border-radius: 11px;
+  overflow: hidden;
+}
+.voile-boite-active {
+  border-color: var(--encre);
+}
+.voile-toile {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.voile-grille {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: center;
+  gap: 9% 4%;
+  padding: 0 6%;
+  color: var(--libelle);
+}
+.voile-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5%;
+  min-width: 0;
+}
+.voile-app-i {
+  width: 42%;
+  aspect-ratio: 1;
+  background: var(--l90);
+}
+.voile-app-t {
+  font-size: 9px;
+  line-height: 1.2;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.voile-mot {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--encre-douce);
+}
+.voile-mot-actif {
+  font-weight: 700;
+  color: var(--encre);
+}
+
+/* --- L'appel de fin ---------------------------------------------------------
+   Le même appel qu'en haut, pas un second : quelqu'un qui a lu la page entière
+   est au bout du défilement, et remonter chercher la porte serait une friction
+   gratuite. Le bandeau garde ses couleurs dans les deux thèmes, comme la
+   marque ; son seuil et son bouton sont donc calés sur l'encre de l'accent et
+   non sur celle de la page, faute de quoi un liseré crème entourerait le lime
+   en thème sombre. */
+.appel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(20px, 3vw, 34px);
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(26px, 4.5vw, 52px);
+  border: 3px solid var(--accent-encre);
+  border-radius: 30px;
+  background: var(--accent);
+  color: var(--accent-encre);
+  /* Le lime est aussi la couleur du focus en thème sombre : sur ce fond, il
+     serait invisible. */
+  --focus: var(--accent-encre);
+}
+.appel-mots {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.appel-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+.appel-p {
+  font-size: 16px;
+  max-width: 32ch;
+}
+.appel-primaire-inverse {
+  border-color: var(--accent-encre);
+  background: var(--accent-encre);
+  color: var(--accent);
+}
+.appel-primaire-inverse:hover {
+  color: var(--accent);
+  box-shadow: 6px 6px 0 var(--accent-encre);
+}
+
+/* --- Le pied ---------------------------------------------------------------- */
+.accueil-pied {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  justify-content: space-between;
+  margin-top: clamp(30px, 5vw, 54px);
+  border-top: 2px solid var(--encre);
+  padding: 14px 0 34px;
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+/* Le lien vers la source est une cible comme une autre. La règle vaut ici
+   comme au pied de page de l'application : 44 px, sans exception. */
+.accueil-pied-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 14px;
+}
+.accueil-pied-meta > * {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* --- Étroit -----------------------------------------------------------------
+   Sous 640 px, la maquette cesse d'être à côté du texte pour passer dessous,
+   et le nom du produit rend un peu de sa hauteur : à 76 px de display, il
+   occupait déjà le tiers du premier écran. */
+@media (max-width: 640px) {
+  .heros-corps {
+    align-items: stretch;
+  }
+  .heros-ecran {
+    width: 100%;
+  }
+  .voile-paire {
+    max-width: 340px;
+  }
+}

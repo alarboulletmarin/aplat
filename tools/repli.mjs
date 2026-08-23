@@ -2,7 +2,7 @@
  *
  * Sur téléphone en portrait, la scène collante, le verdict et la barre
  * d'action prenaient les deux tiers de l'écran ; il ne restait presque rien
- * pour choisir parmi dix-huit familles et onze palettes. Dès que la page
+ * pour choisir parmi trente-deux familles et onze palettes. Dès que la page
  * défile, l'aperçu se replie en vignette et le verdict passe sur une ligne.
  *
  * Trois choses à vérifier, et une seule façon honnête de le faire : défiler
@@ -71,7 +71,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await page.addInitScript(plein => {
       try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
     }, PLEIN);
-    await page.goto(`http://127.0.0.1:${port}/?l=fr`, { waitUntil: 'networkidle' });
+    await page.goto(`http://127.0.0.1:${port}/app?l=fr`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
 
     // 1. en haut de page, l'aperçu est déplié

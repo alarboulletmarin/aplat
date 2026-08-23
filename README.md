@@ -115,20 +115,56 @@ index.html                    le document, et le thème résolu avant la peintur
 vite.config.ts                build, PWA, politique de sécurité
 eslint.config.js              les règles des hooks React, que tsc ne voit pas
 vercel.json                   les en-têtes de cache qui décident des mises à jour
-src/main.tsx                  point d'entrée
+src/main.tsx                  point d'entrée, et le choix des deux pages
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
+src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
 src/lib/{resolution,url,export,geometrie,format,build}.ts
 src/components/               l'interface, un fichier par pièce
+src/components/accueil/       la page d'accueil, un fichier par section
 src/hooks/                    horloge, tailles, focus, ajustement
 src/i18n/{fr,en,index}.ts     les libellés, à parité stricte
-src/styles/                   tokens, reset, base, composants, écrans
+src/styles/                   tokens, reset, base, composants, écrans, accueil
 public/polices/*.woff2        Anton et Archivo, auto-hébergées
 scripts/                      icônes de la PWA, notices de licence
-design/Aplat.dc.html          la maquette de référence
+design/Aplat.dc.html          la maquette de référence de l'application
+design/Aplat-accueil.dc.html  celle de la page d'accueil
 tools/*.mjs                   vérifications headless (hors livraison)
 .github/workflows/ci.yml      la CI : `verify` et `check`, en parallèle
 ```
+
+## Deux adresses
+
+`/` présente le projet. `/app` le fait tourner.
+
+La page d'accueil n'est pas une deuxième section de l'application : c'est un
+autre document, et l'application reste l'écran unique décrit plus haut. Elle ne
+montre pas non plus de captures d'écran. Chacune de ses images sort du moteur,
+au chargement, dans le navigateur qui la lit : la maquette de téléphone du
+haut, les douze motifs de la galerie, la maquette de bureau et la comparaison
+du voile. Il n'y a donc rien à tenir à jour, et rien qui puisse promettre un
+rendu que l'application ne donnerait pas.
+
+Elle garde les règles de l'application, parce que c'est le même produit : un
+seul appel primaire, répété en bas de page mais jamais dédoublé ; aucune
+animation qui ne dise ni une origine, ni un état, ni une continuité ; et rien
+d'écrit sur l'appareil, l'état tenant dans l'adresse. Cet état se réduit à la
+langue et au thème, qui sont aussi ses deux boutons, dans l'enseigne épinglée :
+quelqu'un qui arrive sur une page dans une langue qu'il ne lit pas doit trouver
+la bascule avant le premier paragraphe. Le lien vers l'application les emporte,
+personne ne choisit sa langue deux fois.
+
+Aplat a vécu à la racine. Les liens partagés de cette époque, `/?m=vagues&…`,
+sont reconduits vers `/app` avec leur requête intacte, avant le moindre rendu :
+la promesse « copier le lien suffit à retrouver exactement la même image » ne
+s'annule pas parce que le produit s'est doté d'une porte d'entrée. Une adresse
+nue, ou qui ne porte que la langue et le thème, reste sur l'accueil.
+
+Le manifeste installe l'application sur `/app`, dans une portée qui reste la
+racine : une application installée s'ouvre sur l'outil, pas sur sa
+présentation. Son `id` n'a pas bougé, ce qui est précisément la raison pour
+laquelle il était posé en dur : les installations existantes ont suivi au lieu
+de se dédoubler.
 
 ## L'URL porte l'état
 
@@ -137,6 +173,10 @@ tools/*.mjs                   vérifications headless (hors livraison)
 `m` famille, `p` palette, `d` densité (de 0 à 2), `s` graine, `l` langue,
 `r` résolution (seulement si elle a été saisie à la main),
 `t` thème (seulement s'il n'est pas « système »).
+
+`l` et `t` valent pour les deux pages : la présentation n'a pas de motif à
+relire, mais elle a une langue et un thème, et `?l=en&t=sombre` dit la même
+chose des deux côtés.
 
 Rien d'autre n'est transmis. Copier le lien suffit à retrouver exactement la
 même image, sur n'importe quel appareil. Une URL forgée ne peut produire qu'un
@@ -178,10 +218,36 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
+**Trente-deux familles, trois groupes.**
+
+- **Abstraits** (dix-neuf) : les douze libres, qui sèment des formes sur un
+  aplat, et sept réglées, où une grille porte le motif. Les secondes se
+  reconnaissent à une répétition qu'on peut suivre du doigt, ce que les blobs
+  et le terrazzo n'ont pas.
+- **Paysages** (trois) : Sommets, Horizon, Nuages. Elles ont un haut et un bas,
+  et c'est ce qui les sépare des abstraits. C'est aussi ce qui les rend
+  commodes en fond d'écran : la grille d'icônes tombe dans leur partie basse,
+  et la sonde de lisibilité y trouve un aplat plutôt qu'un motif.
+- **Figures** (dix) : des objets posés sur un fond, reconnaissables un par un.
+
+**Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
+Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
+« Variante » ne change donc rien dessus ; il faut passer par la palette, la
+densité ou une autre famille. Le fait est tenu par un contrôle
+(`tools/e2e.mjs`) qui fige la liste des quatre : une cinquième famille devenue
+sourde à sa graine s'y signale, et une des quatre qui se mettrait à varier
+aussi.
+
+Aucune famille n'a de taille en pixels : tout se rapporte au petit côté, ce qui
+rend le motif indépendant de la résolution. Les deux seules exceptions sont un
+plancher relatif sur le joint de Mosaïque et sur le filet d'Horizon, et elles
+sont commentées à l'endroit où elles se lisent : sans elles, la vignette montre
+un motif plus ajouré, ou perd son horizon.
+
 **L'aperçu est le fichier.** Le canevas d'aperçu porte exactement le rapport
 d'aspect de la résolution visée (la bordure de la maquette d'appareil est
 défalquée), et la mesure de lisibilité porte sur les dimensions d'export, pas
-sur celles du canevas. Vérifié sur les 594 combinaisons : même voile, même
+sur celles du canevas. Vérifié sur les 1 056 combinaisons : même voile, même
 verdict.
 
 **Le voile de lisibilité.** Après les formes, le moteur mesure la luminance
@@ -195,14 +261,20 @@ l'aperçu et l'export donnent exactement les mêmes chiffres, et un fond d'écra
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **594 combinaisons** (18 familles × 11 palettes × 3 densités) en
+Mesuré sur les **1 056 combinaisons** (32 familles × 11 palettes × 3 densités) en
 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
-| médiane | 0,94 Mo | **0,42 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,73 Mo** |
-| maximum | 2,33 Mo | **0,98 Mo** |
+| médiane | 0,94 Mo | **0,43 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,72 Mo** |
+| maximum | 2,33 Mo | **1,04 Mo** |
+
+Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
+la seconde série. Le maximum est monté de 0,98 à 1,04 Mo : il est tenu par
+Azulejos en densité dense, dont le carrelage remplit la page de courbes, et
+c'est le prix honnête d'un motif qui couvre tout plutôt que de semer des formes
+sur un aplat.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -231,7 +303,7 @@ forme jamais de blocs quand on agrandit l'image.
 L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
 dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
 que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
-champ de vision, pas toutes d'un coup : six ou sept sur dix-huit au premier
+champ de vision, pas toutes d'un coup : six ou sept sur trente-deux au premier
 affichage d'un téléphone.
 
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
@@ -341,14 +413,15 @@ pixels sont identiques. Les 3,1 % restants se lisent un par un sur la carte des
 ## Vérifications
 
 ```bash
-npm run verify   # typographie, types, lint, 69 tests unitaires, build
+npm run verify   # typographie, types, lint, tests unitaires, build
 npm run check    # build, puis 98 contrôles dans Chromium
 ```
 
 | Outil | Ce qu'il vérifie |
 |---|---|
 | `tools/typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
-| `tools/e2e.mjs` | 80 contrôles : URL et sa robustesse, déterminisme, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, contenu du cache, clavier, focus non masqué, mouvement réduit |
+| `tools/accueil.mjs` | la page d'accueil : les deux adresses, les liens partagés d'avant, les deux bascules, les toiles qui se peignent toutes, les cibles et la hiérarchie des titres |
+| `tools/e2e.mjs` | 124 contrôles : URL et sa robustesse, déterminisme, les quatre pavages réguliers qui ignorent leur graine et eux seuls, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, contenu du cache, clavier, focus non masqué, mouvement réduit |
 | `tools/pwa.mjs` | 18 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé (page, motif, vignettes, polices et téléchargement réel) |
 | `tools/a11y.mjs` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.mjs` | atteignabilité et taille des cibles, de 320 à 1920 px |
@@ -358,9 +431,9 @@ npm run check    # build, puis 98 contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 594 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 056 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 18 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 32 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

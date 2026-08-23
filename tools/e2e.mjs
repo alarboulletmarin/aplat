@@ -34,7 +34,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 
-  await page.goto(`http://127.0.0.1:${PORT}/?l=fr&m=blobs&p=nuit&d=2&s=4242&r=1179x2556`, { waitUntil: 'networkidle' });
+  await page.goto(`http://127.0.0.1:${PORT}/app?l=fr&m=blobs&p=nuit&d=2&s=4242&r=1179x2556`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
   await poser(page);
 
@@ -92,10 +92,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   });
   t(scale.every(d => d <= 6), 'moteur : même image à deux résolutions', 'écarts max ' + scale.join(','));
 
-  // --- 5. les 18 familles rendent sans erreur, et non vides
+  // --- 5. toutes les familles rendent sans erreur, et non vides
   const fams = await page.evaluate(() => {
     const M = window.MOTEUR;
     const bad = [];
+    const total = M.FAMILLES.length * 3;
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       const c = document.createElement('canvas'); c.width = 240; c.height = 520;
       const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
@@ -105,9 +106,35 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       for (let i = 0; i < px.length; i += 4 * 97) seen.add(px[i] + ',' + px[i + 1] + ',' + px[i + 2]);
       if (seen.size < 6) bad.push(f.id + '/d' + d + ': quasi uni (' + seen.size + ' teintes)');
     }
-    return bad;
+    return { bad, total };
   });
-  t(fams.length === 0, 'moteur : 18 familles x 3 densités rendent une image', fams.join(' | ') || '54 combinaisons');
+  t(fams.bad.length === 0, 'moteur : chaque famille x 3 densités rend une image',
+    fams.bad.join(' | ') || fams.total + ' combinaisons');
+
+  /* Ce que « Variante » promet : une autre graine, une autre image. Quatre
+     familles n'en tiennent rien, et c'est voulu : ce sont des pavages
+     entièrement réguliers, sans un seul tirage. Le bouton ne fait donc rien
+     dessus, ce qui est un défaut connu et non une surprise. Ce contrôle fige
+     la liste : une cinquième famille devenue sourde à sa graine se signale
+     ici, et une des quatre qui se mettrait à varier aussi. */
+  const REGULIERES = ['ecailles', 'arcade', 'azulejos', 'tresse'];
+  const graines = await page.evaluate(() => {
+    const M = window.MOTEUR;
+    const sourdes = [];
+    for (const f of M.FAMILLES) {
+      const rendu = (s) => {
+        const c = document.createElement('canvas'); c.width = 200; c.height = 420;
+        const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
+        M.dessiner(ctx, 200, 420, { famille: f.id, palette: 'lime', densite: 1, graine: s });
+        return c.toDataURL();
+      };
+      if (rendu(101) === rendu(4242)) sourdes.push(f.id);
+    }
+    return sourdes;
+  });
+  t(graines.sort().join(',') === [...REGULIERES].sort().join(','),
+    'moteur : seuls les pavages réguliers ignorent leur graine',
+    graines.join(' ') || 'aucune');
 
   // --- 6. état vide
   await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
@@ -252,7 +279,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const lctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR' });
     const lp = await lctx.newPage();
-    await lp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await lp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await lp.waitForTimeout(900);
     const lazy = await lp.evaluate(() => {
       let drawn = 0, total = 0;
@@ -330,7 +357,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const kctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR' });
     const kp = await kctx.newPage();
-    await kp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await kp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await kp.waitForTimeout(300);
     await kp.keyboard.press('Tab');
     const f1 = await kp.evaluate(() => {
@@ -356,7 +383,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
+    /* Sept : les trois grilles de familles, les palettes, les densités, la
+       langue et le thème. Un groupe de familles ajouté sans son `radiogroup`
+       casserait le parcours clavier sans rien changer à l'affichage. */
+    t(kb.groups.length === 7, 'clavier : les sept groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
@@ -408,7 +438,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await kctx.close();
     const rctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', locale: 'fr-FR' });
     const rp = await rctx.newPage();
-    await rp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await rp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await rp.waitForTimeout(300);
     const rm = await rp.evaluate(() => {
       const c = document.getElementById('apercu');
@@ -437,7 +467,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const rctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR', acceptDownloads: true });
     const rp = await rctx.newPage();
     // image volontairement lourde : l'encodage dure assez pour cliquer pendant
-    await rp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=blobs&p=nuit&d=1&s=777&r=5000x5000', { waitUntil: 'networkidle' });
+    await rp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=blobs&p=nuit&d=1&s=777&r=5000x5000', { waitUntil: 'networkidle' });
     await rp.waitForTimeout(500);
     const dls = [];
     rp.on('download', d => dls.push(d.suggestedFilename()));
@@ -496,7 +526,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         return ctx;
       };
     });
-    await bp.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=4000x4000', { waitUntil: 'networkidle' });
+    await bp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=4000x4000', { waitUntil: 'networkidle' });
     await bp.waitForTimeout(500);
     const dls2 = [];
     bp.on('download', d => dls2.push(d.suggestedFilename()));
@@ -516,7 +546,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const actx = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 2, locale: 'fr-FR' });
     const ap = await actx.newPage();
-    await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
+    await ap.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
     await ap.waitForTimeout(600);
     await poser(ap);
     const inv = await ap.evaluate(() => {
@@ -537,14 +567,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     t(Math.abs(inv.ecart) < 0.5, 'aperçu : le canevas porte le rapport d\'aspect visé', inv.ecart + ' %');
     t(inv.veil === 0 && inv.niveau === 0,
-      'aperçu : même voile et même verdict que le fichier, sur les 594 combinaisons',
+      'aperçu : même voile et même verdict que le fichier, sur toutes les combinaisons',
       inv.veil + ' voiles et ' + inv.niveau + ' verdicts divergents sur ' + inv.total);
 
     // un téléphone récent doit être classé comme un téléphone
     const classe = [];
     for (const [w, h, attendu] of [[1179, 2556, 'Téléphone'], [1290, 2796, 'Téléphone'], [1440, 3200, 'Téléphone'],
                                    [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
-      await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
+      await ap.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
       await ap.waitForTimeout(200);
       const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(', ')[0]);
       if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
@@ -557,7 +587,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const sctx2 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
     const sp2 = await sctx2.newPage();
-    await sp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await sp2.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await sp2.waitForTimeout(400);
     await sp2.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await sp2.waitForTimeout(200);
@@ -617,7 +647,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const lctx2 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
     const lp2 = await lctx2.newPage();
-    await lp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await lp2.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await lp2.waitForTimeout(600);
     const churn = await lp2.evaluate(async () => {
       const cibles = ['verdict-titre', 'verdict-detail', 'partage-note', 'res-valeur', 'cta-libelle'];
@@ -656,7 +686,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     up.on('console', m => { if (m.type() === 'error') uerr.push(m.text()); });
 
     // une palette empruntée à la chaîne de prototypes ne doit rien casser
-    await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&p=constructor&m=blobs', { waitUntil: 'networkidle' });
+    await up.goto('http://127.0.0.1:' + PORT + '/app?l=fr&p=constructor&m=blobs', { waitUntil: 'networkidle' });
     await up.waitForTimeout(500);
     const proto = await up.evaluate(() => ({
       pal: (document.querySelector('[data-palette][aria-checked="true"]') || {}).dataset,
@@ -669,7 +699,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
 
     // resolution hors bornes ou incomplète : on retombe entièrement sur la détection
     for (const [q, label] of [['r=5x5', 'trop petite'], ['r=99999x2000', 'trop grande'], ['r=1179', 'moitié manquante'], ['r=abcxdef', 'illisible']]) {
-      await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&' + q, { waitUntil: 'networkidle' });
+      await up.goto('http://127.0.0.1:' + PORT + '/app?l=fr&' + q, { waitUntil: 'networkidle' });
       await up.waitForTimeout(300);
       const v = await up.evaluate(() => ({
         res: document.getElementById('res-valeur').textContent,
@@ -680,7 +710,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }
 
     // la résolution détectée ne part pas dans le lien
-    await up.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await up.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await up.waitForTimeout(400);
     const propre = await up.evaluate(() => location.search);
     t(!/[?&]r=/.test(propre), 'URL : la résolution détectée ne part pas dans le lien partagé', propre);
@@ -706,7 +736,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         get: () => ({ writeText: () => Promise.reject(new Error('refusé')) })
       });
     });
-    await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await sp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await sp.waitForTimeout(400);
     await sp.$eval('#partage-bouton', e => e.click());
     await sp.waitForTimeout(400);
@@ -726,7 +756,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     // et le succès reste un succès
     const octx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR', permissions: ['clipboard-read', 'clipboard-write'] });
     const op = await octx.newPage();
-    await op.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await op.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await op.waitForTimeout(400);
     await op.$eval('#partage-bouton', e => e.click());
     await op.waitForTimeout(400);
@@ -742,7 +772,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const cctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR' });
     const cp = await cctx.newPage();
-    await cp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
+    await cp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     const csp = await cp.evaluate(() => {
       const m = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
       return m ? m.getAttribute('content') : null;
@@ -777,7 +807,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const vp = await vctx.newPage();
     for (const langue of ['fr', 'en']) {
       for (const motif of MOTIFS) {
-        await vp.goto(`http://127.0.0.1:${PORT}/?l=${langue}&s=4242&r=1179x2556&${motif.q}`, { waitUntil: 'networkidle' });
+        await vp.goto(`http://127.0.0.1:${PORT}/app?l=${langue}&s=4242&r=1179x2556&${motif.q}`, { waitUntil: 'networkidle' });
         await vp.waitForTimeout(300);
         const lu = await vp.evaluate(() => {
           const forme = document.querySelector('.verdict-i > span');
@@ -825,7 +855,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
       graine: new URLSearchParams(location.search).get('s')
     }));
-    await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await sp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
     await sp.waitForTimeout(400);
 
     const depart = await etat();
@@ -878,7 +908,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
     });
     const dp = await dctx.newPage();
-    await dp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
+    await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
     await dp.waitForTimeout(400);
 
     const lire = () => dp.evaluate(() => ({
@@ -939,7 +969,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       vide: !!document.querySelector('.historique-vide')
     }));
 
-    await hp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242', { waitUntil: 'networkidle' });
+    await hp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=4242', { waitUntil: 'networkidle' });
     await hp.waitForTimeout(400);
     const neuf = await lu();
     t(neuf.vignettes === 0 && neuf.vide && neuf.stockage.length === 0,

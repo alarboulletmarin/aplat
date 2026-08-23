@@ -7,7 +7,7 @@ import { ajouter, ecrire, effacer, lire, versEntree, type Entree } from '../lib/
 /**
  * Le temps qu'un motif doit rester à l'écran avant d'entrer dans l'historique.
  *
- * Sans ce délai, parcourir les dix-huit familles au doigt remplirait la liste
+ * Sans ce délai, parcourir les trente-deux familles au doigt remplirait la liste
  * de dix motifs traversés en deux secondes, et pousserait dehors celui qu'on
  * cherchait à retrouver. Deux secondes et demie séparent « je fais défiler »
  * de « je regarde ».

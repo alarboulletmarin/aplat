@@ -9,6 +9,63 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : quatorze familles de plus, et un troisième groupe
+
+- **Trente-deux familles au lieu de dix-huit.** Sept abstraites où une grille
+  porte le motif, là où les douze premières sèment des formes sur un aplat :
+  Arcade, la marque en colonnade ; Truchet, dont les quarts de disque
+  se raccordent en chemins que personne n'a tracés ; Azulejos ; Vitrail ;
+  Persiennes ; Mosaïque ; Tresse. Quatre figures : Agrumes, Palmes, Vases,
+  Poissons.
+- **Un troisième groupe, Paysages** : Sommets, Horizon, Nuages. Elles ont un
+  haut et un bas, ce qui les sépare des abstraits, et ce qui les rend commodes
+  en fond d'écran : la grille d'icônes tombe dans leur partie basse, et la
+  sonde de lisibilité y trouve un aplat plutôt qu'un motif. Le groupe a sa
+  marque, une ligne de crête, comme les deux autres ont l'arche et la goutte.
+- **Rien n'y est en pixels.** Toutes se rapportent au petit côté, donc la
+  vignette et le fichier 4K sont le même dessin. Les deux planchers qui
+  subsistent, sur le joint de Mosaïque et le filet d'Horizon, sont relatifs et
+  commentés là où ils se lisent.
+- **Les fichiers restent légers** : médiane inchangée à 0,43 Mo, maximum monté
+  de 0,98 à 1,04 Mo, tenu par Azulejos en densité dense, dont le carrelage
+  remplit la page de courbes.
+- **Quatre familles ignorent leur graine**, et le disent maintenant : Écailles,
+  Arcade, Azulejos et Tresse sont des pavages entièrement réguliers, sans un
+  seul tirage. « Variante » ne change rien dessus, il faut passer par la
+  palette, la densité ou une autre famille. Un contrôle fige la liste, pour
+  qu'une cinquième ne s'y ajoute pas sans qu'on le sache.
+
+### Ajouté : une page d'accueil, sur « / »
+
+- **Le projet a une porte d'entrée.** `/` présente Aplat, `/app` le fait
+  tourner. La présentation n'est pas une deuxième section de l'application :
+  c'est un autre document, et l'écran unique reste unique.
+- **Aucune capture d'écran.** Chaque image de la page sort du moteur, au
+  chargement, dans le navigateur qui la lit : la maquette de téléphone du haut,
+  les douze motifs de la galerie, choisis comme la maquette les choisit, la maquette de bureau et la comparaison du
+  voile de lisibilité. La maquette vient du même fichier que celle de
+  l'application, et les couleurs de ses libellés de la même sonde. Rien n'y
+  promet donc un rendu que l'application ne donnerait pas, et il n'y a aucune
+  image à tenir à jour.
+- **La résolution de ton écran est annoncée sur la page**, avant même d'ouvrir
+  l'outil : c'est une mesure vraie, faite sur l'appareil qui lit, et elle dit
+  mieux qu'une phrase que rien n'est à saisir.
+- **Deux boutons dans l'enseigne : la langue et le thème.** Ils sont en haut et
+  restent épinglés, parce que quelqu'un qui arrive sur une page dans une langue
+  qu'il ne lit pas doit trouver la bascule avant le premier paragraphe. Chacun
+  montre ce qu'un appui donnera, jamais l'état où l'on est. Le lien vers
+  l'application les emporte : personne ne choisit sa langue deux fois.
+- **Touche un motif de la galerie pour relancer sa graine.** C'est la seule
+  chose qui bouge sur la page, et elle ne bouge que sur demande.
+- **Les liens partagés du temps où l'application vivait à la racine continuent
+  d'ouvrir leur motif** : `/?m=vagues&…` est reconduit vers `/app` avec sa
+  requête intacte. Une porte d'entrée ne devait rien coûter à ce qui avait déjà
+  été envoyé à quelqu'un.
+- **L'application installée s'ouvre sur l'outil**, pas sur sa présentation : le
+  manifeste démarre sur `/app`, dans une portée qui reste la racine. Son
+  identifiant n'a pas bougé, les installations existantes ont donc suivi au
+  lieu de se dédoubler.
+
 ### Ajouté : un seul écran, et l'aperçu ne le quitte jamais
 
 - **Un seul écran, et l'aperçu ne le quitte jamais.** Le motif s'affiche dans
@@ -35,8 +92,8 @@ d'écran derrière mes icônes ?**
 - **Le panneau ne contient que ce qui agit sur l'image.** Langue et thème sont
   dans le pied de page, à côté de la version et du lien vers la source : ils ne
   changent que l'affichage, pas le fichier téléchargé.
-- **Trois réglages, pas un de plus** : famille de motif (dix-huit, réparties
-  en abstraits et figures), palette (onze) et densité (trois). Chaque famille
+- **Trois réglages, pas un de plus** : famille de motif (trente-deux, réparties
+  en abstraits, paysages et figures), palette (onze) et densité (trois). Chaque famille
   montre sa propre vignette, calculée avec la palette et la densité courantes.
   Leur nom revient à la ligne plutôt que de s'élider : « Marguerites » tronqué
   en « Margueri… » ne nomme plus rien.
@@ -78,8 +135,8 @@ d'écran derrière mes icônes ?**
 - **Un voile de lisibilité, seulement s'il sert.** Le moteur mesure la luminance
   de la zone des icônes, choisit la couleur de libellé la plus sûre, puis pousse
   le fond vers elle juste ce qu'il faut pour tenir.
-- **Des fichiers légers et nets au zoom.** Médiane de 0,42 Mo et maximum de
-  0,98 Mo sur les 594 combinaisons en 1179 × 2556, contre 0,94 et 2,33 avant
+- **Des fichiers légers et nets au zoom.** Médiane de 0,43 Mo et maximum de
+  1,04 Mo sur les 1 056 combinaisons en 1179 × 2556, contre 0,94 et 2,33 avant
   réglage. Le voile est peint en bandes plutôt qu'en dégradé, le grain est un
   mouchetis d'un pixel d'appareil, les vagues sont échantillonnées assez fin
   pour un écran 4K et les cellules de la trame calées sur des bornes entières.

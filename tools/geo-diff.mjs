@@ -102,7 +102,7 @@ if (!existsSync(REF)) {
   }
 
   const ref = await grab(`http://127.0.0.1:${refPort}/`, 6000);
-  const mine = await grab(`http://127.0.0.1:${port}/?l=fr`, 1200);
+  const mine = await grab(`http://127.0.0.1:${port}/app?l=fr`, 1200);
 
   const keys = [...new Set([...Object.keys(ref), ...Object.keys(mine)])];
   let diffs = 0, same = 0;

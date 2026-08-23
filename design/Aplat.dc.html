@@ -66,13 +66,10 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
       <h1 style="font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:33px;line-height:.84;letter-spacing:-.04em;text-transform:uppercase">Aplat</h1>
       <p style="margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ resLabel }}</p>
     </div>
-    <div aria-hidden="true" style="display:flex;align-items:flex-end;gap:5px;height:13px;border-bottom:3px solid var(--ink)">
-      <span style="flex:2 1 0;height:100%;background:var(--lime);border-radius:999px 999px 0 0"></span>
-      <span style="flex:1 1 0;height:60%;background:var(--ciel);border-radius:999px 999px 0 0"></span>
-      <span style="flex:3 1 0;height:86%;background:var(--violet);border-radius:999px 999px 0 0"></span>
-      <span style="flex:1 1 0;height:46%;background:var(--corail);border-radius:999px 999px 0 0"></span>
-      <span style="flex:2 1 0;height:100%;background:var(--ink);border-radius:999px 999px 0 0"></span>
-      <span style="flex:1 1 0;height:68%;background:var(--ciel);border-radius:999px 999px 0 0"></span>
+    <div aria-hidden="true" style="display:flex;align-items:flex-end;justify-content:space-between;gap:7px;height:24px;overflow:hidden;border-bottom:3px solid var(--ink)">
+      <sc-for list="{{ arches }}" as="a" hint-placeholder-count="26">
+        <span style="flex:0 0 22px;border-radius:11px 11px 0 0;height:{{ a.h }};background:{{ a.c }}"></span>
+      </sc-for>
     </div>
   </header>
   <div style="display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:space-between;align-items:baseline;margin-top:-11px">
@@ -210,7 +207,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
           <sc-if value="{{ legLow }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:19px;height:17px;background:var(--ink);clip-path:polygon(50% 0,100% 100%,0 100%)"></span></sc-if>
         </span>
         <div style="min-width:0">
-          <p style="font-weight:700;font-size:15px">{{ t.legibTitle }} · {{ legLabel }}</p>
+          <p style="font-weight:700;font-size:15px">{{ t.legibTitle }}, {{ legLabel }}</p>
           <p style="font-size:13.5px;color:var(--ink-muted)">{{ legDetail }}</p>
         </div>
       </div>
@@ -229,6 +226,21 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
         </h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
           <sc-for list="{{ famAbs }}" as="f" hint-placeholder-count="12">
+            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:19px 19px 6px 6px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
+              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:13px 13px 4px 4px;background:var(--surface-2)"></canvas>
+              <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
+                <span aria-hidden="true" style="flex:0 0 auto;width:9px;height:9px;border-radius:2px;background:{{ f.dot }}"></span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ f.label }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+        <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin:17px 0 9px;display:flex;align-items:center;gap:8px">
+          <span aria-hidden="true" style="flex:0 0 auto;width:15px;height:12px;background:var(--violet);clip-path:polygon(0 100%,32% 22%,54% 62%,74% 0,100% 100%)"></span>
+          <span>{{ t.gPay }}</span>
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
+          <sc-for list="{{ famPay }}" as="f" hint-placeholder-count="3">
             <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:19px 19px 6px 6px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
               <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:13px 13px 4px 4px;background:var(--surface-2)"></canvas>
               <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
@@ -426,17 +438,39 @@ class Component extends DCLogic {
     {id:'ecailles',  g:'abs', fr:'Écailles',         en:'Scales'},
     {id:'terrazzo',  g:'abs', fr:'Terrazzo',         en:'Terrazzo'},
     {id:'confettis', g:'abs', fr:'Confettis',        en:'Confetti'},
+    {id:'arcade',    g:'abs', fr:'Arcade',           en:'Arcade'},
+    {id:'truchet',   g:'abs', fr:'Truchet',          en:'Truchet'},
+    {id:'azulejos',  g:'abs', fr:'Azulejos',         en:'Azulejos'},
+    {id:'vitrail',   g:'abs', fr:'Vitrail',          en:'Stained glass'},
+    {id:'persiennes',g:'abs', fr:'Persiennes',       en:'Shutters'},
+    {id:'mosaique',  g:'abs', fr:'Mosaïque',         en:'Mosaic'},
+    {id:'tresse',    g:'abs', fr:'Tresse',           en:'Weave'},
+    {id:'sommets',   g:'pay', fr:'Sommets',          en:'Peaks'},
+    {id:'horizon',   g:'pay', fr:'Horizon',          en:'Horizon'},
+    {id:'nuages',    g:'pay', fr:'Nuages',           en:'Clouds'},
     {id:'fleurs',    g:'fig', fr:'Marguerites',      en:'Daisies'},
     {id:'tournesol', g:'fig', fr:'Tournesol',        en:'Sunflower'},
     {id:'etoiles',   g:'fig', fr:'Étoiles',          en:'Stars'},
     {id:'rayons',    g:'fig', fr:'Rayons',           en:'Sunbeams'},
     {id:'lunes',     g:'fig', fr:'Lunes',            en:'Moons'},
-    {id:'feuilles',  g:'fig', fr:'Feuilles',         en:'Leaves'}
+    {id:'feuilles',  g:'fig', fr:'Feuilles',         en:'Leaves'},
+    {id:'agrumes',   g:'fig', fr:'Agrumes',          en:'Citrus'},
+    {id:'palmes',    g:'fig', fr:'Palmes',           en:'Palms'},
+    {id:'vases',     g:'fig', fr:'Vases',            en:'Vases'},
+    {id:'poissons',  g:'fig', fr:'Poissons',         en:'Fish'}
   ];
   RADII = ['50%','3px','50% 50% 50% 0','3px 11px 3px 11px','50% 0 50% 0','2px'];
+  /* colonnade : le logo répété, hauteurs et couleurs en cycles premiers pour éviter la répétition visible */
+  ARCH_H = ['100%','62%','86%','50%','74%'];
+  ARCH_C = ['var(--ink)','var(--ink)','var(--lime)','var(--ink)','var(--ciel)','var(--ink)','var(--corail)'];
+  arches(n){
+    const out = [];
+    for (let i=0;i<n;i++) out.push({h:this.ARCH_H[i % 5], c:this.ARCH_C[i % 7]});
+    return out;
+  }
   STR = {
     fr:{
-      kicker:'Aplat — édité par trced', title:'Aplat',
+      kicker:'Aplat, édité par trced', title:'Aplat',
       tagline:'Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.',
       search:'Rechercher',
       legibTitle:'Lisibilité des libellés', lvGood:'bonne', lvOk:'correcte', lvLow:'faible',
@@ -445,7 +479,7 @@ class Component extends DCLogic {
       adviceOk:'Lisible, un peu juste sur les zones les plus contrastées.',
       adviceLow:'Essaie la palette Nuit, ou une densité plus calme.',
       veil:'voile de lisibilité {n} %', noVeil:'sans voile',
-      family:'Famille de motif', gAbs:'Abstraits', gFig:'Figures', palette:'Palette', density:'Densité',
+      family:'Famille de motif', gAbs:'Abstraits', gPay:'Paysages', gFig:'Figures', palette:'Palette', density:'Densité',
       dCalm:'Calme', dMid:'Moyen', dDense:'Dense',
       resolution:'Résolution de l’image', edit:'Modifier', close:'Terminé', resCustom:'Sur mesure…',
       width:'Largeur (px)', height:'Hauteur (px)',
@@ -469,7 +503,7 @@ class Component extends DCLogic {
       menu:['Fichier','Édition','Affichage']
     },
     en:{
-      kicker:'Aplat — published by trced', title:'Aplat',
+      kicker:'Aplat, published by trced', title:'Aplat',
       tagline:'Generative wallpapers, computed inside your browser. Phone, tablet, computer.',
       search:'Search',
       legibTitle:'Icon label legibility', lvGood:'good', lvOk:'acceptable', lvLow:'poor',
@@ -478,7 +512,7 @@ class Component extends DCLogic {
       adviceOk:'Readable, a little tight over the busiest areas.',
       adviceLow:'Try the Night palette, or a calmer density.',
       veil:'legibility veil {n}%', noVeil:'no veil needed',
-      family:'Pattern family', gAbs:'Abstract', gFig:'Figures', palette:'Palette', density:'Density',
+      family:'Pattern family', gAbs:'Abstract', gPay:'Landscapes', gFig:'Figures', palette:'Palette', density:'Density',
       dCalm:'Calm', dMid:'Medium', dDense:'Dense',
       resolution:'Image resolution', edit:'Change', close:'Done', resCustom:'Custom…',
       width:'Width (px)', height:'Height (px)',
@@ -929,6 +963,243 @@ class Component extends DCLogic {
       return;
     }
 
+    if (fam === 'arcade'){
+      const cols = [2,4,7][dens], cw = W/cols;
+      const rows = Math.max(1, Math.round(H/(cw*1.3))), ch = H/rows;
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const i = r*cols + c, cx = cw*(c+0.5), base = ch*(r+1);
+        ctx.fillStyle = col(i + r);
+        this.archPath(ctx, cx, base, cw*0.9, ch*0.9);
+        ctx.fillStyle = col(i + r + 2);
+        this.archPath(ctx, cx, base, cw*0.34, ch*0.4);
+      }
+      return;
+    }
+
+    if (fam === 'truchet'){
+      const cols = [4,7,12][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      ctx.fillStyle = col(0); ctx.fillRect(0,0,W,H);
+      const pie = (cx,cy,a0) => { ctx.beginPath(); ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy,s/2,a0,a0+Math.PI/2); ctx.closePath(); ctx.fill(); };
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const x = c*s, y = r*s;
+        ctx.fillStyle = col(1 + ((r+c) % 2));
+        if (rnd() < 0.5){ pie(x, y, 0); pie(x+s, y+s, Math.PI); }
+        else { pie(x+s, y, Math.PI/2); pie(x, y+s, -Math.PI/2); }
+      }
+      return;
+    }
+
+    if (fam === 'azulejos'){
+      const cols = [2,3,5][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      ctx.fillStyle = col(3); ctx.fillRect(0,0,W,H);
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const x = c*s + s/2, y = r*s + s/2;
+        ctx.fillStyle = col(0);
+        for (let k=0;k<4;k++){
+          const a = k*Math.PI/2 + Math.PI/4;
+          ctx.beginPath(); ctx.arc(x+Math.cos(a)*s*0.707, y+Math.sin(a)*s*0.707, s*0.29, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.fillStyle = col(1);
+        ctx.save(); ctx.translate(x,y); ctx.rotate(Math.PI/4);
+        ctx.fillRect(-s*0.25,-s*0.25,s*0.5,s*0.5); ctx.restore();
+        ctx.fillStyle = col(2);
+        for (let k=0;k<4;k++){ const a = k*Math.PI/2;
+          this.leafPath(ctx, x+Math.cos(a)*s*0.14, y+Math.sin(a)*s*0.14, s*0.3, s*0.1, a); }
+        ctx.fillStyle = col(0);
+        ctx.beginPath(); ctx.arc(x,y,s*0.1,0,Math.PI*2); ctx.fill();
+      }
+      return;
+    }
+
+    if (fam === 'vitrail'){
+      const cols = [3,5,8][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      ctx.fillStyle = col(2); ctx.fillRect(0,0,W,H);
+      const P = [];
+      for (let r=0;r<=rows;r++){ P[r] = [];
+        for (let c=0;c<=cols;c++){
+          const edge = (c === 0 || c === cols || r === 0 || r === rows);
+          P[r][c] = [c*s + (edge?0:(rnd()-0.5)*s*0.5), r*s + (edge?0:(rnd()-0.5)*s*0.5)];
+        } }
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const q = [P[r][c], P[r][c+1], P[r+1][c+1], P[r+1][c]];
+        const cx = (q[0][0]+q[1][0]+q[2][0]+q[3][0])/4, cy = (q[0][1]+q[1][1]+q[2][1]+q[3][1])/4;
+        ctx.fillStyle = col(r + c + (rnd() < 0.3 ? 1 : 0));
+        ctx.beginPath();
+        q.forEach((p,k) => { const x = p[0] + (cx-p[0])*0.07, y = p[1] + (cy-p[1])*0.07;
+          k ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+        ctx.closePath(); ctx.fill();
+      }
+      return;
+    }
+
+    if (fam === 'persiennes'){
+      const n = [5,9,16][dens], D = Math.hypot(W,H);
+      ctx.fillStyle = col(2); ctx.fillRect(0,0,W,H);
+      const a = (rnd() < 0.5 ? 1 : -1)*(0.08 + rnd()*0.2);
+      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(a); ctx.translate(-D/2,-D/2);
+      const step = D/n;
+      for (let i=0;i<n;i++){
+        const y = i*step, wide = step*(0.42+0.3*rnd());
+        ctx.fillStyle = col(0);
+        ctx.fillRect(-D*0.2, y, D*1.4, wide);
+        ctx.fillStyle = col(1);
+        ctx.fillRect(-D*0.2, y + wide*0.24, D*1.4, wide*0.34);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (fam === 'mosaique'){
+      const cols = [13,22,36][dens], s = W/cols, rows = Math.ceil(H/s)+1;
+      const cx = W*(0.2+0.6*rnd()), cy = H*(0.2+0.6*rnd()), R = Math.hypot(W,H)*(0.26+0.3*rnd());
+      const g = Math.max(1, s*0.14);
+      ctx.fillStyle = col(3); ctx.fillRect(0,0,W,H);
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++){
+        const x = c*s + (r % 2 ? s*0.5 : 0), y = r*s;
+        const d = Math.hypot(x+s/2-cx, y+s/2-cy)/R;
+        const k = d < 0.5 ? 0 : d < 0.95 ? 1 : 2;
+        ctx.fillStyle = col(k + (rnd() < 0.16 ? 1 : 0));
+        ctx.fillRect(x+g/2, y+g/2, s-g, s-g);
+      }
+      return;
+    }
+
+    if (fam === 'tresse'){
+      const n = [3,5,8][dens], s = W/n, bw = s*0.6, g = (s-bw)/2;
+      const rows = Math.ceil(H/s)+1;
+      ctx.fillStyle = col(3); ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = col(0);
+      for (let c=0;c<n;c++) ctx.fillRect(c*s+g, 0, bw, H);
+      for (let r=0;r<rows;r++){
+        const y = r*s + g;
+        for (let c=0;c<n;c++){
+          ctx.fillStyle = col(1);
+          if ((r+c) % 2 === 0) ctx.fillRect(c*s, y, s, bw);
+          else { ctx.fillRect(c*s, y, g, bw); ctx.fillRect(c*s+g+bw, y, g, bw); }
+        }
+      }
+      return;
+    }
+
+    if (fam === 'sommets'){
+      const n = [3,5,8][dens];
+      for (let i=0;i<n;i++){
+        const base = H*(0.32 + 0.74*i/n), peaks = 2 + Math.floor(rnd()*4), seg = W/peaks;
+        ctx.fillStyle = col(i);
+        ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(0, base - H*0.05*rnd());
+        for (let p=0;p<peaks;p++){
+          ctx.lineTo(seg*(p+0.5), base - H*(0.07+0.17*rnd()));
+          ctx.lineTo(seg*(p+1), base - H*0.03*rnd());
+        }
+        ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+      }
+      return;
+    }
+
+    if (fam === 'horizon'){
+      const n = [3,6,10][dens];
+      const sy = H*(0.26+0.24*rnd()), sr = U*(0.17+0.13*rnd());
+      ctx.fillStyle = col(0);
+      ctx.beginPath(); ctx.arc(W*(0.28+0.44*rnd()), sy, sr, 0, Math.PI*2); ctx.fill();
+      const hz = sy + sr*0.42, band = (H-hz)/n;
+      for (let i=0;i<n;i++){
+        ctx.fillStyle = col(i+1);
+        ctx.fillRect(0, hz + band*i, W, band*(0.55+0.7*rnd()));
+      }
+      ctx.fillStyle = col(2);
+      ctx.fillRect(0, hz, W, Math.max(2, H*0.007));
+      return;
+    }
+
+    if (fam === 'nuages'){
+      const n = [3,6,11][dens];
+      for (let i=0;i<n;i++){
+        const R = U*(0.075+0.075*rnd()), lobes = 3 + Math.floor(rnd()*2);
+        const wid = R*(lobes*0.74 + 0.9);
+        const cx = W*(0.07+0.86*rnd()), cy = H*(0.1+0.8*rnd());
+        ctx.fillStyle = col(i);
+        this.pillPath(ctx, cx-wid/2, cy, wid, R*0.84);
+        for (let k=0;k<lobes;k++){
+          const t = lobes === 1 ? 0.5 : k/(lobes-1);
+          const lx = cx - wid/2 + R*0.62 + t*(wid - R*1.24);
+          const lr = R*(0.5 + 0.46*(1 - Math.abs(t-0.5)*1.3));
+          ctx.beginPath(); ctx.arc(lx, cy + R*0.22 - lr*0.52, lr, 0, Math.PI*2); ctx.fill();
+        }
+      }
+      return;
+    }
+
+    if (fam === 'agrumes'){
+      const n = [3,6,12][dens];
+      for (let i=0;i<n;i++){
+        const cx = W*(0.08+0.84*rnd()), cy = H*(0.07+0.86*rnd()), R = U*(0.07+0.09*rnd());
+        ctx.fillStyle = col(i);
+        ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = col(i+2);
+        ctx.beginPath(); ctx.arc(cx,cy,R*0.84,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = col(i+1);
+        const w = 6 + Math.floor(rnd()*3), rot = rnd()*Math.PI*2;
+        for (let k=0;k<w;k++){
+          const a0 = rot + k/w*Math.PI*2 + 0.09, a1 = rot + (k+1)/w*Math.PI*2 - 0.09;
+          ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,R*0.72,a0,a1); ctx.closePath(); ctx.fill();
+        }
+      }
+      return;
+    }
+
+    if (fam === 'palmes'){
+      const n = [3,6,11][dens];
+      for (let i=0;i<n;i++){
+        const x = W*(0.06+0.88*rnd()), y = H*(0.06+0.88*rnd()),
+              L = U*(0.15+0.16*rnd()), a = rnd()*Math.PI*2, blades = 7 + Math.floor(rnd()*5);
+        ctx.fillStyle = col(i);
+        for (let k=0;k<blades;k++){
+          const t = (k+1)/blades, sp = (k % 2 ? 1 : -1)*(0.92 - 0.42*t);
+          this.leafPath(ctx, x+Math.cos(a)*L*t*0.9, y+Math.sin(a)*L*t*0.9,
+            L*(0.24 + 0.4*Math.sin(t*Math.PI)), L*0.085, a+sp);
+        }
+        ctx.fillStyle = col(i+2);
+        this.leafPath(ctx, x, y, L, L*0.04, a);
+      }
+      return;
+    }
+
+    if (fam === 'vases'){
+      const n = [2,4,7][dens];
+      const cols = Math.max(1, Math.round(Math.sqrt(n*W/H))), rows = Math.max(1, Math.ceil(n/cols));
+      const cw = W/cols, ch = H/rows;
+      for (let i=0;i<n;i++){
+        const c = i % cols, r = Math.floor(i/cols);
+        const cx = cw*(c+0.5), base = ch*(r+0.9),
+              hh = ch*(0.52+0.24*rnd()), bw = cw*(0.34+0.22*rnd());
+        ctx.fillStyle = col(i);
+        ctx.beginPath(); ctx.ellipse(cx, base-hh*0.4, bw/2, hh*0.4, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillRect(cx-bw*0.15, base-hh, bw*0.3, hh*0.52);
+        ctx.fillStyle = col(i+1);
+        this.pillPath(ctx, cx-bw*0.27, base-hh-hh*0.05, bw*0.54, hh*0.11);
+        this.pillPath(ctx, cx-bw*0.21, base-hh*0.06, bw*0.42, hh*0.09);
+      }
+      return;
+    }
+
+    if (fam === 'poissons'){
+      const n = [4,9,18][dens];
+      for (let i=0;i<n;i++){
+        const x = W*(0.08+0.84*rnd()), y = H*(0.07+0.86*rnd()),
+              L = U*(0.1+0.11*rnd()), dir = rnd() < 0.5 ? 1 : -1;
+        ctx.save(); ctx.translate(x,y); ctx.scale(dir,1);
+        ctx.fillStyle = col(i);
+        ctx.beginPath(); ctx.ellipse(0,0,L*0.5,L*0.27,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-L*0.42,0);
+        ctx.lineTo(-L*0.82,-L*0.26); ctx.lineTo(-L*0.82,L*0.26); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = col(i+2);
+        ctx.beginPath(); ctx.arc(L*0.27,-L*0.06,L*0.055,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+      return;
+    }
+
     const n = [4,7,11][dens];
     for (let i=0;i<n;i++){
       const y = H*(0.14 + 0.88*i/n), amp = H*(0.012+0.032*rnd()),
@@ -1106,7 +1377,7 @@ class Component extends DCLogic {
     const opts = this.resOptions(), matched = opts.find(o => o.w === w && o.h === h);
 
     return {
-      t, lang,
+      t, lang, arches: this.arches(34),
       boxRef: this.boxRef, headRef: this.headRef, deviceRef: this.deviceRef, canvasRef: this.canvasRef,
       clock: this.state.clock || this.now(),
       dayNum: String(now.getDate()),
@@ -1127,10 +1398,13 @@ class Component extends DCLogic {
 
       legGood: lvl === 'good', legOk: lvl === 'ok', legLow: lvl === 'low',
       legLabel: lvl === 'good' ? t.lvGood : lvl === 'ok' ? t.lvOk : t.lvLow,
-      legDetail: this.dec(leg.ratio) + ':1 · ' + (leg.mode === 'light' ? t.labLight : t.labDark)
-        + ' · ' + veilTxt + ' — ' + (lvl === 'good' ? t.adviceGood : lvl === 'ok' ? t.adviceOk : t.adviceLow),
+      legDetail: this.dec(leg.ratio) + ':1, ' + (leg.mode === 'light' ? t.labLight : t.labDark)
+        + ', ' + veilTxt + '. ' + (lvl === 'good' ? t.adviceGood : lvl === 'ok' ? t.adviceOk : t.adviceLow),
 
       famAbs: this.FAM.filter(f => f.g === 'abs').map(f => Object.assign({
+        label: f[lang], ref: this.thumbRefs[f.id], onPick: on({family:f.id})
+      }, pick(this.state.family === f.id))),
+      famPay: this.FAM.filter(f => f.g === 'pay').map(f => Object.assign({
         label: f[lang], ref: this.thumbRefs[f.id], onPick: on({family:f.id})
       }, pick(this.state.family === f.id))),
       famFig: this.FAM.filter(f => f.g === 'fig').map(f => Object.assign({
@@ -1145,9 +1419,9 @@ class Component extends DCLogic {
       }, pick(this.state.dens === i))),
 
       resLabel: empty ? '— × —' : this.num(w) + ' × ' + this.num(h) + ' px',
-      deviceLabel: (k === 'phone' ? t.devPhone : k === 'tablet' ? t.devTablet : t.devDesk) + ' · '
+      deviceLabel: (k === 'phone' ? t.devPhone : k === 'tablet' ? t.devTablet : t.devDesk) + ', '
         + (this.detected && w === this.detected.w && h === this.detected.h ? t.detected : t.custom),
-      resOpts: opts.map(o => ({id:o.id, label:o.label + ' — ' + this.num(o.w) + ' × ' + this.num(o.h)}))
+      resOpts: opts.map(o => ({id:o.id, label:o.label + '  ' + this.num(o.w) + ' × ' + this.num(o.h)}))
         .concat([{id:'custom', label: t.resCustom + (matched ? '' : '  ' + this.num(w) + ' × ' + this.num(h))}]),
       resSel: matched ? matched.id : 'custom',
       editRes: this.state.editRes || !matched,
@@ -1162,7 +1436,7 @@ class Component extends DCLogic {
       busyAttr: phase === 'rendering' ? 'true' : 'false',
       exportOpacity: (phase === 'rendering' || empty) ? '0.55' : '1',
       savedMeta: this.state.last
-        ? this.num(this.state.last.w) + ' × ' + this.num(this.state.last.h) + ' px · PNG · '
+        ? this.num(this.state.last.w) + ' × ' + this.num(this.state.last.h) + ' px, PNG, '
           + this.dec(this.state.last.size/1048576) + ' ' + t.savedSize
         : '',
       errMsg: this.state.errKind === 'big'

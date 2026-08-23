@@ -11,7 +11,10 @@
  * part pas dans un lien.
  */
 import { describe, expect, it } from 'vitest'
-import { ecrireUrl, langueParDefaut, lireUrl, REGLAGES_PAR_DEFAUT } from './url'
+import {
+  ecrireAffichage, ecrireUrl, langueParDefaut, lireAffichage, lireUrl,
+  REGLAGES_PAR_DEFAUT,
+} from './url'
 import { depuisSaisie } from './resolution'
 
 const DETECTE = { largeur: 1179, hauteur: 2556 }
@@ -102,5 +105,36 @@ describe('écriture de l’URL', () => {
     const requete = ecrireUrl(REGLAGES_PAR_DEFAUT, DETECTE, DETECTE)
     const cles = [...new URLSearchParams(requete).keys()]
     expect(cles.sort()).toEqual(['d', 'l', 'm', 'p', 's'])
+  })
+})
+
+/* La langue et le thème sont les deux seuls réglages que la page d'accueil
+   partage avec l'application : ils se lisent et s'écrivent à part, et de la
+   même façon des deux côtés. */
+describe('les réglages d’affichage, communs aux deux pages', () => {
+  it('relit ce qu’il a écrit', () => {
+    for (const affichage of [
+      { langue: 'fr', theme: 'sombre' },
+      { langue: 'en', theme: 'clair' },
+      { langue: 'en', theme: 'systeme' },
+    ] as const) {
+      expect(lireAffichage(ecrireAffichage(affichage))).toEqual(affichage)
+    }
+  })
+
+  it('n’écrit pas « système » : l’absence de choix s’écrit par l’absence', () => {
+    expect(ecrireAffichage({ langue: 'fr', theme: 'systeme' })).toBe('l=fr')
+  })
+
+  it('retombe sur la langue du navigateur et sur « système »', () => {
+    expect(lireAffichage('?l=zz&t=neon', 'fr-FR')).toEqual({ langue: 'fr', theme: 'systeme' })
+    expect(lireAffichage('', 'en-GB')).toEqual({ langue: 'en', theme: 'systeme' })
+  })
+
+  it('lit la même chose que la lecture complète de l’URL', () => {
+    const recherche = '?m=terrazzo&p=orage&d=2&s=4242&l=en&t=sombre'
+    const complet = lireUrl(recherche, DETECTE)
+    const affichage = lireAffichage(recherche)
+    expect(affichage).toEqual({ langue: complet.langue, theme: complet.theme })
   })
 })

@@ -38,6 +38,7 @@ export function ChoixFamille({
   onSurprise: () => void
 }) {
   const abstraits = FAMILLES.filter((f) => f.groupe === 'abs')
+  const paysages = FAMILLES.filter((f) => f.groupe === 'pay')
   const figures = FAMILLES.filter((f) => f.groupe === 'fig')
 
   const grille = (liste: typeof FAMILLES, titre: string, identifiant: string) => {
@@ -74,7 +75,7 @@ export function ChoixFamille({
     <div className="carte">
       {/* « Surprends-moi » est ici et non dans la barre d'action : il change le
           fichier téléchargé, sa place est donc dans le panneau, et c'est
-          au-dessus des dix-huit familles qu'on a envie d'en tirer une au
+          au-dessus des trente-deux familles qu'on a envie d'en tirer une au
           hasard. La barre garde un seul appel primaire. */}
       <div className="carte-titre">
         <h2 className="carte-h" id="h-famille">
@@ -100,6 +101,11 @@ export function ChoixFamille({
         <span>{textes.reglages.groupeAbstraits}</span>
       </h3>
       {grille(abstraits, 'h-abstraits', 'liste-abstraits')}
+      <h3 className="groupe groupe-2" id="h-paysages">
+        <span className="groupe-sommet" aria-hidden="true" />
+        <span>{textes.reglages.groupePaysages}</span>
+      </h3>
+      {grille(paysages, 'h-paysages', 'liste-paysages')}
       <h3 className="groupe groupe-2" id="h-figures">
         <span className="groupe-etoile" aria-hidden="true" />
         <span>{textes.reglages.groupeFigures}</span>

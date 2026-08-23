@@ -163,7 +163,7 @@
    en page de la maquette, tenue jusqu'au téléphone.
 
    La part n'est pas la moitié. À 390 px, deux colonnes égales laissent 166 px
-   au panneau, soit une seule vignette de famille par rangée et dix-huit
+   au panneau, soit une seule vignette de famille par rangée et trente-deux
    rangées à parcourir. Trente-huit pour cent donnent un aperçu encore
    jugeable et deux vignettes de front ; c'est le partage qui rend les deux
    colonnes utiles plutôt que seulement fidèles.
@@ -884,8 +884,10 @@
 .groupe-2 {
   margin: 17px 0 9px;
 }
-/* Deux formes du vocabulaire : l'arche pour les abstraits, l'étoile à pointes
-   pour les figures. Elles repèrent le groupe, le mot le nomme.
+/* Trois formes du vocabulaire : l'arche pour les abstraits, la ligne de crête
+   pour les paysages, l'étoile à pointes pour les figures. Elles repèrent le
+   groupe, le mot le nomme, et les trois se distinguent par la silhouette et
+   non par la couleur : en niveaux de gris elles tiennent toujours.
 
    L'arche est mordue à sa base par une seconde arche à la couleur de la
    surface : c'est le dessin de la marque, repris en petit. La même géométrie
@@ -918,6 +920,13 @@
   height: 44%;
   background: var(--surface);
   border-radius: 999px 999px 0 0;
+}
+.groupe-sommet {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 12px;
+  background: var(--violet);
+  clip-path: polygon(0 100%, 32% 22%, 54% 62%, 74% 0, 100% 100%);
 }
 .groupe-etoile {
   flex: 0 0 auto;
@@ -1077,7 +1086,7 @@
    Entre 360 et 760 px, le panneau ne fait plus que deux cents pixels. Les
    valeurs de la maquette ont été dessinées pour une colonne de cinq cents :
    les tenir telles quelles ramène les grilles à une vignette par rangée, ce
-   qui n'est plus une grille mais une liste de dix-huit lignes.
+   qui n'est plus une grille mais une liste de trente-deux lignes.
 
    Ce bloc est en fin de feuille, après les règles qu'il corrige : une requête
    de média n'ajoute pas de spécificité, c'est l'ordre qui tranche.

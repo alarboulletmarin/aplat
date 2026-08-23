@@ -24,6 +24,15 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
   page.on('pageerror', e => problems.push('ERREUR ' + e.message));
   page.on('console', m => { if (m.type() === 'error') problems.push('CONSOLE ' + m.text()); });
 
+  /* Le nombre de puces attendu se relève sur une adresse saine, il ne s'écrit
+     pas ici : ce qu'on vérifie est qu'aucune URL hostile n'en ajoute ni n'en
+     retire, pas qu'il y en ait un nombre donné. Écrit en dur, ce contrôle
+     tombait à chaque famille ajoutée sans rien avoir découvert. */
+  await page.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(150);
+  const ATTENDU = await page.evaluate(() => document.querySelectorAll('.opt').length);
+  console.log('puces sur une adresse saine : ' + ATTENDU);
+
   let n = 0;
   for (const k of KEYS) {
     for (const v of VALS) {
@@ -31,7 +40,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
       const q = '?' + k + '=' + encodeURIComponent(v);
       let ok;
       try {
-        await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
+        await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(90);
         ok = await page.evaluate(() => ({
           peint: (document.getElementById('apercu') || {}).dataset?.peint === '1' || !!document.getElementById('etat-vide'),
@@ -43,7 +52,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
       } catch (e) { problems.push(`${q} : ${e.message}`); continue; }
       if (!ok.peint) problems.push(`${q} : rien n'est peint`);
       if (ok.injecte) problems.push(`${q} : INJECTION exécutée`);
-      if (ok.boutons !== 37) problems.push(`${q} : ${ok.boutons} puces au lieu de 37`);
+      if (ok.boutons !== ATTENDU) problems.push(`${q} : ${ok.boutons} puces au lieu de ${ATTENDU}`);
     }
   }
 
@@ -52,7 +61,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
                    '?m=&p=&d=&s=&l=&r=&t=',
                    '?r=99999x99999&d=999&s=-1&l=zz&t=zz&p=zz&m=zz']) {
     n++;
-    await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
+    await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(150);
     const ok = await page.evaluate(() => ({
       peint: document.getElementById('apercu').width > 4,
