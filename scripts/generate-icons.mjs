@@ -4,10 +4,11 @@
  * Génère les icônes PNG de la PWA sans dépendance : on rasterise quelques
  * formes simples puis on encode le PNG à la main via zlib.
  *
- * Motif : la marque d'Aplat, la même que `public/favicon.svg`, soit un
- * losange lime dans un carré navy, évidé d'un second losange, et le point
- * corail au centre. Trois aplats, aucun dégradé, aucune ombre : la direction
- * artistique tient dans 512 pixels comme dans une page.
+ * Motif : la marque d'Aplat, la même que `public/favicon.svg` et que celle de
+ * l'en-tête, soit une arche lime dans un carré navy, mordue à sa base par une
+ * seconde arche. Deux aplats, aucun dégradé, aucune ombre : la direction
+ * artistique tient dans 512 pixels comme dans une page, et la forme reste
+ * lisible à seize.
  *
  * Usage : npm run icons
  */
@@ -20,7 +21,6 @@ const SORTIE = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
 
 const NAVY = [0x17, 0x24, 0x3f]
 const LIME = [0xdf, 0xf4, 0x78]
-const CORAIL = [0xff, 0x66, 0x48]
 const PAPIER = [0xf2, 0xed, 0xdd]
 
 /** Canvas RGBA minimal, avec anticrénelage par sur-échantillonnage 3x3. */
@@ -66,10 +66,16 @@ function creerCanvas(largeur, hauteur = largeur) {
   }
 }
 
-const disque = (cx, cy, r) => (x, y) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r
-
-/** Losange : un carré posé sur la pointe, comme dans la marque. */
-const losange = (cx, cy, r) => (x, y) => Math.abs(x - cx) + Math.abs(y - cy) <= r
+/**
+ * L'arche : un rectangle surmonté d'un demi-disque, posé sur le bas de la
+ * boîte. `epaule` est la hauteur où les montants droits commencent, c'est
+ * aussi le centre du demi-disque ; le rayon est la demi-largeur.
+ */
+const arche = (cx, rayon, epaule, bas) => (x, y) => {
+  if (y > bas) return false
+  if (y >= epaule) return Math.abs(x - cx) <= rayon
+  return (x - cx) ** 2 + (y - epaule) ** 2 <= rayon * rayon
+}
 
 /** Rectangle à coins arrondis. */
 const rectangleArrondi = (gauche, haut, largeur, hauteur, rayon) => (x, y) => {
@@ -137,17 +143,20 @@ function dessinerIcone(taille, marge = 0) {
 
   if (marge > 0) {
     // Icône maskable : le fond couvre toute la surface, le motif reste dans la
-    // zone sûre, parce qu'un masque rond ne doit jamais mordre dans le losange.
+    // zone sûre, parce qu'un masque rond ne doit jamais mordre dans l'arche.
     canvas.remplir(NAVY)
   } else {
     canvas.remplir(PAPIER)
-    canvas.peindre(NAVY, rectangleArrondi(0, 0, taille - 1, taille - 1, taille * 0.22))
+    canvas.peindre(NAVY, rectangleArrondi(0, 0, taille - 1, taille - 1, taille * 0.23))
   }
 
+  /* Les mêmes fractions que le SVG de la marque et que l'en-tête : arche de
+     0,64 de large dont l'épaule est à 0,52, mordue par une arche de 0,22 dont
+     l'épaule est à 0,74. */
   const centre = bord + boite / 2
-  canvas.peindre(LIME, losange(centre, centre, boite * 0.3125))
-  canvas.peindre(NAVY, losange(centre, centre, boite * 0.1875))
-  canvas.peindre(CORAIL, disque(centre, centre, boite * 0.078))
+  const bas = bord + boite
+  canvas.peindre(LIME, arche(centre, boite * 0.32, bord + boite * 0.52, bas))
+  canvas.peindre(NAVY, arche(centre, boite * 0.11, bord + boite * 0.74, bas))
 
   return encoderPNG(canvas)
 }

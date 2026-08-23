@@ -76,7 +76,8 @@ describe('hauteur de la scène', () => {
   /* Le défaut que ce test tient fermé : en paysage, la scène gardait son
      plancher de 300 px, et le bas du téléphone comme le verdict passaient sous
      la barre d'action. La réserve doit suffire à la barre compacte (56 px),
-     au verdict et aux marges de la scène. */
+     au verdict et aux marges de la scène, plus l'en-tête collant sous lequel
+     la scène commence. */
   it('laisse la place de la barre et du verdict en paysage court', () => {
     for (const fenetre of [
       { largeur: 844, hauteur: 390 },
@@ -85,7 +86,7 @@ describe('hauteur de la scène', () => {
       { largeur: 740, hauteur: 360 },
     ]) {
       const reste = fenetre.hauteur - hauteurScene(fenetre)
-      expect(reste, `${fenetre.largeur}x${fenetre.hauteur}`).toBeGreaterThanOrEqual(140)
+      expect(reste, `${fenetre.largeur}x${fenetre.hauteur}`).toBeGreaterThanOrEqual(198)
     }
   })
 

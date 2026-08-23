@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import type { Textes } from '../i18n'
+import { Arche } from './Arche'
 
 /**
  * Le partage du motif.
@@ -47,7 +48,8 @@ export function Partage({
   return (
     <div className="partage" aria-labelledby="h-partage">
       <h2 className="carte-h" id="h-partage" style={{ marginBottom: 0 }}>
-        {textes.partage.titre}
+        <Arche />
+        <span>{textes.partage.titre}</span>
       </h2>
 
       <button type="button" id="partage-bouton" className="partage-b" ref={bouton} onClick={onCopier}>

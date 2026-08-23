@@ -18,13 +18,26 @@ import { ouvrir } from './serveur.mjs'
 
 const CAS = [
   /* `libre` : la part de la hauteur de la fenêtre laissée aux grilles une fois
-     la page défilée. La recette demande 55 % sur un iPhone ; les petits
-     téléphones ne peuvent pas les tenir, la barre et la vignette y pèsent
-     proportionnellement plus lourd. */
-  { nom: 'phone 390x844', vp: { width: 390, height: 844 }, dsf: 3, mobile: true, replie: true, libre: 55 },
-  { nom: 'phone 430x932', vp: { width: 430, height: 932 }, dsf: 3, mobile: true, replie: true, libre: 55 },
-  { nom: 'phone 360x640', vp: { width: 360, height: 640 }, dsf: 3, mobile: true, replie: true, libre: 44 },
-  { nom: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true, replie: true, libre: 44 },
+     la page défilée.
+
+     `replie` : le repli de l'aperçu en vignette. Il ne sert que là où la scène
+     recouvre les réglages, c'est-à-dire sur une seule colonne, sous 360 px.
+     Dès 360 px la page est sur deux colonnes : l'aperçu est épinglé dans la
+     sienne, à côté du panneau et non devant lui, et il n'a plus rien à rendre
+     en se repliant.
+
+     C'est ce qui fait monter les chiffres d'un coup. Sur une colonne, la scène
+     collante mangeait la moitié de la fenêtre ; à côté, elle n'en prend plus
+     rien. Sous 360 px, où la colonne unique demeure, le repli reste seul à
+     tenir les grilles, et l'en-tête collant lui coûte ses douze points : la
+     barre, le verdict replié et les cibles de 44 px y sont tous au minimum, il
+     n'y a rien à reprendre ailleurs.
+
+     Ce sont des planchers mesurés : ils tiennent la régression, pas l'ambition. */
+  { nom: 'phone 390x844', vp: { width: 390, height: 844 }, dsf: 3, mobile: true, replie: false, libre: 75 },
+  { nom: 'phone 430x932', vp: { width: 430, height: 932 }, dsf: 3, mobile: true, replie: false, libre: 78 },
+  { nom: 'phone 360x640', vp: { width: 360, height: 640 }, dsf: 3, mobile: true, replie: false, libre: 70 },
+  { nom: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true, replie: true, libre: 35 },
   { nom: 'phone paysage 844x390', vp: { width: 844, height: 390 }, dsf: 3, mobile: true, replie: false, libre: 55 },
   { nom: 'tablet 834x1112', vp: { width: 834, height: 1112 }, dsf: 2, mobile: true, replie: false, libre: 55 },
   { nom: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 },
@@ -84,13 +97,22 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         const scene = document.querySelector('.scene');
         const rs = scene.getBoundingClientRect();
         const rb = document.querySelector('.barre').getBoundingClientRect();
-        const recouvre = getComputedStyle(scene).position === 'sticky' && innerWidth < 760;
+        /* Trois couches collantes, pas deux : l'en-tête recouvre le haut de la
+           page à toute largeur, la scène seulement sous 360 px, la seule
+           largeur où la page tient encore sur une colonne. Le seuil est celui
+           de `.colonnes` dans `ecrans.css`. */
+        const re = document.querySelector('.entete').getBoundingClientRect();
+        const recouvre = getComputedStyle(scene).position === 'sticky' && innerWidth < 360;
         const out = [];
         for (const n of document.querySelectorAll('[data-scan]')) {
           const b = n.getBoundingClientRect();
           if (b.top < 0 || b.bottom > innerHeight) continue;
           if (b.bottom > rb.top + 0.5) continue;
-          if (recouvre && b.top < rs.bottom - 0.5) continue;
+          if (b.top < re.bottom - 0.5) continue;
+          /* Un contrôle de la scène est dans la couche collante, pas dessous :
+             il ne peut pas s'en dégager, et n'a pas à le faire. La barre est
+             écartée de la même façon, à la constitution de la liste. */
+          if (recouvre && !n.closest('.scene') && b.top < rs.bottom - 0.5) continue;
           out.push(Number(n.dataset.scan));
         }
         return out;
@@ -113,7 +135,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const bas = await page.evaluate(() => {
       const scene = document.querySelector('.scene').getBoundingClientRect();
       const barre = document.querySelector('.barre').getBoundingClientRect();
-      const haut = innerWidth < 760 ? Math.max(0, scene.bottom) : 0;
+      const entete = document.querySelector('.entete').getBoundingClientRect();
+      const haut = Math.max(0, entete.bottom, innerWidth < 360 ? scene.bottom : 0);
       return {
         replie: !!document.querySelector('.scene-boite-repliee'),
         bascule: !!document.getElementById('verdict-bascule'),

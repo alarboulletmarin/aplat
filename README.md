@@ -75,9 +75,12 @@ d'écran tel qu'un thème sombre l'assombrit : les libellés clairs y gagnent, l
 sombres y perdent, et le rapport annoncé suit. Le fichier téléchargé, lui, ne
 change pas d'un octet, ce qu'une vérification compare pour de bon.
 
-Sur téléphone en portrait, l'aperçu se replie en vignette dès qu'on défile, et
-le verdict se condense sur une ligne, dépliable au doigt : les grilles passent
-de 37 % à 58 % de la hauteur de l'écran. Le repli se fait à l'échelle, pas à la
+Deux colonnes dès 360 px, téléphone compris : l'aperçu épinglé à gauche, les
+réglages qui défilent à droite. L'aperçu n'est plus devant ce qu'on choisit mais
+à côté, et les grilles disposent de plus des trois quarts de la hauteur de
+l'écran au lieu d'un tiers. Sous 360 px, où deux colonnes ne tiennent plus,
+l'aperçu se replie en vignette dès qu'on défile et le verdict se condense sur
+une ligne, dépliable au doigt ; le repli se fait à l'échelle, pas à la
 géométrie, si bien que le motif n'est pas redessiné pour l'occasion.
 
 ---

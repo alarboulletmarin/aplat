@@ -73,14 +73,18 @@ export function Scene({
   const vide = !resolution.largeur || !resolution.hauteur
 
   /* Replier l'aperçu n'a de sens que là où la scène recouvre la page,
-     c'est-à-dire sous 760 px : au-delà elle tient dans sa colonne et ne prend
-     la place de personne.
+     c'est-à-dire sous 360 px : au-delà elle tient dans sa colonne, à côté des
+     réglages, et ne prend la place de personne. Le seuil est celui de
+     `.colonnes` dans `ecrans.css` ; les deux basculent ensemble.
 
-     Le verdict, lui, se condense aussi en paysage court, où la hauteur est
-     comptée : trois lignes de détail y valent le quart de l'écran. Il reste à
-     un appui. */
-  const replie = defile && fenetre.largeur < 760
-  const verdictReplie = replie || paysageCourt(fenetre)
+     Le verdict, lui, se condense dans deux autres cas. En paysage court, où la
+     hauteur est comptée : trois lignes de détail y valent le quart de l'écran.
+     Et dans une colonne étroite, où le détail déplié fait dix lignes de quatre
+     mots et pousse la barre d'action hors de vue. Il reste à un appui dans les
+     deux cas. */
+  const replie = defile && fenetre.largeur < 360
+  const colonneEtroite = tailleBoite.largeur > 0 && tailleBoite.largeur < 300
+  const verdictReplie = replie || paysageCourt(fenetre) || colonneEtroite
 
   /* La hauteur dépliée sert de référence à la géométrie, y compris pendant le
      repli : c'est ce qui garde le canevas et la maquette hors de la
@@ -96,6 +100,15 @@ export function Scene({
   )
   const echelle =
     replie && geometrie ? Math.min(1, hauteurBoite / geometrie.hauteur) : 1
+
+  /* Dans une colonne étroite, l'appareil est borné par la largeur et non par la
+     hauteur : la boîte se referme sur lui plutôt que de laisser sous l'aperçu
+     un vide qui pousserait le verdict vers la barre d'action. Au-delà de 760 px
+     la boîte garde la hauteur de la maquette, et l'appareil y est centré. */
+  const hauteurRendue =
+    geometrie && fenetre.largeur < 760
+      ? Math.min(hauteurBoite, geometrie.hauteur)
+      : hauteurBoite
 
   const style: CSSProperties = geometrie
     ? ({
@@ -137,7 +150,7 @@ export function Scene({
         className={`scene-boite${replie ? ' scene-boite-repliee' : ''}`}
         id="scene-boite"
         ref={boite}
-        style={{ height: `${hauteurBoite}px` }}
+        style={{ height: `${hauteurRendue}px` }}
       >
         <div className="appareil" id="appareil" style={style}>
           {!vide && (

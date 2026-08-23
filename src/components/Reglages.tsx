@@ -5,6 +5,7 @@ import {
   type Densite, type IdFamille, type IdPalette, type Langue,
 } from '../lib/moteur'
 import type { Textes } from '../i18n'
+import { Arche } from './Arche'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
 import { Vignette } from './Vignette'
 
@@ -77,7 +78,8 @@ export function ChoixFamille({
           hasard. La barre garde un seul appel primaire. */}
       <div className="carte-titre">
         <h2 className="carte-h" id="h-famille">
-          {textes.reglages.famille}
+          <Arche />
+          <span>{textes.reglages.famille}</span>
         </h2>
         <button
           type="button"
@@ -91,7 +93,10 @@ export function ChoixFamille({
         </button>
       </div>
       <h3 className="groupe" id="h-abstraits">
-        <span className="groupe-arche" aria-hidden="true" />
+        <span className="groupe-arche" aria-hidden="true">
+          <i />
+          <b />
+        </span>
         <span>{textes.reglages.groupeAbstraits}</span>
       </h3>
       {grille(abstraits, 'h-abstraits', 'liste-abstraits')}
@@ -118,7 +123,8 @@ export function ChoixPalette({
   return (
     <div className="carte">
       <h2 className="carte-h" id="h-palette">
-        {textes.reglages.palette}
+        <Arche />
+        <span>{textes.reglages.palette}</span>
       </h2>
       <GroupeRadio id="liste-palettes" etiquettes="h-palette" className="grille-palettes">
         {ORDRE_PALETTES.map((id) => {
@@ -163,7 +169,8 @@ export function ChoixDensite({
   return (
     <div className="bento">
       <h2 className="carte-h" id="h-densite">
-        {textes.reglages.densite}
+        <Arche />
+        <span>{textes.reglages.densite}</span>
       </h2>
       <GroupeRadio id="liste-densite" etiquettes="h-densite" className="rangee-densite">
         {([0, 1, 2] as Densite[]).map((niveau) => (

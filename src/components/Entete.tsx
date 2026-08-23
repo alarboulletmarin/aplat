@@ -3,21 +3,60 @@
 import type { Textes } from '../i18n'
 
 /**
- * Le titre, en display très grasse et condensée, presque collée ; l'accroche
- * en grotesque neutre juste dessous. Le contraste entre les deux est ce qui
- * donne le ton : c'est le seul geste typographique de la page.
+ * L'en-tête : DESIGN_SYSTEM.md, section 2 (le parti visuel) et section 6
+ * (gabarits).
+ *
+ * La marque, le mot, la résolution visée, et un filet fait de six barres de la
+ * palette. La bande est collante : c'est la troisième couche épinglée de la
+ * page, au-dessus de la scène et de la barre d'action, et sa hauteur est
+ * publiée en `--bar` pour que la scène s'y accroche.
+ *
+ * Le titre n'est plus le geste plein écran d'avant : à trente-trois pixels il
+ * peut rester à l'écran en permanence, ce qu'une capitale de quatre-vingt-dix-
+ * huit pixels ne pouvait pas. Le contraste entre la display condensée et la
+ * grotesque neutre reste le seul geste typographique de la page.
+ *
+ * L'accroche et la mention sont rendues hors de la bande collante : elles se
+ * lisent une fois, au départ, et n'ont rien à faire dans ce qui reste épinglé.
  */
-export function Entete({ textes }: { textes: Textes }) {
+export function Entete({
+  cadre,
+  textes,
+  resolution,
+}: {
+  cadre: React.RefObject<HTMLElement | null>
+  textes: Textes
+  /** La résolution visée, déjà mise en forme, ou le mot qui dit qu'il n'y en a pas. */
+  resolution: string
+}) {
   return (
-    <header>
-      <div className="entete-haut">
-        <h1 className="titre">{textes.entete.titre}</h1>
-        <span className="entete-arche" aria-hidden="true" />
-      </div>
-      <div className="entete-filet" aria-hidden="true" />
+    <>
+      <header className="entete" ref={cadre as React.RefObject<HTMLElement>}>
+        <div className="entete-haut">
+          <span className="marque" aria-hidden="true">
+            <i />
+            <b />
+          </span>
+          <h1 className="titre">{textes.entete.titre}</h1>
+          <p className="entete-res" id="entete-res">
+            {resolution}
+          </p>
+        </div>
+        {/* Six barres et leur seuil : la silhouette d'un motif du générateur,
+            réduite à treize pixels de haut. */}
+        <div className="entete-filet" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+      </header>
       <div className="entete-pied">
         <p className="accroche">{textes.entete.accroche}</p>
+        <p className="entete-mention">{textes.entete.mention}</p>
       </div>
-    </header>
+    </>
   )
 }

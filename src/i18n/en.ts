@@ -14,6 +14,7 @@ export const en: Textes = {
     titre: 'Aplat',
     accroche:
       'Generative wallpapers, computed inside your browser. Phone, tablet, computer.',
+    mention: 'No account, no network.',
   },
   scene: {
     titre: 'Wallpaper preview',

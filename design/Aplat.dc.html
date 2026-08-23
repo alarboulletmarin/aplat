@@ -11,6 +11,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48" />
+<link rel="icon" type="image/svg+xml" href="icons/aplat-mark.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#17243F" />
+<meta name="apple-mobile-web-app-title" content="Aplat" />
 <style>
 :root{
   --lime:#DFF478; --creme:#F7F3E6; --ciel:#92BAD5; --violet:#788CE3; --navy:#17243F; --corail:#FF6648;
@@ -51,21 +57,32 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 <div data-screen-label="Vue unique" style="max-width:1100px;margin:0 auto;padding:22px 16px 0;display:flex;flex-direction:column;gap:22px;min-height:100dvh">
 
-  <header>
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px">
-      <h1 style="font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(56px,15.5vw,98px);line-height:.76;letter-spacing:-.045em;text-transform:uppercase">Aplat</h1>
-      <span aria-hidden="true" style="flex:0 0 auto;width:clamp(28px,7vw,44px);height:clamp(44px,11vw,68px);background:var(--deco-1);border-radius:999px 999px 0 0"></span>
+  <header ref="{{ headRef }}" style="position:sticky;top:0;z-index:6;margin:-22px -16px 0;padding:8px 16px 0;background:var(--bg)">
+    <div style="display:flex;align-items:center;gap:11px;padding-bottom:9px">
+      <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:38px;height:38px;border-radius:23%;background:#17243F;box-shadow:0 0 0 1.5px var(--line);overflow:hidden">
+        <span style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:#DFF478;border-radius:999px 999px 0 0"></span>
+        <span style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:#17243F;border-radius:999px 999px 0 0"></span>
+      </span>
+      <h1 style="font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:33px;line-height:.84;letter-spacing:-.04em;text-transform:uppercase">Aplat</h1>
+      <p style="margin-left:auto;font-size:13px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ resLabel }}</p>
     </div>
-    <div style="height:3px;background:var(--ink);margin-top:11px"></div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:space-between;align-items:baseline;padding-top:11px">
-      <p style="max-width:44ch;font-size:15px;color:var(--ink-muted)">{{ t.tagline }}</p>
-      <p style="font-size:13px;font-weight:600;color:var(--ink-muted);white-space:nowrap">{{ t.kicker }}</p>
+    <div aria-hidden="true" style="display:flex;align-items:flex-end;gap:5px;height:13px;border-bottom:3px solid var(--ink)">
+      <span style="flex:2 1 0;height:100%;background:var(--lime);border-radius:999px 999px 0 0"></span>
+      <span style="flex:1 1 0;height:60%;background:var(--ciel);border-radius:999px 999px 0 0"></span>
+      <span style="flex:3 1 0;height:86%;background:var(--violet);border-radius:999px 999px 0 0"></span>
+      <span style="flex:1 1 0;height:46%;background:var(--corail);border-radius:999px 999px 0 0"></span>
+      <span style="flex:2 1 0;height:100%;background:var(--ink);border-radius:999px 999px 0 0"></span>
+      <span style="flex:1 1 0;height:68%;background:var(--ciel);border-radius:999px 999px 0 0"></span>
     </div>
   </header>
+  <div style="display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:space-between;align-items:baseline;margin-top:-11px">
+    <p style="max-width:44ch;font-size:15px;color:var(--ink-muted)">{{ t.tagline }}</p>
+    <p style="font-size:13px;font-weight:600;color:var(--ink-muted);white-space:nowrap">{{ t.kicker }}</p>
+  </div>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;align-items:start">
 
-    <section style="position:sticky;top:0;z-index:2;display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:8px 0 12px">
+    <section style="position:sticky;top:var(--bar,70px);z-index:2;display:flex;flex-direction:column;gap:12px;background:var(--bg);padding:8px 0 12px">
       <div ref="{{ boxRef }}" style="width:100%;height:min(46vh,560px);min-height:230px;display:flex;align-items:center;justify-content:center">
         <div ref="{{ deviceRef }}" style="position:relative;width:264px;height:540px;border-radius:34px;border:4px solid var(--ink);background:var(--surface-2);overflow:hidden;--mu:2.64px;--cols:4;--label:#F7F3E6;--label-inv:#17243F">
           <canvas ref="{{ canvasRef }}" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
@@ -168,7 +185,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
           <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;background:repeating-linear-gradient(135deg,var(--surface-2) 0 9px,var(--surface) 9px 18px)">
-              <span aria-hidden="true" style="width:26px;height:26px;border:3px solid var(--ink);border-radius:50% 50% 50% 0"></span>
+              <span aria-hidden="true" style="width:24px;height:30px;border:3px solid var(--ink);border-bottom:0;border-radius:999px 999px 0 0"></span>
               <strong style="font-size:15px">{{ t.emptyTitle }}</strong>
               <span style="font-size:13px;color:var(--ink-muted);max-width:26ch">{{ t.emptyBody }}</span>
             </div>
@@ -199,18 +216,21 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
       </div>
     </section>
 
-    <section style="display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--ink);border-radius:26px;overflow:hidden">
+    <section style="display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--ink);border-radius:42px 42px 12px 12px;overflow:hidden">
 
       <div style="padding:18px">
-        <h2 style="font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px">{{ t.family }}</h2>
+        <h2 style="display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px"><span aria-hidden="true" style="position:relative;flex:0 0 auto;width:12px;height:16px;overflow:hidden"><span style="position:absolute;inset:0;background:var(--ink);border-radius:999px 999px 0 0"></span><span style="position:absolute;left:33%;right:33%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span></span><span>{{ t.family }}</span></h2>
         <h3 style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;gap:8px">
-          <span aria-hidden="true" style="flex:0 0 auto;width:15px;height:9px;background:var(--deco-1);border-radius:999px 999px 0 0"></span>
+          <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:15px;height:15px;overflow:hidden">
+            <span style="position:absolute;left:0;right:0;top:6%;bottom:0;background:var(--deco-1);border-radius:999px 999px 0 0"></span>
+            <span style="position:absolute;left:34%;right:34%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span>
+          </span>
           <span>{{ t.gAbs }}</span>
         </h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
           <sc-for list="{{ famAbs }}" as="f" hint-placeholder-count="12">
-            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:15px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
-              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:9px;background:var(--surface-2)"></canvas>
+            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:19px 19px 6px 6px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
+              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:13px 13px 4px 4px;background:var(--surface-2)"></canvas>
               <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
                 <span aria-hidden="true" style="flex:0 0 auto;width:9px;height:9px;border-radius:2px;background:{{ f.dot }}"></span>
                 <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ f.label }}</span>
@@ -224,8 +244,8 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
         </h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(102px,1fr));gap:9px">
           <sc-for list="{{ famFig }}" as="f" hint-placeholder-count="6">
-            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:15px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
-              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:9px;background:var(--surface-2)"></canvas>
+            <button type="button" onClick="{{ f.onPick }}" aria-pressed="{{ f.pressed }}" style="display:flex;flex-direction:column;gap:8px;padding:7px;min-height:44px;text-align:left;cursor:pointer;border-radius:19px 19px 6px 6px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ f.bc }};background:{{ f.bg }}">
+              <canvas ref="{{ f.ref }}" aria-hidden="true" style="width:100%;aspect-ratio:16/10;display:block;border-radius:13px 13px 4px 4px;background:var(--surface-2)"></canvas>
               <span style="display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;color:{{ f.fg }}">
                 <span aria-hidden="true" style="flex:0 0 auto;width:9px;height:9px;border-radius:2px;background:{{ f.dot }}"></span>
                 <span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ f.label }}</span>
@@ -236,10 +256,10 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
       </div>
 
       <div style="padding:18px;border-top:2px solid var(--line)">
-        <h2 style="font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px">{{ t.palette }}</h2>
+        <h2 style="display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px"><span aria-hidden="true" style="position:relative;flex:0 0 auto;width:12px;height:16px;overflow:hidden"><span style="position:absolute;inset:0;background:var(--ink);border-radius:999px 999px 0 0"></span><span style="position:absolute;left:33%;right:33%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span></span><span>{{ t.palette }}</span></h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px">
           <sc-for list="{{ palList }}" as="p" hint-placeholder-count="8">
-            <button type="button" onClick="{{ p.onPick }}" aria-pressed="{{ p.pressed }}" style="display:flex;flex-direction:column;gap:9px;padding:9px;min-height:44px;text-align:left;cursor:pointer;border-radius:15px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ p.bc }};background:{{ p.bg }}">
+            <button type="button" onClick="{{ p.onPick }}" aria-pressed="{{ p.pressed }}" style="display:flex;flex-direction:column;gap:9px;padding:9px;min-height:44px;text-align:left;cursor:pointer;border-radius:19px 19px 6px 6px;border:1.5px solid var(--line-strong);background:transparent;border-color:{{ p.bc }};background:{{ p.bg }}">
               <span style="display:flex;height:28px;border-radius:7px;overflow:hidden;border:1.5px solid var(--line-strong)">
                 <sc-for list="{{ p.cols }}" as="c" hint-placeholder-count="4">
                   <span style="flex:1 1 0;background:{{ c.hex }}"></span>
@@ -256,10 +276,10 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
       <div>
         <div style="padding:18px;border-top:2px solid var(--line)">
-          <h2 style="font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px">{{ t.density }}</h2>
+          <h2 style="display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;letter-spacing:-.012em;margin-bottom:14px"><span aria-hidden="true" style="position:relative;flex:0 0 auto;width:12px;height:16px;overflow:hidden"><span style="position:absolute;inset:0;background:var(--ink);border-radius:999px 999px 0 0"></span><span style="position:absolute;left:33%;right:33%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span></span><span>{{ t.density }}</span></h2>
           <div role="group" style="display:flex;gap:8px;flex-wrap:wrap">
             <sc-for list="{{ densList }}" as="d" hint-placeholder-count="3">
-              <button type="button" onClick="{{ d.onPick }}" aria-pressed="{{ d.pressed }}" style="flex:1 1 68px;min-height:48px;padding:9px 10px;cursor:pointer;border-radius:14px;border:1.5px solid var(--line-strong);background:transparent;font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-color:{{ d.bc }};background:{{ d.bg }};color:{{ d.fg }}">
+              <button type="button" onClick="{{ d.onPick }}" aria-pressed="{{ d.pressed }}" style="flex:1 1 68px;min-height:48px;padding:9px 10px;cursor:pointer;border-radius:17px 17px 5px 5px;border:1.5px solid var(--line-strong);background:transparent;font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-color:{{ d.bc }};background:{{ d.bg }};color:{{ d.fg }}">
                 <span aria-hidden="true" style="display:flex;gap:3px">
                   <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>
                   <span style="width:5px;height:5px;border-radius:50%;background:currentColor;opacity:{{ d.o2 }}"></span>
@@ -273,9 +293,9 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
         <div style="padding:18px;border-top:2px solid var(--line);display:flex;flex-direction:column;gap:11px">
           <label style="display:flex;flex-direction:column;gap:9px">
-            <span style="font-size:16.5px;font-weight:700;letter-spacing:-.012em">{{ t.resolution }}</span>
+            <span style="display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;letter-spacing:-.012em"><span aria-hidden="true" style="position:relative;flex:0 0 auto;width:12px;height:16px;overflow:hidden"><span style="position:absolute;inset:0;background:var(--ink);border-radius:999px 999px 0 0"></span><span style="position:absolute;left:33%;right:33%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span></span><span>{{ t.resolution }}</span></span>
             <span style="position:relative;display:block">
-              <select value="{{ resSel }}" onChange="{{ onResPick }}" style="appearance:none;-webkit-appearance:none;width:100%;min-height:52px;padding:0 46px 0 15px;border-radius:15px;border:2px solid var(--ink);background:var(--field);color:var(--ink);font-family:inherit;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;cursor:pointer;text-overflow:ellipsis">
+              <select value="{{ resSel }}" onChange="{{ onResPick }}" style="appearance:none;-webkit-appearance:none;width:100%;min-height:52px;padding:0 46px 0 15px;border-radius:19px 19px 6px 6px;border:2px solid var(--ink);background:var(--field);color:var(--ink);font-family:inherit;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;cursor:pointer;text-overflow:ellipsis">
                 <sc-for list="{{ resOpts }}" as="o" hint-placeholder-count="5">
                   <option value="{{ o.id }}">{{ o.label }}</option>
                 </sc-for>
@@ -289,11 +309,11 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink-muted)">
                 <span>{{ t.width }}</span>
-                <input type="number" inputmode="numeric" min="16" max="8000" value="{{ wStr }}" onChange="{{ onW }}" style="min-height:48px;padding:0 13px;border-radius:14px;border:1.5px solid var(--line-strong);background:var(--field);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
+                <input type="number" inputmode="numeric" min="16" max="8000" value="{{ wStr }}" onChange="{{ onW }}" style="min-height:48px;padding:0 13px;border-radius:17px 17px 5px 5px;border:1.5px solid var(--line-strong);background:var(--field);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
               </label>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink-muted)">
                 <span>{{ t.height }}</span>
-                <input type="number" inputmode="numeric" min="16" max="8000" value="{{ hStr }}" onChange="{{ onH }}" style="min-height:48px;padding:0 13px;border-radius:14px;border:1.5px solid var(--line-strong);background:var(--field);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
+                <input type="number" inputmode="numeric" min="16" max="8000" value="{{ hStr }}" onChange="{{ onH }}" style="min-height:48px;padding:0 13px;border-radius:17px 17px 5px 5px;border:1.5px solid var(--line-strong);background:var(--field);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;width:100%" />
               </label>
             </div>
           </sc-if>
@@ -301,8 +321,8 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
       </div>
 
       <div style="display:flex;flex-direction:column;gap:12px;padding:18px;border-top:2px solid var(--line)">
-        <h2 style="font-size:16.5px;font-weight:700;letter-spacing:-.012em">{{ t.sharing }}</h2>
-        <button type="button" onClick="{{ onShare }}" style="min-height:48px;padding:0 16px;cursor:pointer;border-radius:15px;border:2px solid var(--ink);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:10px">
+        <h2 style="display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;letter-spacing:-.012em"><span aria-hidden="true" style="position:relative;flex:0 0 auto;width:12px;height:16px;overflow:hidden"><span style="position:absolute;inset:0;background:var(--ink);border-radius:999px 999px 0 0"></span><span style="position:absolute;left:33%;right:33%;bottom:0;height:44%;background:var(--surface);border-radius:999px 999px 0 0"></span></span><span>{{ t.sharing }}</span></h2>
+        <button type="button" onClick="{{ onShare }}" style="min-height:48px;padding:0 16px;cursor:pointer;border-radius:19px 19px 6px 6px;border:2px solid var(--ink);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:10px">
           <span aria-hidden="true" style="display:flex;flex:0 0 auto"><span style="width:11px;height:11px;border:2.5px solid currentColor;border-radius:4px"></span><span style="width:11px;height:11px;border:2.5px solid currentColor;border-radius:4px;margin-left:-4px"></span></span>
           <span>{{ shareLabel }}</span>
         </button>
@@ -314,7 +334,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
             <h3 style="font-size:13px;font-weight:700;margin-bottom:8px">{{ t.lang }}</h3>
             <div role="group" style="display:flex;gap:8px">
               <sc-for list="{{ langList }}" as="l" hint-placeholder-count="2">
-                <button type="button" onClick="{{ l.onPick }}" aria-pressed="{{ l.pressed }}" style="flex:1 1 0;min-height:46px;cursor:pointer;border-radius:13px;border:1.5px solid var(--line-strong);background:transparent;font-weight:700;font-size:14px;border-color:{{ l.bc }};background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</button>
+                <button type="button" onClick="{{ l.onPick }}" aria-pressed="{{ l.pressed }}" style="flex:1 1 0;min-height:46px;cursor:pointer;border-radius:16px 16px 5px 5px;border:1.5px solid var(--line-strong);background:transparent;font-weight:700;font-size:14px;border-color:{{ l.bc }};background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</button>
               </sc-for>
             </div>
           </div>
@@ -322,7 +342,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
             <h3 style="font-size:13px;font-weight:700;margin-bottom:8px">{{ t.theme }}</h3>
             <div role="group" style="display:flex;gap:8px">
               <sc-for list="{{ themeList }}" as="th" hint-placeholder-count="3">
-                <button type="button" onClick="{{ th.onPick }}" aria-pressed="{{ th.pressed }}" title="{{ th.label }}" style="flex:1 1 0;min-height:46px;cursor:pointer;border-radius:13px;border:1.5px solid var(--line-strong);background:transparent;font-weight:600;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-color:{{ th.bc }};background:{{ th.bg }};color:{{ th.fg }}">
+                <button type="button" onClick="{{ th.onPick }}" aria-pressed="{{ th.pressed }}" title="{{ th.label }}" style="flex:1 1 0;min-height:46px;cursor:pointer;border-radius:16px 16px 5px 5px;border:1.5px solid var(--line-strong);background:transparent;font-weight:600;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-color:{{ th.bc }};background:{{ th.bg }};color:{{ th.fg }}">
                   <span aria-hidden="true" style="width:13px;height:13px;border-radius:50%;border:2.5px solid currentColor;background:{{ th.fill }}"></span>
                   <span style="max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ th.label }}</span>
                 </button>
@@ -336,7 +356,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
   <div style="position:sticky;bottom:0;z-index:3;margin-top:auto;padding:13px 0 calc(13px + env(safe-area-inset-bottom));background:var(--bg);border-top:2px solid var(--ink);display:flex;flex-direction:column;gap:10px">
     <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:18px;background:var(--accent);color:var(--accent-ink)">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:22px 22px 7px 7px;background:var(--accent);color:var(--accent-ink)">
         <span aria-hidden="true" style="flex:0 0 auto;margin-top:5px;display:flex;flex-direction:column;align-items:center;gap:2.5px">
           <span style="width:11px;height:12px;background:currentColor;clip-path:polygon(50% 100%,100% 0,0 0)"></span>
           <span style="width:15px;height:2.5px;background:currentColor"></span>
@@ -349,24 +369,24 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
       </div>
     </sc-if>
     <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:20px;background:var(--surface);border:2.5px solid var(--corail)">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:22px 22px 7px 7px;background:var(--surface);border:2.5px solid var(--corail)">
         <span aria-hidden="true" style="flex:0 0 auto;margin-top:3px;width:19px;height:17px;background:var(--corail);clip-path:polygon(50% 0,100% 100%,0 100%)"></span>
         <div style="min-width:0;flex:1 1 auto">
           <p style="font-weight:700;font-size:14.5px">{{ t.errTitle }}</p>
           <p style="font-size:13px;color:var(--ink-muted)">{{ errMsg }}</p>
         </div>
-        <button type="button" onClick="{{ onExport }}" style="flex:0 0 auto;min-height:44px;padding:0 14px;cursor:pointer;border-radius:13px;border:2px solid var(--line-strong);background:transparent;font-weight:700;font-size:13.5px">{{ t.retry }}</button>
+        <button type="button" onClick="{{ onExport }}" style="flex:0 0 auto;min-height:44px;padding:0 14px;cursor:pointer;border-radius:16px 16px 5px 5px;border:2px solid var(--line-strong);background:transparent;font-weight:700;font-size:13.5px">{{ t.retry }}</button>
       </div>
     </sc-if>
     <div style="display:flex;gap:10px;align-items:stretch">
-      <button type="button" onClick="{{ onSeed }}" style="flex:0 0 auto;min-width:56px;min-height:56px;padding:0 17px;cursor:pointer;border-radius:18px;border:2px solid var(--ink);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:10px">
+      <button type="button" onClick="{{ onSeed }}" style="flex:0 0 auto;min-width:56px;min-height:56px;padding:0 17px;cursor:pointer;border-radius:24px 24px 7px 7px;border:2px solid var(--ink);background:transparent;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:10px">
         <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:15px;height:15px">
           <span style="position:absolute;inset:0;border:2.5px solid currentColor;border-radius:50%;border-top-color:transparent"></span>
           <span style="position:absolute;top:-1px;right:-2px;width:7px;height:7px;background:currentColor;clip-path:polygon(0 0,100% 0,100% 100%)"></span>
         </span>
         <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.newSeed }}</span>
       </button>
-      <button type="button" onClick="{{ onExport }}" disabled="{{ exportOff }}" aria-busy="{{ busyAttr }}" style="flex:1 1 auto;min-height:56px;padding:0 18px;cursor:pointer;border-radius:18px;border:2px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px;opacity:{{ exportOpacity }}">
+      <button type="button" onClick="{{ onExport }}" disabled="{{ exportOff }}" aria-busy="{{ busyAttr }}" style="flex:1 1 auto;min-height:56px;padding:0 18px;cursor:pointer;border-radius:24px 24px 7px 7px;border:2px solid var(--ink);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16.5px;display:flex;align-items:center;justify-content:center;gap:10px;opacity:{{ exportOpacity }}">
         <span aria-hidden="true" style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2.5px">
           <span style="width:10px;height:11px;background:currentColor;clip-path:polygon(50% 100%,100% 0,0 0)"></span>
           <span style="width:14px;height:2.5px;background:currentColor"></span>
@@ -490,6 +510,7 @@ class Component extends DCLogic {
   };
 
   boxRef = React.createRef();
+  headRef = React.createRef();
   deviceRef = React.createRef();
   canvasRef = React.createRef();
   thumbRefs = this.FAM.reduce((o,f)=>{ o[f.id] = React.createRef(); return o; }, {});
@@ -562,6 +583,8 @@ class Component extends DCLogic {
     const root = document.documentElement;
     root.setAttribute('data-theme', this.theme());
     root.setAttribute('lang', this.lang());
+    const hd = this.headRef.current;
+    if (hd) root.style.setProperty('--bar', hd.offsetHeight + 'px');
     const box = this.boxRef.current, dev = this.deviceRef.current;
     if (!box || !dev) return;
     /* la vue reste épinglée : elle prend une part de l'écran, jamais tout */
@@ -1084,7 +1107,7 @@ class Component extends DCLogic {
 
     return {
       t, lang,
-      boxRef: this.boxRef, deviceRef: this.deviceRef, canvasRef: this.canvasRef,
+      boxRef: this.boxRef, headRef: this.headRef, deviceRef: this.deviceRef, canvasRef: this.canvasRef,
       clock: this.state.clock || this.now(),
       dayNum: String(now.getDate()),
       dayName: now.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {weekday:'long'}),

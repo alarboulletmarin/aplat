@@ -22,7 +22,7 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 
 | Rang | Quoi | Où |
 |---|---|---|
-| Primaire | le motif derrière de vraies icônes, et **Télécharger** | en haut, épinglé ; le bouton en bas, dans la zone du pouce |
+| Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
 | Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
 | Caché | lien de partage | en bas du bloc, sous un filet |
 | Caché | langue, thème, version, licence, source | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
@@ -41,14 +41,23 @@ barre, « Variante », ne change que la graine, et son libellé le dit en un mot
 Papier découpé, façon Matisse : des aplats francs, aucune ombre portée, un grain
 très léger, des coins largement arrondis.
 
-Une **page imprimée**, pas une pile de cartes. Le titre en pleine chasse et un
-filet de trois pixels tiennent l'en-tête ; les réglages sont dans un seul bloc
-cerné d'un trait franc et découpé par des filets ; les titres sont des titres,
-pas de petites capitales interlettrées.
+Une **page imprimée**, pas une pile de cartes. La marque, le titre en pleine
+chasse et un filet de six barres tiennent l'en-tête ; les réglages sont dans un
+seul bloc cerné d'un trait franc et découpé par des filets ; les titres sont des
+titres, pas de petites capitales interlettrées.
+
+**L'arche est la forme du produit.** Elle est la marque, elle ouvre chaque titre
+de section, elle dit la place vide de l'image, et elle donne leur silhouette aux
+rayons : partout un coin haut largement ouvert et un bas presque droit, dans un
+rapport constant de trois pour dix. Une carte, un bouton, une note, le bloc
+entier se lisent ainsi comme une arche, quelle que soit leur taille. C'est ce
+qui remplace le rayon uniforme, et c'est ce qu'il ne faut pas défaire en
+écrivant `border-radius: 16px` sans y penser.
 
 Ce que ce parti exclut, et qui reviendrait tout seul si on n'y prenait pas
 garde : les cartes flottantes avec ombre, les libellés minuscules en majuscules
-espacées, les formes décoratives posées derrière le titre, les dégradés.
+espacées, les formes décoratives posées derrière le titre, les dégradés, et les
+quatre coins au même rayon.
 
 ---
 
@@ -110,9 +119,12 @@ Les deux sont auto-hébergées (`public/polices/`) et découpées en deux sous-
 ensembles Unicode chacune : rien ne part vers un CDN, et le latin étendu n'est
 téléchargé que s'il sert.
 
-Le titre : `clamp(56px, 15.5vw, 98px)`, interligne `.76`, interlettrage
-`-.045em`, en capitales. Presque collé. C'est le seul geste typographique de la
-page, et il ne se répète nulle part ailleurs.
+Le titre : `33px`, interligne `.84`, interlettrage `-.04em`, en capitales.
+Presque collé. C'est le seul geste typographique de la page, et il ne se répète
+nulle part ailleurs. Il ne prend plus toute la largeur comme la version d'avant
+(`clamp(56px, 15.5vw, 98px)`) : l'en-tête est devenu collant, et une capitale de
+quatre-vingt-dix-huit pixels ne peut pas rester à l'écran en permanence. Ce
+qu'il perd en taille, il le gagne en présence.
 
 Échelle du texte courant : `12,5` `13` `13,5` `14` `14,5` `15` `16` `16,5` px.
 Les titres de section sont à 16,5 px en gras, avec `-.012em` d'interlettrage.
@@ -121,19 +133,28 @@ Les titres de section sont à 16,5 px en gras, avec `-.012em` d'interlettrage.
 
 ## 5. Formes, rayons, filets
 
-Coins largement arrondis, jamais uniformes : le rayon suit la taille de
-l'objet.
+Coins largement arrondis, jamais uniformes, et jamais les quatre au même
+rayon : **tout objet est une arche**, largement ouverte en haut, presque droite
+en bas. Le rayon du bas vaut trois dixièmes de celui du haut, et les deux
+suivent la taille de l'objet.
 
 | Objet | Rayon |
 |---|---|
-| bloc de réglages | 26 px |
-| bouton d'action | 18 px |
-| puce de choix, champ, select | 13 à 15 px |
-| note | 18 à 20 px |
+| bloc de réglages | 42 px en haut, 12 px en bas |
+| bouton d'action | 24 / 7 px |
+| note | 22 / 7 px |
+| puce de famille et de palette, select, bouton de partage | 19 / 6 px |
+| champ, puce de densité | 17 / 5 px |
+| puce de langue et de thème, bouton secondaire d'une carte | 16 / 5 px |
+| vignette d'une puce de famille | 13 / 4 px |
+| vignette d'historique | 14 / 4 px, canevas 10 / 3 px |
+| échantillon de palette | 7 px, les quatre coins : c'est un aplat, pas un objet |
 | appareil de la maquette | 13 % du petit côté (téléphone), 5,5 % (tablette), 2,4 % (ordinateur) |
+| marque | 23 % de son côté |
 
-Filets : 3 px sous le titre, 2 px pour le contour du bloc et ses séparations,
-1,5 px pour le trait d'une puce au repos, 2,5 px pour signaler une erreur.
+Filets : 3 px sous les barres de l'en-tête, 2 px pour le contour du bloc et ses
+séparations, 1,5 px pour le trait d'une puce au repos, 2,5 px pour signaler une
+erreur.
 
 ### Le vocabulaire décoratif
 
@@ -142,6 +163,19 @@ repèrent, ils ne portent jamais d'information seule** : l'arche du groupe
 « Abstraits » et l'étoile du groupe « Figures » accompagnent un mot, elles ne le
 remplacent pas.
 
+**L'arche mordue** est le dessin de la marque, et le seul qui se répète à trois
+échelles : trente-huit pixels dans l'en-tête (aplat lime sur navy), quinze
+devant un titre de groupe et dans la note de mise à jour, douze devant chaque
+titre de section. Un aplat en arche dont la base est mordue par une seconde
+arche à la couleur du fond ; les mêmes fractions partout, celles de
+`public/favicon.svg` et de `scripts/generate-icons.mjs`. La marque garde son
+lime sur son navy dans les deux thèmes, avec un filet `--filet` qui la détache
+du fond sombre : une marque ne s'inverse pas.
+
+Les six barres sous le titre sont la silhouette d'un motif du générateur, réduite
+à treize pixels : un aplat de la palette par barre, arrondies en arche, posées
+sur un seuil d'encre de trois pixels.
+
 Les pictogrammes sont dessinés dans la direction artistique, en CSS, à partir de
 formes pleines et de `clip-path` : ni Material, ni Lucide, **jamais d'emoji**.
 
@@ -149,13 +183,45 @@ formes pleines et de `clip-path` : ni Material, ni Lucide, **jamais d'emoji**.
 
 ## 6. Gabarits
 
-Mobile d'abord. Une colonne sous 760 px, deux au-delà : l'aperçu à gauche, les
-réglages à droite, tous deux visibles en même temps.
+**Deux colonnes dès 360 px** : l'aperçu à gauche, épinglé, les réglages à
+droite, qui défilent à côté de lui. C'est la mise en page de la maquette, et
+elle est tenue jusqu'au téléphone. En dessous de 360 px, une seule colonne :
+le panneau y tomberait à cent trente pixels, et une vignette de famille par
+rangée n'est plus une grille.
 
-L'aperçu est **collant en haut** sur téléphone et la barre d'action **collante
-en bas** : on règle au milieu, on juge au-dessus, on termine en dessous, sans
-aller-retour. Les deux hauteurs sont publiées en variables CSS (`--scene-h`,
-`--barre-h`) pour que la réserve de défilement les suive.
+Le partage n'est pas la moitié. Sous 760 px, la colonne de l'aperçu prend 38 %
+et le panneau 62 %. À parts égales, un téléphone de 390 px laisse 166 px au
+panneau, soit une seule vignette par rangée et dix-huit rangées à parcourir ;
+à 38 %, l'aperçu reste jugeable et les vignettes tiennent deux de front. Au-delà
+de 760 px on revient au partage de la maquette, à parts égales.
+
+Ce que les deux colonnes changent, et qui vaut plus que la fidélité : l'aperçu
+n'est plus **devant** les réglages mais **à côté**. Sur une colonne, la scène
+collante prenait la moitié de la fenêtre à ceux qui choisissent ; à côté, elle
+ne leur prend plus rien. Les grilles passent d'un tiers de la hauteur à plus des
+trois quarts.
+
+Trois couches collantes. L'**en-tête** est épinglé en haut à toute largeur : la
+marque, le mot et la résolution visée restent lisibles pendant qu'on règle.
+L'**aperçu** est collant sous lui, dans sa colonne, et la **barre d'action**
+collante en bas : on règle à droite, on juge à gauche, on termine en dessous,
+sans aller-retour. Les trois hauteurs sont publiées en variables CSS (`--bar`,
+`--scene-h`, `--barre-h`) par `useHauteursCollantes`, pour que la réserve de
+défilement les suive et que la scène sache où s'arrêter de monter
+(`top: var(--bar)`). `--scene-h` ne vaut quelque chose que sous 360 px : c'est
+la seule largeur où la scène recouvre encore les réglages.
+
+**Dans la colonne étroite, le rembourrage cède, jamais la cible.** Entre 360 et
+760 px, le panneau ne fait plus que deux cents pixels : les rembourrages des
+cartes et des puces se resserrent, la piste minimale des grilles descend à
+72 px, et les libellés de carte prennent la césure de la langue
+(`hyphens: auto`) avant la coupure franche. Les cibles restent à 44 px. Ce sont
+les seules valeurs du portage qui s'écartent de la maquette pour une raison de
+largeur, et elles ne s'appliquent qu'en dessous de son gabarit.
+
+La hauteur de l'en-tête entre aussi dans le calcul de la scène en paysage court
+(`ENTETE_PAYSAGE` dans `lib/geometrie.ts`) : sans elle, le verdict passait sous
+la barre d'action sur une fenêtre couchée.
 
 Les grilles sont en `repeat(auto-fit, minmax(min(Xpx, 100%), 1fr))`. Le
 `min(…, 100%)` n'est pas décoratif : sans lui, la piste minimale force une
@@ -172,11 +238,22 @@ est écrit deux fois, dans `@media (orientation: landscape)` d'`ecrans.css` et
 dans `PAYSAGE_COURT` de `lib/geometrie.ts` : les deux basculent ensemble ou pas
 du tout.
 
-**Repli au défilement.** Sur téléphone en portrait, la scène collante, le
-verdict et la barre prenaient les deux tiers de l'écran : il ne restait presque
-rien pour choisir parmi dix-huit familles et onze palettes. Dès que la page
-défile, l'aperçu se replie en vignette et le verdict se condense sur une ligne,
-dépliable au doigt ; les grilles récupèrent 58 % de la hauteur au lieu de 37 %.
+**Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
+sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
+Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
+restait presque rien pour choisir parmi dix-huit familles et onze palettes : dès
+que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
+une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
+du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
+
+Le verdict, lui, se condense aussi ailleurs : en paysage court, et dans toute
+colonne d'aperçu de moins de 300 px, où son détail déplié ferait dix lignes de
+quatre mots. Il reste à un appui dans tous les cas.
+
+Les planchers mesurés de hauteur rendue aux grilles, par fenêtre, sont dans
+`tools/repli.mjs`. Sous 360 px le repli reste seul à les tenir, et l'en-tête
+collant lui coûte douze points : la barre, le verdict replié et les cibles de
+44 px y sont tous au minimum, il n'y a rien à reprendre ailleurs.
 Le repli passe par l'échelle et non par la géométrie : la boîte de l'appareil
 garde la taille qu'elle aurait dépliée, le motif n'est donc pas redessiné et la
 maquette ne se réajuste pas. Deux seuils, 140 px pour replier et 56 px pour
@@ -282,7 +359,7 @@ qui la définit.
 - **Cibles tactiles 44 px**, sans exception, y compris le lien vers la source
   dans le pied de page.
 - **Actions fréquentes dans la zone du pouce** : la barre d'action est en bas.
-- **Focus visible partout**, et jamais masqué par les deux barres collantes.
+- **Focus visible partout**, et jamais masqué par les trois couches collantes.
   `scroll-padding` n'étant appliqué ni par le défilement déclenché par le focus
   ni par `scrollIntoView`, la correction se fait sur `focusin`
   (WCAG 2.2, 2.4.11).

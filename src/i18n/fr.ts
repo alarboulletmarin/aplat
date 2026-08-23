@@ -20,6 +20,10 @@ export const fr = {
     titre: 'Aplat',
     accroche:
       'Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.',
+    /* Au bout de la ligne de l'accroche : la promesse en trois mots, celle que
+       le pied de page détaille et que le partage répète en entier. Elle est
+       écrite courte parce qu'elle ne revient pas à la ligne. */
+    mention: 'Sans compte, sans réseau.',
   },
   scene: {
     titre: 'Aperçu du fond d’écran',

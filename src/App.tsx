@@ -8,6 +8,7 @@ import {
 import { depuisSaisie, detecter, MPX_MAX, typeAppareil } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
+import { nombre } from './lib/format'
 import { textes as dictionnaire } from './i18n'
 import { useDefilement } from './hooks/useDefilement'
 import { useHistorique } from './hooks/useHistorique'
@@ -62,6 +63,7 @@ export function App() {
   const exportEnCours = useRef(false)
   const minuterieCopie = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
+  const entete = useRef<HTMLElement>(null)
   const scene = useRef<HTMLElement>(null)
   const barre = useRef<HTMLDivElement>(null)
   const revision = useRevisionFenetre()
@@ -119,10 +121,18 @@ export function App() {
 
   useFocusDegage()
   useHauteursCollantes(
+    entete,
     scene,
     barre,
     `${revision}|${ephemere.phase}|${reglages.langue}|${vide}|${defile}`,
   )
+
+  /* La résolution visée, en toutes lettres dans l'en-tête : c'est la seule
+     mesure qui décide du fichier, et elle reste sous les yeux pendant qu'on
+     règle. Le même texte que celui du panneau, à la même mise en forme. */
+  const etiquetteResolution = vide
+    ? T.resolution.aucune
+    : `${nombre(resolution.largeur, reglages.langue)}\u00a0×\u00a0${nombre(resolution.hauteur, reglages.langue)}\u00a0px`
 
   /* --- thème, langue et métadonnées du document ---
      `data-theme` ne porte que le thème résolu : « système » est un choix, pas
@@ -260,7 +270,7 @@ export function App() {
       </a>
 
       <div className="page">
-        <Entete textes={T} />
+        <Entete cadre={entete} textes={T} resolution={etiquetteResolution} />
 
         <main className="colonnes">
           <Scene
