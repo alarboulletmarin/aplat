@@ -1,0 +1,56 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* La scène et la barre d'action sont collantes : sans cette réserve, un
+   élément amené au clavier se colle au bord de la fenêtre, c'est-à-dire
+   exactement sous l'une des deux couches, et son anneau de focus disparaît.
+   Les deux hauteurs sont posées par le composant Scene. WCAG 2.2, 2.4.11. */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-padding-bottom: calc(var(--barre-h, 0px) + 12px);
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  border: 0;
+  background: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}

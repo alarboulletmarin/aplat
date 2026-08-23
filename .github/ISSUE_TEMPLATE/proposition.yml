@@ -1,0 +1,46 @@
+name: Proposer une évolution
+description: Une fonctionnalité, une amélioration, une simplification.
+labels: ['proposition']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Avant d'écrire : le projet **exclut explicitement** la gamification, les
+        notifications, les comptes, toute mesure d'audience, tout appel réseau à
+        l'exécution, toute police ou script servi par un CDN, les dark patterns,
+        plus d'un appel primaire par écran, les emoji, et les bibliothèques de
+        composants ou de style. L'écran est unique : rien ne sépare les réglages
+        de l'aperçu. Voir
+        [CONTRIBUTING.md](https://github.com/alarboulletmarin/aplat/blob/main/CONTRIBUTING.md)
+        et le design system. Une proposition qui tombe dans cette liste recevra
+        une réponse argumentée, mais probablement négative.
+
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Le besoin
+      description: >
+        Ce que vous cherchiez à faire, et ce qui vous en a empêché. Le besoin
+        avant la solution : il arrive que l'application sache déjà le couvrir
+        autrement.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposition
+    attributes:
+      label: Ce que vous proposez
+    validations:
+      required: true
+
+  - type: textarea
+    id: place
+    attributes:
+      label: Où cela vivrait-il ?
+      description: >
+        Il n'y a qu'un écran : l'aperçu, les trois réglages (famille, palette,
+        densité), la résolution, le bouton Télécharger, et le pied de page.
+        Une fonctionnalité qui ne trouve pas sa place finit par réclamer un
+        deuxième écran, et le deuxième écran est ce que le projet refuse.
+    validations:
+      required: false

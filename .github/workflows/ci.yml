@@ -1,0 +1,95 @@
+name: CI
+
+# La CI ne lance que des commandes qui existent dans `package.json`, et elle les
+# lance telles quelles : `npm run verify`, puis `npm run check`. Aucune n'est
+# inventée ici. Une commande qui n'existerait que dans ce fichier serait celle
+# que personne ne lit et que personne ne peut rejouer, donc celle qui reste
+# fausse le plus longtemps.
+#
+# Deux travaux et non un, parce que les deux vérifications n'ont pas le même
+# prix d'entrée. `verify` ne demande que Node ; `check` télécharge Chromium et
+# ouvre l'application dans un vrai navigateur. Les fondre ferait payer ce
+# téléchargement à chaque exécution de la porte de sortie, y compris là où elle
+# sert le plus, sur une machine qui vient de cloner. Ils sont indépendants, donc
+# parallèles : le verdict arrive au plus lent des deux, pas à leur somme.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Une nouvelle poussée sur une branche annule la vérification précédente :
+# personne n'a besoin du verdict d'un commit déjà remplacé.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Vérification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      # Une seule version de Node, celle que l'hébergeur exécute : ce n'est pas
+      # une bibliothèque qu'on publie, c'est une application qu'on déploie.
+      # Tester une version que personne ne servira coûte du temps et ne dit rien.
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      # `verify` enchaîne typographie, typecheck, lint, tests et build. Le
+      # `build` en fait partie parce qu'il régénère les notices de licence :
+      # une dépendance ajoutée sans son texte de licence doit échouer ici.
+      - name: Typographie, types, lint, tests et build
+        run: npm run verify
+
+  navigateur:
+    name: Dans un vrai navigateur
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      # Le navigateur et ses dépendances système. La version téléchargée est
+      # celle que le verrou réclame : il n'y a pas de numéro à tenir à jour ici.
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+
+      # `check` construit l'application puis la sert avec `vite preview` : ce
+      # qu'on vérifie est ce qui serait déployé, politique de sécurité et
+      # Service Worker compris, et non ce qu'un serveur de développement
+      # assemble à la volée.
+      - name: Parcours, accessibilité, hors ligne
+        run: npm run check
+
+      # Les captures ne montent qu'en cas d'échec : personne n'ouvre celles
+      # d'une exécution verte, et elles pèsent quelques mébioctets.
+      - name: Conserver les captures d’échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures
+          path: .shots
+          retention-days: 7

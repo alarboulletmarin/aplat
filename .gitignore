@@ -1,0 +1,20 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+.DS_Store
+*.log
+npm-debug.log*
+
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Sorties des outils de vérification (tools/).
+.shots/
+.exports/
+tools/.banc/
+
+# Généré au build à partir de package-lock.json.
+public/THIRD-PARTY.txt

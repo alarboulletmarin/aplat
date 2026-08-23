@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Faille de sécurité
+    url: https://github.com/alarboulletmarin/aplat/security/advisories/new
+    about: À signaler en privé, jamais dans une issue publique.
+  - name: Comment ça marche
+    url: https://github.com/alarboulletmarin/aplat#readme
+    about: Le moteur, le voile de lisibilité, les paramètres d'URL, la résolution d'export.

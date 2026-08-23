@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover : sans lui, env(safe-area-inset-*) vaut toujours 0. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Une seule déclaration, mise à jour par le script ci-dessous puis par
+         React : « système » est résolu en clair ou en sombre avant la première
+         peinture, la couleur de la barre du navigateur suit la même valeur. -->
+    <meta name="theme-color" content="#F2EDDD" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      name="description"
+      content="Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans donnée enregistrée."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Aplat" />
+
+    <!--
+      Les deux polices sont auto-hébergées et chargées par la feuille de style,
+      qui n'arrive qu'après le JavaScript. Sans préchargement, le titre (le
+      seul endroit où la display se voit) apparaît en Impact puis saute.
+      `crossorigin` est obligatoire même en même origine pour les polices,
+      faute de quoi le navigateur télécharge deux fois.
+    -->
+    <link
+      rel="preload"
+      href="/polices/anton-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/polices/archivo-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <title>Aplat : fonds d’écran génératifs</title>
+
+    <!--
+      Le thème et la langue, avant la première peinture.
+
+      Aplat n'écrit rien sur l'appareil : son état tient dans l'URL. Ces deux
+      valeurs s'y lisent donc directement, sans stockage ni requête. React les
+      repose lui-même une fois chargé. D'ici là, le document serait peint en
+      clair : sur un appareil en thème sombre, un éclair blanc à chaque
+      ouverture, le seul défaut d'affichage qu'on ne peut pas corriger après
+      coup puisqu'il a déjà eu lieu.
+
+      « Système » est résolu ici, et non par une requête de média dans la
+      feuille de style : `data-theme` ne porte ainsi que « clair » ou
+      « sombre », et le thème sombre n'est déclaré qu'une fois.
+    -->
+    <script>
+      ;(function () {
+        try {
+          var q = new URLSearchParams(location.search)
+          var choix = q.get('t')
+          if (choix !== 'clair' && choix !== 'sombre') {
+            choix = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'sombre'
+              : 'clair'
+          }
+          document.documentElement.dataset.theme = choix
+          var couleur = document.querySelector('meta[name="theme-color"]')
+          if (couleur) couleur.setAttribute('content', choix === 'sombre' ? '#0E1729' : '#F2EDDD')
+          var langue = q.get('l')
+          if (langue !== 'fr' && langue !== 'en') {
+            langue =
+              (navigator.language || 'fr').toLowerCase().indexOf('fr') === 0 ? 'fr' : 'en'
+          }
+          document.documentElement.lang = langue
+        } catch (erreur) {
+          /* URL illisible : le thème système et le français feront l'affaire. */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="margin: 22px 16px; max-width: 46ch; line-height: 1.45">
+        Aplat calcule les motifs avec JavaScript, dans ton navigateur. Active
+        JavaScript pour l’utiliser. Rien n’est envoyé nulle part.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

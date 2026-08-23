@@ -1,0 +1,90 @@
+name: Signaler un bug
+description: Quelque chose ne se comporte pas comme annoncé.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci. Pour une faille de sécurité, n'utilisez pas ce gabarit : passez par
+        un [avis privé](https://github.com/alarboulletmarin/aplat/security/advisories/new).
+
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Ce que vous attendiez
+      description: En une phrase ou deux.
+    validations:
+      required: true
+
+  - type: textarea
+    id: constate
+    attributes:
+      label: Ce qui s'est passé
+    validations:
+      required: true
+
+  - type: input
+    id: lien
+    attributes:
+      label: Le lien
+      description: >
+        L'URL de la barre d'adresse au moment du problème. Elle porte les réglages
+        et rien d'autre : elle suffit à retrouver exactement la même image.
+      placeholder: https://…/?m=vagues&p=lime&d=1&s=7314&l=fr
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Comment le reproduire
+      placeholder: |
+        1. Ouvrir le lien ci-dessus
+        2. Saisir 1290 × 2796 dans la résolution
+        3. Toucher Télécharger
+        4. …
+    validations:
+      required: true
+
+  - type: input
+    id: resolution
+    attributes:
+      label: Résolution visée
+      description: Celle affichée par l'application, ou celle que vous avez saisie.
+      placeholder: 1179 × 2556
+    validations:
+      required: false
+
+  - type: dropdown
+    id: contexte
+    attributes:
+      label: Comment l'application tournait-elle ?
+      description: >
+        Le Service Worker, la mémoire accordée à un canevas et le sort d'un
+        fichier téléchargé divergent assez pour que la réponse en dépende.
+      options:
+        - Installée sur l'écran d'accueil (PWA)
+        - Dans un onglet du navigateur
+        - En mode hors ligne, ou avec un réseau coupé
+        - Je ne sais pas
+    validations:
+      required: true
+
+  - type: input
+    id: navigateur
+    attributes:
+      label: Navigateur, système et appareil
+      placeholder: Safari 18 sur iOS 18.2, iPhone 15 ; Firefox 134 sur Ubuntu ; Chrome 132 sur Android 15
+    validations:
+      required: true
+
+  - type: textarea
+    id: divers
+    attributes:
+      label: Autre chose
+      description: >
+        Capture d'écran, message d'erreur, poids du fichier obtenu. Une image
+        noire ou tronquée à l'export est presque toujours un refus d'allocation
+        du navigateur : dites à partir de quelle taille cela commence.
+    validations:
+      required: false

@@ -1,0 +1,545 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+/* Référence : DESIGN_SYSTEM.md, section 5 (formes, rayons, filets) et
+   section 7 (les composants). */
+
+/* ==========================================================================
+   Les briques : puces de choix, champs, boutons, notes, pictogrammes.
+   Aucune information ne passe par la seule couleur. En niveaux de gris, la
+   sélection reste un aplat inversé, le niveau de densité un nombre de points,
+   l'erreur un triangle et un trait épaissi.
+   ========================================================================== */
+
+.opt,
+.res-champs input,
+.partage-b,
+.note-reessayer,
+.btn-graine,
+.btn-export {
+  scroll-margin-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
+}
+
+/* --- Puce de choix --------------------------------------------------------
+   La sélection remplit la puce d'encre et fait passer son texte en papier. Un
+   aplat inversé, pas une nuance : il se lit tel quel en niveaux de gris. */
+.opt {
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  cursor: pointer;
+  text-align: left;
+}
+.opt[aria-checked='true'] {
+  border-color: var(--encre);
+  background: var(--encre);
+  color: var(--papier);
+}
+.opt-carre {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: transparent;
+}
+/* Le carré de sélection garde son lime dans les deux thèmes, avec un filet à
+   la couleur du texte : sans lui, sur la puce inversée du thème sombre (un
+   aplat crème), le lime tombait à 1,1:1 et disparaissait. */
+.opt[aria-checked='true'] .opt-carre {
+  background: var(--accent);
+  box-shadow: 0 0 0 1.5px currentColor;
+}
+
+.opt-famille {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 7px;
+  min-height: 44px;
+  border-radius: 15px;
+}
+.opt-famille canvas {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: block;
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+.opt-famille-l,
+.opt-palette-l {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.opt-famille-l span,
+.opt-palette-l span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.opt-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 9px;
+  min-height: 44px;
+  border-radius: 15px;
+}
+.opt-palette-s {
+  display: flex;
+  height: 28px;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1.5px solid var(--filet-franc);
+}
+.opt-palette-s i {
+  flex: 1 1 0;
+  display: block;
+}
+
+.opt-densite {
+  flex: 1 1 68px;
+  min-height: 48px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.opt-densite-d {
+  display: flex;
+  gap: 3px;
+}
+/* Le niveau se lit au nombre de points allumés, pas à leur teinte. */
+.opt-densite-d i {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.opt-densite-d i:nth-child(2),
+.opt-densite-d i:nth-child(3) {
+  opacity: 0;
+}
+.opt-densite[data-niveau='1'] .opt-densite-d i:nth-child(2) {
+  opacity: 1;
+}
+.opt-densite[data-niveau='2'] .opt-densite-d i:nth-child(2),
+.opt-densite[data-niveau='2'] .opt-densite-d i:nth-child(3) {
+  opacity: 1;
+}
+.opt-densite-t {
+  font-size: 13px;
+}
+
+.opt-langue {
+  flex: 1 1 auto;
+  min-width: max-content;
+  min-height: 46px;
+  border-radius: 13px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.opt-theme {
+  flex: 1 1 auto;
+  min-width: max-content;
+  min-height: 46px;
+  border-radius: 13px;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+/* Le thème se distingue au remplissage du disque, pas à sa couleur : plein,
+   vide, moitié. Trois formes, lisibles en niveaux de gris. */
+.opt-theme i {
+  display: block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+}
+.opt-theme[data-theme='clair'] i {
+  background: currentColor;
+}
+.opt-theme[data-theme='sombre'] i {
+  background: transparent;
+}
+.opt-theme[data-theme='systeme'] i {
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+.opt-theme span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Résolution ------------------------------------------------------------ */
+.res-select {
+  position: relative;
+  display: block;
+}
+.res-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 46px 0 15px;
+  border-radius: 15px;
+  border: 2px solid var(--encre);
+  background: var(--champ);
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+.res-select i {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  margin-top: -3px;
+  width: 13px;
+  height: 8px;
+  background: var(--encre);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  pointer-events: none;
+}
+.res-champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.res-champs label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--encre-douce);
+}
+.res-champs input {
+  min-height: 48px;
+  padding: 0 13px;
+  border-radius: 14px;
+  border: 1.5px solid var(--filet-franc);
+  background: var(--champ);
+  font-weight: 700;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  color: var(--encre);
+}
+/* L'erreur de saisie doit se voir, pas seulement s'annoncer : trait épaissi,
+   teinte d'alerte, et le texte d'aide passe en message avec son triangle. */
+.res-champs input[aria-invalid='true'] {
+  border-color: var(--alerte);
+  border-width: 2.5px;
+}
+.res-aide {
+  font-size: 13px;
+  color: var(--encre-douce);
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+.res-aide i {
+  display: none;
+}
+.res-aide[data-etat='erreur'] {
+  color: var(--encre);
+  font-weight: 600;
+}
+.res-aide[data-etat='erreur'] i {
+  display: block;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  width: 13px;
+  height: 12px;
+  background: var(--alerte);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* --- Partage ---------------------------------------------------------------- */
+.partage-b {
+  min-height: 48px;
+  padding: 0 16px;
+  cursor: pointer;
+  border-radius: 15px;
+  border: 2px solid var(--encre);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 14.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.partage-n,
+.partage-p {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.partage-p {
+  max-width: 52ch;
+}
+/* Repli quand le presse-papiers refuse : le lien devient sélectionnable à la
+   main, plutôt que d'annoncer une copie qui n'a pas eu lieu. */
+.partage-repli {
+  display: block;
+}
+.partage-repli input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border-radius: 14px;
+  border: 1.5px solid var(--filet-franc);
+  background: var(--champ);
+  color: var(--encre);
+  font-size: 14px;
+}
+
+/* --- Notes de la barre d'action ---------------------------------------------- */
+.note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 13px 15px;
+  border-radius: 18px;
+}
+.note-faite {
+  background: var(--accent);
+  color: var(--accent-encre);
+}
+.note-erreur {
+  border-radius: 20px;
+  background: var(--surface);
+  border: 2.5px solid var(--alerte);
+}
+.note-erreur-i {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  width: 19px;
+  height: 17px;
+  background: var(--alerte);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.note-txt {
+  min-width: 0;
+}
+.note-erreur .note-txt {
+  flex: 1 1 auto;
+}
+.note-t {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.note-m {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.note-h {
+  font-size: 12.5px;
+  opacity: 0.78;
+  margin-top: 2px;
+}
+.note-d {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.note-reessayer {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  cursor: pointer;
+  border-radius: 13px;
+  border: 2px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+/* --- Boutons d'action --------------------------------------------------------- */
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+/* Le bouton secondaire cède la place au primaire : avec des facteurs de
+   rétrécissement voisins les deux libellés étaient coupés, y compris
+   « Télécharger » dès 320 px. */
+.btn-graine {
+  flex: 0 100 auto;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0 17px;
+  cursor: pointer;
+  border-radius: 18px;
+  border: 2px solid var(--encre);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 14.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Trait en --accent-encre et non --encre : en thème sombre --encre est la
+   crème, qui se confond avec l'aplat lime. En clair les deux sont identiques. */
+.btn-export {
+  flex: 1 0 auto;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 18px;
+  cursor: pointer;
+  border-radius: 18px;
+  border: 2px solid var(--accent-encre);
+  background: var(--accent);
+  color: var(--accent-encre);
+  font-weight: 700;
+  font-size: 16.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-export[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+.btn-graine span,
+.btn-export span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Pictogrammes, dessinés dans la direction artistique ---------------------- */
+/* Flèche circulaire : une boucle ouverte et sa pointe. */
+.ico-encore {
+  position: relative;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+.ico-encore i {
+  position: absolute;
+  inset: 0;
+  border: 2.5px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+}
+.ico-encore b {
+  position: absolute;
+  top: -1px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+/* Téléchargement : une pointe vers le bas et son seuil. */
+.ico-descendre {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5px;
+}
+.ico-descendre i {
+  display: block;
+  width: 10px;
+  height: 11px;
+  background: currentColor;
+  clip-path: polygon(50% 100%, 100% 0, 0 0);
+}
+.ico-descendre b {
+  display: block;
+  width: 14px;
+  height: 2.5px;
+  background: currentColor;
+}
+.note-faite-i {
+  flex: 0 0 auto;
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5px;
+}
+.note-faite-i i {
+  display: block;
+  width: 11px;
+  height: 12px;
+  background: currentColor;
+  clip-path: polygon(50% 100%, 100% 0, 0 0);
+}
+.note-faite-i b {
+  display: block;
+  width: 15px;
+  height: 2.5px;
+  background: currentColor;
+}
+/* Lien : deux maillons carrés qui se chevauchent. */
+.ico-lien {
+  display: flex;
+  flex: 0 0 auto;
+}
+.ico-lien i {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border: 2.5px solid currentColor;
+  border-radius: 4px;
+}
+.ico-lien i + i {
+  margin-left: -4px;
+}
+
+/* --- Mise à jour de l'application ---------------------------------------------- */
+/* Une proposition, pas une injonction : les deux réponses ont le même poids
+   visuel, et l'appel primaire de l'écran reste le téléchargement. */
+.note-maj {
+  background: var(--surface);
+  border: 2px solid var(--filet-franc);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.note-maj-i {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  background: var(--deco-1);
+  border-radius: 999px 999px 0 0;
+}
+.note-maj .note-txt {
+  flex: 1 1 12ch;
+}
+.note-maj-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.note-maj-oui {
+  border-color: var(--encre);
+}
