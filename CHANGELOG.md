@@ -13,15 +13,25 @@ d'écran derrière mes icônes ?**
 
 - **Un seul écran, et l'aperçu ne le quitte jamais.** Le motif s'affiche dans
   une maquette de téléphone, avec l'heure, un widget et une grille d'icônes
-  factices : on juge la lisibilité réelle avant de télécharger, pas après. Sur
-  téléphone l'aperçu est épinglé en haut et les réglages défilent dessous ; sur
-  ordinateur les deux sont côte à côte. Sur une fenêtre couchée et basse,
-  l'en-tête se replie et la barre d'action passe en variante compacte, pour que
-  l'aperçu entier, dock compris, tienne au-dessus d'elle.
-- **L'aperçu se replie en vignette dès qu'on défile**, et le verdict de
-  lisibilité passe sur une ligne, dépliable au doigt. Sur un iPhone en
-  portrait, les grilles de motifs disposent alors de 58 % de la hauteur au lieu
-  de 37 %. L'aperçu se déplie en remontant.
+  factices : on juge la lisibilité réelle avant de télécharger, pas après.
+  L'aperçu est épinglé dans sa colonne et les réglages défilent à côté de lui,
+  sur téléphone comme sur ordinateur. Sur une fenêtre couchée et basse,
+  l'en-tête se resserre et la barre d'action passe en variante compacte, pour
+  que l'aperçu entier, dock compris, tienne au-dessus d'elle.
+- **Deux colonnes dès 360 px.** L'aperçu à gauche, les réglages à droite, les
+  deux visibles en même temps, y compris sur un téléphone. Il n'est plus devant
+  ce qu'on choisit mais à côté : les grilles disposent de plus des trois quarts
+  de la hauteur de l'écran, au lieu d'un tiers. Dans la colonne étroite, les
+  rembourrages se resserrent et les libellés prennent la césure de la langue ;
+  les cibles restent à 44 px.
+- **L'en-tête reste à l'écran.** La marque, le mot et la résolution visée
+  tiennent sur une ligne épinglée en haut, sous six barres de la palette qui
+  font office de filet : on sait toujours quelle image on est en train de
+  fabriquer, et pour quel écran.
+- **Sous 360 px, où deux colonnes ne tiennent plus, l'aperçu se replie en
+  vignette dès qu'on défile**, et le verdict de lisibilité passe sur une ligne,
+  dépliable au doigt. L'aperçu se déplie en remontant. Le verdict se condense
+  aussi partout où sa colonne est trop étroite pour son détail.
 - **Le panneau ne contient que ce qui agit sur l'image.** Langue et thème sont
   dans le pied de page, à côté de la version et du lien vers la source : ils ne
   changent que l'affichage, pas le fichier téléchargé.
@@ -109,11 +119,22 @@ d'écran derrière mes icônes ?**
   tout reste lisible : la sélection est un aplat inversé, la densité un nombre
   de points, la lisibilité trois formes distinctes, l'erreur un triangle.
 - Cibles tactiles de 44 px, actions fréquentes dans la zone du pouce, focus
-  visible et jamais masqué par les deux barres collantes.
+  visible et jamais masqué par les trois couches collantes.
 - Les cinq groupes de réglages sont de vrais groupes radio, et l'historique une
   barre d'outils : seize arrêts de tabulation en tout, historique plein
   compris, là où les puces seules en feraient une soixantaine.
 - `prefers-reduced-motion` respecté.
+
+### Ajouté : une marque, et une forme qui la répète
+
+- **L'arche est la marque** : un aplat lime sur navy, mordu à sa base par une
+  seconde arche. Elle sert d'icône d'application, de favicon, de repère devant
+  chaque titre de section, et elle dit la place vide de l'image tant qu'il n'y
+  a pas de résolution.
+- **Aucun coin n'a le même rayon en haut et en bas.** Cartes, boutons, champs,
+  notes et le bloc de réglages entier sont dessinés comme des arches : large en
+  haut, presque droit en bas, dans un rapport constant. C'est ce qui donne à la
+  page sa silhouette, plus sûrement qu'un rayon uniforme.
 
 ### Ajouté : deux langues, à parité stricte
 

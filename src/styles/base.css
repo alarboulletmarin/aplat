@@ -79,7 +79,7 @@ a:hover {
   min-height: 44px;
   display: flex;
   align-items: center;
-  border-radius: 14px;
+  border-radius: 16px 16px 5px 5px;
   background: var(--accent);
   color: var(--accent-encre);
   font-weight: 700;

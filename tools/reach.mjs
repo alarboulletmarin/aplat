@@ -88,12 +88,16 @@ const PLEIN = JSON.stringify(
       const barre = document.querySelector('.barre').getBoundingClientRect();
       const appareil = document.getElementById('appareil').getBoundingClientRect();
       const verdict = document.querySelector('.verdict').getBoundingClientRect();
+      /* La scène ne se colle pas au bord de la fenêtre mais sous l'en-tête,
+         lui aussi collant : c'est sa hauteur, publiée en `--bar`, qui dit où
+         la scène s'arrête de monter. */
+      const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 0;
       scrollTo(0, 0);
       /* Sous 760 px la scène est collante et recouvre la page ; au-delà elle
          tient dans sa colonne et ne recouvre plus rien, mais la barre la
          recouvre toujours, elle. */
       return {
-        collee: Math.round(scene.top) <= 1,
+        collee: Math.round(scene.top) <= bar + 1,
         apercu: Math.round(appareil.bottom - barre.top),
         verdict: Math.round(verdict.bottom - barre.top)
       };

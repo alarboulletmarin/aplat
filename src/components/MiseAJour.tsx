@@ -28,7 +28,10 @@ export function MiseAJour({ textes }: { textes: Textes }) {
 
   return (
     <div className="note note-maj" role="status">
-      <span className="note-maj-i" aria-hidden="true" />
+      <span className="note-maj-i" aria-hidden="true">
+        <i />
+        <b />
+      </span>
       <div className="note-txt">
         <p className="note-t">{textes.miseAJour.texte}</p>
       </div>

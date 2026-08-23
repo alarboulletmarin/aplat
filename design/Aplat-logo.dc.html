@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{--navy:#17243F;--lime:#DFF478;--creme:#F7F3E6;--ciel:#92BAD5;--corail:#FF6648;--violet:#788CE3;--bg:#F2EDDD;--ink:#17243F;--muted:#4A5773;--line:rgba(23,36,63,.18)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,"Helvetica Neue",Helvetica,system-ui,sans-serif;font-size:16px;line-height:1.45;text-wrap:pretty;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+a{color:#3B4CA8;text-underline-offset:3px}
+a:hover{color:var(--navy)}
+:focus-visible{outline:3px solid #3B4CA8;outline-offset:3px}
+</style>
+</helmet>
+
+<section ref="{{ rootRef }}" data-screen-label="Logo, tour 1" style="padding:40px clamp(18px,3vw,40px) 60px;display:flex;flex-direction:column;gap:26px">
+
+  <div style="display:flex;flex-wrap:wrap;gap:12px 26px;align-items:flex-end;justify-content:space-between;max-width:1500px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)">Tour 1, identité</span>
+      <h1 style="font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(36px,5vw,62px);line-height:.9;letter-spacing:-.035em;text-transform:uppercase">Quatre marques</h1>
+    </div>
+    <p style="font-size:14px;color:var(--muted);max-width:44ch">Chaque piste est montrée en grand, en favicon 32 et 16, en icône PWA, en mono et en lockup. Le test qui compte est la ligne 16px.</p>
+  </div>
+  <div style="height:3px;background:var(--navy);max-width:1500px"></div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+
+    <div id="1a" style="flex:1 1 330px;min-width:300px;max-width:360px;display:flex;flex-direction:column;gap:16px;background:var(--creme);border:3px solid var(--navy);border-radius:26px;padding:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:var(--navy);color:var(--creme);font-size:12.5px;font-weight:700;letter-spacing:.04em">1a</span>
+        <span style="font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase">L’arche</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:8px 0 4px">
+        <div style="--s:158px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--muted)">Le A de Aplat est une arche, motif déjà présent dans le générateur. Une seule forme pleine, zéro détail.</p>
+
+      <div style="display:flex;align-items:flex-end;gap:16px;padding-top:2px;border-top:2px solid var(--line);padding-top:14px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">32</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:16px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">16</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--creme);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">mono</span>
+        </div>
+        <div data-context="1" style="margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:56px;position:relative;width:var(--s);height:var(--s);border-radius:24%;background:var(--navy);overflow:hidden;box-shadow:0 6px 14px rgba(23,36,63,.28)">
+            <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">PWA</span>
+        </div>
+      </div>
+
+      <div data-context="1" style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:11px 11px 0 0;background:#fff;border:1px solid var(--line);border-bottom:0">
+        <div style="--s:16px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Aplat, fonds d’écran</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;padding-top:2px">
+        <div style="--s:34px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:18%;right:18%;top:20%;bottom:0;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:39%;right:39%;bottom:0;height:37%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+        </div>
+        <span style="font-family:Anton,Impact,sans-serif;font-size:31px;letter-spacing:-.035em;text-transform:uppercase;line-height:1">Aplat</span>
+      </div>
+    </div>
+
+    <div id="1b" style="flex:1 1 330px;min-width:300px;max-width:360px;display:flex;flex-direction:column;gap:16px;background:var(--creme);border:3px solid var(--navy);border-radius:26px;padding:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:var(--navy);color:var(--creme);font-size:12.5px;font-weight:700;letter-spacing:.04em">1b</span>
+        <span style="font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase">Le lever</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:8px 0 4px">
+        <div style="--s:158px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--creme);border:calc(var(--s)*.035) solid var(--navy);overflow:hidden">
+          <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--muted)">Trois aplats concentriques, la signature des motifs ondes. Chaleureux, mais moins directement lié au nom.</p>
+
+      <div style="display:flex;align-items:flex-end;gap:16px;border-top:2px solid var(--line);padding-top:14px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--creme);border:calc(var(--s)*.06) solid var(--navy);overflow:hidden">
+            <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">32</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:16px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--creme);border:1px solid var(--navy);overflow:hidden">
+            <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">16</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--creme);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:22%;right:22%;bottom:14%;height:29%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">mono</span>
+        </div>
+        <div data-context="1" style="margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:56px;position:relative;width:var(--s);height:var(--s);border-radius:24%;background:var(--creme);overflow:hidden;box-shadow:0 6px 14px rgba(23,36,63,.28)">
+            <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+            <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">PWA</span>
+        </div>
+      </div>
+
+      <div data-context="1" style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:11px 11px 0 0;background:#fff;border:1px solid var(--line);border-bottom:0">
+        <div style="--s:16px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--creme);border:1px solid var(--navy);overflow:hidden">
+          <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Aplat, fonds d’écran</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;padding-top:2px">
+        <div style="--s:34px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--creme);border:calc(var(--s)*.06) solid var(--navy);overflow:hidden">
+          <div style="position:absolute;left:2%;right:2%;bottom:14%;height:47%;background:var(--navy);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:19%;right:19%;bottom:14%;height:31%;background:var(--ciel);border-radius:999px 999px 0 0"></div>
+          <div style="position:absolute;left:36%;right:36%;bottom:14%;height:16%;background:var(--lime);border-radius:999px 999px 0 0"></div>
+        </div>
+        <span style="font-family:Anton,Impact,sans-serif;font-size:31px;letter-spacing:-.035em;text-transform:uppercase;line-height:1">Aplat</span>
+      </div>
+    </div>
+
+    <div id="1c" style="flex:1 1 330px;min-width:300px;max-width:360px;display:flex;flex-direction:column;gap:16px;background:var(--creme);border:3px solid var(--navy);border-radius:26px;padding:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:var(--navy);color:var(--creme);font-size:12.5px;font-weight:700;letter-spacing:.04em">1c</span>
+        <span style="font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase">Quatre aplats</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:8px 0 4px">
+        <div style="--s:158px;width:var(--s);height:var(--s);border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+          <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+          <div style="background:var(--ciel)"></div>
+          <div style="background:var(--navy)"></div>
+          <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--muted)">La palette est le produit. Quatre quarts, deux arrondis en moulinet. Lisible jusqu’à 16px, mais il faut une version mono dédiée.</p>
+
+      <div style="display:flex;align-items:flex-end;gap:16px;border-top:2px solid var(--line);padding-top:14px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;width:var(--s);height:var(--s);border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+            <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+            <div style="background:var(--ciel)"></div>
+            <div style="background:var(--navy)"></div>
+            <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">32</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:16px;width:var(--s);height:var(--s);border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+            <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+            <div style="background:var(--ciel)"></div>
+            <div style="background:var(--navy)"></div>
+            <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">16</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;width:var(--s);height:var(--s);border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;background:var(--navy)">
+            <div style="background:var(--creme);border-radius:100% 0 0 0"></div>
+            <div style="background:var(--navy)"></div>
+            <div style="background:var(--navy)"></div>
+            <div style="background:var(--creme);border-radius:0 0 100% 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">mono</span>
+        </div>
+        <div data-context="1" style="margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:56px;width:var(--s);height:var(--s);border-radius:24%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;box-shadow:0 6px 14px rgba(23,36,63,.28)">
+            <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+            <div style="background:var(--ciel)"></div>
+            <div style="background:var(--navy)"></div>
+            <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">PWA</span>
+        </div>
+      </div>
+
+      <div data-context="1" style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:11px 11px 0 0;background:#fff;border:1px solid var(--line);border-bottom:0">
+        <div style="--s:16px;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+          <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+          <div style="background:var(--ciel)"></div>
+          <div style="background:var(--navy)"></div>
+          <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Aplat, fonds d’écran</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;padding-top:2px">
+        <div style="--s:34px;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+          <div style="background:var(--lime);border-radius:100% 0 0 0"></div>
+          <div style="background:var(--ciel)"></div>
+          <div style="background:var(--navy)"></div>
+          <div style="background:var(--corail);border-radius:0 0 100% 0"></div>
+        </div>
+        <span style="font-family:Anton,Impact,sans-serif;font-size:31px;letter-spacing:-.035em;text-transform:uppercase;line-height:1">Aplat</span>
+      </div>
+    </div>
+
+    <div id="1d" style="flex:1 1 330px;min-width:300px;max-width:360px;display:flex;flex-direction:column;gap:16px;background:var(--creme);border:3px solid var(--navy);border-radius:26px;padding:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:var(--navy);color:var(--creme);font-size:12.5px;font-weight:700;letter-spacing:.04em">1d</span>
+        <span style="font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase">Le cadre</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:8px 0 4px">
+        <div style="--s:158px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+            <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--muted)">Un écran, un aplat dedans. Dit exactement ce que fait l’app, mais la forme verticale se referme à 16px.</p>
+
+      <div style="display:flex;align-items:flex-end;gap:16px;border-top:2px solid var(--line);padding-top:14px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+              <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">32</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:16px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+              <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">16</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:32px;position:relative;width:var(--s);height:var(--s);border-radius:23%;background:var(--navy);overflow:hidden">
+            <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--creme);overflow:hidden">
+              <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--navy);border-radius:60% 40% 0 0"></div>
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">mono</span>
+        </div>
+        <div data-context="1" style="margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="--s:56px;position:relative;width:var(--s);height:var(--s);border-radius:24%;background:var(--navy);overflow:hidden;box-shadow:0 6px 14px rgba(23,36,63,.28)">
+            <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+              <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">PWA</span>
+        </div>
+      </div>
+
+      <div data-context="1" style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:11px 11px 0 0;background:#fff;border:1px solid var(--line);border-bottom:0">
+        <div style="--s:16px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+            <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+          </div>
+        </div>
+        <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Aplat, fonds d’écran</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;padding-top:2px">
+        <div style="--s:34px;position:relative;width:var(--s);height:var(--s);flex:0 0 auto;border-radius:23%;background:var(--navy);overflow:hidden">
+          <div style="position:absolute;left:22%;right:22%;top:12%;bottom:12%;border-radius:14%;background:var(--lime);overflow:hidden">
+            <div style="position:absolute;left:-14%;right:-14%;bottom:-10%;height:62%;background:var(--corail);border-radius:60% 40% 0 0"></div>
+          </div>
+        </div>
+        <span style="font-family:Anton,Impact,sans-serif;font-size:31px;letter-spacing:-.035em;text-transform:uppercase;line-height:1">Aplat</span>
+      </div>
+    </div>
+
+  </div>
+
+  <p style="max-width:1500px;font-size:14px;color:var(--muted);border-top:2px solid var(--line);padding-top:14px">Dites-moi la piste retenue (<a href="#1a">1a</a>, <a href="#1b">1b</a>, <a href="#1c">1c</a> ou <a href="#1d">1d</a>) et je la pose partout, favicon et manifeste PWA compris, plus les fichiers PNG et ICO exportés.</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:760},&quot;darkSheet&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Planche&quot;},&quot;showContext&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Planche&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  apply(){
+    const r = this.rootRef.current; if (!r) return;
+    const dark = this.props.darkSheet === true;
+    r.style.background = dark ? '#0E1729' : 'transparent';
+    r.style.setProperty('--ink', dark ? '#F7F3E6' : '#17243F');
+    r.style.setProperty('--muted', dark ? '#A9BDD4' : '#4A5773');
+    r.style.setProperty('--creme', dark ? '#1B2942' : '#F7F3E6');
+    r.style.setProperty('--line', dark ? 'rgba(247,243,230,.22)' : 'rgba(23,36,63,.18)');
+    r.style.color = dark ? '#F7F3E6' : '#17243F';
+    const show = this.props.showContext !== false;
+    r.querySelectorAll('[data-context]').forEach(el => { el.style.display = show ? '' : 'none'; });
+  }
+  componentDidMount(){ this.apply(); }
+  componentDidUpdate(){ this.apply(); }
+  renderVals(){ return {rootRef: this.rootRef}; }
+}
+
+</script>
+</body>
+</html>

@@ -6,13 +6,14 @@
   box-sizing: border-box;
 }
 
-/* La scène et la barre d'action sont collantes : sans cette réserve, un
-   élément amené au clavier se colle au bord de la fenêtre, c'est-à-dire
-   exactement sous l'une des deux couches, et son anneau de focus disparaît.
-   Les deux hauteurs sont posées par le composant Scene. WCAG 2.2, 2.4.11. */
+/* L'en-tête, la scène et la barre d'action sont collants : sans cette
+   réserve, un élément amené au clavier se colle au bord de la fenêtre,
+   c'est-à-dire exactement sous l'une des trois couches, et son anneau de focus
+   disparaît. Les trois hauteurs sont posées par `useHauteursCollantes`.
+   WCAG 2.2, 2.4.11. */
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-padding-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-padding-top: calc(var(--bar, 0px) + var(--scene-h, 0px) + 12px);
   scroll-padding-bottom: calc(var(--barre-h, 0px) + 12px);
 }
 

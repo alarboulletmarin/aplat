@@ -45,6 +45,16 @@ export const PAYSAGE_COURT = 560
  */
 const RESERVE_PAYSAGE = 168
 
+/**
+ * Ce que l'en-tête collant prend au-dessus d'elle, en paysage court : la scène
+ * ne se colle pas au bord de la fenêtre mais sous lui (`top: var(--bar)` dans
+ * `ecrans.css`). La valeur est celle que dessine la variante compacte de
+ * `@media (orientation: landscape)` : huit pixels de rembourrage, une marque de
+ * trente pixels et ses sept pixels sous elle, un filet de dix et son seuil de
+ * trois. Elle bascule avec cette règle, ou pas du tout.
+ */
+const ENTETE_PAYSAGE = 58
+
 /** Vrai quand la fenêtre est couchée et trop basse pour la mise en page pleine. */
 export function paysageCourt(fenetre: Boite): boolean {
   return fenetre.largeur > fenetre.hauteur && fenetre.hauteur <= PAYSAGE_COURT
@@ -63,7 +73,7 @@ export function paysageCourt(fenetre: Boite): boolean {
 export function hauteurScene(fenetre: Boite): number {
   const h = fenetre.hauteur || 800
   if (paysageCourt(fenetre)) {
-    return Math.round(Math.max(150, Math.min(420, h - RESERVE_PAYSAGE)))
+    return Math.round(Math.max(150, Math.min(420, h - RESERVE_PAYSAGE - ENTETE_PAYSAGE)))
   }
   const etroit = fenetre.largeur < 760
   return Math.round(
@@ -103,7 +113,12 @@ export function geometrieAppareil(
   if (!resolution.largeur || !resolution.hauteur) return null
 
   const plafond = type === 'telephone' ? 300 : type === 'tablette' ? 430 : 660
-  const maxL = Math.max(160, Math.min(boite.largeur || 300, plafond))
+  /* Le plancher est bas, et il le doit : en deux colonnes sur un téléphone, la
+     colonne de l'aperçu fait cent trente pixels. Un plancher de 160 px y
+     dessinerait un appareil plus large que sa colonne, qui déborderait de la
+     page. Il ne sert qu'à écarter les largeurs absurdes ; la boîte non encore
+     mesurée est déjà traitée par le `|| 300`. */
+  const maxL = Math.max(80, Math.min(boite.largeur || 300, plafond))
   const maxH = Math.max(200, boite.hauteur || 420)
   const bord = 2 * BORDURE_APPAREIL
   const interneL = Math.max(40, maxL - bord)

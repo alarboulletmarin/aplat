@@ -8,6 +8,7 @@ import {
   type Resolution,
 } from '../lib/resolution'
 import type { Textes } from '../i18n'
+import { Arche } from './Arche'
 
 interface Preset {
   id: string
@@ -111,7 +112,10 @@ export function ChoixResolution({
   return (
     <div className="res-carte">
       <label className="res-label" htmlFor={idSelect}>
-        <span>{T.titre}</span>
+        <span>
+          <Arche />
+          <span>{T.titre}</span>
+        </span>
         <span className="res-select">
           <select id={idSelect} value={choix} onChange={surSelection}>
             {liste.map((p) => (

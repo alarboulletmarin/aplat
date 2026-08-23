@@ -4,6 +4,7 @@ import { useRef, type KeyboardEvent } from 'react'
 import { famille, palette, type Langue, type Motif } from '../lib/moteur'
 import { identique, versEntree, versMotif, type Entree } from '../lib/historique'
 import { remplir, type Textes } from '../i18n'
+import { Arche } from './Arche'
 import { Vignette } from './Vignette'
 
 /**
@@ -78,7 +79,8 @@ export function Historique({
     <div className="carte" id="carte-historique">
       <div className="carte-titre">
         <h2 className="carte-h" id="h-historique">
-          {T.titre}
+          <Arche />
+          <span>{T.titre}</span>
         </h2>
         {liste.length > 0 && (
           <button type="button" id="btn-oublier" className="btn-oublier" onClick={onOublier}>

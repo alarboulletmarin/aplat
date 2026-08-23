@@ -19,54 +19,194 @@
 }
 
 /* --- En-tête ---------------------------------------------------------------- */
+/* L'en-tête est la troisième couche collante, au-dessus des deux autres : la
+   marque, le mot et la résolution visée restent lisibles à toute position de
+   défilement, et le filet à barres tient la limite entre l'en-tête et la page.
+   Les marges négatives annulent le rembourrage de `.page` : l'aplat de fond va
+   d'un bord à l'autre quand l'en-tête est épinglé, sinon on verrait la page
+   passer dessous par les côtés.
+   Sa hauteur est publiée en `--bar` : la scène s'y accroche. */
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  margin: -22px -16px 0;
+  padding: 8px 16px 0;
+  background: var(--fond);
+}
 .entete-haut {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 9px;
 }
-/* L'arche : une forme du vocabulaire, posée là pour tenir le titre. Elle
-   habille et repère, elle ne porte aucune information. */
-.entete-arche {
+/* La marque : une arche lime dans un carré navy, mordue à sa base par une
+   seconde arche. Elle garde ses deux couleurs dans les deux thèmes, comme
+   toute marque, et un filet la détache du fond sombre. */
+.marque {
+  position: relative;
   flex: 0 0 auto;
-  width: clamp(28px, 7vw, 44px);
-  height: clamp(44px, 11vw, 68px);
-  background: var(--deco-1);
+  width: 38px;
+  height: 38px;
+  border-radius: 23%;
+  background: #17243f;
+  box-shadow: 0 0 0 1.5px var(--filet);
+  overflow: hidden;
+}
+.marque i {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 20%;
+  bottom: 0;
+  background: #dff478;
   border-radius: 999px 999px 0 0;
 }
-.entete-filet {
-  height: 3px;
-  background: var(--encre);
-  margin-top: 11px;
-}
-.entete-pied {
-  padding-top: 11px;
+.marque b {
+  position: absolute;
+  left: 39%;
+  right: 39%;
+  bottom: 0;
+  height: 37%;
+  background: #17243f;
+  border-radius: 999px 999px 0 0;
 }
 .titre {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(56px, 15.5vw, 98px);
-  line-height: 0.76;
-  letter-spacing: -0.045em;
+  font-size: 33px;
+  line-height: 0.84;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
+}
+/* La résolution visée, au bout de la ligne de titre : c'est la seule mesure
+   qui décide du fichier, et elle reste sous les yeux pendant qu'on règle. */
+.entete-res {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Le filet sous le titre n'est plus un trait mais six barres posées dessus :
+   un aplat de la palette par barre, la signature du générateur en miniature.
+   Il habille et repère, il ne porte aucune information. */
+.entete-filet {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 13px;
+  border-bottom: 3px solid var(--encre);
+}
+.entete-filet i {
+  display: block;
+  border-radius: 999px 999px 0 0;
+}
+.entete-filet i:nth-child(1) {
+  flex: 2 1 0;
+  height: 100%;
+  background: var(--lime);
+}
+.entete-filet i:nth-child(2) {
+  flex: 1 1 0;
+  height: 60%;
+  background: var(--ciel);
+}
+.entete-filet i:nth-child(3) {
+  flex: 3 1 0;
+  height: 86%;
+  background: var(--violet);
+}
+.entete-filet i:nth-child(4) {
+  flex: 1 1 0;
+  height: 46%;
+  background: var(--corail);
+}
+.entete-filet i:nth-child(5) {
+  flex: 2 1 0;
+  height: 100%;
+  background: var(--encre);
+}
+.entete-filet i:nth-child(6) {
+  flex: 1 1 0;
+  height: 68%;
+  background: var(--ciel);
+}
+/* L'accroche et la mention sortent de l'en-tête collant : elles se lisent une
+   fois, au départ, et n'ont rien à faire dans la bande épinglée. La marge
+   négative reprend onze des vingt-deux pixels de l'espacement de `.page`. */
+.entete-pied {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: -11px;
 }
 .accroche {
   max-width: 44ch;
   font-size: 15px;
   color: var(--encre-douce);
 }
+.entete-mention {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--encre-douce);
+  white-space: nowrap;
+}
 
+/* Deux colonnes dès 360 px : l'aperçu tient dans la sienne, épinglé, pendant
+   que les réglages défilent à côté sans jamais passer dessous. C'est la mise
+   en page de la maquette, tenue jusqu'au téléphone.
+
+   La part n'est pas la moitié. À 390 px, deux colonnes égales laissent 166 px
+   au panneau, soit une seule vignette de famille par rangée et dix-huit
+   rangées à parcourir. Trente-huit pour cent donnent un aperçu encore
+   jugeable et deux vignettes de front ; c'est le partage qui rend les deux
+   colonnes utiles plutôt que seulement fidèles.
+
+   L'espacement descend à 12 px sous 760 px : à 390 px, les 22 px de la
+   maquette valent six pour cent de la largeur, pris sur les deux colonnes.
+
+   Sous 360 px la page revient à une seule colonne : le panneau y tomberait à
+   130 px, et une vignette de famille par rangée n'est plus une grille. */
 .colonnes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-  gap: 22px;
+  grid-template-columns: 38fr 62fr;
+  gap: 12px;
   align-items: start;
 }
+/* Une colonne de grille peut rétrécir sous son contenu. Sans ça, la largeur
+   minimale du select de résolution et des grilles s'impose à la piste, et la
+   page défile de côté. */
+.colonnes > * {
+  min-width: 0;
+}
+@media (max-width: 359px) {
+  .colonnes {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+/* Au-delà de 760 px, le partage de la maquette : à parts égales, et une seule
+   colonne si la fenêtre ne peut pas en porter deux de 320 px. */
+@media (min-width: 760px) {
+  .colonnes {
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 22px;
+  }
+}
+
 
 /* --- Scène : le motif derrière de vraies icônes ------------------------------ */
 .scene {
   position: sticky;
-  top: 0;
+  /* Sous l'en-tête collant, jamais dessous : `--bar` est sa hauteur mesurée.
+     La valeur de repli ne sert qu'avant la première mesure. */
+  top: var(--bar, 70px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -494,11 +634,14 @@
   text-align: center;
   background: repeating-linear-gradient(135deg, var(--surface-2) 0 9px, var(--surface) 9px 18px);
 }
+/* L'arche, en contour cette fois : c'est la forme de la marque, et elle dit
+   que la place de l'image est là, vide. */
 .etat-vide-i {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 30px;
   border: 3px solid var(--encre);
-  border-radius: 50% 50% 50% 0;
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
 }
 .etat-vide-t {
   font-size: 15px;
@@ -612,6 +755,15 @@
 .verdict-bascule .verdict-i {
   margin-top: 0;
 }
+/* Le résumé peut revenir à la ligne. Sans `min-width: 0`, le mot le plus long
+   impose sa largeur au bouton, et dans la colonne étroite du gabarit à deux
+   colonnes le résumé dépassait de la scène. La césure d'abord, la coupure
+   franche ensuite, comme pour les libellés de carte. */
+.verdict-bascule .verdict-t {
+  min-width: 0;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
 .verdict-chevron {
   flex: 0 0 auto;
   margin-left: auto;
@@ -634,7 +786,7 @@
   min-height: 44px;
   padding: 0 13px;
   cursor: pointer;
-  border-radius: 14px;
+  border-radius: 16px 16px 5px 5px;
   border: 1.5px solid var(--filet-franc);
   background: transparent;
   color: var(--encre);
@@ -643,7 +795,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  scroll-margin-top: calc(var(--scene-h, 0px) + 12px);
+  scroll-margin-top: calc(var(--bar, 0px) + var(--scene-h, 0px) + 12px);
   scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
 }
 .btn-assombri[aria-pressed='true'] {
@@ -686,7 +838,8 @@
   flex-direction: column;
   background: var(--surface);
   border: 2px solid var(--encre);
-  border-radius: 26px;
+  /* L'arche, à l'échelle du bloc : large en haut, presque droit en bas. */
+  border-radius: 42px 42px 12px 12px;
   overflow: hidden;
 }
 .carte {
@@ -699,6 +852,9 @@
   border-top: 2px solid var(--filet);
 }
 .carte-h {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 16.5px;
   font-weight: 700;
   letter-spacing: -0.012em;
@@ -729,12 +885,38 @@
   margin: 17px 0 9px;
 }
 /* Deux formes du vocabulaire : l'arche pour les abstraits, l'étoile à pointes
-   pour les figures. Elles repèrent le groupe, le mot le nomme. */
-.groupe-arche {
+   pour les figures. Elles repèrent le groupe, le mot le nomme.
+
+   L'arche est mordue à sa base par une seconde arche à la couleur de la
+   surface : c'est le dessin de la marque, repris en petit. La même géométrie
+   sert à la note de mise à jour, pour qu'il n'y ait qu'une arche dans la page
+   et non deux qui se ressemblent. */
+.groupe-arche,
+.note-maj-i {
+  position: relative;
   flex: 0 0 auto;
   width: 15px;
-  height: 9px;
+  height: 15px;
+  overflow: hidden;
+}
+.groupe-arche i,
+.note-maj-i i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6%;
+  bottom: 0;
   background: var(--deco-1);
+  border-radius: 999px 999px 0 0;
+}
+.groupe-arche b,
+.note-maj-i b {
+  position: absolute;
+  left: 34%;
+  right: 34%;
+  bottom: 0;
+  height: 44%;
+  background: var(--surface);
   border-radius: 999px 999px 0 0;
 }
 .groupe-etoile {
@@ -794,6 +976,9 @@
   gap: 9px;
 }
 .res-label > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 16.5px;
   font-weight: 700;
   letter-spacing: -0.012em;
@@ -888,6 +1073,56 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* --- Le panneau dans une colonne étroite -------------------------------------
+   Entre 360 et 760 px, le panneau ne fait plus que deux cents pixels. Les
+   valeurs de la maquette ont été dessinées pour une colonne de cinq cents :
+   les tenir telles quelles ramène les grilles à une vignette par rangée, ce
+   qui n'est plus une grille mais une liste de dix-huit lignes.
+
+   Ce bloc est en fin de feuille, après les règles qu'il corrige : une requête
+   de média n'ajoute pas de spécificité, c'est l'ordre qui tranche.
+
+   Ce sont les seules valeurs du portage qui s'écartent de la maquette pour une
+   raison de largeur, et elles ne s'appliquent qu'en dessous de son gabarit.
+   Les cibles restent à 44 px : c'est le rembourrage qui cède, jamais la
+   surface au doigt. */
+@media (min-width: 360px) and (max-width: 759px) {
+  .carte,
+  .bento,
+  .res-carte,
+  .partage {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  /* 72 px et non 102 : à 360 px de fenêtre la piste utile fait 172 px, et deux
+     pistes de 80 avec leur gouttière en demandent 169. Quelques pixels
+     décident entre une grille et une liste. */
+  .grille-familles,
+  .grille-palettes {
+    grid-template-columns: repeat(auto-fit, minmax(min(72px, 100%), 1fr));
+    gap: 7px;
+  }
+  /* Chaque pixel repris ici va au libellé, et c'est le libellé qui nomme le
+     motif : sur une piste de quatre-vingt-dix pixels, sept de rembourrage en
+     moins font la différence entre « Découpes » et « Découpe / s ». */
+  .opt-famille {
+    padding: 5px;
+  }
+  .opt-palette {
+    padding: 7px;
+  }
+  .opt-famille-l,
+  .opt-palette-l {
+    gap: 5px;
+  }
+  /* Trois niveaux sur une rangée plutôt que deux plus un : la densité se lit
+     en comparant les trois, pas en les empilant. */
+  .opt-densite {
+    flex-basis: 48px;
+    padding: 9px 6px;
+  }
+}
+
 /* --- Paysage court : la hauteur est la ressource rare ------------------------ */
 /* Une fenêtre couchée de moins de 560 px de haut ne peut pas porter le même
    en-tête ni la même barre d'action qu'un écran debout. La barre passe en
@@ -900,21 +1135,24 @@
    basculent ensemble ou pas du tout. */
 @media (orientation: landscape) and (max-height: 560px) {
   .page {
-    padding-top: 12px;
     gap: 14px;
   }
-  .titre {
-    font-size: clamp(40px, 7.5vw, 62px);
+  /* L'en-tête se resserre sans changer de dessin : le rembourrage cède, les
+     formes gardent leurs proportions. Le titre à trente-trois pixels tient
+     déjà dans une fenêtre couchée, contrairement à celui qu'il remplace. */
+  .entete-haut {
+    gap: 9px;
+    padding-bottom: 7px;
   }
-  .entete-arche {
-    width: clamp(20px, 3.6vw, 30px);
-    height: clamp(30px, 5.6vw, 44px);
+  .marque {
+    width: 30px;
+    height: 30px;
+  }
+  .titre {
+    font-size: 27px;
   }
   .entete-filet {
-    margin-top: 8px;
-  }
-  .entete-pied {
-    padding-top: 8px;
+    height: 10px;
   }
   .accroche {
     font-size: 14px;
@@ -932,7 +1170,7 @@
   .btn-graine,
   .btn-export {
     min-height: 44px;
-    border-radius: 14px;
+    border-radius: 18px 18px 5px 5px;
   }
   .btn-graine {
     min-width: 44px;
