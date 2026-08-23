@@ -12,11 +12,16 @@ import { Bascules } from './Bascules'
  * Elle reste épinglée en haut. C'est la seule chose de la page qui ne défile
  * pas, et c'est voulu : quelqu'un convaincu au tiers de la page ne doit pas
  * avoir à remonter ou à descendre pour trouver la porte.
+ *
+ * La marque ramène ici, sur « / », et non dans l'outil : un logo ramène chez
+ * soi, et la porte est déjà là, nommée, à droite. C'est le même geste que dans
+ * l'application, où la marque est la seule sortie.
  */
 export function Enseigne({
   langue,
   resolu,
   textes,
+  accueil,
   lien,
   onLangue,
   onTheme,
@@ -24,6 +29,8 @@ export function Enseigne({
   langue: Langue
   resolu: 'clair' | 'sombre'
   textes: Textes
+  /** Le lien vers la présentation elle-même, langue et thème déjà posés. */
+  accueil: string
   /** Le lien vers l'application, langue et thème déjà posés. */
   lien: string
   onLangue: (langue: Langue) => void
@@ -31,7 +38,7 @@ export function Enseigne({
 }) {
   return (
     <header className="enseigne">
-      <a className="enseigne-marque" href={lien}>
+      <a className="enseigne-marque" href={accueil}>
         <span className="marque marque-nav" aria-hidden="true">
           <i />
           <b />

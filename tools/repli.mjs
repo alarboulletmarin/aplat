@@ -82,9 +82,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(!haut.replie, `${c.nom} : déplié en haut de page`, haut.hauteur + ' px');
 
     // 2. numérote les contrôles, puis balaie le document en attendant la page
+    /* La barre et l'en-tête sont écartés d'emblée : leurs propres contrôles
+       sont DANS une couche collante, jamais dessous, et leur demander de s'en
+       dégager n'a pas de sens. La marque de l'en-tête, qui est un lien vers la
+       présentation depuis qu'elle en est un, tombe sous cette règle ; c'est
+       `reach.mjs` qui la juge, au doigt et à la cible de 44 px. */
     const total = await page.evaluate(() => {
       const noeuds = [...document.querySelectorAll('button, input, select, a[href]')]
-        .filter(n => n.offsetParent !== null && !n.closest('.evitement') && !n.closest('.barre'));
+        .filter(n => n.offsetParent !== null && !n.closest('.evitement') &&
+          !n.closest('.barre') && !n.closest('.entete'));
       noeuds.forEach((n, i) => { n.dataset.scan = String(i); });
       return noeuds.length;
     });
@@ -110,8 +116,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
           if (b.bottom > rb.top + 0.5) continue;
           if (b.top < re.bottom - 0.5) continue;
           /* Un contrôle de la scène est dans la couche collante, pas dessous :
-             il ne peut pas s'en dégager, et n'a pas à le faire. La barre est
-             écartée de la même façon, à la constitution de la liste. */
+             il ne peut pas s'en dégager, et n'a pas à le faire. La barre et
+             l'en-tête sont écartés de la même façon, à la constitution de la
+             liste. */
           if (recouvre && !n.closest('.scene') && b.top < rs.bottom - 0.5) continue;
           out.push(Number(n.dataset.scan));
         }

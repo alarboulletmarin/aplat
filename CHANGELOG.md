@@ -9,6 +9,23 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : la marque ramène chez soi, et le 4K se choisit d'un geste
+
+- **La marque, en haut, est un lien vers « / ».** Depuis l'application, c'est
+  sa seule sortie, et elle est là où tout le monde cherche une sortie. Depuis
+  la présentation, elle ramène en haut de page au lieu d'ouvrir l'outil : la
+  porte nommée le fait déjà, à droite, et une marque qui mène ailleurs que chez
+  soi surprend pour rien. La langue et le thème
+  traversent le lien dans ce sens comme dans l'autre : revenir ne coûte pas le
+  choix qu'on vient de faire. La bande garde sa hauteur au pixel près, marges
+  négatives à l'appui, et la cible reste à quarante-quatre pixels.
+- **Un préréglage 4K, 3 840 × 2 160.** Les quatre autres nomment un appareil,
+  celui-ci nomme une taille, parce que c'est sous ce nom qu'on la demande.
+  Le format était déjà atteignable, la saisie manuelle montant à 8 000 px, mais
+  il n'était pas proposé, donc il ne se voyait pas. Rien n'y est agrandi : le
+  motif est recalculé à ces pixels-là, comme la vignette et comme le fichier de
+  l'appareil, et un 4K pèse entre 0,4 et 1,7 Mo.
+
 ### Ajouté : quatorze familles de plus, et un troisième groupe
 
 - **Trente-deux familles au lieu de dix-huit.** Sept abstraites où une grille

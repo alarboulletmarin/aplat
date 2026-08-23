@@ -101,6 +101,9 @@ export const fr = {
   entete: {
     evitement: 'Aller aux réglages',
     titre: 'Aplat',
+    /* La marque est un lien vers « / ». Le mot du titre le nomme déjà ; cette
+       mention, lue par les seules technologies d'assistance, dit où il mène. */
+    accueil: 'Retour à la présentation',
     accroche:
       'Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.',
     /* Au bout de la ligne de l'accroche : la promesse en trois mots, celle que
@@ -186,6 +189,11 @@ export const fr = {
     presetTelephone: 'Téléphone',
     presetTablette: 'Tablette',
     presetOrdinateur: 'Ordinateur',
+    /* Les quatre premiers préréglages nomment un appareil ; celui-ci nomme une
+       taille, parce que c'est sous ce nom qu'on la demande. Rien n'y est
+       agrandi : le motif est recalculé à ces pixels-là, comme à tous les
+       autres. */
+    presetUHD: '4K',
   },
   historique: {
     titre: 'Derniers motifs',

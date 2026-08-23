@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Langue } from '../../lib/moteur'
 import { detecter } from '../../lib/resolution'
 import { ecrireAffichage, lireAffichage, type Affichage, type Theme } from '../../lib/url'
-import { lienApp } from '../../lib/route'
+import { lienAccueil, lienApp } from '../../lib/route'
 import { textes as dictionnaire } from '../../i18n'
 import { useThemeResolu } from '../../hooks/useThemeResolu'
 import { Enseigne } from './Enseigne'
@@ -74,11 +74,15 @@ export function Accueil() {
     }
   }, [requete])
 
-  const lien = lienApp(
+  /* Les deux liens internes de la page partent des mêmes deux paramètres :
+     celui de la porte, vers « /app », et celui de la marque, qui revient ici
+     en haut de page sans reperdre la langue ni le thème. */
+  const affiche: Record<string, string> =
     affichage.theme === 'systeme'
       ? { l: affichage.langue }
-      : { l: affichage.langue, t: affichage.theme },
-  )
+      : { l: affichage.langue, t: affichage.theme }
+  const lien = lienApp(affiche)
+  const accueil = lienAccueil(affiche)
 
   return (
     <>
@@ -91,6 +95,7 @@ export function Accueil() {
           langue={affichage.langue}
           resolu={themeResolu}
           textes={T}
+          accueil={accueil}
           lien={lien}
           onLangue={(langue: Langue) =>
             setAffichage((precedent) => ({ ...precedent, langue }))

@@ -172,6 +172,14 @@ arche à la couleur du fond ; les mêmes fractions partout, celles de
 lime sur son navy dans les deux thèmes, avec un filet `--filet` qui la détache
 du fond sombre : une marque ne s'inverse pas.
 
+Dans l'en-tête comme dans l'enseigne de la présentation, **la marque et le mot
+font un lien vers « / »** : un logo ramène chez soi, et c'est la seule sortie de
+l'application. Elle ne prend ni l'encre des liens ni leur soulignement, parce
+qu'une marque garde ses couleurs. Sa cible fait quarante-quatre pixels de haut
+comme toutes les autres, mais des marges négatives lui rendent ce qu'elle
+prendrait à la bande : la hauteur de l'en-tête ne bouge pas d'un pixel, et
+`ENTETE_PAYSAGE` dans `lib/geometrie.ts` reste vrai.
+
 Les six barres sous le titre sont la silhouette d'un motif du générateur, réduite
 à treize pixels : un aplat de la palette par barre, arrondies en arche, posées
 sur un seuil d'encre de trois pixels.

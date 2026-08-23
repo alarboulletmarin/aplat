@@ -154,6 +154,15 @@ quelqu'un qui arrive sur une page dans une langue qu'il ne lit pas doit trouver
 la bascule avant le premier paragraphe. Le lien vers l'application les emporte,
 personne ne choisit sa langue deux fois.
 
+La marque, en haut, fait le chemin dans l'autre sens. Elle est un lien vers
+`/` depuis les deux documents : depuis l'application, c'est sa seule sortie, et
+elle est là où tout le monde cherche une sortie ; depuis la présentation, elle
+ramène en haut de page plutôt que d'ouvrir l'outil, ce que la porte nommée fait
+déjà, à droite. La langue et le thème traversent ce lien comme ils traversent
+l'autre : revenir ne coûte pas le choix qu'on vient de faire. Aucun paramètre de
+motif n'y entre, sinon la reconduction ci-dessous renverrait le retour vers
+`/app` avant qu'il n'ait lieu.
+
 Aplat a vécu à la racine. Les liens partagés de cette époque, `/?m=vagues&…`,
 sont reconduits vers `/app` avec leur requête intacte, avant le moindre rendu :
 la promesse « copier le lien suffit à retrouver exactement la même image » ne

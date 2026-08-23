@@ -40,6 +40,22 @@
   gap: 11px;
   padding-bottom: 9px;
 }
+/* La marque et le mot font un lien vers la présentation. Quarante-quatre
+   pixels au doigt, comme toutes les cibles, mais les marges négatives lui
+   rendent les six qu'il prendrait à la bande : l'en-tête garde sa hauteur, et
+   `ENTETE_PAYSAGE` dans `lib/geometrie.ts` reste vrai. Le lien ne se souligne
+   pas et ne prend pas l'encre des liens : une marque garde ses couleurs, comme
+   celle de l'enseigne sur l'accueil. */
+.entete-marque {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  min-height: 44px;
+  margin: -3px 0;
+  color: var(--encre);
+  text-decoration: none;
+}
 /* La marque : une arche lime dans un carré navy, mordue à sa base par une
    seconde arche. Elle garde ses deux couleurs dans les deux thèmes, comme
    toute marque, et un filet la détache du fond sombre. */
@@ -1152,6 +1168,12 @@
   .entete-haut {
     gap: 9px;
     padding-bottom: 7px;
+  }
+  /* La marque perd huit pixels, la cible n'en perd aucun : la marge négative
+     se creuse d'autant. */
+  .entete-marque {
+    gap: 9px;
+    margin: -7px 0;
   }
   .marque {
     width: 30px;

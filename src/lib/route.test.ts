@@ -7,7 +7,7 @@
  * ouvrir son motif, et une adresse nue doit encore ouvrir la présentation.
  */
 import { describe, expect, it } from 'vitest'
-import { CHEMIN_APP, lienApp, redirection, route } from './route'
+import { CHEMIN_APP, lienAccueil, lienApp, redirection, route } from './route'
 
 describe('le chemin décide de la page', () => {
   it('donne l’application sous /app, à la barre oblique et à la casse près', () => {
@@ -56,5 +56,28 @@ describe('le lien vers l’application', () => {
 
   it('reste nu quand il n’y a rien à emporter', () => {
     expect(lienApp({})).toBe('/app')
+  })
+})
+
+describe('le lien vers la présentation', () => {
+  it('emporte la langue et le thème dans l’autre sens aussi', () => {
+    expect(lienAccueil({ l: 'en', t: 'sombre' })).toBe('/?l=en&t=sombre')
+  })
+
+  it('reste nu quand il n’y a rien à emporter', () => {
+    expect(lienAccueil({})).toBe('/')
+  })
+
+  /* La marque de l'application mène ici : si ce lien portait un paramètre de
+     motif, `redirection()` le renverrait aussitôt sous `/app` et le retour
+     n'aurait jamais lieu. */
+  it('mène bien à l’accueil, sans être reconduit vers l’application', () => {
+    const jeux: Record<string, string>[] = [{}, { l: 'fr' }, { l: 'en', t: 'clair' }]
+    for (const parametres of jeux) {
+      const adresse = lienAccueil(parametres)
+      const [chemin, recherche = ''] = adresse.split('?')
+      expect(route(chemin)).toBe('accueil')
+      expect(redirection(chemin, recherche ? `?${recherche}` : '')).toBeNull()
+    }
   })
 })

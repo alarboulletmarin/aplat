@@ -18,6 +18,9 @@ export type Route = 'accueil' | 'app'
 /** Le chemin de l'application, tel qu'il s'écrit dans les liens. */
 export const CHEMIN_APP = '/app'
 
+/** Celui de la présentation. La marque y ramène, depuis les deux pages. */
+export const CHEMIN_ACCUEIL = '/'
+
 /**
  * Les paramètres qui décrivent un motif.
  *
@@ -63,6 +66,12 @@ export function redirection(chemin: string, recherche: string): string | null {
   return `${CHEMIN_APP}${recherche.startsWith('?') ? recherche : `?${recherche}`}`
 }
 
+/** Un chemin et sa requête, la requête omise quand elle est vide. */
+function lien(chemin: string, parametres: Record<string, string>): string {
+  const requete = new URLSearchParams(parametres).toString()
+  return requete ? `${chemin}?${requete}` : chemin
+}
+
 /**
  * Un lien vers l'application, avec les réglages d'affichage déjà posés.
  *
@@ -71,7 +80,18 @@ export function redirection(chemin: string, recherche: string): string | null {
  * a décidé autrement serait un pas en arrière visible.
  */
 export function lienApp(parametres: Record<string, string>): string {
-  const q = new URLSearchParams(parametres)
-  const requete = q.toString()
-  return requete ? `${CHEMIN_APP}?${requete}` : CHEMIN_APP
+  return lien(CHEMIN_APP, parametres)
+}
+
+/**
+ * Un lien vers la présentation, avec les mêmes réglages d'affichage.
+ *
+ * C'est celui de la marque, en haut des deux pages : un logo ramène chez soi,
+ * et le voyage de retour ne doit pas plus reperdre la langue que l'aller.
+ *
+ * Aucun paramètre de motif n'a le droit d'y entrer : `redirection()` renverrait
+ * aussitôt vers `/app`, et le lien ne mènerait nulle part.
+ */
+export function lienAccueil(parametres: Record<string, string>): string {
+  return lien(CHEMIN_ACCUEIL, parametres)
 }
