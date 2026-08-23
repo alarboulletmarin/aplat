@@ -56,7 +56,7 @@ Le parti visuel et les règles d'interface sont dans
 | **Chargement** | Trois points au centre de la maquette pendant le rendu. Le bouton passe à « Rendu en cours » et devient `aria-busy`. | Se résout seul. |
 | **Erreur** | Carte à trait d'alerte et triangle, cause exacte : au-delà de 40 Mpx on dit le nombre ; si le navigateur a refusé d'allouer le canevas (ce que font les navigateurs mobiles au-delà d'une certaine surface, en rendant une image noire sans le dire), on dit d'essayer plus petit ; sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
 | **Succès** | Carte lime : dimensions produites, format, poids réel du fichier, et le geste pour passer de « téléchargé » à « dans la pellicule ». | Rien à faire, c'est fini. |
-| **Données trop longues** | Chaque libellé a son échappatoire prévue : ellipse sur les puces de réglage et les icônes de la maquette, retour à la ligne dans les cartes, colonnes qui s'étirent, `overflow-wrap` sur les valeurs. Le bouton secondaire cède la place au primaire. | Sans objet. |
+| **Données trop longues** | Chaque libellé a son échappatoire prévue : les libellés de carte reviennent à la ligne, sur deux lignes s'il le faut, et ne s'élident jamais ; ellipse sur les icônes de la maquette ; colonnes qui s'étirent ; `overflow-wrap` sur les valeurs. Le bouton secondaire cède la place au primaire. | Sans objet. |
 
 Le verdict de lisibilité est affiché en permanence, pas seulement en cas de
 problème : rapport de contraste mesuré, couleur de libellé retenue, force du
@@ -265,6 +265,7 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Trait du bouton primaire en `--accent-encre` plutôt que `--encre` | En sombre `--encre` est la crème, qui disparaît sur l'aplat lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
 | Le carré de sélection reçoit un filet à la couleur du texte | Sur la puce inversée du thème sombre (un aplat crème), le lime tombait à 1,1:1 et disparaissait. |
 | La colonne des préférences passe de 150 à 200 px de seuil | À 150, la colonne Thème tombait à 52 px par bouton : « Système » partait seul sur une deuxième rangée, étiré sur toute la largeur. |
+| Les libellés de carte reviennent à la ligne au lieu de s'élider | « Marguerites » tronqué en « Margueri… » ne nomme plus rien, et la piste d'une grille à quatre colonnes est trop étroite pour lui dès 1024 px de fenêtre. |
 | Boutons langue et thème : plancher lié au contenu | Avec un plancher fixe la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
 | Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
 | Les grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |

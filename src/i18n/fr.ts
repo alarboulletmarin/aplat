@@ -5,9 +5,9 @@
  * et l'anglais doit s'y conformer clé pour clé.
  *
  * Les gabarits laissent 30 % de marge. Selon l'endroit, un libellé long revient
- * à la ligne (puces de famille et de palette), replie sa rangée (langue,
- * thème), s'étire avec sa colonne (cartes), ou s'élide (icônes de la maquette,
- * bouton secondaire).
+ * à la ligne sans jamais s'élider (puces de famille et de palette, deux lignes
+ * au plus), replie sa rangée (langue, thème), s'étire avec sa colonne (cartes),
+ * ou s'élide (icônes de la maquette, bouton secondaire).
  */
 export const fr = {
   document: {

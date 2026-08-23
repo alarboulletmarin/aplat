@@ -239,7 +239,7 @@ Chaque écran a cinq états, tous dessinés.
 | **Chargement** | trois points au centre, bouton en « Rendu en cours » et `aria-busy` |
 | **Erreur** | carte à trait d'alerte et triangle, **la cause exacte**, bouton Réessayer |
 | **Succès** | carte lime : dimensions, format, poids réel, et le geste pour finir |
-| **Données trop longues** | ellipse sur les puces et les icônes de la maquette, retour à la ligne dans les cartes, `overflow-wrap` sur les valeurs, rangées retirées de la maquette |
+| **Données trop longues** | libellés de carte sur deux lignes, jamais élidés ; ellipse sur les icônes de la maquette ; `overflow-wrap` sur les valeurs ; rangées retirées de la maquette |
 
 Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas de
 problème. Et il n'affiche rien tant qu'il n'a rien mesuré : une application qui

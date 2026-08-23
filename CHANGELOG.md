@@ -28,6 +28,8 @@ d'écran derrière mes icônes ?**
 - **Trois réglages, pas un de plus** : famille de motif (dix-huit, réparties
   en abstraits et figures), palette (onze) et densité (trois). Chaque famille
   montre sa propre vignette, calculée avec la palette et la densité courantes.
+  Leur nom revient à la ligne plutôt que de s'élider : « Marguerites » tronqué
+  en « Margueri… » ne nomme plus rien.
 - **La résolution est détectée**, pas demandée. Elle reste modifiable, avec
   trois préréglages et une saisie libre entre 16 et 8000 px. La maquette prend
   la forme de l'appareil visé : téléphone, tablette ou ordinateur, déduits du

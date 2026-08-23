@@ -37,6 +37,9 @@
 }
 .opt-carre {
   flex: 0 0 auto;
+  /* Le libellé peut tenir sur deux lignes : le carré se cale sur la première,
+     et non au milieu du bloc. */
+  margin-top: 3.5px;
   width: 9px;
   height: 9px;
   border-radius: 2px;
@@ -65,19 +68,29 @@
   border-radius: 9px;
   background: var(--surface-2);
 }
+/* Un libellé de carte ne s'élide pas, il revient à la ligne. « Marguerites »
+   tronqué en « Margueri… » ne nomme plus rien, et la piste d'une grille à
+   quatre colonnes est trop étroite pour le mot le plus long dès 1024 px de
+   fenêtre. Un demi-point de moins sur la police y suffisait presque ; deux
+   lignes le règlent pour de bon, et pour les libellés allongés de 30 % que
+   l'anglais peut réclamer.
+
+   `overflow-wrap: anywhere` et non `break-word` : le premier entre aussi dans
+   le calcul de la largeur minimale de la piste, si bien qu'un nom long ne
+   pousse pas la colonne au-delà de l'écran. */
 .opt-famille-l,
 .opt-palette-l {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 7px;
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 13px;
+  line-height: 1.25;
 }
-.opt-famille-l span,
-.opt-palette-l span {
+.opt-famille-l > span:last-child,
+.opt-palette-l > span:last-child {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .opt-palette {
