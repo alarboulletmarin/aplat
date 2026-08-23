@@ -114,10 +114,9 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .hdr-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
 .hdr-arch{flex:0 0 auto;width:clamp(28px,7vw,44px);height:clamp(44px,11vw,68px);background:var(--deco-1);border-radius:999px 999px 0 0}
 .hdr-rule{height:3px;background:var(--ink);margin-top:11px}
-.hdr-foot{display:flex;flex-wrap:wrap;gap:4px 20px;justify-content:space-between;align-items:baseline;padding-top:11px}
+.hdr-foot{padding-top:11px}
 .title{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:clamp(56px,15.5vw,98px);line-height:.76;letter-spacing:-.045em;text-transform:uppercase}
 .tagline{max-width:44ch;font-size:15px;color:var(--ink-muted)}
-.kicker-t{font-size:13px;font-weight:600;color:var(--ink-muted);white-space:nowrap}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:22px;align-items:start}
 
 /* --- Scène : maquette d'écran -------------------------------------------- */

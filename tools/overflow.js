@@ -70,7 +70,7 @@ const STRETCH = `(() => {
             out.hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
 
             // texte coupé : scrollWidth > clientWidth sans ellipsis prévue
-            for (const n of document.querySelectorAll('button, .card-h, .grp, .leg-t, .leg-d, .res-val, .res-dev, .share-n, .note-t, .note-m, .note-h, .prefs h3, .tagline, .kicker-t')) {
+            for (const n of document.querySelectorAll('button, .card-h, .grp, .leg-t, .leg-d, .res-val, .res-dev, .share-n, .note-t, .note-m, .note-h, .prefs h3, .tagline')) {
               const cs = getComputedStyle(n);
               if (n.offsetParent === null) continue;
               const okX = cs.textOverflow === 'ellipsis' || cs.overflowX !== 'visible';

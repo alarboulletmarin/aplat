@@ -12,7 +12,7 @@ const REF = process.env.REF_DIR ||
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain', '.md': 'text/plain' };
 
 const PROBES = [
-  'Aplat', 'Aplat — édité par trced',
+  'Aplat',
   'Famille de motif', 'Abstraits', 'Figures', 'Palette', 'Densité', 'Résolution de l’image',
   'Vagues', 'Blobs', 'Lime & crème', 'Soleil', 'Calme', 'Moyen', 'Dense',
   'Copier le lien du motif', 'Langue', 'Thème', 'Partage et réglages',
