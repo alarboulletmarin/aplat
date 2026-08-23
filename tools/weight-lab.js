@@ -1,16 +1,17 @@
 /* Décompose le poids du PNG exporté : fond · formes · voile · grain. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
 
   const rows = await page.evaluate(async () => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const W = 1179, H = 2556;
     const cases = [
       ['vagues', 'nuit', 1], ['vagues', 'lime', 1], ['trame', 'nuit', 1],
@@ -21,22 +22,22 @@ let PORT = 0;
     const out = [];
 
     async function build(fam, pal, dens, steps) {
-      const P = E.PALETTES[pal];
+      const P = M.PALETTES[pal];
       const c = document.createElement('canvas');
       c.width = W; c.height = H;
       const ctx = c.getContext('2d', { alpha: false });
-      const m = E.measure(fam, pal, dens, 7314, W, H);
+      const m = M.mesurer(fam, pal, dens, 7314, W, H);
       ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
-      if (steps.shapes) E._shapes(ctx, W, H, fam, P.cols, dens, E.rng(E._drawSeed(fam, dens, 7314)), Math.min(W, H));
-      if (steps.veil) E._applyVeil(ctx, W, H, m);
-      if (steps.grain) E._paintGrain(ctx, W, H);
+      if (steps.shapes) M.formes(ctx, W, H, fam, P.cols, dens, M.alea(M.graineDeDessin(fam, dens, 7314)), Math.min(W, H));
+      if (steps.veil) M.peindreVoile(ctx, W, H, m);
+      if (steps.grain) M.peindreGrain(ctx, W, H);
       const b = await blobOf(c);
       c.width = 1; c.height = 1;
       return b.size;
     }
 
     for (const [fam, pal, dens] of cases) {
-      const m = E.measure(fam, pal, dens, 7314, W, H);
+      const m = M.mesurer(fam, pal, dens, 7314, W, H);
       const bg = await build(fam, pal, dens, {});
       const sh = await build(fam, pal, dens, { shapes: 1 });
       const shv = await build(fam, pal, dens, { shapes: 1, veil: 1 });

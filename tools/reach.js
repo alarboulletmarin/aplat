@@ -3,7 +3,7 @@
    vérifie la cible de 44 px. */
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 const CASES = [
@@ -15,7 +15,7 @@ const CASES = [
 ];
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   let bad = 0;
 
@@ -26,7 +26,7 @@ const CASES = [
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
+    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
     await page.waitForTimeout(300);
 
     const report = await page.evaluate(() => {
@@ -51,7 +51,7 @@ const CASES = [
         }
         const r = n.getBoundingClientRect();
         out.push({
-          id: n.id || n.dataset.family || n.dataset.pal || n.dataset.dens || n.dataset.lang ||
+          id: n.id || n.dataset.famille || n.dataset.palette || n.dataset.densite || n.dataset.langue ||
               n.dataset.theme || n.dataset.preset || (n.textContent || '').trim().slice(0, 24) || n.tagName,
           ok, w: Math.round(r.width), h: Math.round(r.height), at: best && best.y
         });

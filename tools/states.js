@@ -2,13 +2,13 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
 
   async function shot(name, scheme, prep) {
@@ -24,46 +24,46 @@ const OUT = path.resolve(__dirname, '../.shots');
   const tap = (page, sel) => page.$eval(sel, e => e.click());
 
   await shot('vide', 'light', async p => {
-    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await p.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await p.waitForTimeout(200);
-    await p.fill('#inW', '');
+    await p.fill('#res-largeur', '');
     await p.waitForTimeout(400);
   });
 
   await shot('chargement', 'light', async p => {
     await p.evaluate(() => {
-      document.getElementById('stateBusy').hidden = false;
-      document.getElementById('mockHandheld').hidden = true;
-      document.getElementById('ctaLabel').textContent = 'Rendu en cours';
-      document.getElementById('btnExport').disabled = true;
+      document.getElementById('etat-calcul').hidden = false;
+      document.getElementById('maquette').hidden = true;
+      document.getElementById('cta-libelle').textContent = 'Rendu en cours';
+      document.getElementById('btn-export').disabled = true;
     });
     await p.waitForTimeout(250);
   });
 
   await shot('erreur', 'light', async p => {
-    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await p.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await p.waitForTimeout(200);
-    await p.fill('#inW', '7000');
-    await p.fill('#inH', '7000');
+    await p.fill('#res-largeur', '7000');
+    await p.fill('#res-hauteur', '7000');
     await p.waitForTimeout(250);
-    await tap(p, '#btnExport');
+    await tap(p, '#btn-export');
     await p.waitForTimeout(600);
   });
 
   await shot('succes', 'light', async p => {
     await p.evaluate(() => {
-      const c = document.getElementById('doneCard');
+      const c = document.getElementById('note-faite');
       c.hidden = false;
-      document.getElementById('doneMeta').textContent = '1 179 × 2 556 px · PNG · 267 Ko';
+      document.getElementById('note-meta').textContent = '1 179 × 2 556 px · PNG · 267 Ko';
     });
     await p.waitForTimeout(250);
   });
 
   await shot('succes-sombre', 'dark', async p => {
     await p.evaluate(() => {
-      const c = document.getElementById('doneCard');
+      const c = document.getElementById('note-faite');
       c.hidden = false;
-      document.getElementById('doneMeta').textContent = '1 179 × 2 556 px · PNG · 267 Ko';
+      document.getElementById('note-meta').textContent = '1 179 × 2 556 px · PNG · 267 Ko';
     });
     await p.waitForTimeout(250);
   });

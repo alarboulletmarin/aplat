@@ -4,31 +4,31 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
 
   for (const scheme of ['light', 'dark']) {
     const ctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, deviceScaleFactor: 3, colorScheme: scheme, locale: 'fr-FR' });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(300);
     // désature toute la page
     await page.addStyleTag({ content: 'html{filter:grayscale(1) !important}' });
     await page.waitForTimeout(200);
 
     for (const [name, sel] of [
-      ['densite', '#densList'],
-      ['langue', '#langList'],
-      ['theme', '#themeList'],
-      ['palette', '#palList'],
-      ['famille', '#famAbs']
+      ['densite', '#liste-densite'],
+      ['langue', '#liste-langue'],
+      ['theme', '#liste-theme'],
+      ['palette', '#liste-palettes'],
+      ['famille', '#liste-abstraits']
     ]) {
       const elh = await page.$(sel);
       if (!elh) continue;
@@ -38,7 +38,7 @@ const OUT = path.resolve(__dirname, '../.shots');
     // mesure : luminance moyenne de la bordure sélectionnée vs non sélectionnée
     const diff = await page.evaluate(() => {
       const out = [];
-      for (const grp of ['densList', 'langList', 'themeList', 'palList']) {
+      for (const grp of ['liste-densite', 'liste-langue', 'liste-theme', 'liste-palettes']) {
         const bs = [...document.getElementById(grp).querySelectorAll('.opt')];
         const on = bs.find(b => b.getAttribute('aria-checked') === 'true');
         const off = bs.find(b => b.getAttribute('aria-checked') === 'false');

@@ -43,7 +43,7 @@ export function MaquetteTelephone({
   const dock = textes.maquette.dock.slice(0, 4)
 
   return (
-    <div className="maq" ref={cadre} aria-hidden="true">
+    <div className="maq" id="maquette" ref={cadre} aria-hidden="true">
       <div className="maq-etat">
         <span>{instant.heure}</span>
         <span className="maq-etat-d">
@@ -110,7 +110,7 @@ export function MaquetteBureau({
   const dock = textes.maquette.dock.slice(0, 6)
 
   return (
-    <div className="maqo" ref={cadre} aria-hidden="true">
+    <div className="maqo" id="maquette-bureau" ref={cadre} aria-hidden="true">
       <div className="maqo-barre">
         <span className="maqo-logo" />
         {textes.maquette.menu.map((entree) => (

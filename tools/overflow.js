@@ -2,7 +2,7 @@
    maquette d'écran qui déborde. Tourne aussi avec des libellés allongés de
    30 %, comme le demande la contrainte i18n. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 const VIEWS = [
@@ -23,26 +23,32 @@ const TARGETS = [
   { q: '&r=2560x1440', label: 'ordinateur' }
 ];
 
-/* rallonge chaque libellé de 30 % pour éprouver les gabarits */
+/* Rallonge chaque libellé de 30 % pour éprouver les gabarits.
+   L'allongement se fait sur le DOM et non sur les dictionnaires : React rend
+   depuis ses modules, une donnée modifiée après coup serait réécrite au
+   premier rendu. Ce qu'on éprouve ici, c'est la mise en page, pas la donnée. */
 const STRETCH = `(() => {
-  const pad = s => typeof s === 'string' && s.length > 2
-    ? s + '\\u00a0' + 'x'.repeat(Math.max(1, Math.round(s.length * 0.3)))
-    : s;
-  for (const lang of ['fr','en']) {
-    const T = window.APLAT_I18N[lang];
-    for (const k of Object.keys(T)) {
-      if (typeof T[k] === 'string') T[k] = pad(T[k]);
-      else if (Array.isArray(T[k])) T[k] = T[k].map(pad);
-    }
-  }
-  for (const f of window.APLAT_ENGINE.FAMILIES) { f.fr = pad(f.fr); f.en = pad(f.en); }
-  for (const k of Object.keys(window.APLAT_ENGINE.PALETTES)) {
-    const P = window.APLAT_ENGINE.PALETTES[k]; P.fr = pad(P.fr); P.en = pad(P.en);
+  const pad = s => {
+    const net = s.trim();
+    if (net.length <= 2) return s;
+    // Espace insécable sur un libellé, ordinaire sur une phrase : autrement
+    // l'allongement fabrique un mot de trente caractères qui ne peut pas
+    // revenir à la ligne, et on mesurerait un défaut inventé par la mesure.
+    const liant = net.length <= 24 ? '\\u00a0' : ' ';
+    return s + liant + 'x'.repeat(Math.max(1, Math.round(net.length * 0.3)));
+  };
+  const racine = document.getElementById('root');
+  const marche = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT);
+  const noeuds = [];
+  while (marche.nextNode()) noeuds.push(marche.currentNode);
+  for (const n of noeuds) {
+    if (!n.textContent.trim()) continue;
+    n.textContent = pad(n.textContent);
   }
 })()`;
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const problems = [];
 
@@ -56,21 +62,19 @@ const STRETCH = `(() => {
             hasTouch: v.w < 900, isMobile: v.w < 900
           });
           const page = await ctx.newPage();
-          if (stretched) await page.addInitScript(() => { window.__stretch = true; });
           await page.goto(`http://127.0.0.1:${PORT}/?l=${lang}${tg.q}`, { waitUntil: 'networkidle' });
+          await page.waitForTimeout(200);
           if (stretched) {
             await page.evaluate(STRETCH);
-            await page.evaluate(() => { document.querySelectorAll('[data-family]')[0].click(); });
-            await page.waitForTimeout(200);
+            await page.waitForTimeout(150);
           }
-          await page.waitForTimeout(150);
 
           const r = await page.evaluate(() => {
             const out = { hScroll: 0, clipped: [], mockOverflow: null };
             out.hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
 
             // texte coupé : scrollWidth > clientWidth sans ellipsis prévue
-            for (const n of document.querySelectorAll('button, .card-h, .grp, .leg-t, .leg-d, .res-val, .res-dev, .share-n, .note-t, .note-m, .note-h, .prefs h3, .tagline')) {
+            for (const n of document.querySelectorAll('button, .carte-h, .grp, .verdict-t, .verdict-d, .res-val, .res-appareil, .partage-n, .note-t, .note-m, .note-h, .prefs h3, .accroche')) {
               const cs = getComputedStyle(n);
               if (n.offsetParent === null) continue;
               const okX = cs.textOverflow === 'ellipsis' || cs.overflowX !== 'visible';
@@ -82,11 +86,11 @@ const STRETCH = `(() => {
             // libellés qui ne doivent jamais être coupés ni élidés
             out.truncated = [];
             const jamais = [
-              ['#ctaLabel', 'appel primaire'],
-              ['#langList .opt', 'bouton de langue'],
-              ['#themeList .opt span', 'bouton de thème'],
+              ['#cta-libelle', 'appel primaire'],
+              ['#liste-langue .opt', 'bouton de langue'],
+              ['#liste-theme .opt span', 'bouton de thème'],
               
-              ['#shareLabel', 'copier le lien']
+              ['#partage-libelle', 'copier le lien']
             ];
             for (const [sel, nom] of jamais) {
               for (const n of document.querySelectorAll(sel)) {
@@ -109,18 +113,18 @@ const STRETCH = `(() => {
             }
 
             // la maquette d'écran doit tenir dans l'appareil
-            const dev = document.getElementById('device');
-            for (const id of ['mockHandheld', 'mockDesk']) {
+            const dev = document.getElementById('appareil');
+            for (const id of ['maquette', 'maquette-bureau']) {
               const m = document.getElementById(id);
-              if (!m || m.hidden) continue;
+              if (!m) continue;
               const over = Math.max(0, m.scrollHeight - m.clientHeight);
-              const dockSel = id === 'mockDesk' ? '.mockd-dock-w' : '.mock-dock';
+              const dockSel = id === 'maquette-bureau' ? '.maqo-dock-b' : '.maq-dock';
               const dock = m.querySelector(dockSel);
               const dr = dock && dock.getBoundingClientRect();
               const vr = dev.getBoundingClientRect();
               const dockOut = dr ? Math.round(dr.bottom - vr.bottom) : null;
               if (over > 1 || (dockOut !== null && dockOut > 1)) {
-                out.mockOverflow = { id, over, dockOut, devH: Math.round(vr.height) };
+                out.maqOverflow = { id, over, dockOut, devH: Math.round(vr.height) };
               }
             }
             return out;
@@ -130,7 +134,7 @@ const STRETCH = `(() => {
           if (r.hScroll > 0) problems.push(`${tag}: défilement horizontal ${r.hScroll}px`);
           if (r.clipped.length) problems.push(`${tag}: texte coupé — ${r.clipped.slice(0, 4).join(' | ')}`);
           if (r.truncated && r.truncated.length) problems.push(`${tag}: libellé coupé — ${r.truncated.slice(0, 3).join(' | ')}`);
-          if (r.mockOverflow) problems.push(`${tag}: maquette ${r.mockOverflow.id} déborde de ${r.mockOverflow.over}px (dock à +${r.mockOverflow.dockOut}px, appareil ${r.mockOverflow.devH}px)`);
+          if (r.maqOverflow) problems.push(`${tag}: maquette ${r.maqOverflow.id} déborde de ${r.maqOverflow.over}px (dock à +${r.maqOverflow.dockOut}px, appareil ${r.maqOverflow.devH}px)`);
           await ctx.close();
         }
       }

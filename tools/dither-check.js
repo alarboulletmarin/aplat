@@ -3,25 +3,27 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.exports');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await poser(page);
 
   const { rows, crops } = await page.evaluate(async () => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const rows = [];
     for (const bg of ['#101A2E', '#17243F', '#4A5773', '#92BAD5', '#DFF478', '#F7F3E6', '#FFFFFF']) {
       const c = document.createElement('canvas'); c.width = 256; c.height = 256;
       const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
       ctx.fillStyle = bg; ctx.fillRect(0, 0, 256, 256);
-      E._paintGrain(ctx, 256, 256);
+      M.peindreGrain(ctx, 256, 256);
       const d = ctx.getImageData(0, 0, 256, 256).data;
       let mn = [255, 255, 255], mx = [0, 0, 0];
       for (let i = 0; i < d.length; i += 4) for (let k = 0; k < 3; k++) {
@@ -37,7 +39,7 @@ const OUT = path.resolve(__dirname, '../.exports');
     for (const [fam, pal] of [['vagues', 'lime'], ['vagues', 'nuit'], ['ondes', 'encre'], ['blobs', 'ciel']]) {
       const c = document.createElement('canvas'); c.width = W; c.height = H;
       const ctx = c.getContext('2d', { alpha: false });
-      E.draw(ctx, W, H, fam, pal, 1, 7314);
+      M.dessiner(ctx, W, H, { famille: fam, palette: pal, densite: 1, graine: 7314 });
       const o = document.createElement('canvas'); o.width = 600; o.height = 600;
       const oc = o.getContext('2d'); oc.imageSmoothingEnabled = false;
       oc.drawImage(c, 300, 1300, 150, 150, 0, 0, 600, 600);

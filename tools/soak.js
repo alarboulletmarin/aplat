@@ -1,11 +1,11 @@
 /* Test d'endurance : on martèle les réglages et on regarde si la mémoire, le
    nombre de nœuds ou le nombre de canevas dérivent. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch({ args: ['--js-flags=--expose-gc'] });
   const ctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
   const page = await ctx.newPage();
@@ -35,16 +35,16 @@ let PORT = 0;
     const pick = sel => { const l = document.querySelectorAll(sel); return l[Math.floor(Math.random() * l.length)]; };
     for (let i = 0; i < n; i++) {
       const r = i % 5;
-      if (r === 0) pick('[data-family]').click();
-      else if (r === 1) pick('[data-pal]').click();
-      else if (r === 2) pick('[data-dens]').click();
-      else if (r === 3) document.getElementById('btnSeed').click();
+      if (r === 0) pick('[data-famille]').click();
+      else if (r === 1) pick('[data-palette]').click();
+      else if (r === 2) pick('[data-densite]').click();
+      else if (r === 3) document.getElementById('btn-graine').click();
       else pick('[data-theme]').click();
       if (i % 40 === 0) await new Promise(r => setTimeout(r, 30));
     }
     // et un aller-retour de langue
-    document.querySelector('[data-lang="en"]').click();
-    document.querySelector('[data-lang="fr"]').click();
+    document.querySelector('[data-langue="en"]').click();
+    document.querySelector('[data-langue="fr"]').click();
   }, TOURS);
   await page.waitForTimeout(1500);
 

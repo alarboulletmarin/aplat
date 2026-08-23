@@ -3,27 +3,29 @@
    sauts. Une marche d'un seul cran étalée sur des centaines de lignes se voit ;
    des paliers courts, non. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
+  await poser(page);
 
   const out = await page.evaluate(async () => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const W = 1179, H = 2556;
     const results = [];
 
     for (const bg of ['#F7F3E6', '#92BAD5', '#17243F', '#EFA22B']) {
       for (const veil of [0.5, 0.44, 0.25, 0.12]) {
-        for (const mode of ['light', 'dark']) {
+        for (const libelles of ['clair', 'sombre']) {
           const c = document.createElement('canvas'); c.width = W; c.height = H;
           const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
           ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-          E._applyVeil(ctx, W, H, { mode, veil });
+          M.peindreVoile(ctx, W, H, { libelles, voile: veil, contraste: 0 });
           const d = ctx.getImageData(Math.round(W / 2), 0, 1, H).data;
           let runs = [], cur = 1, maxJump = 0;
           for (let y = 1; y < H; y++) {
@@ -35,7 +37,7 @@ let PORT = 0;
           }
           runs.push(cur);
           runs.sort((x, y) => y - x);
-          results.push({ bg, veil, mode, maxRun: runs[0], p90Run: runs[Math.floor(runs.length * 0.1)], steps: runs.length, maxJump });
+          results.push({ bg, veil, mode: libelles, maxRun: runs[0], p90Run: runs[Math.floor(runs.length * 0.1)], steps: runs.length, maxJump });
           c.width = 1; c.height = 1;
         }
       }

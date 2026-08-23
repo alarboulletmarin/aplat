@@ -1,22 +1,23 @@
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const STRETCH = `(() => {
   const pad = s => typeof s === 'string' && s.length > 2 ? s + '\\u00a0' + 'x'.repeat(Math.max(1, Math.round(s.length * 0.3))) : s;
   for (const lang of ['fr','en']) { const T = window.APLAT_I18N[lang];
     for (const k of Object.keys(T)) { if (typeof T[k] === 'string') T[k] = pad(T[k]); else if (Array.isArray(T[k])) T[k] = T[k].map(pad); } }
-  for (const f of window.APLAT_ENGINE.FAMILIES) { f.fr = pad(f.fr); f.en = pad(f.en); }
-  for (const k of Object.keys(window.APLAT_ENGINE.PALETTES)) { const P = window.APLAT_ENGINE.PALETTES[k]; P.fr = pad(P.fr); P.en = pad(P.en); }
+  for (const f of window.MOTEUR.FAMILIES) { f.fr = pad(f.fr); f.en = pad(f.en); }
+  for (const k of Object.keys(window.MOTEUR.PALETTES)) { const P = window.MOTEUR.PALETTES[k]; P.fr = pad(P.fr); P.en = pad(P.en); }
 })()`;
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const ctx = await browser.newContext({ viewport: { width: 320, height: 568 }, deviceScaleFactor: 2, locale: 'fr-FR', hasTouch: true, isMobile: true });
   const page = await ctx.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
   await page.evaluate(STRETCH);
-  await page.evaluate(() => document.querySelectorAll('[data-family]')[0].click());
-  await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+  await page.evaluate(() => document.querySelectorAll('[data-famille]')[0].click());
+  await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
   await page.waitForTimeout(300);
   const out = await page.evaluate(() => {
     const vw = document.documentElement.clientWidth;

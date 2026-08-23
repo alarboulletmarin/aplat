@@ -64,14 +64,14 @@ export function BarreAction({
       {children}
       <div className="barre-live" aria-live="polite">
         {phase === 'faite' && !vide && fichier && (
-          <div className="note note-faite">
+          <div className="note note-faite" id="note-faite">
             <span className="note-faite-i" aria-hidden="true">
               <i />
               <b />
             </span>
             <div className="note-txt">
               <p className="note-t">{T.enregistre}</p>
-              <p className="note-m">
+              <p className="note-m" id="note-meta">
                 {`${nombre(fichier.largeur, langue)} × ${nombre(fichier.hauteur, langue)} px · PNG · ${poids(fichier.octets, langue, T.ko, T.mo)}`}
               </p>
               <p className="note-h">{T.astuce}</p>
@@ -80,13 +80,13 @@ export function BarreAction({
         )}
 
         {phase === 'erreur' && (
-          <div className="note note-erreur">
+          <div className="note note-erreur" id="note-erreur">
             <span className="note-erreur-i" aria-hidden="true" />
             <div className="note-txt">
               <p className="note-t">{T.erreurTitre}</p>
-              <p className="note-d">{message}</p>
+              <p className="note-d" id="note-erreur-message">{message}</p>
             </div>
-            <button type="button" className="note-reessayer" onClick={onExporter}>
+            <button type="button" id="btn-reessayer" className="note-reessayer" onClick={onExporter}>
               {T.reessayer}
             </button>
           </div>
@@ -94,7 +94,7 @@ export function BarreAction({
       </div>
 
       <div className="actions">
-        <button type="button" className="btn-graine" onClick={onGraine}>
+        <button type="button" id="btn-graine" className="btn-graine" onClick={onGraine}>
           <span className="ico-encore" aria-hidden="true">
             <i />
             <b />
@@ -108,6 +108,7 @@ export function BarreAction({
             pour l'état vide, où le bouton n'a rien à faire dans le parcours. */}
         <button
           type="button"
+          id="btn-export"
           className="btn-export"
           disabled={vide}
           aria-disabled={calcul}
@@ -118,7 +119,7 @@ export function BarreAction({
             <i />
             <b />
           </span>
-          <span>{calcul ? T.rendu : T.telecharger}</span>
+          <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
         </button>
       </div>
     </div>

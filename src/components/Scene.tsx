@@ -85,10 +85,11 @@ export function Scene({
 
       <div
         className="scene-boite"
+        id="scene-boite"
         ref={boite}
         style={{ height: `${hauteurScene(fenetre)}px` }}
       >
-        <div className="appareil" style={style}>
+        <div className="appareil" id="appareil" style={style}>
           {!vide && (
             <Apercu
               motif={motif}
@@ -113,7 +114,7 @@ export function Scene({
           )}
 
           {vide && (
-            <div className="etat-vide">
+            <div className="etat-vide" id="etat-vide">
               <span className="etat-vide-i" aria-hidden="true" />
               <strong className="etat-vide-t">{textes.scene.videTitre}</strong>
               <span className="etat-vide-b">{textes.scene.videCorps}</span>
@@ -121,7 +122,7 @@ export function Scene({
           )}
 
           {calculEnCours && (
-            <div className="etat-calcul">
+            <div className="etat-calcul" id="etat-calcul">
               <span className="etat-calcul-p" aria-hidden="true">
                 <i />
                 <i />

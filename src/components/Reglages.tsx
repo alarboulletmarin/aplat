@@ -36,10 +36,10 @@ export function ChoixFamille({
   const abstraits = FAMILLES.filter((f) => f.groupe === 'abs')
   const figures = FAMILLES.filter((f) => f.groupe === 'fig')
 
-  const grille = (liste: typeof FAMILLES, titre: string) => {
+  const grille = (liste: typeof FAMILLES, titre: string, identifiant: string) => {
     const contient = liste.some((f) => f.id === valeur)
     return (
-      <GroupeRadio etiquettes={`h-famille ${titre}`} className="grille-familles">
+      <GroupeRadio id={identifiant} etiquettes={`h-famille ${titre}`} className="grille-familles">
         {liste.map((f, indice) => (
           <OptionRadio
             key={f.id}
@@ -75,12 +75,12 @@ export function ChoixFamille({
         <span className="groupe-arche" aria-hidden="true" />
         <span>{textes.reglages.groupeAbstraits}</span>
       </h3>
-      {grille(abstraits, 'h-abstraits')}
+      {grille(abstraits, 'h-abstraits', 'liste-abstraits')}
       <h3 className="groupe groupe-2" id="h-figures">
         <span className="groupe-etoile" aria-hidden="true" />
         <span>{textes.reglages.groupeFigures}</span>
       </h3>
-      {grille(figures, 'h-figures')}
+      {grille(figures, 'h-figures', 'liste-figures')}
     </div>
   )
 }
@@ -101,7 +101,7 @@ export function ChoixPalette({
       <h2 className="carte-h" id="h-palette">
         {textes.reglages.palette}
       </h2>
-      <GroupeRadio etiquettes="h-palette" className="grille-palettes">
+      <GroupeRadio id="liste-palettes" etiquettes="h-palette" className="grille-palettes">
         {ORDRE_PALETTES.map((id) => {
           const p = PALETTES[id]
           return (
@@ -146,7 +146,7 @@ export function ChoixDensite({
       <h2 className="carte-h" id="h-densite">
         {textes.reglages.densite}
       </h2>
-      <GroupeRadio etiquettes="h-densite" className="rangee-densite">
+      <GroupeRadio id="liste-densite" etiquettes="h-densite" className="rangee-densite">
         {([0, 1, 2] as Densite[]).map((niveau) => (
           <OptionRadio
             key={niveau}

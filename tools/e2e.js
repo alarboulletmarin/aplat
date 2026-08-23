@@ -3,7 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.exports/e2e');
 
@@ -12,7 +13,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const ctx = await browser.newContext({
     viewport: { width: 390, height: 844 }, deviceScaleFactor: 3,
@@ -28,14 +29,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr&m=blobs&p=nuit&d=2&s=4242&r=1179x2556`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
+  await poser(page);
 
   // --- 1. l'URL est bien lue
   const st = await page.evaluate(() => ({
-    fam: document.querySelector('[data-family][aria-checked="true"]').dataset.family,
-    pal: document.querySelector('[data-pal][aria-checked="true"]').dataset.pal,
-    dens: document.querySelector('[data-dens][aria-checked="true"]').dataset.dens,
-    res: document.getElementById('resValue').textContent,
-    seed: document.getElementById('shareNote').textContent
+    fam: document.querySelector('[data-famille][aria-checked="true"]').dataset.famille,
+    pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
+    dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
+    res: document.getElementById('res-valeur').textContent,
+    seed: document.getElementById('partage-note').textContent
   }));
   t(st.fam === 'blobs', 'URL : famille lue', st.fam);
   t(st.pal === 'nuit', 'URL : palette lue', st.pal);
@@ -47,28 +49,30 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   const url1 = page.url();
   await page.goto(url1, { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
+  await poser(page);
   const url2 = page.url();
   t(new URL(url1).search === new URL(url2).search, 'URL : aller-retour stable', url2.split('?')[1]);
 
   // --- 3. déterminisme du rendu
   const h = async () => page.evaluate(() => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const c = document.createElement('canvas'); c.width = 300; c.height = 650;
-    E.draw(c.getContext('2d', { alpha: false }), 300, 650, 'terrazzo', 'corail', 2, 987);
+    M.dessiner(c.getContext('2d', { alpha: false }), 300, 650, { famille: 'terrazzo', palette: 'corail', densite: 2, graine: 987 });
     return c.toDataURL('image/png').length + ':' + c.toDataURL('image/png').slice(-64);
   });
   const h1 = await h(), h2 = await h();
   await page.reload({ waitUntil: 'networkidle' });
+  await poser(page);
   const h3 = await h();
   t(h1 === h2 && h2 === h3, 'moteur : rendu déterministe, y compris après rechargement');
 
   // --- 4. indépendance à l'échelle : mêmes proportions à deux résolutions
   const scale = await page.evaluate(() => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     function sample(W, H) {
       const c = document.createElement('canvas'); c.width = W; c.height = H;
       const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
-      E.draw(ctx, W, H, 'arches', 'soleil', 1, 555);
+      M.dessiner(ctx, W, H, { famille: 'arches', palette: 'soleil', densite: 1, graine: 555 });
       const pts = [];
       for (const [fx, fy] of [[0.2, 0.2], [0.5, 0.5], [0.8, 0.35], [0.35, 0.8], [0.9, 0.9]]) {
         const d = ctx.getImageData(Math.round(W * fx), Math.round(H * fy), 1, 1).data;
@@ -83,12 +87,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   // --- 5. les 18 familles rendent sans erreur, et non vides
   const fams = await page.evaluate(() => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const bad = [];
-    for (const f of E.FAMILIES) for (const d of [0, 1, 2]) {
+    for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       const c = document.createElement('canvas'); c.width = 240; c.height = 520;
       const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
-      try { E.draw(ctx, 240, 520, f.id, 'lime', d, 31337); } catch (e) { bad.push(f.id + '/d' + d + ': ' + e.message); continue; }
+      try { M.dessiner(ctx, 240, 520, { famille: f.id, palette: 'lime', densite: d, graine: 31337 }); } catch (e) { bad.push(f.id + '/d' + d + ': ' + e.message); continue; }
       const px = ctx.getImageData(0, 0, 240, 520).data;
       const seen = new Set();
       for (let i = 0; i < px.length; i += 4 * 97) seen.add(px[i] + ',' + px[i + 1] + ',' + px[i + 2]);
@@ -99,42 +103,42 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   t(fams.length === 0, 'moteur : 18 familles x 3 densités rendent une image', fams.join(' | ') || '54 combinaisons');
 
   // --- 6. état vide
-  await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+  await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
   await page.waitForTimeout(200);
-  await page.fill('#inW', '');
+  await page.fill('#res-largeur', '');
   await page.waitForTimeout(250);
   const empty = await page.evaluate(() => ({
-    shown: !document.getElementById('stateEmpty').hidden,
-    disabled: document.getElementById('btnExport').disabled,
-    res: document.getElementById('resValue').textContent
+    shown: !!document.getElementById('etat-vide'),
+    disabled: document.getElementById('btn-export').disabled,
+    res: document.getElementById('res-valeur').textContent
   }));
   t(empty.shown, 'état vide : hachure affichée');
   t(empty.disabled, 'état vide : téléchargement désactivé');
   t(empty.res.includes('—'), 'état vide : résolution en tirets', empty.res);
 
   // --- 7. état erreur : au-delà de 40 Mpx
-  await page.fill('#inW', '7000');
-  await page.fill('#inH', '7000');
+  await page.fill('#res-largeur', '7000');
+  await page.fill('#res-hauteur', '7000');
   await page.waitForTimeout(250);
-  await tap('#btnExport');
+  await tap('#btn-export');
   await page.waitForTimeout(400);
   const err = await page.evaluate(() => ({
-    shown: !document.getElementById('errCard').hidden,
-    msg: document.getElementById('errMsg').textContent
+    shown: !!document.getElementById('note-erreur'),
+    msg: document.getElementById('note-erreur-message').textContent
   }));
   t(err.shown, 'état erreur : carte affichée');
   t(/49/.test(err.msg) && /40/.test(err.msg), 'état erreur : message chiffré', err.msg);
 
   // --- 8. bouton Réessayer présent et cliquable
-  t(await page.isEnabled('#btnRetry'), 'état erreur : Réessayer actif');
+  t(await page.isEnabled('#btn-reessayer'), 'état erreur : Réessayer actif');
 
   // --- 9. téléchargement réel
-  await page.fill('#inW', '1179');
-  await page.fill('#inH', '2556');
+  await page.fill('#res-largeur', '1179');
+  await page.fill('#res-hauteur', '2556');
   await page.waitForTimeout(300);
   const [dl] = await Promise.all([
     page.waitForEvent('download', { timeout: 30000 }),
-    tap('#btnExport')
+    tap('#btn-export')
   ]);
   const fname = dl.suggestedFilename();
   const fpath = path.join(OUT, fname);
@@ -147,8 +151,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   await page.waitForTimeout(600);
   const done = await page.evaluate(() => ({
-    shown: !document.getElementById('doneCard').hidden,
-    meta: document.getElementById('doneMeta').textContent
+    shown: !!document.getElementById('note-faite'),
+    meta: document.getElementById('note-meta').textContent
   }));
   t(done.shown, 'état succès : carte affichée');
   t(/PNG/.test(done.meta) && /(Mo|Ko)/.test(done.meta) && /1\s*179/.test(done.meta), 'état succès : dimensions, format et poids', done.meta);
@@ -159,37 +163,62 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   t(w === 1179 && hh === 2556, 'export : dimensions exactes du fichier', w + 'x' + hh);
 
   // --- 11. changer de réglage efface la carte succès
-  await tap('[data-family="etoiles"]');
+  await tap('[data-famille="etoiles"]');
   await page.waitForTimeout(300);
-  t(await page.evaluate(() => document.getElementById('doneCard').hidden), 'succès effacé au changement de réglage');
+  t(await page.evaluate(() => !document.getElementById('note-faite')), 'succès effacé au changement de réglage');
 
   // --- 13. langue
-  await tap('[data-lang="en"]');
+  await tap('[data-langue="en"]');
   await page.waitForTimeout(300);
   const en = await page.evaluate(() => ({
     html: document.documentElement.lang,
-    cta: document.getElementById('ctaLabel').textContent,
+    cta: document.getElementById('cta-libelle').textContent,
     title: document.title,
     url: location.search
   }));
   t(en.html === 'en' && en.cta === 'Download' && /Download|generative/.test(en.title) && en.url.includes('l=en'), 'langue : bascule complète', JSON.stringify(en));
 
   // --- 14. thème
-  await tap('[data-theme="dark"]');
+  await tap('[data-theme="sombre"]');
   await page.waitForTimeout(200);
   const th = await page.evaluate(() => ({
     attr: document.documentElement.getAttribute('data-theme'),
     bg: getComputedStyle(document.body).backgroundColor,
     url: location.search
   }));
-  t(th.attr === 'dark' && th.url.includes('t=dark'), 'thème : bascule et mémorisation dans l\'URL', th.bg);
+  t(th.attr === 'sombre' && th.url.includes('t=sombre'), 'thème : bascule et mémorisation dans l\'URL', th.bg);
 
-  // --- 15. aucun stockage
-  const store = await page.evaluate(() => ({
-    ls: localStorage.length, ss: sessionStorage.length, cookie: document.cookie.length,
-    sw: navigator.serviceWorker ? navigator.serviceWorker.controller !== null : false
-  }));
-  t(store.ls === 0 && store.ss === 0 && store.cookie === 0 && !store.sw, 'vie privée : aucun stockage', JSON.stringify(store));
+  /* --- 15. rien d'écrit sur l'appareil
+     L'application est installable : un cache existe donc, et l'annoncer
+     absent serait faux. Ce qu'on vérifie, c'est ce qu'il contient — les
+     fichiers de l'application, jamais un réglage ni une image — et qu'aucun
+     des mécanismes de stockage adressables ne porte quoi que ce soit. */
+  await page.evaluate(() => navigator.serviceWorker && navigator.serviceWorker.ready).catch(() => {});
+  await page.waitForTimeout(600);
+  const store = await page.evaluate(async () => {
+    const entrees = [];
+    if ('caches' in window) {
+      for (const nom of await caches.keys()) {
+        const cache = await caches.open(nom);
+        for (const requete of await cache.keys()) entrees.push(requete.url);
+      }
+    }
+    let bases = [];
+    try { bases = (await indexedDB.databases()).map(b => b.name); } catch (e) { bases = []; }
+    return {
+      ls: localStorage.length, ss: sessionStorage.length,
+      cookie: document.cookie.length, bases, entrees
+    };
+  });
+  t(store.ls === 0 && store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
+    'vie privée : rien d\'écrit sur l\'appareil',
+    `local ${store.ls}, session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
+  const horsSite = store.entrees.filter(u => !u.startsWith('http://127.0.0.1:' + PORT));
+  const avecEtat = store.entrees.filter(u => /[?&](m|p|d|s|r|t)=/.test(u));
+  t(store.entrees.length > 0 && horsSite.length === 0 && avecEtat.length === 0,
+    'vie privée : le cache ne contient que les fichiers de l\'application',
+    `${store.entrees.length} entrées` + (horsSite.length ? ' | HORS SITE ' + horsSite.join(', ') : '')
+      + (avecEtat.length ? ' | AVEC ÉTAT ' + avecEtat.join(', ') : ''));
 
   t(errors.length === 0, 'aucune erreur JavaScript', errors.slice(0, 3).join(' | '));
 
@@ -202,7 +231,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await lp.waitForTimeout(900);
     const lazy = await lp.evaluate(() => {
       let drawn = 0, total = 0;
-      for (const cv of document.querySelectorAll('canvas[data-thumb]')) { total++; if (cv.dataset.painted) drawn++; }
+      for (const cv of document.querySelectorAll('canvas[data-vignette]')) { total++; if (cv.dataset.peint) drawn++; }
       return { drawn, total };
     });
     t(lazy.drawn < lazy.total, 'vignettes : paresseuses au premier affichage', lazy.drawn + '/' + lazy.total + ' dessinées');
@@ -213,21 +242,21 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   //          remises à jour au changement de palette, et conformes à un
   //          recalcul indépendant par le moteur
   {
-    await tap('[data-pal="encre"]');
+    await tap('[data-palette="encre"]');
     await page.waitForTimeout(300);
-    await page.evaluate(() => document.getElementById('famAbs').scrollIntoView({ block: 'center' }));
+    await page.evaluate(() => document.getElementById('liste-abstraits').scrollIntoView({ block: 'center' }));
     await page.waitForTimeout(800);
 
     const vign = await page.evaluate(() => {
-      const E = window.APLAT_ENGINE;
+      const M = window.MOTEUR;
       const q = new URLSearchParams(location.search);
       const PAL = q.get('p'), DENS = parseInt(q.get('d'), 10), SEED = parseInt(q.get('s'), 10);
       const out = { drawn: 0, blank: [], offscreen: 0, mismatch: [], hashes: {} };
       const vh = innerHeight;
-      for (const cv of document.querySelectorAll('canvas[data-thumb]')) {
+      for (const cv of document.querySelectorAll('canvas[data-vignette]')) {
         const r = cv.getBoundingClientRect();
         if (!(r.bottom > -200 && r.top < vh + 200)) { out.offscreen++; continue; }
-        if (!cv.dataset.painted) { out.blank.push(cv.dataset.thumb); continue; }
+        if (!cv.dataset.peint) { out.blank.push(cv.dataset.vignette); continue; }
         const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
         const teintes = new Set();
         let h = 2166136261;
@@ -235,17 +264,17 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
           teintes.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]);
           h = Math.imul(h ^ (d[i] * 65536 + d[i + 1] * 256 + d[i + 2]), 16777619) >>> 0;
         }
-        if (teintes.size < 4) { out.blank.push(cv.dataset.thumb); continue; }
+        if (teintes.size < 4) { out.blank.push(cv.dataset.vignette); continue; }
         out.drawn++;
-        out.hashes[cv.dataset.thumb] = h;
+        out.hashes[cv.dataset.vignette] = h;
         // recalcul indépendant : le moteur doit produire exactement la même image
         const ref = document.createElement('canvas');
         ref.width = cv.width; ref.height = cv.height;
-        E.draw(ref.getContext('2d', { alpha: false }), cv.width, cv.height, cv.dataset.thumb, PAL, DENS, SEED);
+        M.dessiner(ref.getContext('2d', { alpha: false }), cv.width, cv.height, { famille: cv.dataset.vignette, palette: PAL, densite: DENS, graine: SEED });
         const rd = ref.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
         let rh = 2166136261;
         for (let i = 0; i < rd.length; i += 4 * 53) rh = Math.imul(rh ^ (rd[i] * 65536 + rd[i + 1] * 256 + rd[i + 2]), 16777619) >>> 0;
-        if (rh !== h) out.mismatch.push(cv.dataset.thumb);
+        if (rh !== h) out.mismatch.push(cv.dataset.vignette);
       }
       return out;
     });
@@ -254,13 +283,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(vign.mismatch.length === 0, 'vignettes : conformes à un recalcul indépendant du moteur',
       vign.mismatch.join(',') || 'toutes identiques');
 
-    await tap('[data-pal="lime"]');
+    await tap('[data-palette="lime"]');
     await page.waitForTimeout(500);
     const apres = await page.evaluate(hashes => {
       const changed = [], same = [];
-      for (const cv of document.querySelectorAll('canvas[data-thumb]')) {
-        const id = cv.dataset.thumb;
-        if (!(id in hashes) || !cv.dataset.painted) continue;
+      for (const cv of document.querySelectorAll('canvas[data-vignette]')) {
+        const id = cv.dataset.vignette;
+        if (!(id in hashes) || !cv.dataset.peint) continue;
         const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
         let h = 2166136261;
         for (let i = 0; i < d.length; i += 4 * 53) h = Math.imul(h ^ (d[i] * 65536 + d[i + 1] * 256 + d[i + 2]), 16777619) >>> 0;
@@ -283,7 +312,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
       const a = document.activeElement, cs = getComputedStyle(a);
       return { cls: String(a.className), outline: cs.outlineWidth, left: a.getBoundingClientRect().left, txt: (a.textContent || '').trim().slice(0, 24) };
     });
-    t(f1.cls.includes('skip'), 'clavier : le lien d\'évitement vient en premier', f1.txt);
+    t(f1.cls.includes('evitement'), 'clavier : le lien d\'évitement vient en premier', f1.txt);
     t(parseFloat(f1.outline) >= 3, 'clavier : focus visible', f1.outline);
     t(f1.left > 0, 'clavier : le lien d\'évitement apparaît au focus', 'left=' + Math.round(f1.left));
     await kp.keyboard.press('Enter');
@@ -311,13 +340,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(kb.stops <= 22, 'clavier : parcours ramené sous 22 arrêts', kb.stops + ' arrêts (42 avant)');
 
     // flèches : elles déplacent le choix dans le groupe
-    await kp.evaluate(() => document.querySelector('#densList .opt[aria-checked="true"]').focus());
-    const avant = await kp.evaluate(() => document.querySelector('#densList .opt[aria-checked="true"]').dataset.dens);
+    await kp.evaluate(() => document.querySelector('#liste-densite .opt[aria-checked="true"]').focus());
+    const avant = await kp.evaluate(() => document.querySelector('#liste-densite .opt[aria-checked="true"]').dataset.densite);
     await kp.keyboard.press('ArrowRight');
     await kp.waitForTimeout(250);
     const apresFleche = await kp.evaluate(() => ({
-      checked: document.querySelector('#densList .opt[aria-checked="true"]').dataset.dens,
-      focused: document.activeElement.dataset.dens
+      checked: document.querySelector('#liste-densite .opt[aria-checked="true"]').dataset.densite,
+      focused: document.activeElement.dataset.densite
     }));
     t(apresFleche.checked !== avant && apresFleche.checked === apresFleche.focused,
       'clavier : la flèche déplace le choix et le focus ensemble', avant + ' -> ' + apresFleche.checked);
@@ -343,7 +372,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(masque.bad.length === 0, 'clavier : aucun focus masqué par les barres collantes (WCAG 2.4.11)',
       masque.total + ' arrêts testés' + (masque.bad.length ? ' — ' + masque.bad.slice(0, 5).join(' | ') : ''));
     // le focus doit rester visible sur le bouton primaire, qui est sur aplat lime
-    await kp.evaluate(() => document.getElementById('btnExport').focus());
+    await kp.evaluate(() => document.getElementById('btn-export').focus());
     const f2 = await kp.evaluate(() => {
       const cs = getComputedStyle(document.activeElement);
       return { w: cs.outlineWidth, c: cs.outlineColor };
@@ -357,8 +386,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await rp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await rp.waitForTimeout(300);
     const rm = await rp.evaluate(() => {
-      const c = document.getElementById('previewCanvas');
-      const dots = document.querySelector('.st-busy-d i');
+      const c = document.getElementById('apercu');
+      const dots = document.querySelector('.etat-calcul-p i');
       return {
         canvasTransition: getComputedStyle(c).transitionDuration,
         canvasOpacity: getComputedStyle(c).opacity,
@@ -385,16 +414,16 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     // tout en une seule évaluation : les clics sont synchrones, donc bien
     // pendant la fenêtre d'encodage
     const pendant = await rp.evaluate(async () => {
-      document.getElementById('btnExport').click();
+      document.getElementById('btn-export').click();
       await new Promise(r => setTimeout(r, 120));       // le dessin a démarré
-      const busyAvant = document.getElementById('btnExport').getAttribute('aria-busy');
-      document.querySelector('[data-pal="soleil"]').click();
-      document.querySelector('[data-dens="2"]').click();
-      document.getElementById('btnExport').click();
-      document.getElementById('btnExport').click();
-      document.getElementById('btnExport').click();
-      const busyApres = document.getElementById('btnExport').getAttribute('aria-busy');
-      const voile = !document.getElementById('stateBusy').hidden;
+      const busyAvant = document.getElementById('btn-export').getAttribute('aria-busy');
+      document.querySelector('[data-palette="soleil"]').click();
+      document.querySelector('[data-densite="2"]').click();
+      document.getElementById('btn-export').click();
+      document.getElementById('btn-export').click();
+      document.getElementById('btn-export').click();
+      const busyApres = document.getElementById('btn-export').getAttribute('aria-busy');
+      const voile = !!document.getElementById('etat-calcul');
       return { busyAvant, busyApres, voile };
     });
     t(pendant.busyAvant === 'true', 'export : le bouton est marqué occupé pendant le rendu', pendant.busyAvant);
@@ -407,9 +436,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(dls[0] === 'aplat-blobs-nuit-777-5000x5000.png',
       'export : le nom du fichier décrit bien l\'image dessinée, pas les réglages changés depuis', dls[0]);
     const apres = await rp.evaluate(() => ({
-      pal: document.querySelector('[data-pal][aria-checked="true"]').dataset.pal,
-      meta: document.getElementById('doneMeta').textContent,
-      done: !document.getElementById('doneCard').hidden
+      pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
+      meta: document.getElementById('note-meta').textContent,
+      done: !!document.getElementById('note-faite')
     }));
     t(apres.pal === 'soleil', 'export : le réglage changé pendant l\'encodage vaut pour la suite', apres.pal);
     t(apres.done && /5\s*000/.test(apres.meta), 'export : la fiche décrit l\'image produite', apres.meta);
@@ -440,11 +469,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await bp.waitForTimeout(500);
     const dls2 = [];
     bp.on('download', d => dls2.push(d.suggestedFilename()));
-    await bp.$eval('#btnExport', e => e.click());
+    await bp.$eval('#btn-export', e => e.click());
     await bp.waitForTimeout(4000);
     const vide = await bp.evaluate(() => ({
-      err: !document.getElementById('errCard').hidden,
-      msg: document.getElementById('errMsg').textContent
+      err: !!document.getElementById('note-erreur'),
+      msg: document.getElementById('note-erreur-message').textContent
     }));
     t(vide.err, 'export : un canevas resté noir est signalé comme une erreur');
     t(/taille|large/i.test(vide.msg), 'export : le message dit quoi faire', vide.msg.slice(0, 60));
@@ -458,19 +487,20 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     const ap = await actx.newPage();
     await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
     await ap.waitForTimeout(600);
+    await poser(ap);
     const inv = await ap.evaluate(() => {
-      const E = window.APLAT_ENGINE;
-      const cv = document.getElementById('previewCanvas');
+      const M = window.MOTEUR;
+      const cv = document.getElementById('apercu');
       const r = cv.getBoundingClientRect();
       const arCv = r.width / r.height, arCible = 1179 / 2556;
       let veil = 0, niveau = 0, total = 0;
-      const niv = m => m.ratio >= 4.5 ? 'bonne' : m.ratio >= 3 ? 'correcte' : 'faible';
-      for (const f of E.FAMILIES) for (const p of E.PAL_ORDER) for (const d of [0, 1, 2]) {
+      const niv = m => m.contraste >= 4.5 ? 'bonne' : m.contraste >= 3 ? 'correcte' : 'faible';
+      for (const f of M.FAMILLES) for (const p of M.ORDRE_PALETTES) for (const d of [0, 1, 2]) {
         total++;
-        const a = E.measure(f.id, p, d, 7314, cv.width, cv.height);
-        const b = E.measure(f.id, p, d, 7314, 1179, 2556);
-        if (Math.round(a.veil * 100) !== Math.round(b.veil * 100)) veil++;
-        if (niv(a) !== niv(b) || a.mode !== b.mode) niveau++;
+        const a = M.mesurer(f.id, p, d, 7314, cv.width, cv.height);
+        const b = M.mesurer(f.id, p, d, 7314, 1179, 2556);
+        if (Math.round(a.voile * 100) !== Math.round(b.voile * 100)) veil++;
+        if (niv(a) !== niv(b) || a.libelles !== b.libelles) niveau++;
       }
       return { ecart: +(((arCv / arCible) - 1) * 100).toFixed(2), total, veil, niveau };
     });
@@ -485,7 +515,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
                                    [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
       await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
       await ap.waitForTimeout(200);
-      const got = await ap.evaluate(() => document.getElementById('resDevice').textContent.split(' · ')[0]);
+      const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(' · ')[0]);
       if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
     }
     t(classe.length === 0, 'aperçu : le type d\'appareil est correct, téléphones récents compris', classe.join(' | ') || '6 formats');
@@ -498,15 +528,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     const sp2 = await sctx2.newPage();
     await sp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await sp2.waitForTimeout(400);
-    await sp2.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await sp2.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await sp2.waitForTimeout(200);
 
-    await sp2.fill('#inW', '');
-    await sp2.type('#inW', '9999');
+    await sp2.fill('#res-largeur', '');
+    await sp2.type('#res-largeur', '9999');
     await sp2.waitForTimeout(300);
     const clamp = await sp2.evaluate(() => ({
-      champ: document.getElementById('inW').value,
-      carte: document.getElementById('resValue').textContent,
+      champ: document.getElementById('res-largeur').value,
+      carte: document.getElementById('res-valeur').textContent,
       url: location.search
     }));
     t(clamp.champ === '8000' && /8\s*000/.test(clamp.carte) && /8000x/.test(clamp.url),
@@ -514,28 +544,28 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
       clamp.champ + ' / ' + clamp.carte + ' / ' + clamp.url);
 
     // saisie mal formée : le champ montre ce que l'app utilise
-    await sp2.fill('#inW', '');
-    await sp2.type('#inW', '19e20');
+    await sp2.fill('#res-largeur', '');
+    await sp2.type('#res-largeur', '19e20');
     await sp2.waitForTimeout(300);
     const mal = await sp2.evaluate(() => ({
-      champ: document.getElementById('inW').value,
-      carte: document.getElementById('resValue').textContent
+      champ: document.getElementById('res-largeur').value,
+      carte: document.getElementById('res-valeur').textContent
     }));
     t(mal.champ === '1920' && /1\s*920/.test(mal.carte),
       'saisie : un caractère non numérique est filtré sans vider l\'état',
       mal.champ + ' / ' + mal.carte);
 
     // borne basse : signalée, et visible
-    await sp2.fill('#inW', '');
-    await sp2.type('#inW', '5');
+    await sp2.fill('#res-largeur', '');
+    await sp2.type('#res-largeur', '5');
     await sp2.waitForTimeout(300);
     const bas = await sp2.evaluate(() => {
-      const i = document.getElementById('inW'), j = document.getElementById('inH');
-      const h = document.getElementById('resHint');
+      const i = document.getElementById('res-largeur'), j = document.getElementById('res-hauteur');
+      const h = document.getElementById('res-aide');
       const cs = getComputedStyle(i), csOk = getComputedStyle(j);
       return {
         invalide: i.getAttribute('aria-invalid'),
-        etat: h.dataset.state,
+        etat: h.dataset.etat,
         message: h.textContent.trim(),
         bordure: cs.borderTopWidth,
         bordureOk: csOk.borderTopWidth,
@@ -559,12 +589,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await lp2.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await lp2.waitForTimeout(600);
     const churn = await lp2.evaluate(async () => {
-      const cibles = ['legTitle', 'legDetail', 'shareNote', 'resValue', 'ctaLabel'];
+      const cibles = ['verdict-titre', 'verdict-detail', 'partage-note', 'res-valeur', 'cta-libelle'];
       let ecritures = 0;
       const obs = new MutationObserver(ms => { ecritures += ms.length; });
       for (const id of cibles) obs.observe(document.getElementById(id), { childList: true, characterData: true, subtree: true });
       // trois rendus qui ne changent rien de ces textes
-      const b = document.querySelector('[data-family][aria-checked="true"]');
+      const b = document.querySelector('[data-famille][aria-checked="true"]');
       for (let i = 0; i < 3; i++) { b.click(); await new Promise(r => setTimeout(r, 120)); }
       obs.disconnect();
       return ecritures;
@@ -572,14 +602,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(churn === 0, 'régions live : rien n\'est réécrit quand rien ne change', churn + ' écritures');
 
     // et l'état vide n'affiche aucun chiffre inventé
-    await lp2.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await lp2.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await lp2.waitForTimeout(200);
-    await lp2.fill('#inW', '');
+    await lp2.fill('#res-largeur', '');
     await lp2.waitForTimeout(400);
     const vide2 = await lp2.evaluate(() => ({
-      detail: document.getElementById('legDetail').textContent,
-      titre: document.getElementById('legTitle').textContent,
-      pastilles: [...document.querySelectorAll('.leg-good, .leg-ok, .leg-low')].filter(n => !n.hidden).length
+      detail: document.getElementById('verdict-detail').textContent,
+      titre: document.getElementById('verdict-titre').textContent,
+      pastilles: document.querySelectorAll('.verdict-bonne, .verdict-correcte, .verdict-faible').length
     }));
     t(!/:1/.test(vide2.detail) && vide2.pastilles === 0,
       'lisibilité : aucun chiffre affiché tant qu\'il n\'y a rien à mesurer', vide2.detail.slice(0, 50));
@@ -598,11 +628,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&p=constructor&m=blobs', { waitUntil: 'networkidle' });
     await up.waitForTimeout(500);
     const proto = await up.evaluate(() => ({
-      pal: (document.querySelector('[data-pal][aria-checked="true"]') || {}).dataset,
-      peint: document.getElementById('previewCanvas').width > 4,
+      pal: (document.querySelector('[data-palette][aria-checked="true"]') || {}).dataset,
+      peint: document.getElementById('apercu').dataset.peint === '1',
       url: location.search
     }));
-    t(proto.pal && proto.pal.pal === 'lime', 'URL : palette inconnue ramenée au défaut', proto.pal && proto.pal.pal);
+    t(proto.pal && proto.pal.palette === 'lime', 'URL : palette inconnue ramenée au défaut', proto.pal && proto.pal.palette);
     t(proto.peint, 'URL : le rendu a bien eu lieu malgré le paramètre hostile');
     t(uerr.length === 0, 'URL : aucune erreur levée', uerr.slice(0, 2).join(' | '));
 
@@ -611,8 +641,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
       await up.goto('http://127.0.0.1:' + PORT + '/?l=fr&' + q, { waitUntil: 'networkidle' });
       await up.waitForTimeout(300);
       const v = await up.evaluate(() => ({
-        res: document.getElementById('resValue').textContent,
-        dev: document.getElementById('resDevice').textContent,
+        res: document.getElementById('res-valeur').textContent,
+        dev: document.getElementById('res-appareil').textContent,
         url: location.search
       }));
       t(/détecté/.test(v.dev) && !/—/.test(v.res), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.dev);
@@ -625,10 +655,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(!/[?&]r=/.test(propre), 'URL : la résolution détectée ne part pas dans le lien partagé', propre);
 
     // une résolution saisie à la main, elle, est transmise
-    await up.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await up.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await up.waitForTimeout(200);
-    await up.fill('#inW', '2560');
-    await up.fill('#inH', '1440');
+    await up.fill('#res-largeur', '2560');
+    await up.fill('#res-hauteur', '1440');
     await up.waitForTimeout(400);
     const manuel = await up.evaluate(() => location.search);
     t(/[?&]r=2560x1440/.test(manuel), 'URL : une résolution saisie à la main est transmise', manuel);
@@ -647,14 +677,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     });
     await sp.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await sp.waitForTimeout(400);
-    await sp.$eval('#shareBtn', e => e.click());
+    await sp.$eval('#partage-bouton', e => e.click());
     await sp.waitForTimeout(400);
     const echec = await sp.evaluate(() => ({
-      label: document.getElementById('shareLabel').textContent,
-      note: document.getElementById('shareNote').textContent,
-      repli: !document.getElementById('shareFallback').hidden,
-      url: document.getElementById('shareUrl').value,
-      live: !!document.getElementById('shareNote').getAttribute('aria-live')
+      label: document.getElementById('partage-libelle').textContent,
+      note: document.getElementById('partage-note').textContent,
+      repli: !!document.querySelector('.partage-repli'),
+      url: document.getElementById('partage-lien').value,
+      live: !!document.getElementById('partage-note').getAttribute('aria-live')
     }));
     t(!/copié/i.test(echec.label), 'partage : pas de « lien copié » quand la copie échoue', echec.label);
     t(/impossible/i.test(echec.note), 'partage : l\'échec est dit', echec.note.slice(0, 40));
@@ -667,11 +697,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     const op = await octx.newPage();
     await op.goto('http://127.0.0.1:' + PORT + '/?l=fr', { waitUntil: 'networkidle' });
     await op.waitForTimeout(400);
-    await op.$eval('#shareBtn', e => e.click());
+    await op.$eval('#partage-bouton', e => e.click());
     await op.waitForTimeout(400);
     const ok2 = await op.evaluate(() => ({
-      label: document.getElementById('shareLabel').textContent,
-      repli: !document.getElementById('shareFallback').hidden
+      label: document.getElementById('partage-libelle').textContent,
+      repli: !!document.querySelector('.partage-repli')
     }));
     t(/copié/i.test(ok2.label) && !ok2.repli, 'partage : succès annoncé, pas de repli affiché', ok2.label);
     await octx.close();

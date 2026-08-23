@@ -71,6 +71,7 @@ export function Apercu({
   return (
     <canvas
       ref={canevas}
+      id="apercu"
       className="appareil-canevas"
       role={description ? 'img' : undefined}
       aria-label={description ?? undefined}

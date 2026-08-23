@@ -10,10 +10,12 @@ import { useRef, type ButtonHTMLAttributes, type KeyboardEvent, type ReactNode }
  * y a deux barres collantes.
  */
 export function GroupeRadio({
+  id,
   etiquettes,
   className,
   children,
 }: {
+  id: string
   /** Les `id` des titres qui nomment le groupe, séparés par une espace. */
   etiquettes: string
   className?: string
@@ -48,6 +50,7 @@ export function GroupeRadio({
 
   return (
     <div
+      id={id}
       ref={cadre}
       role="radiogroup"
       aria-labelledby={etiquettes}

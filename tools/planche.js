@@ -3,13 +3,14 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
@@ -18,10 +19,10 @@ const OUT = path.resolve(__dirname, '../.shots');
   const dens = parseInt(process.argv[3] || '1', 10);
 
   const uri = await page.evaluate(({ pal, dens }) => {
-    const E = window.APLAT_ENGINE;
+    const M = window.MOTEUR;
     const W = 1179, H = 2556;
     const cols = 6, cw = 210, ch = Math.round(cw * H / W), pad = 14, lab = 26;
-    const rows = Math.ceil(E.FAMILIES.length / cols);
+    const rows = Math.ceil(M.FAMILLES.length / cols);
     const o = document.createElement('canvas');
     o.width = cols * (cw + pad) + pad;
     o.height = rows * (ch + pad + lab) + pad;
@@ -34,10 +35,10 @@ const OUT = path.resolve(__dirname, '../.shots');
     tmp.width = W; tmp.height = H;
     const tctx = tmp.getContext('2d', { alpha: false });
 
-    E.FAMILIES.forEach((f, i) => {
+    M.FAMILLES.forEach((f, i) => {
       const c = i % cols, r = Math.floor(i / cols);
       const x = pad + c * (cw + pad), y = pad + r * (ch + pad + lab);
-      E.draw(tctx, W, H, f.id, pal, dens, 7314);
+      M.dessiner(tctx, W, H, { famille: f.id, palette: pal, densite: dens, graine: 7314 });
       g.drawImage(tmp, 0, 0, W, H, x, y, cw, ch);
       g.strokeStyle = '#17243F'; g.lineWidth = 1.5;
       g.strokeRect(x + 0.75, y + 0.75, cw - 1.5, ch - 1.5);

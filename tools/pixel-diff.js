@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 
 const REF = process.env.REF_DIR ||
   '/tmp/claude-0/-home-user-aplat/8f5dcbc4-f656-52ad-aa59-e5dc203b1088/scratchpad/refsite';
@@ -29,7 +29,7 @@ if (!require('fs').existsSync(REF)) {
     fs.createReadStream(f).pipe(res);
   }).listen(0);
   const refPort = refSrv.address().port;
-  const { srv, port } = start();
+  const { srv, port } = await ouvrir();
   const browser = await launch();
 
   const W = 1280, H = 900;

@@ -1,10 +1,10 @@
 /* Combien coûte une frappe dans le champ de résolution, et un changement de
    palette ? Mesuré sur un profil mobile lent. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR', hasTouch: true, isMobile: true });
   const page = await ctx.newPage();
@@ -15,10 +15,10 @@ let PORT = 0;
 
   const r = await page.evaluate(async () => {
     const out = {};
-    const el = document.getElementById('resSelect');
-    el.value = 'custom'; el.dispatchEvent(new Event('change', { bubbles: true }));
+    const el = document.getElementById('res-select');
+    el.value = 'surMesure'; el.dispatchEvent(new Event('change', { bubbles: true }));
     await new Promise(r => setTimeout(r, 200));
-    const inW = document.getElementById('inW');
+    const inW = document.getElementById('res-largeur');
 
     function timeIt(label, fn, n) {
       const t0 = performance.now();
@@ -31,13 +31,13 @@ let PORT = 0;
       inW.dispatchEvent(new Event('input', { bubbles: true }));
     }, 12);
 
-    const pals = [...document.querySelectorAll('[data-pal]')];
+    const pals = [...document.querySelectorAll('[data-palette]')];
     timeIt('changement de palette', i => pals[i % pals.length].click(), 8);
 
-    const fams = [...document.querySelectorAll('[data-family]')];
+    const fams = [...document.querySelectorAll('[data-famille]')];
     timeIt('changement de famille', i => fams[i % fams.length].click(), 8);
 
-    timeIt('nouvelle graine', () => document.getElementById('btnSeed').click(), 6);
+    timeIt('nouvelle graine', () => document.getElementById('btn-graine').click(), 6);
     return out;
   });
 

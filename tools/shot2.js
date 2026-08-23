@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 const OUT = path.resolve(__dirname, '../.shots');
 let PORT = 0;
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
 
   async function grab(name, opts, q, actions) {
@@ -34,7 +34,7 @@ let PORT = 0;
   await grab('vp-desk-target', desk, '?l=fr&r=2560x1440');
   await grab('vp-tablet-target', desk, '?l=fr&r=2048x2732');
   await grab('vp-phone-resedit', phone, '?l=fr', async p => {
-    await p.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForTimeout(300);
+    await p.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForTimeout(300);
     await p.mouse.wheel(0, 2600); await p.waitForTimeout(300);
   });
 

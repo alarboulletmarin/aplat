@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useId, useRef, type ChangeEvent } from 'react'
+import { useRef, type ChangeEvent } from 'react'
 import { nombre } from '../lib/format'
 import type { Langue } from '../lib/moteur'
 import {
@@ -65,8 +65,10 @@ export function ChoixResolution({
 }) {
   const T = textes.resolution
   const champLargeur = useRef<HTMLInputElement>(null)
-  const idAide = useId()
-  const idSelect = useId()
+  /* Identifiants fixes : il n'y a qu'un jeu de champs sur la page, et les
+     vérifications comme les tests d'accessibilité doivent pouvoir les nommer. */
+  const idAide = 'res-aide'
+  const idSelect = 'res-select'
 
   const liste = presets(textes, detecte)
   const trouve = liste.find(
@@ -124,7 +126,7 @@ export function ChoixResolution({
         </span>
       </label>
 
-      <p className="res-appareil">{`${nomType} · ${origine}`}</p>
+      <p className="res-appareil" id="res-appareil">{`${nomType} · ${origine}`}</p>
       <p className="vh" id="res-valeur">
         {vide
           ? '— × —'
@@ -138,6 +140,7 @@ export function ChoixResolution({
               <span>{T.largeur}</span>
               <input
                 ref={champLargeur}
+                id="res-largeur"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -152,6 +155,7 @@ export function ChoixResolution({
             <label>
               <span>{T.hauteur}</span>
               <input
+                id="res-hauteur"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"

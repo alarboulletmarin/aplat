@@ -63,17 +63,17 @@ export function Partage({
         {textes.partage.titre}
       </h2>
 
-      <button type="button" className="partage-b" ref={bouton} onClick={onCopier}>
+      <button type="button" id="partage-bouton" className="partage-b" ref={bouton} onClick={onCopier}>
         <span className="ico-lien" aria-hidden="true">
           <i />
           <i />
         </span>
-        <span>{copie ? textes.partage.copie : textes.partage.copier}</span>
+        <span id="partage-libelle">{copie ? textes.partage.copie : textes.partage.copier}</span>
       </button>
 
       {/* Le même rappel ne peut pas servir de succès et d'échec : un refus de
           permission afficherait « Lien copié » alors que rien n'a été copié. */}
-      <p className="partage-n" aria-live="polite">
+      <p className="partage-n" id="partage-note" aria-live="polite">
         {echecCopie
           ? textes.partage.echec
           : `${textes.partage.note} ${textes.partage.graine} ${graine}`}
@@ -82,7 +82,7 @@ export function Partage({
       {echecCopie && (
         <label className="partage-repli">
           <span className="vh">{textes.partage.copier}</span>
-          <input type="text" ref={champ} value={lien} readOnly spellCheck={false} autoComplete="off" />
+          <input type="text" id="partage-lien" ref={champ} value={lien} readOnly spellCheck={false} autoComplete="off" />
         </label>
       )}
 
@@ -91,7 +91,7 @@ export function Partage({
       <div className="prefs">
         <div>
           <h3 id="h-langue">{textes.preferences.langue}</h3>
-          <GroupeRadio etiquettes="h-langue" className="prefs-rangee">
+          <GroupeRadio id="liste-langue" etiquettes="h-langue" className="prefs-rangee">
             {(
               [
                 { id: 'fr' as Langue, libelle: 'Français' },
@@ -113,7 +113,7 @@ export function Partage({
         </div>
         <div>
           <h3 id="h-theme">{textes.preferences.theme}</h3>
-          <GroupeRadio etiquettes="h-theme" className="prefs-rangee">
+          <GroupeRadio id="liste-theme" etiquettes="h-theme" className="prefs-rangee">
             {themes.map((t) => (
               <OptionRadio
                 key={t.id}

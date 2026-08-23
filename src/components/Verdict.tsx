@@ -28,8 +28,8 @@ export function Verdict({
       <div className="verdict" aria-live="polite">
         <span className="verdict-i" aria-hidden="true" />
         <div className="verdict-txt">
-          <p className="verdict-t">{T.titre}</p>
-          <p className="verdict-d">{T.attente}</p>
+          <p className="verdict-t" id="verdict-titre">{T.titre}</p>
+          <p className="verdict-d" id="verdict-detail">{T.attente}</p>
         </div>
       </div>
     )
@@ -51,8 +51,8 @@ export function Verdict({
         <span className={`verdict-${rang}`} />
       </span>
       <div className="verdict-txt">
-        <p className="verdict-t">{`${T.titre} · ${mot}`}</p>
-        <p className="verdict-d">
+        <p className="verdict-t" id="verdict-titre">{`${T.titre} · ${mot}`}</p>
+        <p className="verdict-d" id="verdict-detail">
           {`${decimal(mesure.contraste, langue)}:1 · ${libelles} · ${voile} — ${conseil}`}
         </p>
       </div>

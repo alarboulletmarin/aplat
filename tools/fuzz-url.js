@@ -1,7 +1,7 @@
 /* L'URL est la seule entrée extérieure du produit. On lui envoie des valeurs
    hostiles et on vérifie que la page rend toujours, sans erreur ni injection. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 const VALS = [
@@ -16,7 +16,7 @@ const VALS = [
 const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const ctx = await browser.newContext({ viewport: { width: 900, height: 900 }, locale: 'fr-FR' });
   const page = await ctx.newPage();
@@ -34,11 +34,11 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
         await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(90);
         ok = await page.evaluate(() => ({
-          peint: document.getElementById('previewCanvas').width > 4 || !document.getElementById('stateEmpty').hidden,
-          fam: !!document.querySelector('[data-family][aria-checked="true"]') || true,
+          peint: (document.getElementById('apercu') || {}).dataset?.peint === '1' || !!document.getElementById('etat-vide'),
+          fam: !!document.querySelector('[data-famille][aria-checked="true"]') || true,
           injecte: !!window.x,
           boutons: document.querySelectorAll('.opt').length,
-          res: document.getElementById('resValue').textContent
+          res: document.getElementById('res-valeur').textContent
         }));
       } catch (e) { problems.push(`${q} : ${e.message}`); continue; }
       if (!ok.peint) problems.push(`${q} : rien n'est peint`);
@@ -55,7 +55,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
     await page.goto('http://127.0.0.1:' + PORT + '/' + q, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(150);
     const ok = await page.evaluate(() => ({
-      peint: document.getElementById('previewCanvas').width > 4,
+      peint: document.getElementById('apercu').width > 4,
       url: location.search
     }));
     if (!ok.peint) problems.push(`${q} : rien n'est peint`);

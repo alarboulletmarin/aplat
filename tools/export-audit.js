@@ -3,7 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { poser } = require('./banc');
+const { ouvrir } = require('./serveur');
 
 let PORT = 0;
 const OUT = path.resolve(__dirname, '../.exports');
@@ -16,7 +17,7 @@ const ALL_RES = [
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
@@ -25,10 +26,10 @@ const ALL_RES = [
   const RES = mode === 'phone-full' ? [ALL_RES[0]] : ALL_RES;
 
   const rows = await page.evaluate(async ({ RES, mode }) => {
-    const E = window.APLAT_ENGINE;
-    const fams = mode === 'quick' ? ['vagues', 'trame', 'terrazzo', 'confettis', 'tournesol'] : E.FAMILIES.map(f => f.id);
+    const M = window.MOTEUR;
+    const fams = mode === 'quick' ? ['vagues', 'trame', 'terrazzo', 'confettis', 'tournesol'] : M.FAMILLES.map(f => f.id);
     const dl = mode === 'quick' ? [1] : [0, 1, 2];
-    const pals = mode === 'quick' ? ['lime', 'nuit'] : E.PAL_ORDER;
+    const pals = mode === 'quick' ? ['lime', 'nuit'] : M.ORDRE_PALETTES;
     const out = [];
 
     function blobOf(canvas) {
@@ -43,7 +44,7 @@ const ALL_RES = [
             c.width = res.w; c.height = res.h;
             const ctx = c.getContext('2d', { alpha: false });
             const t0 = performance.now();
-            E.draw(ctx, res.w, res.h, fam, pal, dens, 7314);
+            M.dessiner(ctx, res.w, res.h, { famille: fam, palette: pal, densite: dens, graine: 7314 });
             const tDraw = performance.now() - t0;
             const t1 = performance.now();
             const b = await blobOf(c);

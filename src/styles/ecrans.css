@@ -555,6 +555,9 @@
 .verdict-d {
   font-size: 13.5px;
   color: var(--encre-douce);
+  /* Une phrase composée de chiffres et de noms de palette : sur 320 px, un
+     nom long ne doit pas pousser la page hors de l'écran. */
+  overflow-wrap: anywhere;
 }
 
 /* --- Réglages ------------------------------------------------------------------ */
@@ -701,14 +704,22 @@
 }
 
 /* --- Pied de page ---------------------------------------------------------------- */
+/* Le lien vers la source n'est pas une mention légale en petit : l'AGPL en
+   fait une obligation, et une obligation doit être cliquable. D'où une cible
+   de 44 px de haut comme partout ailleurs, malgré la petite taille du texte. */
 .pied {
-  padding: 0 0 14px;
+  padding: 0 0 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 14px;
-  align-items: baseline;
+  gap: 0 14px;
+  align-items: center;
   font-size: 12.5px;
   color: var(--encre-douce);
+}
+.pied > * {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .pied-version {
   font-variant-numeric: tabular-nums;

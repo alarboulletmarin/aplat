@@ -4,7 +4,7 @@
    La fausse maquette d'écran est exclue : elle est posée sur le motif, et sa
    lisibilité est mesurée par le moteur, pas par cette sonde. */
 const { launch } = require('./pw');
-const { start } = require('./serve');
+const { ouvrir } = require('./serveur');
 let PORT = 0;
 
 const CASES = [
@@ -54,7 +54,7 @@ const PROBE = () => {
     return px >= 24 || (px >= 18.66 && w >= 700);
   }
 
-  const skip = el => el.closest('#mockHandheld, #mockDesk, .skip, noscript') !== null;
+  const skip = el => el.closest('.maq, .maqo, .evitement, noscript') !== null;
   const out = { text: [], border: [], vus: { texte: 0, bordure: 0, forme: 0 }, temoins: [] };
 
   for (const n of document.querySelectorAll('*')) {
@@ -63,7 +63,7 @@ const PROBE = () => {
     if (cs.visibility === 'hidden' || cs.display === 'none') continue;
 
     // formes pleines porteuses de sens : triangle d'alerte, pastilles de niveau
-    if (n.matches('.note-err-i, .leg-good, .leg-ok, .leg-low')) {
+    if (n.matches('.note-erreur-i, .verdict-bonne, .verdict-correcte, .verdict-faible')) {
       const fg = parse(cs.backgroundColor);
       if (fg && fg[3] > 0) {
         out.vus.forme++;
@@ -96,13 +96,13 @@ const PROBE = () => {
     /* Éléments porteurs de sens dont la bordure ou l'aplat identifie l'état :
        les contrôles, mais aussi la carte d'erreur, dont le trait et le triangle
        sont les seuls porteurs non textuels qui la distinguent du succès. */
-    if (n.matches('button, input, select, textarea, [role="button"], [role="radio"], .note-err')) {
+    if (n.matches('button, input, select, textarea, [role="button"], [role="radio"], .note-erreur')) {
       const bw = parseFloat(cs.borderTopWidth) || 0;
       if (bw > 0) {
         const bc = parse(cs.borderTopColor);
         if (bc && bc[3] > 0) {
           out.vus.bordure++;
-          if (n.classList.contains('note-err')) out.temoins.push('note-err');
+          if (n.classList.contains('note-erreur')) out.temoins.push('note-erreur');
           const inside = bgOf(n);
           const outside = n.parentElement ? bgOf(n.parentElement) : inside;
           const rIn = ratio(over(bc, inside), inside);
@@ -123,7 +123,7 @@ const PROBE = () => {
 };
 
 (async () => {
-  const { srv, port } = start(); PORT = port;
+  const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
   let bad = 0, sawErr = false;
 
@@ -134,15 +134,15 @@ const PROBE = () => {
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/${c.q}`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('resSelect'); s.value = 'custom'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await page.waitForTimeout(200);
-    await page.fill('#inW', '7000');
-    await page.fill('#inH', '7000');
+    await page.fill('#res-largeur', '7000');
+    await page.fill('#res-hauteur', '7000');
     await page.waitForTimeout(200);
-    await page.$eval('#btnExport', e => e.click());   // fait apparaître la carte d'erreur
+    await page.$eval('#btn-export', e => e.click());   // fait apparaître la carte d'erreur
     await page.waitForTimeout(500);
     const r = await page.evaluate(PROBE);
-    if (r.temoins.indexOf('note-err') >= 0) sawErr = true;
+    if (r.temoins.indexOf('note-erreur') >= 0) sawErr = true;
 
     console.log(`\n=== ${c.name} === (${r.vus.texte} textes, ${r.vus.bordure} bordures, ${r.vus.forme} formes ; témoins : ${[...new Set(r.temoins)].join(', ') || 'AUCUN'})`);
     if (!r.text.length) console.log('  texte : tous les rapports tiennent');
