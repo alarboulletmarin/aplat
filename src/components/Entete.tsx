@@ -15,10 +15,12 @@ import type { Textes } from '../i18n'
  * l'application, et elle est là où tout le monde la cherche : un logo ramène à
  * la présentation, et personne n'a à retaper l'adresse pour y revenir.
  *
- * Le titre n'est plus le geste plein écran d'avant : à trente-trois pixels il
+ * Le titre n'est plus le geste plein écran d'avant : à vingt-cinq pixels il
  * peut rester à l'écran en permanence, ce qu'une capitale de quatre-vingt-dix-
  * huit pixels ne pouvait pas. Le contraste entre la display condensée et la
- * grotesque neutre reste le seul geste typographique de la page.
+ * grotesque neutre reste le seul geste typographique de la page. C'est la
+ * taille de l'enseigne de la présentation, et c'est la même déclaration : la
+ * marque ne doit pas changer de taille quand on passe d'un document à l'autre.
  *
  * L'accroche et la mention sont rendues hors de la bande collante : elles se
  * lisent une fois, au départ, et n'ont rien à faire dans ce qui reste épinglé.

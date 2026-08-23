@@ -119,12 +119,19 @@ Les deux sont auto-hébergées (`public/polices/`) et découpées en deux sous-
 ensembles Unicode chacune : rien ne part vers un CDN, et le latin étendu n'est
 téléchargé que s'il sert.
 
-Le titre : `33px`, interligne `.84`, interlettrage `-.04em`, en capitales.
-Presque collé. C'est le seul geste typographique de la page, et il ne se répète
-nulle part ailleurs. Il ne prend plus toute la largeur comme la version d'avant
+Le titre : `25px`, interligne `1`, interlettrage `-.03em`, en capitales. Presque
+collé. C'est le seul geste typographique de la page, et il ne se répète nulle
+part ailleurs. Il ne prend plus toute la largeur comme la version d'avant
 (`clamp(56px, 15.5vw, 98px)`) : l'en-tête est devenu collant, et une capitale de
 quatre-vingt-dix-huit pixels ne peut pas rester à l'écran en permanence. Ce
 qu'il perd en taille, il le gagne en présence.
+
+C'est aussi, au pixel près, le mot de l'enseigne de la présentation, et les deux
+sortent d'une seule déclaration (`.titre, .enseigne-mot`). Ils ont vécu
+séparément, `33px` ici et `25px` là, au-dessus d'une marque de `38px` d'un côté
+et de `30px` de l'autre : le logo changeait de taille sous les yeux au passage
+d'un document à l'autre. Deux copies d'un même objet finissent toujours par
+diverger ; il n'y en a plus qu'une.
 
 Échelle du texte courant : `12,5` `13` `13,5` `14` `14,5` `15` `16` `16,5` px.
 Les titres de section sont à 16,5 px en gras, avec `-.012em` d'interlettrage.
@@ -164,9 +171,10 @@ repèrent, ils ne portent jamais d'information seule** : l'arche du groupe
 remplacent pas.
 
 **L'arche mordue** est le dessin de la marque, et le seul qui se répète à trois
-échelles : trente-huit pixels dans l'en-tête (aplat lime sur navy), quinze
-devant un titre de groupe et dans la note de mise à jour, douze devant chaque
-titre de section. Un aplat en arche dont la base est mordue par une seconde
+échelles : trente pixels dans l'en-tête de l'application comme dans l'enseigne
+de la présentation (aplat lime sur navy, une seule règle `.marque` pour les
+deux), quinze devant un titre de groupe et dans la note de mise à jour, douze
+devant chaque titre de section. Un aplat en arche dont la base est mordue par une seconde
 arche à la couleur du fond ; les mêmes fractions partout, celles de
 `public/favicon.svg` et de `scripts/generate-icons.mjs`. La marque garde son
 lime sur son navy dans les deux thèmes, avec un filet `--filet` qui la détache
@@ -174,11 +182,13 @@ du fond sombre : une marque ne s'inverse pas.
 
 Dans l'en-tête comme dans l'enseigne de la présentation, **la marque et le mot
 font un lien vers « / »** : un logo ramène chez soi, et c'est la seule sortie de
-l'application. Elle ne prend ni l'encre des liens ni leur soulignement, parce
+l'application. Il ne prend ni l'encre des liens ni leur soulignement, parce
 qu'une marque garde ses couleurs. Sa cible fait quarante-quatre pixels de haut
 comme toutes les autres, mais des marges négatives lui rendent ce qu'elle
-prendrait à la bande : la hauteur de l'en-tête ne bouge pas d'un pixel, et
-`ENTETE_PAYSAGE` dans `lib/geometrie.ts` reste vrai.
+prendrait à la bande. Quarante-quatre pixels de cible sur trente de marque ne
+laissant qu'un pixel au-dessus du lien, et l'en-tête étant collé à `top: 0`,
+l'anneau de focus y passe dedans (`outline-offset: -3px`) : entier, plutôt que
+coupé par le bord de l'écran.
 
 Les six barres sous le titre sont la silhouette d'un motif du générateur, réduite
 à treize pixels : un aplat de la palette par barre, arrondies en arche, posées

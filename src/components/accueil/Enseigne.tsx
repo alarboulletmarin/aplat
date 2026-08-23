@@ -39,7 +39,7 @@ export function Enseigne({
   return (
     <header className="enseigne">
       <a className="enseigne-marque" href={accueil}>
-        <span className="marque marque-nav" aria-hidden="true">
+        <span className="marque" aria-hidden="true">
           <i />
           <b />
         </span>

@@ -52,18 +52,19 @@
   gap: 11px;
   min-width: 0;
   min-height: 44px;
-  margin: -3px 0;
+  margin: -7px 0;
   color: var(--encre);
   text-decoration: none;
 }
-/* L'anneau de focus se resserre sur la cible au lieu de s'en écarter de trois
-   pixels. C'est le seul contrôle de la page dont la cible déborde vers le HAUT
-   de la fenêtre : l'en-tête est collé à `top: 0`, et un anneau posé trois
-   pixels plus haut que les cinq qui restent au-dessus du lien sortait de
-   l'écran par le bord. À zéro, il tient dans la bande, à trois pixels de la
-   marque, et reste à trois pixels du filet. */
+/* L'anneau de focus passe DANS la cible au lieu de l'entourer. C'est le seul
+   contrôle de la page dont la cible déborde vers le HAUT de la fenêtre :
+   l'en-tête est collé à `top: 0`, et quarante-quatre pixels de cible sur trente
+   de marque ne laissent qu'un pixel au-dessus du lien. Un anneau posé dehors en
+   sortait par le bord de l'écran. Dedans, il encadre la marque de quatre pixels
+   et mord de trois sur ses bords ; c'est le prix d'un anneau entier plutôt que
+   d'un anneau coupé. */
 .entete-marque:focus-visible {
-  outline-offset: 0;
+  outline-offset: -3px;
 }
 /* La marque : une arche lime dans un carré navy, mordue à sa base par une
    seconde arche. Elle garde ses deux couleurs dans les deux thèmes, comme
@@ -71,8 +72,8 @@
 .marque {
   position: relative;
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   border-radius: 23%;
   background: #17243f;
   box-shadow: 0 0 0 1.5px var(--filet);
@@ -96,12 +97,20 @@
   background: #17243f;
   border-radius: 999px 999px 0 0;
 }
-.titre {
+/* Le mot, dans les deux documents : `.titre` est le h1 de l'application,
+   `.enseigne-mot` le nom dans l'enseigne de la présentation. Une seule
+   déclaration pour les deux, comme `.marque` juste au-dessus n'a plus de
+   variante de taille. C'est ce qui les empêche de se désaccorder d'un document
+   à l'autre : ils l'avaient fait, trente-huit et trente-trois pixels ici,
+   trente et vingt-cinq là, et le logo changeait de taille sous les yeux au
+   passage d'une page à l'autre. */
+.titre,
+.enseigne-mot {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 33px;
-  line-height: 0.84;
-  letter-spacing: -0.04em;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: -0.03em;
   text-transform: uppercase;
 }
 /* La résolution visée, au bout de la ligne de titre : c'est la seule mesure
@@ -1178,26 +1187,11 @@
     gap: 9px;
     padding-bottom: 7px;
   }
-  /* La marque perd huit pixels, la cible n'en perd aucun : la marge négative
-     se creuse d'autant. */
+  /* La marque et le mot ne se resserrent plus ici : ils sont à la taille de
+     l'enseigne dans les deux orientations, et c'était déjà celle que le paysage
+     court leur donnait. Seul l'espace entre eux cède. */
   .entete-marque {
     gap: 9px;
-    margin: -7px 0;
-  }
-  /* Quarante-quatre pixels de cible sur trente de marque, dans une bande de
-     cinquante-cinq : il ne reste rien au-dessus du lien, et l'anneau passe
-     dedans. Il y encadre la marque de quatre pixels, et mord de trois sur ses
-     bords ; c'est le prix d'un anneau entier plutôt qu'un anneau coupé par le
-     haut de l'écran. */
-  .entete-marque:focus-visible {
-    outline-offset: -3px;
-  }
-  .marque {
-    width: 30px;
-    height: 30px;
-  }
-  .titre {
-    font-size: 27px;
   }
   .entete-filet {
     height: 10px;

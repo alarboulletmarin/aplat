@@ -19,6 +19,14 @@ d'écran derrière mes icônes ?**
   traversent le lien dans ce sens comme dans l'autre : revenir ne coûte pas le
   choix qu'on vient de faire. La bande garde sa hauteur au pixel près, marges
   négatives à l'appui, et la cible reste à quarante-quatre pixels.
+- **Le logo ne change plus de taille d'une page à l'autre.** Il vivait en deux
+  exemplaires, trente-huit pixels de marque et trente-trois de mot dans
+  l'application, trente et vingt-cinq dans l'enseigne de la présentation : on
+  le voyait grossir en passant de « / » à « /app ». C'est la taille de
+  l'enseigne qui l'emporte, parce que l'inverse ne tient pas à 320 px, où il ne
+  reste que douze pixels entre le logo et les bascules. L'application y gagne
+  huit pixels de bande, rendus aux réglages. Et il n'y a plus deux exemplaires :
+  une seule règle pour la marque, une seule pour le mot.
 - **Un préréglage 4K, 3 840 × 2 160.** Les quatre autres nomment un appareil,
   celui-ci nomme une taille, parce que c'est sous ce nom qu'on la demande.
   Le format était déjà atteignable, la saisie manuelle montant à 8 000 px, mais
