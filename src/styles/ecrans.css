@@ -516,8 +516,10 @@
 }
 
 /* --- Verdict de lisibilité ---------------------------------------------------- */
-/* Trois formes, jamais trois couleurs : disque plein, disque à moitié,
-   triangle. Le niveau se lit en niveaux de gris comme en couleur. */
+/* Trois bandes, trois formes, jamais trois couleurs : disque plein au-dessus
+   de 4,5:1, disque à moitié entre 3:1 et 4,5:1, triangle en dessous. Elles
+   partagent la même encre : le niveau se lit en niveaux de gris comme en
+   couleur, et la forme change en même temps que le mot. */
 .verdict {
   display: flex;
   gap: 11px;
@@ -536,7 +538,7 @@
   border-radius: 50%;
   background: var(--encre);
 }
-.verdict-correcte {
+.verdict-juste {
   display: block;
   width: 17px;
   height: 17px;
@@ -544,7 +546,7 @@
   background: linear-gradient(90deg, var(--encre) 50%, transparent 50%);
   box-shadow: inset 0 0 0 2.5px var(--encre);
 }
-.verdict-faible {
+.verdict-insuffisante {
   display: block;
   width: 19px;
   height: 17px;

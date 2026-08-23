@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { describe, expect, it } from 'vitest'
+import { niveau } from '../lib/moteur'
 import { DICTIONNAIRES, remplir, textes } from './index'
 import { fr } from './fr'
 import { en } from './en'
@@ -118,5 +119,28 @@ describe('promesses de l’interface', () => {
   it('ne promet pas un stockage nul sans le qualifier', () => {
     expect(fr.partage.confidentialite).toMatch(/aucune donnée enregistrée/)
     expect(en.partage.confidentialite).toMatch(/nothing stored/)
+  })
+
+  /* Le défaut que ces deux tests tiennent fermé : le titre annonçait
+     « correcte » pour 3,5:1, pendant que le corps disait « un peu juste ».
+     Un qualificatif se cale sur une bande, et la bande se nomme. */
+  it('donne un mot et un conseil à chaque bande de niveau()', () => {
+    for (const contraste of [1, 2.99, 3, 4.49, 4.5, 21]) {
+      const rang = niveau({ libelles: 'clair', voile: 0, contraste })
+      for (const [langue, dictionnaire] of Object.entries(DICTIONNAIRES)) {
+        expect(dictionnaire.lisibilite[rang], `${langue} ${contraste}`).toBeTruthy()
+      }
+    }
+  })
+
+  it('nomme dans chaque conseil la borne qui définit sa bande', () => {
+    for (const [langue, dictionnaire] of Object.entries(DICTIONNAIRES)) {
+      const L = dictionnaire.lisibilite
+      expect(new Set([L.bonne, L.juste, L.insuffisante]).size, langue).toBe(3)
+      expect(L.conseilBonne, langue).toMatch(/4[.,]5:1/)
+      expect(L.conseilJuste, langue).toMatch(/4[.,]5:1/)
+      expect(L.conseilJuste, langue).toMatch(/3:1/)
+      expect(L.conseilInsuffisante, langue).toMatch(/3:1/)
+    }
   })
 })

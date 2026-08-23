@@ -936,9 +936,23 @@ export function dessiner(
   return mesure
 }
 
-/** Le niveau de lisibilité, tel que l'interface le nomme. */
-export function niveau(mesure: Mesure): 'bonne' | 'correcte' | 'faible' {
-  if (mesure.contraste >= 4.5) return 'bonne'
-  if (mesure.contraste >= 3) return 'correcte'
-  return 'faible'
+/**
+ * Le niveau de lisibilité, tel que l'interface le nomme.
+ *
+ * Les bornes sont celles de WCAG, et les mots doivent le dire. « Correcte »
+ * pour 3,5:1 laissait entendre qu'un seuil était tenu, alors qu'un libellé
+ * d'icône est du petit texte et réclame 4,5:1 : la bande du milieu s'appelle
+ * donc « juste », et celle du bas « insuffisante ». Le mot affiché est ce nom,
+ * pris tel quel dans le dictionnaire : il ne peut plus s'en écarter.
+ */
+export type Niveau = 'bonne' | 'juste' | 'insuffisante'
+
+/** Le seuil AA du texte courant, et celui des éléments d'interface. */
+export const SEUIL_AA = 4.5
+export const SEUIL_UI = 3
+
+export function niveau(mesure: Mesure): Niveau {
+  if (mesure.contraste >= SEUIL_AA) return 'bonne'
+  if (mesure.contraste >= SEUIL_UI) return 'juste'
+  return 'insuffisante'
 }

@@ -29,17 +29,23 @@ export const fr = {
     videTitre: 'Indique une résolution',
     videCorps: 'Largeur et hauteur en pixels, ou reviens à la détection.',
   },
+  /* Trois bandes, trois mots, et rien entre les deux. Les clés portent le nom
+     du niveau rendu par `niveau()` : le composant y puise directement, si bien
+     que le qualificatif affiché ne peut pas s'écarter du rapport mesuré. Le
+     titre disait « correcte » pour 3,5:1, sous le seuil AA du petit texte
+     qu'est un libellé d'icône, pendant que le corps disait « un peu juste ». */
   lisibilite: {
     titre: 'Lisibilité des libellés',
     attente: 'Rien à mesurer tant qu’il n’y a pas d’image.',
     bonne: 'bonne',
-    correcte: 'correcte',
-    faible: 'faible',
+    juste: 'juste',
+    insuffisante: 'insuffisante',
     libellesClairs: 'libellés clairs',
     libellesSombres: 'libellés sombres',
-    conseilBonne: 'Les libellés restent nets sur toute la grille.',
-    conseilCorrecte: 'Lisible, un peu juste sur les zones les plus contrastées.',
-    conseilFaible: 'Essaie la palette Nuit, ou une densité plus calme.',
+    conseilBonne: 'Au-dessus du seuil AA de 4,5:1 : les libellés restent nets sur toute la grille.',
+    conseilJuste:
+      'Sous le seuil AA de 4,5:1, au-dessus de 3:1 : une palette plus sombre ou une densité plus calme regagne la marge.',
+    conseilInsuffisante: 'Sous 3:1 : essaie la palette Nuit, ou une densité plus calme.',
     voile: 'voile de lisibilité {n} %',
     sansVoile: 'sans voile',
     /* Assemblés ici et non dans le composant : la ponctuation d'un titre ou

@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,
   FAMILLES, graineDeDessin, luminance, niveau, ORDRE_PALETTES, PALETTES, palette,
+  SEUIL_AA, SEUIL_UI,
 } from './moteur'
 
 describe('aléatoire', () => {
@@ -160,8 +161,20 @@ describe('voile', () => {
 describe('niveau de lisibilité', () => {
   it('suit les seuils WCAG, sans arrondi complaisant', () => {
     expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.5 })).toBe('bonne')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.49 })).toBe('correcte')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 3 })).toBe('correcte')
-    expect(niveau({ libelles: 'clair', voile: 0, contraste: 2.99 })).toBe('faible')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 4.49 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 3 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, contraste: 2.99 })).toBe('insuffisante')
+  })
+
+  /* Le défaut que ce test tient fermé : le titre disait « correcte » pour
+     3,5:1, un rapport pourtant sous le seuil AA du petit texte. Un mot qui
+     rassure au-dessous du seuil vaut moins que pas de mot du tout. */
+  it('ne dit « bonne » qu’au-dessus du seuil AA du petit texte', () => {
+    for (const contraste of [1, 2.5, 2.99, 3, 3.5, 4.49]) {
+      expect(niveau({ libelles: 'clair', voile: 0, contraste }), String(contraste))
+        .not.toBe('bonne')
+    }
+    expect(SEUIL_AA).toBe(4.5)
+    expect(SEUIL_UI).toBe(3)
   })
 })

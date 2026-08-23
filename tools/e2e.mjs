@@ -501,7 +501,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       const r = cv.getBoundingClientRect();
       const arCv = r.width / r.height, arCible = 1179 / 2556;
       let veil = 0, niveau = 0, total = 0;
-      const niv = m => m.contraste >= 4.5 ? 'bonne' : m.contraste >= 3 ? 'correcte' : 'faible';
+      const niv = m => m.contraste >= 4.5 ? 'bonne' : m.contraste >= 3 ? 'juste' : 'insuffisante';
       for (const f of M.FAMILLES) for (const p of M.ORDRE_PALETTES) for (const d of [0, 1, 2]) {
         total++;
         const a = M.mesurer(f.id, p, d, 7314, cv.width, cv.height);
@@ -616,7 +616,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const vide2 = await lp2.evaluate(() => ({
       detail: document.getElementById('verdict-detail').textContent,
       titre: document.getElementById('verdict-titre').textContent,
-      pastilles: document.querySelectorAll('.verdict-bonne, .verdict-correcte, .verdict-faible').length
+      pastilles: document.querySelectorAll('.verdict-bonne, .verdict-juste, .verdict-insuffisante').length
     }));
     t(!/:1/.test(vide2.detail) && vide2.pastilles === 0,
       'lisibilité : aucun chiffre affiché tant qu\'il n\'y a rien à mesurer', vide2.detail.slice(0, 50));
@@ -730,6 +730,62 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     t(bloque === 'bloquée', 'réseau : une requête sortante est refusée par la politique', bloque);
     await cctx.close();
+  }
+
+  /* --- 19. le mot du verdict suit toujours la bande du rapport mesuré
+     Le titre annonçait « correcte » pour 3,5:1 pendant que le corps disait
+     « un peu juste » : deux mots pour une seule mesure, et le plus rassurant
+     des deux sous le seuil AA du petit texte. On relit ici le rapport affiché,
+     on en déduit la bande, et on exige le mot et la forme de cette bande.
+     La bande basse ne se produit pas : le voile ramène toute combinaison
+     au-dessus de 3:1. Elle est éprouvée dans `src/lib/moteur.test.ts`. */
+  {
+    const MOTS = {
+      fr: { bonne: 'bonne', juste: 'juste', insuffisante: 'insuffisante' },
+      en: { bonne: 'good', juste: 'borderline', insuffisante: 'insufficient' }
+    };
+    const MOTIFS = [
+      { q: 'm=vagues&p=soleil&d=0', attendu: 'bonne' },
+      { q: 'm=vagues&p=ciel&d=2', attendu: 'juste' },
+      { q: 'm=marguerites&p=nuit&d=2', attendu: null }
+    ];
+    const vctx = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
+    const vp = await vctx.newPage();
+    for (const langue of ['fr', 'en']) {
+      for (const motif of MOTIFS) {
+        await vp.goto(`http://127.0.0.1:${PORT}/?l=${langue}&s=4242&r=1179x2556&${motif.q}`, { waitUntil: 'networkidle' });
+        await vp.waitForTimeout(300);
+        const lu = await vp.evaluate(() => {
+          const forme = document.querySelector('.verdict-i > span');
+          return {
+            titre: document.getElementById('verdict-titre').textContent,
+            detail: document.getElementById('verdict-detail').textContent,
+            forme: forme ? forme.className : ''
+          };
+        });
+        // « 3,9:1 » en français, « 3.9:1 » en anglais
+        const trouve = lu.detail.match(/(\d+[.,]\d+):1/);
+        const rapport = trouve ? parseFloat(trouve[1].replace(',', '.')) : NaN;
+        /* Le rapport est affiché arrondi au dixième : à moins d'un demi
+           dixième d'une borne, les deux bandes voisines sont recevables. */
+        const bande = rapport >= 4.5 ? 'bonne' : rapport >= 3 ? 'juste' : 'insuffisante';
+        const voisine = Math.abs(rapport - 4.5) < 0.05 ? 'juste'
+          : Math.abs(rapport - 3) < 0.05 ? 'insuffisante' : bande;
+        const mots = [...new Set([MOTS[langue][bande], MOTS[langue][voisine]])];
+        t(Number.isFinite(rapport), `verdict ${langue} ${motif.q} : le détail donne un rapport`, lu.detail.slice(0, 40));
+        t(mots.some(m => lu.titre.toLowerCase().endsWith(m)),
+          `verdict ${langue} ${motif.q} : le titre porte le mot de la bande`,
+          `${rapport}:1 -> attendu « ${mots.join(' ou ')} », lu « ${lu.titre} »`);
+        t(lu.forme === 'verdict-' + bande || lu.forme === 'verdict-' + voisine,
+          `verdict ${langue} ${motif.q} : la forme suit la bande`,
+          `${bande} -> ${lu.forme}`);
+        if (motif.attendu) {
+          t(lu.forme === 'verdict-' + motif.attendu,
+            `verdict ${langue} ${motif.q} : la bande attendue est atteinte`, lu.forme);
+        }
+      }
+    }
+    await vctx.close();
   }
 
   await browser.close();

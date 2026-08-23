@@ -63,7 +63,7 @@ const PROBE = () => {
     if (cs.visibility === 'hidden' || cs.display === 'none') continue;
 
     // formes pleines porteuses de sens : triangle d'alerte, pastilles de niveau
-    if (n.matches('.note-erreur-i, .verdict-bonne, .verdict-correcte, .verdict-faible')) {
+    if (n.matches('.note-erreur-i, .verdict-bonne, .verdict-juste, .verdict-insuffisante')) {
       const fg = parse(cs.backgroundColor);
       if (fg && fg[3] > 0) {
         out.vus.forme++;

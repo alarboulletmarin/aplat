@@ -29,7 +29,9 @@ d'écran derrière mes icônes ?**
   contraste mesuré, la couleur de libellé retenue, la force du voile appliqué,
   et une phrase qui dit quoi faire s'il est juste. Il n'affiche rien tant qu'il
   n'a rien mesuré, parce qu'une application qui promet de mesurer n'affiche pas
-  un chiffre de repli.
+  un chiffre de repli. Le qualificatif tient à trois bandes nommées, avec leur
+  forme : bonne au-dessus de 4,5:1, le seuil AA du petit texte qu'est un
+  libellé d'icône ; juste entre 3:1 et 4,5:1 ; insuffisante en dessous.
 - **Un seul appel primaire** : Télécharger. Le bouton dit ensuite les dimensions
   produites, le format, le poids réel du fichier, et le geste qui fait passer de
   « téléchargé » à « dans la pellicule ».

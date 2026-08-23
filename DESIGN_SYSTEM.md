@@ -227,6 +227,13 @@ Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas d
 problème. Et il n'affiche rien tant qu'il n'a rien mesuré : une application qui
 promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
 
+Trois bandes, et rien entre les deux : **bonne** au-dessus de 4,5:1, le seuil AA
+du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
+**insuffisante** en dessous. Le mot affiché est le nom de la bande, pris tel
+quel dans le dictionnaire : un titre ne peut plus rassurer là où le corps
+nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme la borne
+qui la définit.
+
 ---
 
 ## 9. Accessibilité : non négociable

@@ -55,7 +55,11 @@ Le parti visuel et les règles d'interface sont dans
 
 Le verdict de lisibilité est affiché en permanence, pas seulement en cas de
 problème : rapport de contraste mesuré, couleur de libellé retenue, force du
-voile appliqué, et une phrase qui dit quoi faire si c'est juste.
+voile appliqué, et une phrase qui dit quoi faire si c'est juste. Le
+qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
+4,5:1, le seuil AA du petit texte qu'est un libellé d'icône ; **juste** entre
+3:1 et 4,5:1 ; **insuffisante** en dessous. Chaque bande a sa forme, disque
+plein, disque à moitié, triangle.
 
 ---
 
@@ -260,6 +264,7 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée, alors que le champ affiche toujours le texte tapé. |
 | La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle. |
 | Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur (5,4:1, voile 18 %), écrit dans une région live avant toute mesure. |
+| Le qualificatif de lisibilité tient à trois bandes nommées, et le composant le prend dans le dictionnaire par le nom du niveau | Le titre disait « correcte » pour 3,5:1 pendant que le corps disait « un peu juste » : deux mots pour une seule mesure, et le plus rassurant des deux sous le seuil AA du petit texte. |
 | Les puces de réglage deviennent des groupes radio | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
