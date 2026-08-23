@@ -934,7 +934,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const hctx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
     const hp = await hctx.newPage();
     const lu = () => hp.evaluate(() => ({
-      vignettes: document.querySelectorAll('#liste-historique li').length,
+      vignettes: document.querySelectorAll('#liste-historique button').length,
       stockage: JSON.parse(localStorage.getItem('aplat:motifs') || '[]'),
       vide: !!document.querySelector('.historique-vide')
     }));
@@ -975,7 +975,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       relu.vignettes + ' vignettes');
 
     const cible = await hp.evaluate(() => {
-      const b = document.querySelectorAll('#liste-historique li button')[3];
+      const b = document.querySelectorAll('#liste-historique button')[3];
       b.click();
       return b.getAttribute('aria-label');
     });
@@ -988,7 +988,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await hp.waitForTimeout(300);
     const efface = await hp.evaluate(() => ({
       cle: localStorage.getItem('aplat:motifs'),
-      vignettes: document.querySelectorAll('#liste-historique li').length
+      vignettes: document.querySelectorAll('#liste-historique button').length
     }));
     t(efface.cle === null && efface.vignettes === 0,
       'historique : le bouton efface la clé, pas seulement l\'affichage',

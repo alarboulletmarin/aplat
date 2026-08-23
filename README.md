@@ -261,9 +261,10 @@ thèmes et les deux langues :
   défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
   (WCAG 2.2, 2.4.11) ;
-- les cinq groupes de réglages sont de vrais groupes radio : un arrêt de
-  tabulation par groupe, flèches et Début/Fin. Le parcours passe de 42 arrêts
-  à 11 ;
+- les cinq groupes de réglages sont de vrais groupes radio, et l'historique une
+  barre d'outils : un arrêt de tabulation par groupe, flèches et Début/Fin.
+  Seize arrêts en tout, historique plein compris, là où les puces seules en
+  feraient une soixantaine ;
 - lien d'évitement, points de repère, `aria-live` sur la lisibilité, sur le
   résultat de l'export et sur la confirmation de copie, sans rien y réécrire
   quand rien ne change ;
@@ -300,7 +301,7 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | Le qualificatif de lisibilité tient à trois bandes nommées, et le composant le prend dans le dictionnaire par le nom du niveau | Le titre disait « correcte » pour 3,5:1 pendant que le corps disait « un peu juste » : deux mots pour une seule mesure, et le plus rassurant des deux sous le seuil AA du petit texte. |
 | L'historique garde quatre réglages par motif, jamais une vignette | Le rendu est déterministe : une image enregistrée ne serait qu'un cache de calcul, mille fois plus lourd, et ferait du stockage autre chose qu'une liste de réglages. |
 | La promesse de confidentialité a été réécrite en même temps que l'historique est arrivé | « Aucune donnée enregistrée » est devenu faux le jour où quelque chose l'a été. Un test l'interdit maintenant dans les deux langues. |
-| Les puces de réglage deviennent des groupes radio | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
+| Les puces de réglage deviennent des groupes radio, et l'historique une barre d'outils | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Un arrêt de tabulation par groupe au lieu d'un par puce ; seize en tout, historique plein compris. Dans l'historique les flèches déplacent le focus sans restaurer : ce sont dix actions, pas dix options d'un même réglage. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
 | Espaces insécables dans les chaînes françaises | Le texte se coupait devant « % », « : » et à l'intérieur des guillemets. |

@@ -206,6 +206,13 @@ nuance : un aplat se lit de loin, en niveaux de gris, sans comparer deux teintes
 voisines. Le petit carré lime confirme, il ne décide pas ; il porte un filet à la
 couleur du texte, sans quoi il disparaîtrait sur la puce crème du thème sombre.
 
+L'historique des motifs suit la même économie de clavier, avec une nuance :
+c'est une **barre d'outils**, pas un groupe radio. Un seul arrêt de tabulation
+pour les dix vignettes, les flèches déplacent le focus, mais elles ne
+restaurent rien : ce sont dix actions distinctes, pas dix options d'un même
+réglage. Le motif en cours s'y reconnaît au trait épaissi et à l'aplat, comme
+une puce choisie.
+
 ### Les champs
 
 Trait `--filet-franc` à 1,5 px, fond `--champ`, chiffres en `tabular-nums`.

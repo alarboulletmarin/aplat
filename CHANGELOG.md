@@ -110,8 +110,9 @@ d'écran derrière mes icônes ?**
   de points, la lisibilité trois formes distinctes, l'erreur un triangle.
 - Cibles tactiles de 44 px, actions fréquentes dans la zone du pouce, focus
   visible et jamais masqué par les deux barres collantes.
-- Les cinq groupes de réglages sont de vrais groupes radio : le parcours clavier
-  passe de 42 arrêts à 11.
+- Les cinq groupes de réglages sont de vrais groupes radio, et l'historique une
+  barre d'outils : seize arrêts de tabulation en tout, historique plein
+  compris, là où les puces seules en feraient une soixantaine.
 - `prefers-reduced-motion` respecté.
 
 ### Ajouté : deux langues, à parité stricte
