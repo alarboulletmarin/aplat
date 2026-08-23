@@ -1,7 +1,7 @@
 /* Test d'endurance : on martèle les réglages et on regarde si la mémoire, le
    nombre de nœuds ou le nombre de canevas dérivent. */
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 (async () => {
@@ -50,9 +50,9 @@ let PORT = 0;
 
   const apres = await mesure();
   const dHeap = +(apres.heapMo - avant.heapMo).toFixed(1);
-  console.log(`avant : ${avant.heapMo} Mo · ${avant.noeuds} nœuds · ${avant.canevas} canevas · ${avant.listeners} écouteurs`);
-  console.log(`après ${TOURS} actions : ${apres.heapMo} Mo · ${apres.noeuds} nœuds · ${apres.canevas} canevas · ${apres.listeners} écouteurs`);
-  console.log(`dérive : ${dHeap > 0 ? '+' : ''}${dHeap} Mo · ${apres.noeuds - avant.noeuds} nœuds · ${apres.canevas - avant.canevas} canevas · ${apres.listeners - avant.listeners} écouteurs`);
+  console.log(`avant : ${avant.heapMo} Mo, ${avant.noeuds} nœuds, ${avant.canevas} canevas, ${avant.listeners} écouteurs`);
+  console.log(`après ${TOURS} actions : ${apres.heapMo} Mo, ${apres.noeuds} nœuds, ${apres.canevas} canevas, ${apres.listeners} écouteurs`);
+  console.log(`dérive : ${dHeap > 0 ? '+' : ''}${dHeap} Mo, ${apres.noeuds - avant.noeuds} nœuds, ${apres.canevas - avant.canevas} canevas, ${apres.listeners - avant.listeners} écouteurs`);
   console.log('erreurs :', errs.length ? errs.slice(0, 3).join(' | ') : 'aucune');
 
   const bad = errs.length > 0 || dHeap > 12 || (apres.noeuds - avant.noeuds) > 40 ||

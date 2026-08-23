@@ -4,7 +4,7 @@ Merci de regarder. Ce document dit ce qu'il faut savoir avant d'écrire une lign
 
 ## Le projet en trois phrases
 
-Aplat répond à une seule question : **à quoi ressemblera ce fond d'écran derrière mes icônes ?** Il ne calcule rien ailleurs que dans le navigateur : le motif, l'aperçu et le fichier exporté sortent tous du même code, sur l'appareil. Il n'a ni compte, ni serveur : ce qui est partageable tient dans l'URL, et rien d'autre ne survit à la fermeture de l'onglet — le seul cache est celui du Service Worker, qui ne contient que les fichiers de l'application.
+Aplat répond à une seule question : **à quoi ressemblera ce fond d'écran derrière mes icônes ?** Il ne calcule rien ailleurs que dans le navigateur : le motif, l'aperçu et le fichier exporté sortent tous du même code, sur l'appareil. Il n'a ni compte, ni serveur : ce qui est partageable tient dans l'URL, et rien d'autre ne survit à la fermeture de l'onglet (le seul cache est celui du Service Worker, qui ne contient que les fichiers de l'application).
 
 Une proposition qui contredit une de ces trois phrases sera refusée, même bien écrite.
 
@@ -17,13 +17,13 @@ Le projet exclut aussi, explicitement et pour de bon :
 - **la gamification** : aucune série à tenir, aucun score, aucun badge, aucune collection à compléter ;
 - **les notifications** : l'application ne réclame rien, et ne demande aucune permission ;
 - **les comptes** : rien à créer, rien à connecter, rien à retrouver ailleurs ;
-- **toute mesure d'audience**, tout appel réseau à l'exécution, toute police ou script servi par un CDN — Anton et Archivo sont auto-hébergées, et un appel à un CDN transmet une adresse IP que le projet promet de ne pas faire voyager ;
+- **toute mesure d'audience**, tout appel réseau à l'exécution, toute police ou script servi par un CDN (Anton et Archivo sont auto-hébergées, et un appel à un CDN transmet une adresse IP que le projet promet de ne pas faire voyager) ;
 - **les dark patterns** : aucune case précochée, aucun compte à rebours, aucun bouton dont le libellé ment sur ce qu'il fait, aucune sortie cachée ;
 - **plus d'un appel primaire par écran** : il n'y en a qu'un, Télécharger, et il ne partage sa place avec rien ;
 - **les emoji**, dans l'interface comme dans les libellés ;
 - **les bibliothèques de composants ou de style** : le balisage, le CSS et l'accessibilité sont écrits ici.
 
-L'écran unique n'est pas non plus négociable. La valeur du produit est de voir le rendu derrière de vraies icônes **avant** de télécharger : toute navigation qui sépare les réglages de l'aperçu — un onglet, une étape, une page de résultat — casse exactement ça, puisqu'on réglerait à l'aveugle avant d'aller vérifier.
+L'écran unique n'est pas non plus négociable. La valeur du produit est de voir le rendu derrière de vraies icônes **avant** de télécharger : toute navigation qui sépare les réglages de l'aperçu (un onglet, une étape, une page de résultat) casse exactement ça, puisqu'on réglerait à l'aveugle avant d'aller vérifier.
 
 Si une idée vous tient à cœur et figure dans cette liste, ouvrez une issue pour en parler : la réponse sera probablement non, mais elle sera argumentée.
 
@@ -32,8 +32,12 @@ Si une idée vous tient à cœur et figure dans cette liste, ouvrez une issue po
 ```bash
 npm install
 npm run dev        # serveur de développement
-npm run test       # tests unitaires
-npm run typecheck  # vérification TypeScript
+npm run verify     # la porte de sortie : typographie, types, lint, tests, build
+npm run check      # les vérifications dans un vrai navigateur
+
+npm run test       # tests unitaires seuls
+npm run typecheck  # vérification TypeScript seule
+npm run lint       # règles des hooks React, que tsc ne voit pas
 npm run build      # notices + types + build de production
 npm run preview    # sert le build (Service Worker actif)
 ```
@@ -52,13 +56,14 @@ Les vérifications headless vivent dans [`tools/`](tools/) et se lancent avec `n
 
 ## Ce qu'on attend d'une pull request
 
-- `npm run typecheck` et `npm run test` passent.
-- `npm run check` passe si vous avez touché l'interface ou le moteur.
+- `npm run verify` passe. Il enchaîne typographie, types, lint, tests et build ; c'est la même commande que rejoue la CI.
+- `npm run check` passe si vous avez touché l'interface ou le moteur. Il demande Chromium (`npx playwright install --with-deps chromium`), c'est pourquoi il vit hors de `verify`.
 - La logique ajoutée au moteur est testée. Le reste ne l'est pas encore automatiquement : vérifiez à la main, et dites-le dans la description.
 - L'écran passe le plancher qualité : cible tactile de 44 px, focus visible et jamais masqué par les barres collantes, `prefers-reduced-motion`, contrastes, zoom à 200 %, et vérification à **320 px** de large.
 - Un changement du moteur s'accompagne de ses chiffres : poids et netteté des PNG produits se mesurent avec les outils du dépôt, ils ne s'estiment pas.
 - Les commentaires expliquent **pourquoi**, pas quoi. Le code dit déjà ce qu'il fait ; ce qu'on relit six mois plus tard, c'est la raison d'un choix et le piège qu'il évite. C'est le style du projet, tenez-le.
 - Le vocabulaire de l'interface est celui du design system : français et anglais, casse normale, infinitif pour les actions, zéro emoji, zéro exclamation.
+- **Ni tiret cadratin, ni tiret demi-cadratin, ni point médian**, nulle part : ni dans l'interface, ni dans les commentaires, ni dans la documentation. Ces trois signes se glissent partout dès qu'on écrit vite, et ils donnent au texte une allure qui n'est pas celle du projet. Une phrase qui en réclame un se réécrit : deux points pour annoncer, virgule entre éléments de même rang, parenthèses pour une précision secondaire, point-virgule quand la virgule est déjà prise par la décimale française. `npm run typographie` fait échouer la porte de sortie sur la moindre occurrence, et le design system en donne la convention complète (section 11).
 
 Les messages de commit sont en français et disent ce que le changement fait pour la personne qui utilise l'application, pas quel fichier a bougé.
 
@@ -74,4 +79,4 @@ En contribuant, vous acceptez que votre contribution soit distribuée sous la [l
 
 Concrètement : votre code reste libre, et personne ne pourra l'enfermer dans un produit fermé. En contrepartie, qui héberge une version modifiée d'Aplat doit en publier les sources. Ajoutez l'en-tête `// SPDX-License-Identifier: AGPL-3.0-only` en tête des fichiers que vous créez, et gardez-le sur ceux qui le portent.
 
-Les polices Anton et Archivo sont sous [SIL Open Font License 1.1](assets/fonts/), qui voyage avec elles dans le dépôt. Elles suffisent : le projet n'en ajoutera pas d'autre.
+Les polices Anton et Archivo sont sous SIL Open Font License 1.1, qui voyage avec elles dans le dépôt : [OFL-Anton.txt](public/polices/OFL-Anton.txt) et [OFL-Archivo.txt](public/polices/OFL-Archivo.txt), servis à la racine du site et repris dans `public/THIRD-PARTY.txt`. Elles suffisent : le projet n'en ajoutera pas d'autre.

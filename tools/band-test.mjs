@@ -2,9 +2,9 @@
    de chaque ligne et on regarde la hauteur des paliers et l'amplitude des
    sauts. Une marche d'un seul cran étalée sur des centaines de lignes se voit ;
    des paliers courts, non. */
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 (async () => {

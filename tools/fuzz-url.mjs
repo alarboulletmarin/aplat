@@ -1,7 +1,7 @@
 /* L'URL est la seule entrée extérieure du produit. On lui envoie des valeurs
    hostiles et on vérifie que la page rend toujours, sans erreur ni injection. */
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 const VALS = [

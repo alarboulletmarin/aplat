@@ -1,7 +1,7 @@
-/* Décompose le poids du PNG exporté : fond · formes · voile · grain. */
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+/* Décompose le poids du PNG exporté : fond, formes, voile, grain. */
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 (async () => {
@@ -28,8 +28,8 @@ let PORT = 0;
       c.width = W; c.height = H;
       const ctx = c.getContext('2d', { alpha: false });
       const m = M.mesurer(fam, pal, dens, 7314, W, H);
-      ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
-      if (steps.shapes) M.formes(ctx, W, H, fam, P.cols, dens, M.alea(M.graineDeDessin(fam, dens, 7314)), Math.min(W, H));
+      ctx.fillStyle = P.fond; ctx.fillRect(0, 0, W, H);
+      if (steps.shapes) M.formes(ctx, W, H, fam, P.couleurs, dens, M.alea(M.graineDeDessin(fam, dens, 7314)), Math.min(W, H));
       if (steps.veil) M.peindreVoile(ctx, W, H, m);
       if (steps.grain) M.peindreGrain(ctx, W, H);
       const b = await blobOf(c);
@@ -43,7 +43,7 @@ let PORT = 0;
       const sh = await build(fam, pal, dens, { shapes: 1 });
       const shv = await build(fam, pal, dens, { shapes: 1, veil: 1 });
       const all = await build(fam, pal, dens, { shapes: 1, veil: 1, grain: 1 });
-      out.push({ fam, pal, dens, veil: +m.veil.toFixed(3), bg, sh, shv, all });
+      out.push({ fam, pal, dens, veil: +m.voile.toFixed(3), bg, sh, shv, all });
     }
     return out;
   });
@@ -57,7 +57,7 @@ let PORT = 0;
   }
   const dVeil = rows.reduce((s, r) => s + (r.shv - r.sh), 0) / rows.length;
   const dGrain = rows.reduce((s, r) => s + (r.all - r.shv), 0) / rows.length;
-  console.log(`\ncoût moyen du voile : ${(dVeil / 1024).toFixed(0)} Ko · coût moyen du grain : ${(dGrain / 1024).toFixed(0)} Ko`);
+  console.log(`\ncoût moyen du voile : ${(dVeil / 1024).toFixed(0)} Ko ; coût moyen du grain : ${(dGrain / 1024).toFixed(0)} Ko`);
 
   await browser.close();
   srv.close();

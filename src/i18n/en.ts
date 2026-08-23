@@ -5,7 +5,7 @@ import type { Textes } from './fr'
 /** English labels. The type is the French file: a missing key does not build. */
 export const en: Textes = {
   document: {
-    titre: 'Aplat — generative wallpapers',
+    titre: 'Aplat: generative wallpapers',
     description:
       'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing stored.',
   },
@@ -36,6 +36,8 @@ export const en: Textes = {
     conseilFaible: 'Try the Night palette, or a calmer density.',
     voile: 'legibility veil {n}%',
     sansVoile: 'no veil needed',
+    titreNiveau: 'Icon label legibility: {niveau}',
+    detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {
     titre: 'Settings',
@@ -51,6 +53,7 @@ export const en: Textes = {
   resolution: {
     titre: 'Image resolution',
     surMesure: 'Custom…',
+    aucune: 'No resolution',
     largeur: 'Width (px)',
     hauteur: 'Height (px)',
     bornes: 'From 16 to 8000 px.',

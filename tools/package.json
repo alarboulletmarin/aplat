@@ -1,4 +1,0 @@
-{
-  "//": "L'outillage est en CommonJS : le paquet racine est en modules ES, ces scripts non. Un package.json imbriqué suffit à le dire, plutôt que de renommer vingt fichiers.",
-  "type": "commonjs"
-}

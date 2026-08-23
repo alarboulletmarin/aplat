@@ -10,7 +10,7 @@ import { Vignette } from './Vignette'
 
 /**
  * Trois réglages, pas un de plus : famille, palette, densité. La résolution
- * est détectée — c'est une mesure, pas un choix — et n'apparaît qu'en dessous,
+ * est détectée (c'est une mesure, pas un choix) et n'apparaît qu'en dessous,
  * modifiable si besoin.
  */
 

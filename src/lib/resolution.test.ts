@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Ce que ces tests protègent : les bornes de ce qu'un navigateur sait produire,
+ * et la classification de l'appareil. Les deux ont déjà été faux, et aucun des
+ * deux ne se voit à la lecture : une borne trop lâche laisse exporter une image
+ * de cinq pixels, un seuil mal choisi affiche « Tablette » sur un téléphone et
+ * fausse toute la maquette.
+ *
+ * Ce qu'ils ne couvrent pas : `detecter()`, qui lit `window.screen` et n'existe
+ * donc pas sans navigateur.
+ */
 import { describe, expect, it } from 'vitest'
 import { chiffres, depuisSaisie, horsBornes, RES_MAX, RES_MIN, typeAppareil } from './resolution'
 
@@ -38,7 +48,7 @@ describe('frappe', () => {
 
   it('borne vers le haut dès la frappe', () => {
     /* Sinon le champ affichait 9999, la carte 8 000, l'URL r=8000 et le
-       fichier 8000 px — quatre vérités pour une seule valeur. */
+       fichier 8000 px : quatre vérités pour une seule valeur. */
     expect(chiffres('9999')).toBe(String(RES_MAX))
   })
 

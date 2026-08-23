@@ -1,7 +1,7 @@
 /* Combien coûte une frappe dans le champ de résolution, et un changement de
    palette ? Mesuré sur un profil mobile lent. */
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 (async () => {
   const { srv, port } = await ouvrir(); PORT = port;

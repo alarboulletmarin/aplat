@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Le moteur génératif — tout ce qui fabrique l'image.
+ * Le moteur génératif, tout ce qui fabrique l'image.
  *
  * Rien n'en sort : aucune requête, aucune donnée. Le rendu est déterministe,
  * le quadruplet (famille, palette, densité, graine) donne toujours la même
@@ -42,7 +42,7 @@ export type IdPalette =
   | 'orage'
   | 'encre'
 
-/** 0 calme · 1 moyen · 2 dense. */
+/** 0 calme, 1 moyen, 2 dense. */
 export type Densite = 0 | 1 | 2
 
 export type Langue = 'fr' | 'en'
@@ -56,7 +56,7 @@ export interface Palette {
 
 export interface Famille {
   id: IdFamille
-  /** `abs` abstraits, `fig` figures — les deux groupes de la liste. */
+  /** `abs` abstraits, `fig` figures : les deux groupes de la liste. */
   groupe: 'abs' | 'fig'
   fr: string
   en: string
@@ -341,7 +341,7 @@ function tournesol(
 
 /**
  * Les formes, et rien d'autre : ni fond, ni voile, ni grain. `unite` est le
- * petit côté — toutes les tailles s'y rapportent, c'est ce qui rend le motif
+ * petit côté ; toutes les tailles s'y rapportent, c'est ce qui rend le motif
  * indépendant de la résolution.
  */
 export function formes(
@@ -662,7 +662,7 @@ export function formes(
     return
   }
 
-  /* vagues — famille par défaut.
+  /* vagues : famille par défaut.
      Le pas d'échantillonnage suit la largeur : la courbe reste lisse même
      quand on zoome à 100 % dans un fond d'écran 4K. */
   const n = [4, 7, 11][densite]
@@ -690,7 +690,7 @@ export function formes(
 
 /*
  * Grain papier. Il fait deux choses : il donne la texture de la direction
- * artistique, et il trame le voile — sans lui, une marche d'un cran sur 255
+ * artistique, et il trame le voile. Sans grain, une marche d'un cran sur 255
  * s'étale parfois sur plusieurs centaines de lignes et se lit comme une bande,
  * surtout sur les palettes très sombres.
  *
@@ -765,7 +765,7 @@ const memoire = new Map<string, Mesure>()
 /**
  * On borne la surface de la sonde, pas son grand côté : borner le grand côté
  * écrasait le rapport d'aspect au-delà de 3,44:1, si bien qu'un format
- * panoramique était mesuré sur une autre composition que celle exportée — le
+ * panoramique était mesuré sur une autre composition que celle exportée ; le
  * voile brûlé dans le PNG et le contraste annoncé portaient alors sur une image
  * qui n'existait pas.
  */
@@ -906,9 +906,9 @@ export interface Motif {
  *
  * `mesureW` et `mesureH` : les dimensions à utiliser pour la lisibilité quand
  * elles diffèrent de celles du canevas. L'aperçu est dessiné dans une boîte de
- * quelques pixels plus petite que la géométrie visée — la bordure de l'appareil
- * — et doit malgré tout mesurer le format réellement exporté, sans quoi le
- * voile brûlé dans l'aperçu n'est pas celui du fichier.
+ * quelques pixels plus petite que la géométrie visée (la bordure de l'appareil)
+ * et doit malgré tout mesurer le format réellement exporté, sans quoi le voile
+ * brûlé dans l'aperçu n'est pas celui du fichier.
  */
 export function dessiner(
   ctx: Ctx, W: number, H: number, motif: Motif,

@@ -55,16 +55,16 @@ un très sombre**, plus un accent chaud réservé aux aplats.
 
 | Jeton | Valeur | Rôle |
 |---|---|---|
-| `--lime` | `#DFF478` | l'acide — accent, appel primaire |
+| `--lime` | `#DFF478` | l'acide : accent, appel primaire |
 | `--creme` | `#F7F3E6` | le neutre chaud |
-| `--ciel` | `#92BAD5` | le premier bleu — décor en thème clair |
-| `--violet` | `#788CE3` | le second bleu — décor en thème sombre |
-| `--navy` | `#17243F` | le très sombre — l'encre |
+| `--ciel` | `#92BAD5` | le premier bleu : décor en thème clair |
+| `--violet` | `#788CE3` | le second bleu : décor en thème sombre |
+| `--navy` | `#17243F` | le très sombre : l'encre |
 | `--corail` | `#FF6648` | l'accent chaud |
 
 **Le corail ne porte jamais de texte.** 2,9:1 sur crème : il est réservé aux
 aplats et aux formes. Là où une teinte d'alerte doit tenir le 3:1 d'un élément
-d'interface — le trait de la carte d'erreur, le triangle de saisie invalide —
+d'interface (le trait de la carte d'erreur, le triangle de saisie invalide),
 c'est `--alerte` qui sert : `#E8481F` en clair, et le corail lui-même en sombre,
 où il passe.
 
@@ -107,10 +107,10 @@ ensembles Unicode chacune : rien ne part vers un CDN, et le latin étendu n'est
 téléchargé que s'il sert.
 
 Le titre : `clamp(56px, 15.5vw, 98px)`, interligne `.76`, interlettrage
-`-.045em`, en capitales. Presque collé — c'est le seul geste typographique de la
+`-.045em`, en capitales. Presque collé. C'est le seul geste typographique de la
 page, et il ne se répète nulle part ailleurs.
 
-Échelle du texte courant : 12,5 · 13 · 13,5 · 14 · 14,5 · 15 · 16 · 16,5 px.
+Échelle du texte courant : `12,5` `13` `13,5` `14` `14,5` `15` `16` `16,5` px.
 Les titres de section sont à 16,5 px en gras, avec `-.012em` d'interlettrage.
 
 ---
@@ -139,13 +139,13 @@ repèrent, ils ne portent jamais d'information seule** : l'arche du groupe
 remplacent pas.
 
 Les pictogrammes sont dessinés dans la direction artistique, en CSS, à partir de
-formes pleines et de `clip-path` — ni Material, ni Lucide, **jamais d'emoji**.
+formes pleines et de `clip-path` : ni Material, ni Lucide, **jamais d'emoji**.
 
 ---
 
 ## 6. Gabarits
 
-Mobile d'abord. Une colonne sous 760 px, deux au-delà — l'aperçu à gauche, les
+Mobile d'abord. Une colonne sous 760 px, deux au-delà : l'aperçu à gauche, les
 réglages à droite, tous deux visibles en même temps.
 
 L'aperçu est **collant en haut** sur téléphone et la barre d'action **collante
@@ -170,7 +170,7 @@ Les cinq groupes de réglage sont à choix unique et exclusif : ce sont des
 **boutons radio**, pas des bascules. `role="radio"`, `aria-checked`, un seul
 arrêt de tabulation par groupe, les flèches déplacent le choix.
 
-La sélection est un **aplat inversé** — encre pleine, texte papier — et non une
+La sélection est un **aplat inversé** (encre pleine, texte papier) et non une
 nuance : un aplat se lit de loin, en niveaux de gris, sans comparer deux teintes
 voisines. Le petit carré lime confirme, il ne décide pas ; il porte un filet à la
 couleur du texte, sans quoi il disparaîtrait sur la puce crème du thème sombre.
@@ -184,8 +184,8 @@ teinte seule ne suffit jamais.
 ### Les boutons
 
 - **Primaire** : aplat `--accent`, texte `--accent-encre`, trait
-  `--accent-encre` — et non `--encre`, qui est la crème en thème sombre et
-  disparaîtrait sur le lime. 56 px de haut.
+  `--accent-encre` (et non `--encre`, qui est la crème en thème sombre et
+  disparaîtrait sur le lime). 56 px de haut.
 - **Secondaire** : transparent, trait `--encre` à 2 px. 56 px, mais
   `flex: 0 100 auto` : il cède toute sa place au primaire.
 
@@ -219,7 +219,7 @@ promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
 
 ---
 
-## 9. Accessibilité — non négociable
+## 9. Accessibilité : non négociable
 
 - **Contrastes** : 4,5:1 pour le texte courant, 3:1 pour le texte large, les
   bordures d'éléments d'interface et les formes porteuses de sens.
@@ -227,7 +227,7 @@ promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
   sélection est un aplat inversé, la densité un nombre de points allumés, la
   lisibilité trois formes distinctes (disque plein, demi-disque, triangle), le
   thème un disque plein, vide ou à moitié, l'erreur un triangle.
-- **Cibles tactiles 44 px**, sans exception — y compris le lien vers la source
+- **Cibles tactiles 44 px**, sans exception, y compris le lien vers la source
   dans le pied de page.
 - **Actions fréquentes dans la zone du pouce** : la barre d'action est en bas.
 - **Focus visible partout**, et jamais masqué par les deux barres collantes.
@@ -235,7 +235,7 @@ promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
   ni par `scrollIntoView`, la correction se fait sur `focusin`
   (WCAG 2.2, 2.4.11).
 - **Régions live** sur le verdict de lisibilité, le résultat de l'export et la
-  confirmation de copie — et rien n'y est réécrit quand rien ne change.
+  confirmation de copie, sans rien y réécrire quand rien ne change.
 - **La maquette d'écran est `aria-hidden`** : un lecteur d'écran n'a pas à lire
   de faux noms d'application. L'aperçu, lui, porte une description de ce qu'il
   montre.
@@ -247,31 +247,57 @@ promet de mesurer la lisibilité n'affiche pas un chiffre de repli.
 Une animation ne sert que si elle dit **une origine, un état ou une
 continuité**. Il y en a deux :
 
-- le fondu de l'aperçu quand le motif change — il dit « c'est une autre
-  image », et il se tait quand seule la fenêtre a bougé ;
-- les trois points pendant le calcul — ils disent « c'est en cours ».
+- le fondu de l'aperçu dit « c'est une autre image » quand le motif change, et
+  il se tait quand seule la fenêtre a bougé ;
+- les trois points disent « c'est en cours » pendant le calcul.
 
 `prefers-reduced-motion: reduce` les coupe toutes les deux.
 
 ---
 
-## 11. Deux langues
+## 11. Écriture et ponctuation
+
+Trois signes que le projet n'emploie nulle part : **le tiret cadratin, le tiret
+demi-cadratin et le point médian**. Ni dans l'interface, ni dans les
+commentaires, ni dans la documentation. Ils se glissent partout dès qu'on écrit
+vite, et ils donnent au texte une allure qui n'est pas celle du projet.
+
+Une phrase qui en réclame un se réécrit. La convention des séparateurs :
+
+| Ce qu'on veut marquer | Le signe |
+|---|---|
+| annoncer une explication ou un exemple | deux points, jamais deux fois dans des phrases voisines |
+| séparer des éléments de même rang | la virgule |
+| une précision secondaire, un qualificatif | les parenthèses |
+| une rupture forte, ou quand la virgule est prise par la décimale française | le point-virgule |
+| deux propositions qui tiennent seules | le point |
+
+Pas de barre verticale dans la prose : elle n'appartient pas à la typographie
+française et se lit comme de la syntaxe de tableau.
+
+`npm run typographie` fait échouer la porte de sortie sur la moindre occurrence
+des trois signes, dans toutes les sources.
+
+Espaces insécables dans les chaînes françaises devant `%`, `:`, `;` et à
+l'intérieur des guillemets. Dans le code, elles s'écrivent `\u00a0` : un
+caractère invisible dans une chaîne est un caractère que personne ne relit.
+
+---
+
+## 12. Deux langues
 
 FR et EN, à parité stricte : la clé qui manque d'un côté ne compile pas. Les
-gabarits laissent **30 % de marge** — vérifié en allongeant chaque libellé
-d'autant, sur huit largeurs et quatre résolutions cibles.
+gabarits laissent **30 % de marge** (vérifié en allongeant chaque libellé
+d'autant, sur huit largeurs et quatre résolutions cibles).
 
 Selon l'endroit, un libellé long revient à la ligne (puces), replie sa rangée
 (langue, thème), s'étire avec sa colonne (cartes) ou s'élide (icônes de la
 maquette, bouton secondaire). Le libellé du bouton primaire, lui, ne s'élide ni
 ne se coupe jamais.
 
-Espaces insécables dans les chaînes françaises devant `%`, `:` et à l'intérieur
-des guillemets.
-
 ---
 
-## 12. Ce que le design refuse
+## 13. Ce que le design refuse
 
 - Dark patterns, fausse urgence, frictions asymétriques.
 - Gamification : ni badge, ni série, ni barre de progression culpabilisante.
@@ -280,3 +306,4 @@ des guillemets.
 - Emoji.
 - Bibliothèque de composants ou de style.
 - Une deuxième section.
+- Tiret cadratin, tiret demi-cadratin, point médian (section 11).

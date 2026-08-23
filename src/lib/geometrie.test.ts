@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Ce que ces tests protègent : que la boîte de l'appareil porte le rapport
+ * d'aspect du fichier visé, bordure défalquée. C'est ce qui rend l'aperçu
+ * concluant ; un écart de 1,5 % suffisait à mesurer la lisibilité d'une image
+ * qui n'existait pas.
+ *
+ * Ce qu'ils ne couvrent pas : le rendu réel de la maquette, qui dépend de la
+ * mise en page et se vérifie dans `tools/overflow.js`.
+ */
 import { describe, expect, it } from 'vitest'
 import { BORDURE_APPAREIL, geometrieAppareil, hauteurScene, jetonsLibelle } from './geometrie'
 

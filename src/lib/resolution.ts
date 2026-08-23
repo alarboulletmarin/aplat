@@ -37,7 +37,7 @@ export function horsBornes(saisie: string): boolean {
 
 /**
  * Borné vers le haut dès la frappe : sinon le champ affichait 9999, la carte
- * Résolution 8 000, l'URL r=8000 et le fichier 8000 px — quatre vérités pour
+ * Résolution 8 000, l'URL r=8000 et le fichier 8000 px : quatre vérités pour
  * une seule valeur. La borne basse, elle, ne peut pas être appliquée à la
  * frappe : on passe par « 1 » pour écrire « 1179 ». Elle est signalée.
  */
@@ -50,8 +50,8 @@ export function chiffres(saisie: string): string {
 /**
  * En portrait on classe sur le rapport d'aspect, pas sur le petit côté en
  * pixels : un seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796)
- * comme une tablette — largeur de scène, nombre de colonnes de la maquette et
- * libellé « Tablette · détecté » tous faux, alors que la densité de la grille
+ * comme une tablette (largeur de scène, nombre de colonnes de la maquette et
+ * libellé « Tablette, détecté sur cet appareil » tous faux), alors que la densité de la grille
  * est précisément ce que la maquette sert à juger. Un téléphone est plus étroit
  * que 0,62 ; une tablette tourne autour de 0,75.
  */

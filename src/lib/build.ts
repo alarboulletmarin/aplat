@@ -5,7 +5,7 @@
  *
  * L'AGPL demande que la source *correspondante* soit désignable : un lien vers
  * la branche principale ne l'est pas, le commit exact l'est. Un build fait
- * depuis une archive n'a pas de dépôt git — le commit est alors vide et seule
+ * depuis une archive n'a pas de dépôt git ; le commit est alors vide et seule
  * la version s'affiche.
  */
 export const VERSION: string = __APP_VERSION__
@@ -13,10 +13,20 @@ export const COMMIT: string = __APP_COMMIT__
 
 const DEPOT = 'https://github.com/alarboulletmarin/aplat'
 
-export function lienSource(): string {
-  return COMMIT ? `${DEPOT}/tree/${COMMIT}` : DEPOT
+/**
+ * Les deux fonctions prennent un objet plutôt que des positions : sans ça,
+ * l'une commencerait par le commit et l'autre par la version, deux chaînes que
+ * rien ne distingue au typage. Un appel écrit par analogie avec l'autre
+ * produirait « v<commit> » sans que rien ne le signale. L'interface les appelle
+ * toujours sans argument ; les paramètres n'existent que pour que les tests
+ * atteignent la branche du build sans dépôt git.
+ */
+export function lienSource({ commit = COMMIT }: { commit?: string } = {}): string {
+  return commit ? `${DEPOT}/tree/${commit}` : DEPOT
 }
 
-export function etiquetteVersion(): string {
-  return COMMIT ? `v${VERSION} · ${COMMIT}` : `v${VERSION}`
+export function etiquetteVersion(
+  { version = VERSION, commit = COMMIT }: { version?: string; commit?: string } = {},
+): string {
+  return commit ? `v${version} (${commit})` : `v${version}`
 }

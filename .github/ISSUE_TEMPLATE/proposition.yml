@@ -38,8 +38,8 @@ body:
     attributes:
       label: Où cela vivrait-il ?
       description: >
-        Il n'y a qu'un écran : l'aperçu, les trois réglages — famille, palette,
-        densité —, la résolution, le bouton Télécharger, et le pied de page.
+        Il n'y a qu'un écran : l'aperçu, les trois réglages (famille, palette,
+        densité), la résolution, le bouton Télécharger, et le pied de page.
         Une fonctionnalité qui ne trouve pas sa place finit par réclamer un
         deuxième écran, et le deuxième écran est ce que le projet refuse.
     validations:

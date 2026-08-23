@@ -21,8 +21,8 @@ C'est un projet personnel : la réponse est de bonne foi, pas contractuelle. Com
 
 ## Ce qui n'est pas une faille
 
-- **Une URL forgée qui donne un motif inattendu.** Les paramètres sont lus un par un, et une valeur inconnue, hors bornes ou absurde retombe sur la valeur par défaut plutôt que d'arrêter la page. `tools/fuzz-url.js` passe une série d'URL hostiles pour vérifier qu'aucune ne provoque d'erreur, d'injection, ni de page vide. Si vous en trouvez une qui y échappe, c'est un bug intéressant, signalez-le.
-- **Le lien de partage révèle vos réglages.** C'est ce qu'il est fait pour faire : famille, palette, densité, graine, langue, thème. Il ne porte ni identifiant, ni horodatage, ni la résolution détectée de votre appareil — celle-ci est une mesure du matériel, pas un réglage, et elle ne part pas dans le lien.
+- **Une URL forgée qui donne un motif inattendu.** Les paramètres sont lus un par un, et une valeur inconnue, hors bornes ou absurde retombe sur la valeur par défaut plutôt que d'arrêter la page. `tools/fuzz-url.mjs` passe une série d'URL hostiles pour vérifier qu'aucune ne provoque d'erreur, d'injection, ni de page vide. Si vous en trouvez une qui y échappe, c'est un bug intéressant, signalez-le.
+- **Le lien de partage révèle vos réglages.** C'est ce qu'il est fait pour faire : famille, palette, densité, graine, langue, thème. Il ne porte ni identifiant, ni horodatage, ni la résolution détectée de votre appareil ; celle-ci est une mesure du matériel, pas un réglage, et elle ne part pas dans le lien.
 - **Le PNG téléchargé n'est pas protégé.** C'est un fichier image dans votre dossier de téléchargements, comme n'importe quel autre. Aplat ne le voit plus une fois qu'il est écrit.
 - **Le Service Worker sert une version antérieure après une mise à jour.** C'est le fonctionnement normal d'un cache hors ligne : la nouvelle version est récupérée en arrière-plan et prend la main au chargement suivant.
 - **Effacer les données du site depuis le navigateur.** Il n'y a rien à perdre : cela vide le cache de l'application, qui se remplira au prochain chargement avec une connexion.

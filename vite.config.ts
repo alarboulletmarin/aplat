@@ -10,7 +10,7 @@ const { version } = JSON.parse(readFileSync('./package.json', 'utf8'))
 
 /**
  * Le commit d'où sort ce build, pour que le pied de page puisse pointer la
- * source *exacte* du JavaScript servi — c'est ce que l'AGPL appelle la
+ * source *exacte* du JavaScript servi : c'est ce que l'AGPL appelle la
  * « Corresponding Source », et un lien vers `main` ne la désigne pas.
  *
  * Un build depuis une archive n'a pas de dépôt git : on renvoie une chaîne
@@ -30,7 +30,7 @@ function commit() {
 /**
  * La page promet « aucun réseau » : cette politique en fait une propriété du
  * document et non une simple phrase. `connect-src 'none'` coupe fetch, XHR,
- * WebSocket, EventSource et sendBeacon — l'application n'en émet aucun, le
+ * WebSocket, EventSource et sendBeacon. L'application n'en émet aucun, le
  * moteur ne calcule qu'ici. Aucune directive ne porte sur les scripts, les
  * styles ni les images : la restriction doit dire quelque chose de vrai, pas
  * décorer.
@@ -77,15 +77,24 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'polices/*.woff2'],
       manifest: {
-        name: 'Aplat — fonds d’écran génératifs',
+        name: 'Aplat\u00a0: fonds d’écran génératifs',
         short_name: 'Aplat',
         description:
           'Des fonds d’écran génératifs calculés dans le navigateur, exportés à la résolution exacte de l’appareil.',
         lang: 'fr',
         dir: 'ltr',
+        // `id` posé explicitement : sans lui, l'identité de l'application
+        // installée dépend de `start_url`, et changer l'un reviendrait à
+        // installer une seconde application à côté de la première.
+        id: '/',
         start_url: '/',
         scope: '/',
         display: 'standalone',
+        // 'any' et non 'portrait' : la maquette d'appareil est déduite du
+        // rapport d'aspect et sert téléphone, tablette et ordinateur.
+        // Verrouiller en portrait empêcherait de juger un fond d'écran
+        // d'ordinateur, qui est précisément ce que le format 2560 × 1440 sert.
+        orientation: 'any',
         background_color: '#F2EDDD',
         theme_color: '#F2EDDD',
         categories: ['graphics', 'personalization', 'utilities'],

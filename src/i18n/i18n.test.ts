@@ -69,6 +69,25 @@ describe('parité des dictionnaires', () => {
   })
 })
 
+describe('ponctuation', () => {
+  /* Trois signes que le projet n'emploie pas. Une phrase qui en réclame un se
+     réécrit ; `tools/typographie.js` fait le même contrôle sur tout le dépôt. */
+  it('n’emploie ni tiret cadratin, ni tiret demi-cadratin, ni point médian', () => {
+    const interdits = ['\u2014', '\u2013', '\u00b7']
+    for (const [langue, dictionnaire] of Object.entries(DICTIONNAIRES)) {
+      for (const chemin of chemins(dictionnaire as unknown as Noeud)) {
+        const contenu = valeur(dictionnaire as unknown as Noeud, chemin)
+        const textes = Array.isArray(contenu) ? contenu.map(String) : [String(contenu)]
+        for (const texte of textes) {
+          for (const signe of interdits) {
+            expect(texte.includes(signe), `${langue}.${chemin} : ${texte}`).toBe(false)
+          }
+        }
+      }
+    }
+  })
+})
+
 describe('choix de la langue', () => {
   it('rend le dictionnaire demandé', () => {
     expect(textes('fr')).toBe(fr)

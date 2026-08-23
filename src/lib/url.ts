@@ -10,7 +10,7 @@ import { RES_MAX, RES_MIN, type Resolution } from './resolution'
  * L'URL est la seule mémoire d'Aplat.
  *
  * Rien n'est écrit sur l'appareil : ni compte, ni cookie, ni stockage local.
- * L'état partageable tient dans la barre d'adresse — c'est aussi ce qui rend
+ * L'état partageable tient dans la barre d'adresse ; c'est aussi ce qui rend
  * un motif transmissible sans passer par personne.
  */
 

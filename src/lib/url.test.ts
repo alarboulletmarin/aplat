@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Ce que ces tests protègent : l'URL est la seule mémoire d'Aplat. Elle doit
+ * relire exactement ce qu'elle a écrit, ne rien emporter d'autre que les
+ * réglages, et ne jamais casser devant une adresse forgée à la main.
+ *
+ * La liste d'URL hostiles est courte ici, à dessein : `tools/fuzz-url.js` en
+ * essaie 241 dans un vrai navigateur. Ce fichier garde les cas qui décrivent
+ * une décision, comme la résolution traitée en couple ou la détection qui ne
+ * part pas dans un lien.
+ */
 import { describe, expect, it } from 'vitest'
 import { ecrireUrl, langueParDefaut, lireUrl, REGLAGES_PAR_DEFAUT } from './url'
 import { depuisSaisie } from './resolution'

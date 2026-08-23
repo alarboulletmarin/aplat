@@ -2,17 +2,19 @@
  *
  * La promesse « dans les transports » ne tient que si l'application démarre
  * sans réseau : on l'ouvre, on attend que le Service Worker prenne la main, on
- * coupe, on recharge, et on vérifie qu'un motif est bien dessiné — polices
+ * coupe, on recharge, et on vérifie qu'un motif est bien dessiné, polices
  * comprises, sans quoi le titre tomberait sur une police de secours au moment
  * précis où l'utilisateur n'a plus de quoi la télécharger.
  */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir, RACINE } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir, RACINE } from './serveur.mjs'
 
 const ok = [], ko = [];
-const t = (cond, titre, extra) => (cond ? ok : ko).push(titre + (extra ? ' — ' + extra : ''));
+/* Même séparateur que dans e2e.js : les deux produisent la même forme de
+   rapport, et la flèche ne s'imbrique avec rien. */
+const t = (cond, titre, extra) => (cond ? ok : ko).push(titre + (extra ? ' -> ' + extra : ''));
 
 /** Largeur et hauteur déclarées dans l'en-tête IHDR d'un PNG. */
 function taillePNG(fichier) {

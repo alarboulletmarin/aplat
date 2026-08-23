@@ -53,7 +53,7 @@ export function Apercu({
     noeud.dataset.peint = '1'
 
     /* Le fondu dit « le motif a changé ». Il n'a rien à dire quand seule la
-       fenêtre a bougé — sur téléphone, le repli de la barre d'URL pendant le
+       fenêtre a bougé : sur téléphone, le repli de la barre d'URL pendant le
        défilement faisait clignoter l'aperçu. */
     const signature = [motif.famille, motif.palette, motif.densite, motif.graine].join('|')
     const change = precedent.current !== null && precedent.current !== signature

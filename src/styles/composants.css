@@ -1,8 +1,11 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+/* Référence : DESIGN_SYSTEM.md, section 5 (formes, rayons, filets) et
+   section 7 (les composants). */
+
 /* ==========================================================================
    Les briques : puces de choix, champs, boutons, notes, pictogrammes.
-   Aucune information ne passe par la seule couleur — en niveaux de gris, la
+   Aucune information ne passe par la seule couleur. En niveaux de gris, la
    sélection reste un aplat inversé, le niveau de densité un nombre de points,
    l'erreur un triangle et un trait épaissi.
    ========================================================================== */
@@ -40,8 +43,8 @@
   background: transparent;
 }
 /* Le carré de sélection garde son lime dans les deux thèmes, avec un filet à
-   la couleur du texte : sans lui, sur la puce inversée du thème sombre — un
-   aplat crème — le lime tombait à 1,1:1 et disparaissait. */
+   la couleur du texte : sans lui, sur la puce inversée du thème sombre (un
+   aplat crème), le lime tombait à 1,1:1 et disparaissait. */
 .opt[aria-checked='true'] .opt-carre {
   background: var(--accent);
   box-shadow: 0 0 0 1.5px currentColor;
@@ -163,7 +166,7 @@
   text-align: center;
 }
 /* Le thème se distingue au remplissage du disque, pas à sa couleur : plein,
-   vide, moitié — trois formes, lisibles en niveaux de gris. */
+   vide, moitié. Trois formes, lisibles en niveaux de gris. */
 .opt-theme i {
   display: block;
   width: 13px;

@@ -1,15 +1,19 @@
 /* Capture l'écran dans plusieurs contextes et remonte les erreurs console. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
 
-const OUT = process.env.SHOT_OUT || path.resolve(__dirname, '../.shots');
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
+
+const OUT = process.env.SHOT_OUT || path.resolve(ICI, '../.shots');
 let PORT = 0;
 
 const CASES = [
   { name: 'phone-fr-light', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=fr' },
-  { name: 'phone-fr-dark', w: 390, h: 844, dsf: 3, scheme: 'dark', q: '?l=fr&t=dark' },
+  { name: 'phone-fr-dark', w: 390, h: 844, dsf: 3, scheme: 'dark', q: '?l=fr&t=sombre' },
   { name: 'phone-en-light', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=en' },
   { name: 'desktop-fr-light', w: 1280, h: 900, dsf: 2, scheme: 'light', q: '?l=fr' },
   { name: 'desktop-fr-dark', w: 1280, h: 900, dsf: 2, scheme: 'dark', q: '?l=fr' },
@@ -51,5 +55,5 @@ const CASES = [
   await browser.close();
   srv.close();
   if (problems.length) { console.log('PROBLÈMES:\n' + problems.join('\n')); process.exitCode = 1; }
-  else console.log('OK — aucune erreur console, aucune requête externe.');
+  else console.log('OK : aucune erreur console, aucune requête externe.');
 })();

@@ -9,6 +9,7 @@ import { textes as dictionnaire } from './i18n'
 import { useFocusDegage } from './hooks/useFocusDegage'
 import { useHauteursCollantes } from './hooks/useHauteursCollantes'
 import { useRevisionFenetre } from './hooks/useRevisionFenetre'
+import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
 import { ChoixDensite, ChoixFamille, ChoixPalette } from './components/Reglages'
@@ -48,7 +49,6 @@ export function App() {
     lireUrl(window.location.search, detecte, navigator.language),
   )
   const [ephemere, setEphemere] = useState<Ephemere>(EPHEMERE_INITIAL)
-  const [lien, setLien] = useState(() => window.location.href)
 
   /* Le verrou de réentrance ne peut pas vivre dans la phase d'affichage :
      n'importe quel réglage la remet à « repos », et un clic sur une palette
@@ -79,7 +79,7 @@ export function App() {
   )
 
   /* La sonde est mémoïsée deux fois : ici pour le rendu, et dans le moteur
-     lui-même pour l'export — les deux tombent donc sur le même verdict. */
+     lui-même pour l'export. Les deux tombent donc sur le même verdict. */
   const mesure = useMemo(
     () =>
       vide
@@ -89,7 +89,7 @@ export function App() {
     [motif, resolution.largeur, resolution.hauteur, vide],
   )
 
-  /** Un réglage touché efface le résultat précédent — mais jamais un export en cours. */
+  /** Un réglage touché efface le résultat précédent, mais jamais un export en cours. */
   const changer = useCallback((patch: Partial<Reglages>, edition?: boolean) => {
     setReglages((precedent) => ({ ...precedent, ...patch }))
     setEphemere((precedent) => ({
@@ -105,31 +105,43 @@ export function App() {
   useFocusDegage()
   useHauteursCollantes(scene, barre, `${revision}|${ephemere.phase}|${reglages.langue}|${vide}`)
 
-  /* — thème, langue et métadonnées du document — */
+  /* --- thème, langue et métadonnées du document ---
+     `data-theme` ne porte que le thème résolu : « système » est un choix, pas
+     un thème, et la feuille de style n'a ainsi qu'un seul bloc sombre. */
+  const themeResolu = useThemeResolu(reglages.theme)
   useEffect(() => {
     const racine = document.documentElement
-    racine.dataset.theme = reglages.theme
+    racine.dataset.theme = themeResolu
     racine.lang = reglages.langue
     document.title = T.document.titre
     document.querySelector('meta[name="description"]')?.setAttribute('content', T.document.description)
-  }, [reglages.theme, reglages.langue, T])
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', themeResolu === 'sombre' ? '#0E1729' : '#F2EDDD')
+  }, [themeResolu, reglages.langue, T])
 
-  /* — l'URL suit l'état, sans jamais empiler d'entrée d'historique — */
+  /* --- l'URL suit l'état, sans jamais empiler d'entrée d'historique ---
+     Le lien est calculé, pas relu après coup : `replaceState` peut être refusé
+     par certaines ouvertures locales, et relire `location.href` ferait alors
+     copier une adresse qui n'est plus celle des réglages affichés. */
+  const requete = useMemo(
+    () => ecrireUrl(reglages, resolution, detecte),
+    [reglages, resolution, detecte],
+  )
+  const lien = `${window.location.origin}${window.location.pathname}?${requete}`
+
   useEffect(() => {
-    const requete = ecrireUrl(reglages, resolution, detecte)
-    if (window.location.search.slice(1) !== requete) {
-      try {
-        window.history.replaceState(null, '', `${window.location.pathname}?${requete}`)
-      } catch {
-        /* certaines ouvertures locales refusent replaceState : sans conséquence */
-      }
+    if (window.location.search.slice(1) === requete) return
+    try {
+      window.history.replaceState(null, '', `${window.location.pathname}?${requete}`)
+    } catch {
+      /* certaines ouvertures locales refusent replaceState : sans conséquence */
     }
-    setLien(window.location.href)
-  }, [reglages, resolution, detecte])
+  }, [requete])
 
   useEffect(() => () => clearTimeout(minuterieCopie.current), [])
 
-  /* — actions — */
+  /* --- actions --- */
 
   const nouvelleGraine = () => changer({ graine: Math.floor(Math.random() * GRAINE_MAX) + 1 })
 
@@ -172,8 +184,8 @@ export function App() {
     /* Instantané pris au clic : l'encodage d'un PNG de plusieurs mégapixels
        dure plusieurs centaines de millisecondes, pendant lesquelles
        l'interface reste cliquable. Sans ça, un changement de palette pendant
-       l'encodage renommerait un fichier déjà dessiné, et la densité — absente
-       du nom — glisserait sans laisser de trace. */
+       l'encodage renommerait un fichier déjà dessiné, et la densité (absente
+       du nom) glisserait sans laisser de trace. */
     const travail = { motif, largeur: resolution.largeur, hauteur: resolution.hauteur }
 
     exportEnCours.current = true

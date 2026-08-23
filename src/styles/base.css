@@ -1,5 +1,8 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+/* Référence : DESIGN_SYSTEM.md, section 9 (accessibilité) et section 10
+   (mouvement). */
+
 body {
   background: var(--fond);
   color: var(--encre);

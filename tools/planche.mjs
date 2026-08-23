@@ -1,12 +1,16 @@
 /* Planche-contact : les 18 familles rendues à la résolution d'un téléphone,
    réduites côte à côte. Sert à juger d'un coup d'œil ce que produit le moteur. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.shots');
+const OUT = path.resolve(ICI, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });

@@ -1,5 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Ce que ces tests protègent : la promesse centrale du produit, c'est-à-dire
+ * qu'un quadruplet donné rend toujours la même image, à n'importe quelle
+ * résolution. Si le déterminisme cède, un lien partagé ne montre plus le même
+ * motif, et l'aperçu cesse d'être le fichier.
+ *
+ * Ils couvrent aussi les listes blanches, parce qu'un identifiant venu de l'URL
+ * n'a jamais servi d'index, et le plafond du voile, parce qu'une marche de plus
+ * d'un cran sur 255 se voit à l'oeil sur un aplat sombre.
+ *
+ * Ce qu'ils ne couvrent pas : le tracé lui-même. Vérifier des pixels demande un
+ * canevas, donc un navigateur ; c'est le travail de `tools/`.
+ */
 import { describe, expect, it } from 'vitest'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,

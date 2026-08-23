@@ -1,15 +1,22 @@
 /* Parcours réel dans le navigateur : téléchargement, aller-retour par l'URL,
    déterminisme, états vide / chargement / erreur / succès, clavier. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.exports/e2e');
+const OUT = path.resolve(ICI, '../.exports/e2e');
 
 const ok = [], ko = [];
-const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — ' + extra : ''));
+/* Le détail est amené par une flèche : la barre verticale sert déjà à
+   énumérer les éléments d'un détail, et la parenthèse figure dans plusieurs
+   libellés. La flèche n'apparaît nulle part ailleurs, et ne s'imbrique pas. */
+const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' + extra : ''));
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
@@ -114,7 +121,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
   }));
   t(empty.shown, 'état vide : hachure affichée');
   t(empty.disabled, 'état vide : téléchargement désactivé');
-  t(empty.res.includes('—'), 'état vide : résolution en tirets', empty.res);
+  t(/Aucune/.test(empty.res), 'état vide : la résolution est dite absente', empty.res);
 
   // --- 7. état erreur : au-delà de 40 Mpx
   await page.fill('#res-largeur', '7000');
@@ -190,8 +197,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
 
   /* --- 15. rien d'écrit sur l'appareil
      L'application est installable : un cache existe donc, et l'annoncer
-     absent serait faux. Ce qu'on vérifie, c'est ce qu'il contient — les
-     fichiers de l'application, jamais un réglage ni une image — et qu'aucun
+     absent serait faux. Ce qu'on vérifie, c'est ce qu'il contient (les
+     fichiers de l'application, jamais un réglage ni une image) et qu'aucun
      des mécanismes de stockage adressables ne porte quoi que ce soit. */
   await page.evaluate(() => navigator.serviceWorker && navigator.serviceWorker.ready).catch(() => {});
   await page.waitForTimeout(600);
@@ -349,7 +356,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
       focused: document.activeElement.dataset.densite
     }));
     t(apresFleche.checked !== avant && apresFleche.checked === apresFleche.focused,
-      'clavier : la flèche déplace le choix et le focus ensemble', avant + ' -> ' + apresFleche.checked);
+      'clavier : la flèche déplace le choix et le focus ensemble', avant + ' puis ' + apresFleche.checked);
 
     // WCAG 2.2 SC 2.4.11 : le focus ne doit jamais finir sous une barre collante
     const masque = await kp.evaluate(async () => {
@@ -370,7 +377,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
       return { total: stops.length, bad };
     });
     t(masque.bad.length === 0, 'clavier : aucun focus masqué par les barres collantes (WCAG 2.4.11)',
-      masque.total + ' arrêts testés' + (masque.bad.length ? ' — ' + masque.bad.slice(0, 5).join(' | ') : ''));
+      masque.total + ' arrêts testés' + (masque.bad.length ? ', dont ' + masque.bad.slice(0, 5).join(' | ') : ''));
     // le focus doit rester visible sur le bouton primaire, qui est sur aplat lime
     await kp.evaluate(() => document.getElementById('btn-export').focus());
     const f2 = await kp.evaluate(() => {
@@ -515,7 +522,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
                                    [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
       await ap.goto('http://127.0.0.1:' + PORT + '/?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
       await ap.waitForTimeout(200);
-      const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(' · ')[0]);
+      const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(', ')[0]);
       if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
     }
     t(classe.length === 0, 'aperçu : le type d\'appareil est correct, téléphones récents compris', classe.join(' | ') || '6 formats');
@@ -576,7 +583,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
     t(bas.invalide === 'true', 'saisie : la valeur hors bornes est marquée aria-invalid');
     t(bas.etat === 'erreur' && bas.triangle !== 'none' &&
       parseFloat(bas.bordure) > parseFloat(bas.bordureOk) && bas.teinte,
-      'saisie : l\'erreur se voit aussi — trait épaissi et triangle, pas seulement la teinte',
+      'saisie : l\'erreur se voit au trait épaissi et au triangle, pas seulement à la teinte',
       'bordure ' + bas.bordure + ' contre ' + bas.bordureOk + ', triangle ' + bas.triangle);
     t(/16/.test(bas.message) && /8000/.test(bas.message), 'saisie : le message dit les bornes', bas.message);
     await sctx2.close();
@@ -645,7 +652,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' — '
         dev: document.getElementById('res-appareil').textContent,
         url: location.search
       }));
-      t(/détecté/.test(v.dev) && !/—/.test(v.res), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.dev);
+      t(/détecté/.test(v.dev) && !/Aucune/.test(v.res), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.dev);
     }
 
     // la résolution détectée ne part pas dans le lien

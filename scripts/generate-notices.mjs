@@ -9,8 +9,8 @@
  * leur code ; il doit donc voyager avec leurs notices.
  *
  * Sans dépendance, comme `generate-icons.mjs` : la liste des paquets vient de
- * `package-lock.json` — c'est lui qui sait ce qui est installé et ce qui n'est
- * là que pour le développement —, et les textes viennent des fichiers LICENSE
+ * `package-lock.json` (c'est lui qui sait ce qui est installé et ce qui n'est
+ * là que pour le développement), et les textes viennent des fichiers LICENSE
  * de `node_modules`.
  *
  * Lancé par `npm run build`, pour qu'aucune mise à jour de dépendance ne puisse
@@ -31,7 +31,7 @@ const FICHIERS_LICENCE = /^(licen[cs]e|copying|notice)(\.(md|txt))?$/i
 /**
  * Les paquets embarqués : tout ce que le verrou connaît, moins ce qui ne sert
  * qu'au développement. Un paquet utilisé des deux côtés n'est pas marqué
- * `dev` — c'est ce qui rend ce filtre sûr par défaut.
+ * `dev`. C'est ce qui rend ce filtre sûr par défaut.
  */
 function paquetsEmbarques() {
   const verrou = JSON.parse(readFileSync(join(RACINE, 'package-lock.json'), 'utf8'))
@@ -75,26 +75,51 @@ function nomLicence(chemin) {
   return 'licence non déclarée'
 }
 
+/**
+ * Les polices. Elles ne viennent pas de node_modules et n'apparaîtraient donc
+ * dans aucune liste de paquets, alors que le build embarque leurs quatre
+ * fichiers .woff2 et que le Service Worker les précache. L'OFL 1.1 est la
+ * raison première de ce fichier : elle exige d'être distribuée avec les fontes
+ * qu'elle couvre. Leurs textes voyagent déjà dans public/polices/, mais un
+ * lecteur qui cherche « ce que ce build embarque et sous quelle licence » ne
+ * doit avoir qu'un seul endroit à ouvrir.
+ */
+const POLICES = [
+  { nom: 'Anton', licence: 'SIL Open Font License 1.1', fichier: 'OFL-Anton.txt' },
+  { nom: 'Archivo', licence: 'SIL Open Font License 1.1', fichier: 'OFL-Archivo.txt' },
+]
+
+function textePolice(fichier) {
+  try {
+    return readFileSync(join(RACINE, 'public', 'polices', fichier), 'utf8').trim()
+  } catch {
+    return null
+  }
+}
+
 const paquets = paquetsEmbarques()
+const composants = paquets.length + POLICES.length
 
 const entete = [
-  'Aplat — licences des composants tiers',
+  'Aplat : licences des composants tiers',
   '',
   'Aplat est distribué sous licence AGPL-3.0-only (voir LICENSE). Le fichier',
   'JavaScript produit par le build embarque le code des bibliothèques listées',
-  'ci-dessous ; leurs licences respectives — permissives, donc compatibles avec',
-  "l'AGPL — sont reproduites ici, comme elles le demandent.",
+  'ci-dessous, et le build embarque aussi deux familles de police ; leurs',
+  'licences respectives (permissives, donc compatibles avec AGPL) sont',
+  'reproduites ici, comme elles le demandent.',
   '',
   'Ce fichier est régénéré à chaque build par scripts/generate-notices.mjs.',
   '',
-  `${paquets.length} paquets :`,
-  ...paquets.map((paquet) => `  · ${paquet.nom}@${paquet.version}`),
+  `${composants} composants :`,
+  ...paquets.map((paquet) => `  - ${paquet.nom}@${paquet.version}`),
+  ...POLICES.map((police) => `  - ${police.nom} (police)`),
   '',
 ]
 
 const corps = paquets.map((paquet) => {
   const texte = texteLicence(paquet.chemin)
-  const titre = `${paquet.nom}@${paquet.version} — ${nomLicence(paquet.chemin)}`
+  const titre = `${paquet.nom}@${paquet.version} : ${nomLicence(paquet.chemin)}`
   return [
     '='.repeat(78),
     titre,
@@ -106,7 +131,22 @@ const corps = paquets.map((paquet) => {
   ].join('\n')
 })
 
-writeFileSync(SORTIE, [entete.join('\n'), ...corps].join('\n'), 'utf8')
+const fontes = POLICES.map((police) => {
+  const texte = textePolice(police.fichier)
+  return [
+    '='.repeat(78),
+    `${police.nom} : ${police.licence}`,
+    '='.repeat(78),
+    '',
+    texte ??
+      `Texte de licence introuvable dans public/polices/${police.fichier}.\nLe fichier doit voyager avec les fontes qu'il couvre.`,
+    '',
+  ].join('\n')
+})
+
+writeFileSync(SORTIE, [entete.join('\n'), ...corps, ...fontes].join('\n'), 'utf8')
 
 const taille = (readFileSync(SORTIE).length / 1024).toFixed(1)
-console.log(`THIRD-PARTY.txt — ${paquets.length} paquets (${taille} Ko)`)
+console.log(
+  `THIRD-PARTY.txt : ${paquets.length} paquets, ${POLICES.length} polices (${taille} Ko)`,
+)

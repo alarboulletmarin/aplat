@@ -3,9 +3,12 @@
 import { useRef, type ButtonHTMLAttributes, type KeyboardEvent, type ReactNode } from 'react'
 
 /**
+ * La puce de choix : DESIGN_SYSTEM.md, section 7.
+ *
+ * Un groupe à choix unique et exclusif/**
  * Un groupe à choix unique et exclusif : ce sont des boutons radio, pas des
  * bascules. Un seul arrêt de tabulation par groupe, les flèches déplacent le
- * choix — comme des radios natives. Le parcours clavier de la page passe ainsi
+ * choix, comme des radios natives. Le parcours clavier de la page passe ainsi
  * d'une quarantaine d'arrêts à une dizaine, ce qui compte d'autant plus qu'il
  * y a deux barres collantes.
  */

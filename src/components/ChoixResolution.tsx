@@ -19,8 +19,11 @@ interface Preset {
 /**
  * Les tailles proposées. Un préréglage identique à la résolution détectée est
  * retiré : il n'y a aucune raison de proposer deux fois la même chose.
+ *
+ * Non exportée : rien d'autre n'en a l'usage, et un module qui exporte autre
+ * chose que des composants perd le rafraîchissement à chaud.
  */
-export function presets(textes: Textes, detecte: Resolution): Preset[] {
+function presets(textes: Textes, detecte: Resolution): Preset[] {
   const T = textes.resolution
   return [
     { id: 'detectee', libelle: T.presetAppareil, largeur: detecte.largeur, hauteur: detecte.hauteur },
@@ -113,24 +116,24 @@ export function ChoixResolution({
           <select id={idSelect} value={choix} onChange={surSelection}>
             {liste.map((p) => (
               <option value={p.id} key={p.id}>
-                {`${p.libelle} — ${nombre(p.largeur, langue)} × ${nombre(p.hauteur, langue)}`}
+                {`${p.libelle}, ${nombre(p.largeur, langue)}\u00a0×\u00a0${nombre(p.hauteur, langue)}`}
               </option>
             ))}
             <option value="surMesure">
               {trouve
                 ? T.surMesure
-                : `${T.surMesure}  ${nombre(resolution.largeur, langue)} × ${nombre(resolution.hauteur, langue)}`}
+                : `${T.surMesure}\u00a0\u00a0${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}`}
             </option>
           </select>
           <i aria-hidden="true" />
         </span>
       </label>
 
-      <p className="res-appareil" id="res-appareil">{`${nomType} · ${origine}`}</p>
+      <p className="res-appareil" id="res-appareil">{`${nomType}, ${origine}`}</p>
       <p className="vh" id="res-valeur">
         {vide
-          ? '— × —'
-          : `${nombre(resolution.largeur, langue)} × ${nombre(resolution.hauteur, langue)} px`}
+          ? T.aucune
+          : `${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}\u00a0px`}
       </p>
 
       {editeur && (

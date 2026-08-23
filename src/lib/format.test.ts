@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Ce que ces tests protègent : un nombre écrit à la française dans une
+ * interface anglaise, ou l'inverse. Ces défauts ne cassent rien et ne se voient
+ * qu'en basculant de langue, c'est-à-dire presque jamais.
+ *
+ * Le passage des kilooctets aux mégaoctets est ici parce que le poids du
+ * fichier fait partie du résultat annoncé : « 262 Ko » dit ce que « 0,3 Mo »
+ * cache.
+ */
 import { describe, expect, it } from 'vitest'
 import { decimal, heure, nombre, poids } from './format'
 

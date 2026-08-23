@@ -5,11 +5,13 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import type { Textes } from '../i18n'
 
 /**
+ * La note de mise à jour : DESIGN_SYSTEM.md, section 7.
+ *
  * Une nouvelle version a été mise en cache par le Service Worker.
  *
  * L'utilisateur choisit le moment du rechargement : recharger sous ses doigts
  * ferait perdre le motif en cours. Le refus est proposé aussi franchement que
- * l'acceptation — ni compte à rebours, ni urgence inventée.
+ * l'acceptation, sans compte à rebours ni urgence inventée.
  *
  * Le message « prête hors ligne » n'est volontairement pas affiché : c'est une
  * information sur l'application, pas sur le fond d'écran, et l'écran n'a pas

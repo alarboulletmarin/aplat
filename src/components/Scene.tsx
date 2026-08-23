@@ -12,11 +12,14 @@ import { MaquetteBureau, MaquetteTelephone } from './Maquette'
 import { Verdict } from './Verdict'
 
 /**
- * La scène : le motif, dans une maquette d'écran, avec le verdict de
- * lisibilité juste dessous.
+ * La scène : DESIGN_SYSTEM.md, section 1 (la hiérarchie de l'écran) et
+ * section 6 (gabarits).
  *
- * C'est le seul endroit de la page qui répond à la question posée — « mes
- * icônes resteront-elles lisibles ? » — et c'est pour ça qu'il est collant sur
+ * Le motif, dans une maquette d'écran, avec le verdict de lisibilité juste
+ * dessous.
+ *
+ * C'est le seul endroit de la page qui répond à la question posée (« mes
+ * icônes resteront-elles lisibles ? »), et c'est pour ça qu'il est collant sur
  * téléphone : on règle en dessous, on juge au-dessus, sans faire l'aller-retour.
  */
 export function Scene({

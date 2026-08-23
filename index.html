@@ -1,12 +1,14 @@
 <!doctype html>
-<html lang="fr" data-theme="systeme">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <!-- viewport-fit=cover : sans lui, env(safe-area-inset-*) vaut toujours 0. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#F2EDDD" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0E1729" media="(prefers-color-scheme: dark)" />
+    <!-- Une seule déclaration, mise à jour par le script ci-dessous puis par
+         React : « système » est résolu en clair ou en sombre avant la première
+         peinture, la couleur de la barre du navigateur suit la même valeur. -->
+    <meta name="theme-color" content="#F2EDDD" />
     <meta name="referrer" content="no-referrer" />
     <meta
       name="description"
@@ -20,8 +22,8 @@
 
     <!--
       Les deux polices sont auto-hébergées et chargées par la feuille de style,
-      qui n'arrive qu'après le JavaScript. Sans préchargement, le titre — le
-      seul endroit où la display se voit — apparaît en Impact puis saute.
+      qui n'arrive qu'après le JavaScript. Sans préchargement, le titre (le
+      seul endroit où la display se voit) apparaît en Impact puis saute.
       `crossorigin` est obligatoire même en même origine pour les polices,
       faute de quoi le navigateur télécharge deux fois.
     -->
@@ -40,25 +42,35 @@
       crossorigin
     />
 
-    <title>Aplat — fonds d’écran génératifs</title>
+    <title>Aplat : fonds d’écran génératifs</title>
 
     <!--
       Le thème et la langue, avant la première peinture.
 
       Aplat n'écrit rien sur l'appareil : son état tient dans l'URL. Ces deux
       valeurs s'y lisent donc directement, sans stockage ni requête. React les
-      repose lui-même une fois chargé ; d'ici là, le document serait peint en
-      clair — sur un appareil en thème sombre, un éclair blanc à chaque
+      repose lui-même une fois chargé. D'ici là, le document serait peint en
+      clair : sur un appareil en thème sombre, un éclair blanc à chaque
       ouverture, le seul défaut d'affichage qu'on ne peut pas corriger après
       coup puisqu'il a déjà eu lieu.
+
+      « Système » est résolu ici, et non par une requête de média dans la
+      feuille de style : `data-theme` ne porte ainsi que « clair » ou
+      « sombre », et le thème sombre n'est déclaré qu'une fois.
     -->
     <script>
       ;(function () {
         try {
           var q = new URLSearchParams(location.search)
           var choix = q.get('t')
-          if (choix !== 'clair' && choix !== 'sombre') choix = 'systeme'
+          if (choix !== 'clair' && choix !== 'sombre') {
+            choix = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'sombre'
+              : 'clair'
+          }
           document.documentElement.dataset.theme = choix
+          var couleur = document.querySelector('meta[name="theme-color"]')
+          if (couleur) couleur.setAttribute('content', choix === 'sombre' ? '#0E1729' : '#F2EDDD')
           var langue = q.get('l')
           if (langue !== 'fr' && langue !== 'en') {
             langue =
@@ -76,7 +88,7 @@
     <noscript>
       <p style="margin: 22px 16px; max-width: 46ch; line-height: 1.45">
         Aplat calcule les motifs avec JavaScript, dans ton navigateur. Active
-        JavaScript pour l’utiliser — rien n’est envoyé nulle part.
+        JavaScript pour l’utiliser. Rien n’est envoyé nulle part.
       </p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

@@ -5,7 +5,7 @@ import type { Textes } from '../i18n'
 /**
  * Le titre, en display très grasse et condensée, presque collée ; l'accroche
  * en grotesque neutre juste dessous. Le contraste entre les deux est ce qui
- * donne le ton — c'est le seul geste typographique de la page.
+ * donne le ton : c'est le seul geste typographique de la page.
  */
 export function Entete({ textes }: { textes: Textes }) {
   return (

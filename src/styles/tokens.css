@@ -1,5 +1,8 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+/* Référence : DESIGN_SYSTEM.md, section 3 (les couleurs) et section 4
+   (typographie). Les valeurs se décident là, elles s'écrivent ici. */
+
 /* ==========================================================================
    Les jetons : couleurs, polices. Tout le reste s'y réfère, rien d'autre ne
    déclare de valeur en dur.
@@ -8,6 +11,11 @@
    descend plus bas que la simple négation du crème, les décors passent du
    bleu clair au bleu-violet, et le lime reste l'accent des deux côtés parce
    que c'est lui qui porte l'appel primaire.
+
+   Un seul bloc sombre, et aucune requête de média : « système » est résolu en
+   « clair » ou « sombre » avant la première peinture (script d'index.html,
+   puis useThemeResolu). Deux déclarations du même thème finiraient par
+   diverger, et la seconde ne serait jamais celle qu'on relit.
 
    Le corail #FF6648 est réservé aux aplats et aux formes : 2,9:1 sur crème,
    il ne peut porter ni texte ni trait d'interface en thème clair. La variable
@@ -109,29 +117,4 @@
   --alerte: #ff6648;
 
   color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root[data-theme='systeme'],
-  :root:not([data-theme]) {
-    --fond: #0e1729;
-    --surface: #17243f;
-    --surface-2: #22314f;
-    --surface-74: rgba(23, 36, 63, 0.74);
-    --champ: #0b1322;
-    --papier: #17243f;
-
-    --encre: #f7f3e6;
-    --encre-douce: #a9bdd4;
-    --filet: rgba(247, 243, 230, 0.2);
-    --filet-franc: rgba(247, 243, 230, 0.46);
-
-    --deco-1: #788ce3;
-    --lien: #92bad5;
-    --lien-survol: #dff478;
-    --focus: #dff478;
-    --alerte: #ff6648;
-
-    color-scheme: dark;
-  }
 }

@@ -1,17 +1,22 @@
 /* Comparaison pixel à pixel maquette / portage, mêmes polices, même cadrage,
    même graine. Produit une carte des écarts et un pourcentage. Hors livraison. */
-const fs = require('fs');
-const path = require('path');
-const http = require('http');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import http from 'node:http'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 
 const REF = process.env.REF_DIR ||
   '/tmp/claude-0/-home-user-aplat/8f5dcbc4-f656-52ad-aa59-e5dc203b1088/scratchpad/refsite';
-const OUT = path.resolve(__dirname, '../.shots');
+const OUT = path.resolve(ICI, '../.shots');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2' };
 
-if (!require('fs').existsSync(REF)) {
+if (!existsSync(REF)) {
   console.log('maquette de référence absente : passe REF_DIR vers un dossier contenant');
   console.log('Aplat.dc.html, support.js et vendor/{react,react-dom,babel}.min.js.');
   console.log('Voir tools/README.md. Vérification ignorée.');

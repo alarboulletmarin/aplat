@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * L'export : dessiner hors écran, encoder, livrer le fichier.
+ *
+ * Séparé du moteur parce qu'il ne parle pas de la même chose. Le moteur répond
+ * à « quelle image », ce module à « le navigateur a-t-il pu la produire ». Deux
+ * échecs ne se voient qu'ici, et aucun n'est une erreur levée : un canevas trop
+ * grand que le navigateur refuse silencieusement d'allouer, et un encodage qui
+ * rend un blob vide. Les confondre avec le rendu reviendrait à faire porter au
+ * moteur des limites qui ne sont pas les siennes.
+ */
 import { dessiner, type Motif } from './moteur'
 
 export type EchecExport = 'capacite' | 'generale'
@@ -14,7 +24,7 @@ export class ErreurExport extends Error {
 /**
  * Le nom du fichier porte tout ce qui a produit l'image : famille, palette,
  * graine, dimensions. Retrouver un motif six mois plus tard, c'est relire son
- * nom de fichier — il n'y a pas de bibliothèque, pas de compte, rien d'autre.
+ * nom de fichier : il n'y a pas de bibliothèque, pas de compte, rien d'autre.
  * La densité y manquerait si l'instantané n'était pas pris au clic.
  */
 export function nomFichier(motif: Motif, largeur: number, hauteur: number): string {
@@ -25,7 +35,7 @@ export function nomFichier(motif: Motif, largeur: number, hauteur: number): stri
  * Vrai si le canevas est resté noir pur : le dessin n'a pas eu lieu.
  *
  * Certains navigateurs mobiles refusent silencieusement d'allouer un canevas
- * au-delà d'une surface donnée — le dessin ne fait rien et le fichier produit
+ * au-delà d'une surface donnée ; le dessin ne fait rien et le fichier produit
  * est un aplat noir, que rien d'autre ne distingue d'un export réussi. Aucune
  * palette ne part du noir pur : cinq points suffisent à le voir, et on le dit
  * au lieu de livrer une image vide.

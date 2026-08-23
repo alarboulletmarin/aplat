@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Les libellés français — la référence : le type `Textes` en est déduit, et
- * l'anglais doit s'y conformer clé pour clé.
+ * Les libellés français sont la référence : le type `Textes` en est déduit,
+ * et l'anglais doit s'y conformer clé pour clé.
  *
  * Les gabarits laissent 30 % de marge. Selon l'endroit, un libellé long revient
  * à la ligne (puces de famille et de palette), replie sa rangée (langue,
@@ -11,7 +11,7 @@
  */
 export const fr = {
   document: {
-    titre: 'Aplat — fonds d’écran génératifs',
+    titre: 'Aplat\u00a0: fonds d’écran génératifs',
     description:
       'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans donnée enregistrée.',
   },
@@ -42,6 +42,12 @@ export const fr = {
     conseilFaible: 'Essaie la palette Nuit, ou une densité plus calme.',
     voile: 'voile de lisibilité {n} %',
     sansVoile: 'sans voile',
+    /* Assemblés ici et non dans le composant : la ponctuation d'un titre ou
+       d'une énumération appartient à la langue. Le point-virgule sépare les
+       trois mesures parce que la virgule est déjà prise par la décimale
+       française, « 4,5:1 ». */
+    titreNiveau: 'Lisibilité des libellés\u00a0: {niveau}',
+    detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {
     titre: 'Réglages',
@@ -57,6 +63,7 @@ export const fr = {
   resolution: {
     titre: 'Résolution de l’image',
     surMesure: 'Sur mesure…',
+    aucune: 'Aucune résolution',
     largeur: 'Largeur (px)',
     hauteur: 'Hauteur (px)',
     bornes: 'De 16 à 8000 px.',
@@ -78,8 +85,9 @@ export const fr = {
     echec: 'Copie impossible. Le lien est ci-dessous, à copier à la main.',
     note: 'Le lien contient les réglages, rien d’autre.',
     graine: 'Graine',
-    /* La formule doit rester exacte : le Service Worker met bien quelque chose
-       en cache — les fichiers de l'application, jamais un réglage ni une image. */
+    /* La formule doit rester exacte : le Service Worker met bien quelque
+       chose en cache, à savoir les fichiers de l'application, jamais un
+       réglage ni une image. */
     confidentialite:
       'Aucun compte, aucun réseau, aucune donnée enregistrée. Tout est calculé sur cet appareil ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },

@@ -1,17 +1,21 @@
 /* Les deux serveurs dont l'outillage a besoin.
  *
- * `apercu()` sert le vrai build — c'est lui qu'il faut vérifier : politique de
+ * `apercu()` sert le vrai build, c'est lui qu'il faut vérifier : politique de
  * sécurité, Service Worker, fichiers empreintés. Le moteur, lui, s'injecte
  * dans la page par `banc.js`, sans que l'application ait à l'exposer.
  *
  * Le port n'est jamais fixé : plusieurs vérifications tournent en parallèle et
  * se marchaient dessus. On lit celui que Vite annonce.
  */
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
-const RACINE = path.resolve(__dirname, '..');
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
+
+const RACINE = path.resolve(ICI, '..');
 const VITE = path.join(RACINE, 'node_modules', '.bin', 'vite');
 
 function demarrer(args, attente = 30000) {
@@ -54,7 +58,7 @@ async function apercu() {
 
 /**
  * L'API que prennent les vérifications : `{ srv, port }`, comme un serveur
- * ordinaire. Toutes vérifient le build livré — c'est lui qui compte.
+ * ordinaire. Toutes vérifient le build livré : c'est lui qui compte.
  */
 async function ouvrir() {
   const serveur = await apercu();
@@ -65,4 +69,4 @@ async function ouvrir() {
   };
 }
 
-module.exports = { apercu, ouvrir, RACINE };
+export { apercu, ouvrir, RACINE }

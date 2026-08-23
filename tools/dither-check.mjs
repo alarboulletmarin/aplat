@@ -1,12 +1,16 @@
 /* Contrôle final du tramage : amplitude du grain sur toute la gamme tonale,
    et taille de la plus longue marche du voile une fois le grain posé. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.exports');
+const OUT = path.resolve(ICI, '../.exports');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });

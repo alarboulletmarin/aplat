@@ -1,8 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
-const OUT = path.resolve(__dirname, '../.shots');
+/* Neuf cadrages, dans la fenêtre et non en pleine page : téléphone et
+ * ordinateur, clair et sombre, français et anglais, deux résolutions cibles,
+ * l'éditeur de résolution ouvert, et la page défilée.
+ *
+ * Là où `shot.mjs` capture la page entière pour la relire, celui-ci capture ce
+ * qu'on voit vraiment à l'ouverture : ce qui tient au-dessus de la ligne de
+ * flottaison, et ce que recouvrent les deux barres collantes.
+ */
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
+const OUT = path.resolve(ICI, '../.shots');
 let PORT = 0;
 
 (async () => {

@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * La géométrie de la maquette d'écran.
+ *
+ * À part de `resolution.ts`, qui ne connaît que des pixels de fichier. Ici on
+ * calcule des pixels d'affichage : la boîte de l'appareil, son rayon, le module
+ * dont dépendent toutes les tailles de la maquette. Ce sont des fonctions pures
+ * pour qu'elles se testent sans navigateur, alors même qu'elles décrivent une
+ * mise en page.
+ */
 import type { Resolution, TypeAppareil } from './resolution'
 
 export interface Boite {
@@ -37,7 +46,7 @@ export function hauteurScene(fenetre: Boite): number {
  * La boîte de l'appareil, au rapport d'aspect exact du fichier visé.
  *
  * Le canevas est en `inset: 0` : il remplit la boîte de contenu, pas la boîte
- * de bordure. C'est donc celle-ci qui doit porter le rapport d'aspect — sinon
+ * de bordure. C'est donc celle-ci qui doit porter le rapport d'aspect ; sinon
  * l'aperçu est un format légèrement différent de celui du fichier, et la mesure
  * de lisibilité porte sur une image qui n'existe pas.
  */

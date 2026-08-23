@@ -8,8 +8,8 @@ import { useEffect } from 'react'
  *
  * Sans ça, un élément atteint au clavier se colle au bord de la fenêtre,
  * c'est-à-dire sous l'une des deux couches, et son anneau de focus disparaît
- * (WCAG 2.2, 2.4.11). Les déclarations `scroll-padding` restent — elles servent
- * aux ancres et aux navigateurs qui les respectent — mais ni le défilement
+ * (WCAG 2.2, 2.4.11). Les déclarations `scroll-padding` restent (elles servent
+ * aux ancres et aux navigateurs qui les respectent), mais ni le défilement
  * déclenché par le focus ni `scrollIntoView` ne les appliquent aujourd'hui :
  * la correction fiable se fait ici.
  */

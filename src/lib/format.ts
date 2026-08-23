@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * Les nombres, tels qu'ils s'écrivent dans chaque langue.
+ *
+ * Rassemblés ici parce qu'un séparateur de milliers ou une virgule décimale
+ * posés à la main dans un composant sont justes dans une langue et faux dans
+ * l'autre, et que personne ne s'en aperçoit avant de basculer.
+ */
 import type { Langue } from './moteur'
 
 const LOCALES: Record<Langue, string> = { fr: 'fr-FR', en: 'en-US' }

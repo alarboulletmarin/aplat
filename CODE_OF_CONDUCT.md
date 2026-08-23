@@ -12,7 +12,7 @@ Faire preuve d'empathie et de bienveillance. Accepter les avis divergents, les c
 
 ## Ce qui ne l'est pas
 
-Le langage ou l'imagerie sexualisés et les avances importunes. Le trolling, les insultes, les commentaires désobligeants, les attaques personnelles ou politiques. Le harcèlement, public ou privé. La publication d'informations privées — adresse physique ou électronique — sans autorisation explicite. Tout comportement qu'on jugerait déplacé dans un cadre professionnel.
+Le langage ou l'imagerie sexualisés et les avances importunes. Le trolling, les insultes, les commentaires désobligeants, les attaques personnelles ou politiques. Le harcèlement, public ou privé. La publication d'informations privées (adresse physique ou électronique) sans autorisation explicite. Tout comportement qu'on jugerait déplacé dans un cadre professionnel.
 
 ## Application
 

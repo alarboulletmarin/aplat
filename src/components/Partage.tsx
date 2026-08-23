@@ -76,7 +76,7 @@ export function Partage({
       <p className="partage-n" id="partage-note" aria-live="polite">
         {echecCopie
           ? textes.partage.echec
-          : `${textes.partage.note} ${textes.partage.graine} ${graine}`}
+          : `${textes.partage.note} ${textes.partage.graine}\u00a0${graine}`}
       </p>
 
       {echecCopie && (

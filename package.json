@@ -30,23 +30,36 @@
     "build": "npm run notices && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "//typographie": "Ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources. Ces trois signes se glissent partout dès qu'on écrit vite, et ils donnent au texte une allure qui n'est pas celle du projet. La règle est énoncée dans CONTRIBUTING.md et dans DESIGN_SYSTEM.md, section 11.",
+    "typographie": "node tools/typographie.mjs",
     "icons": "node scripts/generate-icons.mjs",
+    "//notices": "Les licences des paquets embarqués dans le build, plus l'OFL des deux polices. Lancé par `build` pour qu'aucune mise à jour de dépendance ne puisse laisser le fichier derrière elle.",
     "notices": "node scripts/generate-notices.mjs",
-    "check": "node tools/check.js"
+    "//verify": "La porte de sortie locale, que la CI rejoue à l'identique. Elle ne demande que Node. Le `build` en fait partie parce qu'il régénère les notices de licence : une dépendance ajoutée sans son texte de licence doit échouer ici, pas en production.",
+    "verify": "npm run typographie && npm run typecheck && npm run lint && npm run test && npm run build",
+    "//check": "Les vérifications dans un vrai navigateur, sur le build servi par `vite preview`. Hors de `verify` à dessein : c'est la seule vérification du dépôt qui exige Chromium (`npx playwright install --with-deps chromium`), et faire dépendre la porte de sortie locale d'un téléchargement de cette taille la rendrait inutilisable là où elle sert le plus, sur une machine qui vient de cloner. La CI la joue dans un second travail, avec la même commande qu'ici.",
+    "check": "node tools/check.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
+    "eslint": "^10.9.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
     "playwright": "^1.49.0",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.67.0",
     "vite": "^7.1.5",
     "vite-plugin-pwa": "^1.0.3",
     "vitest": "^3.2.4"

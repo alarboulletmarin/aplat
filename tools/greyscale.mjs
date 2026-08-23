@@ -1,12 +1,16 @@
 /* Test en niveaux de gris : sélectionné et non sélectionné doivent rester
    distinguables sans la couleur. On compare les deux vignettes pixel par pixel
    après désaturation, et on sort les images pour jugement à l'œil. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.shots');
+const OUT = path.resolve(ICI, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });

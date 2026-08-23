@@ -12,8 +12,8 @@ export interface Taille {
  *
  * Le canevas dessine en pixels d'appareil : il lui faut la mesure réelle de sa
  * boîte, pas la valeur demandée en CSS. Un `ResizeObserver` la donne à chaque
- * changement de mise en page — rotation, repli de la barre d'URL, arrivée des
- * polices — sans écouter `resize`, qui manque la moitié de ces cas.
+ * changement de mise en page (rotation, repli de la barre d'URL, arrivée des
+ * polices) sans écouter `resize`, qui manque la moitié de ces cas.
  */
 export function useTaille(cible: RefObject<Element | null>): Taille {
   const [taille, setTaille] = useState<Taille>({ largeur: 0, hauteur: 0 })
@@ -48,7 +48,7 @@ export function useTaille(cible: RefObject<Element | null>): Taille {
 /**
  * La fenêtre, sans amortissement : la hauteur de la scène en dépend, et un
  * retard s'y verrait comme un saut. Le repli de la barre d'URL sur téléphone
- * déclenche cet événement en rafale — d'où un état qui ne change que si la
+ * déclenche cet événement en rafale, d'où un état qui ne change que si la
  * valeur change vraiment.
  */
 export function useTailleFenetre(): Taille {

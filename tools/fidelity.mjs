@@ -2,15 +2,19 @@
  *
  * On extrait chaque déclaration des styles en ligne de `design/Aplat.dc.html`
  * et chacun de ses jetons, puis on cherche la même valeur dans le portage. Ce
- * qui manque est listé pour arbitrage — l'outil ne tranche pas, il montre.
+ * qui manque est listé pour arbitrage : l'outil ne tranche pas, il montre.
  *
  * Deux normalisations, sans lesquelles la comparaison ne dirait rien :
  * l'écriture (espaces, casse des hexadécimaux, zéro initial), et les noms de
  * jetons, que le portage a traduits.
  */
-const fs = require('fs');
-const path = require('path');
-const ROOT = path.resolve(__dirname, '..');
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
+const ROOT = path.resolve(ICI, '..');
 
 /** Les jetons de la maquette, tels que le portage les nomme. */
 const TRADUCTION = {

@@ -7,8 +7,8 @@ import { useEffect, useState, type RefObject } from 'react'
  *
  * Sert aux dix-huit vignettes de famille : sur un téléphone il y en a six ou
  * sept à l'écran, pas dix-huit, et chacune est un rendu complet du moteur.
- * Sans navigateur qui sache observer, on répond « oui » — mieux vaut dessiner
- * pour rien qu'afficher des cases vides.
+ * Sans navigateur qui sache observer, on répond « oui », car mieux vaut
+ * dessiner pour rien qu'afficher des cases vides.
  */
 export function useVisible(
   cible: RefObject<Element | null>,

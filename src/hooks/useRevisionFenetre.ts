@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 
 /**
  * Un compteur qui avance à chaque redimensionnement, une fois la rafale
- * retombée, et une fois les polices prêtes — elles changent la métrique des
- * vignettes. Les rendus qui dépendent de la mise en page s'y accrochent.
+ * retombée, et une fois les polices prêtes (elles changent la métrique des
+ * vignettes). Les rendus qui dépendent de la mise en page s'y accrochent.
  */
 export function useRevisionFenetre(): number {
   const [revision, setRevision] = useState(0)

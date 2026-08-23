@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "//": "Les en-têtes qui décident si une mise à jour arrive. SECURITY.md demande en prose que le document ne soit pas mis en cache plus longtemps que les fichiers versionnés ; c'est ici que ça s'écrit. Sans cette règle, un Service Worker périmé peut rester en place bien après une publication, et l'application continue de servir l'ancienne version à quelqu'un qui a rechargé. Pas de réécriture SPA : l'état d'Aplat tient dans la chaîne de requête, le chemin servi est toujours la racine.",
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/registerSW.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
+  ]
+}

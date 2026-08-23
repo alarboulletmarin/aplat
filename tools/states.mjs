@@ -1,14 +1,18 @@
-/* Capture les cinq états — vide, calcul, erreur, succès, succès en sombre.
+/* Capture les cinq états : vide, calcul, erreur, succès, succès en sombre.
  *
  * Chacun est atteint pour de vrai, par les mêmes gestes qu'un utilisateur :
  * une capture d'un état fabriqué à la main ne prouve rien sur l'application.
  */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.shots');
+const OUT = path.resolve(ICI, '../.shots');
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });

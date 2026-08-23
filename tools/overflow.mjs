@@ -1,8 +1,8 @@
 /* Détecte les débordements : barre de défilement horizontale, contenu coupé,
    maquette d'écran qui déborde. Tourne aussi avec des libellés allongés de
    30 %, comme le demande la contrainte i18n. */
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 const VIEWS = [
@@ -97,7 +97,7 @@ const STRETCH = `(() => {
                 if (n.offsetParent === null) continue;
                 const elide = n.scrollWidth > n.clientWidth + 1;
                 /* mot coupé : on compte les boîtes de ligne réellement produites
-                   par le texte, via un Range — la hauteur du bouton ne dit rien,
+                   par le texte, via un Range. La hauteur du bouton ne dit rien,
                    elle est imposée par min-height:44px. */
                 let lignes = 1;
                 const txt = [...n.childNodes].find(c => c.nodeType === 3 && c.textContent.trim());
@@ -132,8 +132,8 @@ const STRETCH = `(() => {
 
           const tag = `${stretched ? '+30% ' : ''}${lang} ${v.name} ${tg.label}`;
           if (r.hScroll > 0) problems.push(`${tag}: défilement horizontal ${r.hScroll}px`);
-          if (r.clipped.length) problems.push(`${tag}: texte coupé — ${r.clipped.slice(0, 4).join(' | ')}`);
-          if (r.truncated && r.truncated.length) problems.push(`${tag}: libellé coupé — ${r.truncated.slice(0, 3).join(' | ')}`);
+          if (r.clipped.length) problems.push(`${tag}: texte coupé sur ${r.clipped.slice(0, 4).join(' | ')}`);
+          if (r.truncated && r.truncated.length) problems.push(`${tag}: libellé coupé sur ${r.truncated.slice(0, 3).join(' | ')}`);
           if (r.maqOverflow) problems.push(`${tag}: maquette ${r.maqOverflow.id} déborde de ${r.maqOverflow.over}px (dock à +${r.maqOverflow.dockOut}px, appareil ${r.maqOverflow.devH}px)`);
           await ctx.close();
         }

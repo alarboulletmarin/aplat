@@ -10,7 +10,7 @@ import { useAjustement } from '../hooks/useAjustement'
  * La maquette d'écran. C'est la valeur du produit : voir le motif derrière des
  * icônes avant de télécharger, plutôt que de le découvrir une fois posé.
  *
- * Tout y est factice et le dit — la note sous l'aperçu le rappelle, et
+ * Tout y est factice et le dit. La note sous l'aperçu le rappelle, et
  * l'ensemble est retiré de l'arbre d'accessibilité : ce sont des formes, pas
  * des informations.
  */

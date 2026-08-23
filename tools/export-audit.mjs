@@ -1,13 +1,17 @@
 /* Mesure le poids réel des PNG exportés et extrait des zooms 1:1 pour juger
    la qualité. Tourne dans un vrai Chromium : mêmes encodeurs que l'utilisateur. */
-const fs = require('fs');
-const path = require('path');
-const { launch } = require('./pw');
-const { poser } = require('./banc');
-const { ouvrir } = require('./serveur');
+import fs from 'node:fs'
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { poser } from './banc.mjs'
+import { ouvrir } from './serveur.mjs'
+import { fileURLToPath } from 'node:url'
+
+/* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
+const ICI = fileURLToPath(new URL('.', import.meta.url))
 
 let PORT = 0;
-const OUT = path.resolve(__dirname, '../.exports');
+const OUT = path.resolve(ICI, '../.exports');
 const ALL_RES = [
   { name: 'phone', w: 1179, h: 2556 },
   { name: 'phone-hi', w: 1290, h: 2796 },
@@ -73,11 +77,11 @@ const ALL_RES = [
     const med = sizes[Math.floor(sizes.length / 2)];
     const p90 = sizes[Math.floor(sizes.length * 0.9)];
     const px = list[0].px;
-    console.log(`${res} (${(px / 1e6).toFixed(1)} Mpx) — médiane ${mb(med).toFixed(2)} Mo · p90 ${mb(p90).toFixed(2)} Mo · max ${mb(sizes[sizes.length - 1]).toFixed(2)} Mo · min ${mb(sizes[0]).toFixed(2)} Mo`);
+    console.log(`${res} (${(px / 1e6).toFixed(1)} Mpx) : médiane ${mb(med).toFixed(2)} Mo, p90 ${mb(p90).toFixed(2)} Mo, max ${mb(sizes[sizes.length - 1]).toFixed(2)} Mo, min ${mb(sizes[0]).toFixed(2)} Mo`);
     const worst = [...list].sort((a, b) => b.bytes - a.bytes).slice(0, 5);
-    console.log('   plus lourds : ' + worst.map(r => `${r.fam}/${r.pal}/d${r.dens} ${mb(r.bytes).toFixed(2)}Mo`).join(' · '));
+    console.log('   plus lourds : ' + worst.map(r => `${r.fam}/${r.pal}/d${r.dens} ${mb(r.bytes).toFixed(2)}Mo`).join(', '));
     const slow = [...list].sort((a, b) => (b.tDraw + b.tEnc) - (a.tDraw + a.tEnc)).slice(0, 3);
-    console.log('   plus lents  : ' + slow.map(r => `${r.fam} ${Math.round(r.tDraw)}+${Math.round(r.tEnc)}ms`).join(' · '));
+    console.log('   plus lents  : ' + slow.map(r => `${r.fam} ${Math.round(r.tDraw)}+${Math.round(r.tEnc)}ms`).join(', '));
   }
   fs.writeFileSync(path.join(OUT, 'audit.json'), JSON.stringify(rows, null, 1));
 })();

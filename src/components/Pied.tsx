@@ -8,7 +8,7 @@ import type { Textes } from '../i18n'
  *
  * Ce n'est pas de la décoration : l'AGPL demande que quiconque utilise le
  * logiciel puisse obtenir la source *correspondante*. Un lien vers la branche
- * principale ne la désigne pas — le commit, si.
+ * principale ne la désigne pas ; le commit, si.
  */
 export function Pied({ textes }: { textes: Textes }) {
   return (

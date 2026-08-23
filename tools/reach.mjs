@@ -1,9 +1,9 @@
 /* Chaque contrôle doit être atteignable au doigt : on cherche une position de
    défilement où le centre du contrôle répond bien au test de pointage, et on
    vérifie la cible de 44 px. */
-const path = require('path');
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import path from 'node:path'
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 const CASES = [
@@ -62,7 +62,7 @@ const CASES = [
 
     const unreachable = report.filter(r => !r.ok);
     const small = report.filter(r => r.ok && (r.h < 44 || r.w < 44));
-    console.log(`\n=== ${c.name} — ${report.length} contrôles ===`);
+    console.log(`\n=== ${c.name} : ${report.length} contrôles ===`);
     if (unreachable.length) { bad++; console.log('  INATTEIGNABLES: ' + unreachable.map(r => r.id).join(', ')); }
     else console.log('  atteignables: tous');
     if (small.length) console.log('  < 44 px: ' + small.map(r => `${r.id}(${r.w}x${r.h})`).join(', '));

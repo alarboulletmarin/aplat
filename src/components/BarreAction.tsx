@@ -15,9 +15,12 @@ export interface Fichier {
 }
 
 /**
+ * Les boutons d'action : DESIGN_SYSTEM.md, section 7. Les notes de résultat :
+ * section 8.
+ *
  * Un seul appel primaire par écran : télécharger.
  *
- * Le bouton secondaire — une nouvelle graine — cède la place au primaire quand
+ * Le bouton secondaire (une nouvelle graine) cède la place au primaire quand
  * la largeur manque : mieux vaut « Nouveau motif » tronqué que « Télécharger »
  * coupé en deux.
  */
@@ -72,7 +75,7 @@ export function BarreAction({
             <div className="note-txt">
               <p className="note-t">{T.enregistre}</p>
               <p className="note-m" id="note-meta">
-                {`${nombre(fichier.largeur, langue)} × ${nombre(fichier.hauteur, langue)} px · PNG · ${poids(fichier.octets, langue, T.ko, T.mo)}`}
+                {`${nombre(fichier.largeur, langue)}\u00a0×\u00a0${nombre(fichier.hauteur, langue)}\u00a0px, PNG, ${poids(fichier.octets, langue, T.ko, T.mo)}`}
               </p>
               <p className="note-h">{T.astuce}</p>
             </div>
@@ -103,7 +106,7 @@ export function BarreAction({
         </button>
         {/* Pendant le rendu, `disabled` retirerait le focus du bouton et le
             renverrait au début du document, obligeant à tout reparcourir.
-            `aria-disabled` le neutralise sans le rendre infocusable — et
+            `aria-disabled` le neutralise sans le rendre infocusable, et
             l'export refuse de repartir de lui-même. `disabled` ne reste que
             pour l'état vide, où le bouton n'a rien à faire dans le parcours. */}
         <button

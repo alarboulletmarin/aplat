@@ -1,10 +1,10 @@
 /* Contrôle de contraste sur le DOM réel : on remonte la pile de fonds pour
    composer les couleurs semi-transparentes, puis on applique la formule WCAG.
-   Texte courant 4,5:1 · texte large 3:1 · bordures d'éléments d'interface 3:1.
+   Texte courant 4,5:1 ; texte large 3:1 ; bordures d'éléments d'interface 3:1.
    La fausse maquette d'écran est exclue : elle est posée sur le motif, et sa
    lisibilité est mesurée par le moteur, pas par cette sonde. */
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 
 const CASES = [
@@ -12,8 +12,8 @@ const CASES = [
   { name: 'sombre fr', scheme: 'dark', q: '?l=fr' },
   { name: 'clair en', scheme: 'light', q: '?l=en' },
   { name: 'sombre en', scheme: 'dark', q: '?l=en' },
-  { name: 'clair forcé', scheme: 'dark', q: '?l=fr&t=light' },
-  { name: 'sombre forcé', scheme: 'light', q: '?l=fr&t=dark' }
+  { name: 'clair forcé', scheme: 'dark', q: '?l=fr&t=clair' },
+  { name: 'sombre forcé', scheme: 'light', q: '?l=fr&t=sombre' }
 ];
 
 const PROBE = () => {
@@ -152,7 +152,7 @@ const PROBE = () => {
       for (const t of r.text) {
         const k = t.sel + t.ratio;
         if (seen.has(k)) continue; seen.add(k);
-        console.log(`  TEXTE ${t.ratio}:1 (min ${t.need}) — ${t.sel} · ${t.size}/${t.weight} · "${t.txt}"`);
+        console.log(`  TEXTE ${t.ratio}:1 (min ${t.need}) | ${t.sel}, ${t.size}/${t.weight}, "${t.txt}"`);
       }
     }
     if (!r.border.length) console.log('  bordures : toutes >= 3:1');
@@ -162,7 +162,7 @@ const PROBE = () => {
       for (const b of r.border) {
         const k = b.sel + b.rIn;
         if (seen.has(k)) continue; seen.add(k);
-        console.log(`  BORDURE int ${b.rIn}:1 / ext ${b.rOut}:1 — ${b.sel} · ${b.color} · "${b.txt}"`);
+        console.log(`  BORDURE int ${b.rIn}:1 / ext ${b.rOut}:1 | ${b.sel}, ${b.color}, "${b.txt}"`);
       }
     }
     await ctx.close();

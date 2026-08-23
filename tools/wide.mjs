@@ -1,5 +1,12 @@
-const { launch } = require('./pw');
-const { ouvrir } = require('./serveur');
+/* Qui déborde à 320 px, et de combien.
+ *
+ * `overflow.mjs` répond « oui ou non » sur 128 combinaisons ; celui-ci répond
+ * « lequel » sur la plus étroite d'entre elles, en listant chaque élément dont
+ * la boîte sort de la fenêtre, avec son parent et son texte. C'est l'outil
+ * qu'on ouvre quand overflow vient de dire non.
+ */
+import { launch } from './pw.mjs'
+import { ouvrir } from './serveur.mjs'
 let PORT = 0;
 /* Même allongement que overflow.js : sur le DOM, parce que React rend depuis
    ses modules et qu'une donnée modifiée après coup serait réécrite. */

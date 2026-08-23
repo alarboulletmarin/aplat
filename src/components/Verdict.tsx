@@ -5,11 +5,14 @@ import { niveau, type Langue, type Mesure } from '../lib/moteur'
 import { remplir, type Textes } from '../i18n'
 
 /**
+ * Le verdict de lisibilité : DESIGN_SYSTEM.md, section 8 (les états) et
+ * section 9 (jamais la couleur seule).
+ *
  * Ce que la sonde a mesuré, dit en toutes lettres.
  *
  * Trois états, et aucune valeur de repli : une application qui promet de
  * mesurer la lisibilité n'affiche pas un chiffre qu'elle n'a pas mesuré. Le
- * niveau se lit à la forme du repère autant qu'au mot — disque plein, disque à
+ * niveau se lit à la forme du repère autant qu'au mot : disque plein, disque à
  * moitié, triangle.
  */
 export function Verdict({
@@ -51,9 +54,16 @@ export function Verdict({
         <span className={`verdict-${rang}`} />
       </span>
       <div className="verdict-txt">
-        <p className="verdict-t" id="verdict-titre">{`${T.titre} · ${mot}`}</p>
+        <p className="verdict-t" id="verdict-titre">
+          {remplir(T.titreNiveau, { niveau: mot })}
+        </p>
         <p className="verdict-d" id="verdict-detail">
-          {`${decimal(mesure.contraste, langue)}:1 · ${libelles} · ${voile} — ${conseil}`}
+          {remplir(T.detail, {
+            contraste: decimal(mesure.contraste, langue),
+            libelles,
+            voile,
+            conseil,
+          })}
         </p>
       </div>
     </div>

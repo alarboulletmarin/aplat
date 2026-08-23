@@ -4,10 +4,10 @@
  * Génère les icônes PNG de la PWA sans dépendance : on rasterise quelques
  * formes simples puis on encode le PNG à la main via zlib.
  *
- * Motif : la marque d'Aplat, la même que `public/favicon.svg` — un losange
- * lime dans un carré navy, évidé d'un second losange, et le point corail au
- * centre. Trois aplats, aucun dégradé, aucune ombre : la direction artistique
- * tient dans 512 pixels comme dans une page.
+ * Motif : la marque d'Aplat, la même que `public/favicon.svg`, soit un
+ * losange lime dans un carré navy, évidé d'un second losange, et le point
+ * corail au centre. Trois aplats, aucun dégradé, aucune ombre : la direction
+ * artistique tient dans 512 pixels comme dans une page.
  *
  * Usage : npm run icons
  */
@@ -137,7 +137,7 @@ function dessinerIcone(taille, marge = 0) {
 
   if (marge > 0) {
     // Icône maskable : le fond couvre toute la surface, le motif reste dans la
-    // zone sûre — un masque rond ne doit jamais mordre dans le losange.
+    // zone sûre, parce qu'un masque rond ne doit jamais mordre dans le losange.
     canvas.remplir(NAVY)
   } else {
     canvas.remplir(PAPIER)
