@@ -6,8 +6,9 @@ Des fonds d'écran génératifs, exportés à la résolution exacte de l'apparei
 Tout est calculé dans le navigateur.
 
 Gratuit, sans compte, sans pub, sans traceur, sans serveur. Aucune donnée ne
-sort de l'appareil et rien n'y est enregistré : ce qui est partageable tient
-dans l'URL. Installable, et pleinement utilisable hors ligne.
+sort de l'appareil : ce qui est partageable tient dans l'URL, et la seule
+chose écrite sur l'appareil est la liste des dix derniers motifs regardés,
+effaçable d'un bouton. Installable, et pleinement utilisable hors ligne.
 
 ---
 
@@ -143,8 +144,18 @@ suffisait à faire lever le rendu tout entier.
 ## Ce qui est enregistré, et ce qui ne l'est pas
 
 Aucun compte, aucun réseau à l'exécution, aucune mesure d'audience. Ni cookie,
-ni `localStorage`, ni `sessionStorage`, ni base indexée : les réglages vivent
-dans la barre d'adresse, et rien d'autre ne survit à la fermeture de l'onglet.
+ni `sessionStorage`, ni base indexée. Les réglages du motif affiché vivent dans
+la barre d'adresse.
+
+**Une seule clé de `localStorage`**, `aplat:motifs` : les dix derniers motifs
+regardés, quatre réglages chacun. Ni image (le rendu est déterministe, le
+moteur les redessine), ni horodatage, ni identifiant, ni URL, ni compteur de
+visites. Rien qui distingue un appareil d'un autre, rien qui décrive une
+session. Deux cents octets pour cinq entrées, et un bouton « Effacer » dans la
+carte « Derniers motifs ». Un motif n'y entre qu'après être resté deux secondes
+et demie à l'écran : parcourir les familles ne remplit pas la liste. Ce que
+cette clé contient exactement est vérifié à chaque `npm run check`, champ par
+champ.
 
 L'application étant installable, un cache existe, celui du Service Worker. Il
 ne contient **que les fichiers de l'application** : le document, le script, la
@@ -287,6 +298,8 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 | La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle. |
 | Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur (5,4:1, voile 18 %), écrit dans une région live avant toute mesure. |
 | Le qualificatif de lisibilité tient à trois bandes nommées, et le composant le prend dans le dictionnaire par le nom du niveau | Le titre disait « correcte » pour 3,5:1 pendant que le corps disait « un peu juste » : deux mots pour une seule mesure, et le plus rassurant des deux sous le seuil AA du petit texte. |
+| L'historique garde quatre réglages par motif, jamais une vignette | Le rendu est déterministe : une image enregistrée ne serait qu'un cache de calcul, mille fois plus lourd, et ferait du stockage autre chose qu'une liste de réglages. |
+| La promesse de confidentialité a été réécrite en même temps que l'historique est arrivé | « Aucune donnée enregistrée » est devenu faux le jour où quelque chose l'a été. Un test l'interdit maintenant dans les deux langues. |
 | Les puces de réglage deviennent des groupes radio | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
 | Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |

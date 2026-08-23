@@ -13,7 +13,7 @@ export const fr = {
   document: {
     titre: 'Aplat\u00a0: fonds d’écran génératifs',
     description:
-      'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans donnée enregistrée.',
+      'Générateur de fonds d’écran génératifs, calculé entièrement dans le navigateur. Sans compte, sans réseau, sans rien envoyer.',
   },
   entete: {
     evitement: 'Aller aux réglages',
@@ -99,6 +99,14 @@ export const fr = {
     presetTablette: 'Tablette',
     presetOrdinateur: 'Ordinateur',
   },
+  historique: {
+    titre: 'Derniers motifs',
+    vide: 'Les motifs que tu regardes s’ajoutent ici, dix au plus.',
+    effacer: 'Effacer',
+    note:
+      'Gardés sur cet appareil, dans le navigateur : quatre réglages par motif, ni image ni identifiant.',
+    motif: '{famille}, {palette}, graine {graine}',
+  },
   partage: {
     titre: 'Partage',
     copier: 'Copier le lien du motif',
@@ -106,11 +114,12 @@ export const fr = {
     echec: 'Copie impossible. Le lien est ci-dessous, à copier à la main.',
     note: 'Le lien contient les réglages, rien d’autre.',
     graine: 'Graine',
-    /* La formule doit rester exacte : le Service Worker met bien quelque
-       chose en cache, à savoir les fichiers de l'application, jamais un
-       réglage ni une image. */
+    /* La formule doit rester exacte des deux côtés : le Service Worker met
+       bien quelque chose en cache, à savoir les fichiers de l'application, et
+       l'historique garde bien quelque chose, à savoir dix fois quatre
+       réglages. Une promesse plus large que le produit ne vaut rien. */
     confidentialite:
-      'Aucun compte, aucun réseau, aucune donnée enregistrée. Tout est calculé sur cet appareil ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
+      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur : quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   preferences: {
     langue: 'Langue',

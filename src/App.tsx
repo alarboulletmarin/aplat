@@ -10,6 +10,7 @@ import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib
 import { encoderPNG, ErreurExport, nomFichier, telecharger } from './lib/export'
 import { textes as dictionnaire } from './i18n'
 import { useDefilement } from './hooks/useDefilement'
+import { useHistorique } from './hooks/useHistorique'
 import { useFocusDegage } from './hooks/useFocusDegage'
 import { useHauteursCollantes } from './hooks/useHauteursCollantes'
 import { useRevisionFenetre } from './hooks/useRevisionFenetre'
@@ -17,6 +18,7 @@ import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
 import { ChoixDensite, ChoixFamille, ChoixPalette } from './components/Reglages'
+import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
 import { BarreAction, type Echec, type Fichier, type Phase } from './components/BarreAction'
@@ -105,6 +107,10 @@ export function App() {
       ...(edition === undefined ? {} : { edition }),
     }))
   }, [])
+
+  /* La seule mémoire de l'application. Elle n'entre pas dans `Reglages` : ce
+     qui est dans l'URL décrit le motif affiché, l'historique décrit ceux d'avant. */
+  const { liste: historique, oublier } = useHistorique(motif)
 
   /* Le repli de la scène est décidé ici et non dans `Scene` : la réserve de
      défilement des deux barres collantes en dépend, et c'est `App` qui la
@@ -296,6 +302,22 @@ export function App() {
               valeur={reglages.densite}
               textes={T}
               onChoisir={(densite: Densite) => changer({ densite })}
+            />
+            <Historique
+              liste={historique}
+              courant={motif}
+              langue={reglages.langue}
+              textes={T}
+              revision={revision}
+              onRestaurer={(restaure: Motif) =>
+                changer({
+                  famille: restaure.famille,
+                  palette: restaure.palette,
+                  densite: restaure.densite,
+                  graine: restaure.graine,
+                })
+              }
+              onOublier={oublier}
             />
             <ChoixResolution
               largeurSaisie={reglages.largeurSaisie}

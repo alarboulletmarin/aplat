@@ -20,7 +20,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | Fichier | Rôle |
 |---|---|
 | `typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
-| `e2e.mjs` | 80 contrôles dans un vrai navigateur : lecture et écriture de l'URL, déterminisme du rendu, les quatre états, téléchargement réel avec lecture de l'en-tête PNG, course à l'export, échec de copie, contenu du cache, clavier, focus non masqué, mouvement réduit |
+| `e2e.mjs` | 123 contrôles dans un vrai navigateur : lecture et écriture de l'URL, déterminisme du rendu, les quatre états, téléchargement réel avec lecture de l'en-tête PNG, course à l'export, échec de copie, contenu du cache **et de l'historique local**, clavier, focus non masqué, mouvement réduit, aperçu assombri comparé octet pour octet |
 | `pwa.mjs` | manifeste, icônes à la taille annoncée, Service Worker activé. Puis réseau coupé : page, motif, vignettes, polices et téléchargement réel |
 | `fuzz-url.mjs` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `a11y.mjs` | contrastes calculés sur le DOM, couleurs semi-transparentes recomposées sur leur pile de fonds, deux thèmes, deux langues |
@@ -30,7 +30,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | `band-test.mjs` | hauteur des marches du voile sur 32 cas |
 | `dither-check.mjs` | amplitude du grain du `#101A2E` au `#FFFFFF` |
 | `shot.mjs` | captures et absence de requête sortante |
-| `soak.mjs` | 400 actions enchaînées : dérive du tas, des nœuds, des canevas et des écouteurs |
+| `soak.mjs` | 400 actions enchaînées, historique plein : dérive du tas, des nœuds, des canevas et des écouteurs |
 
 ## La recette des quatre cadrages
 
@@ -47,6 +47,13 @@ listes des outils ci-dessus, et voici qui répond de quoi.
 | parcours clavier complet, focus visible et jamais masqué | `e2e.mjs` |
 | aucune information portée par la seule couleur | `a11y.mjs` (contraste des formes) et `greyscale.mjs` (captures désaturées) |
 | français et anglais complets, aucune chaîne en dur | `src/i18n/i18n.test.ts` (parité stricte) et `overflow.mjs` (gabarits à +30 %) |
+| ce que le stockage local contient, champ par champ | `e2e.mjs`, section 15, et `src/lib/historique.test.ts` |
+
+`reach.mjs`, `repli.mjs`, `soak.mjs` et `greyscale.mjs` écrivent un historique
+plein avant le premier rendu. C'est le cas le plus lourd (dix vignettes de plus
+à dégager des deux couches collantes), et surtout une mise en page qui ne bouge
+plus sous la mesure : sans lui, la carte apparaît au bout de deux secondes et
+demie, en plein balayage.
 
 ## Les autres
 

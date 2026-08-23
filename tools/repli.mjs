@@ -31,6 +31,12 @@ const CAS = [
   { nom: 'desktop 1440x900', vp: { width: 1440, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 }
 ];
 
+/* Dix motifs valides, écrits avant le premier rendu. */
+const PLEIN = JSON.stringify(
+  ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes', 'pointille', 'trame', 'colonnes', 'ecailles']
+    .map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))
+);
+
 const ok = [], ko = [];
 const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' + extra : ''));
 
@@ -44,6 +50,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       locale: 'fr-FR', hasTouch: c.mobile, isMobile: c.mobile
     });
     const page = await ctx.newPage();
+    /* Historique plein dès le premier rendu : c'est le cas le plus lourd, dix
+       vignettes de plus à dégager des deux couches, et surtout une mise en
+       page qui ne bouge plus. Sans lui, la carte apparaît au bout de deux
+       secondes et demie, en plein balayage, et décale ce qu'on est en train de
+       mesurer. */
+    await page.addInitScript(plein => {
+      try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
+    }, PLEIN);
     await page.goto(`http://127.0.0.1:${port}/?l=fr`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
 

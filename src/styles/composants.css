@@ -14,6 +14,7 @@
 .res-champs input,
 .partage-b,
 .note-reessayer,
+.btn-oublier,
 .btn-surprise,
 .btn-graine,
 .btn-export {
@@ -201,6 +202,42 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* --- Vignette d'historique --------------------------------------------------
+   L'entrée courante se reconnaît au trait épaissi et à l'aplat d'encre, comme
+   une puce choisie : en niveaux de gris, la marque tient toujours. */
+.historique-b {
+  display: block;
+  width: 100%;
+  padding: 4px;
+  border-radius: 12px;
+}
+.historique-b canvas {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: block;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.historique-b[aria-current='true'] {
+  border-color: var(--encre);
+  border-width: 3px;
+  padding: 2.5px;
+  background: var(--encre);
+}
+.btn-oublier {
+  flex: 0 0 auto;
+  min-height: 44px;
+  margin-bottom: 14px;
+  padding: 0 13px;
+  cursor: pointer;
+  border-radius: 13px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 13.5px;
 }
 
 /* --- Surprends-moi ---------------------------------------------------------

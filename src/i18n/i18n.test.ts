@@ -116,9 +116,24 @@ describe('promesses de l’interface', () => {
     expect(en.partage.confidentialite).toMatch(/application’s own files/)
   })
 
-  it('ne promet pas un stockage nul sans le qualifier', () => {
-    expect(fr.partage.confidentialite).toMatch(/aucune donnée enregistrée/)
-    expect(en.partage.confidentialite).toMatch(/nothing stored/)
+  /* Le défaut que ce test tient fermé : la phrase disait « aucune donnée
+     enregistrée » avant que l'historique n'existe. Une promesse qui survit à
+     la fonctionnalité qui la contredit est pire que pas de promesse. */
+  it('nomme ce que l’historique garde, plutôt que de promettre le vide', () => {
+    for (const [langue, phrase] of [
+      ['fr', fr.partage.confidentialite],
+      ['en', en.partage.confidentialite],
+    ] as const) {
+      expect(phrase, langue).not.toMatch(/aucune donnée enregistrée|nothing stored/)
+      expect(phrase, langue).toMatch(/dix derniers motifs|last ten patterns/)
+      expect(phrase, langue).toMatch(/ni image ni identifiant|no image and no identifier/)
+      expect(phrase, langue).toMatch(/effaçables|clearable/)
+    }
+  })
+
+  it('ne promet pas dans la description ce que l’historique dément', () => {
+    expect(fr.document.description).not.toMatch(/sans donnée enregistrée/)
+    expect(en.document.description).not.toMatch(/nothing stored/)
   })
 
   /* Le défaut que ces deux tests tiennent fermé : le titre annonçait

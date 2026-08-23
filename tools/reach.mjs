@@ -23,6 +23,13 @@ const CASES = [
   { name: 'desktop 1440x900', vp: { width: 1440, height: 900 }, dsf: 2, mobile: false }
 ];
 
+/* Dix motifs valides, écrits avant le premier rendu : l'historique plein est
+   le cas le plus lourd, et une mise en page qui ne bouge plus. */
+const PLEIN = JSON.stringify(
+  ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes', 'pointille', 'trame', 'colonnes', 'ecailles']
+    .map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))
+);
+
 (async () => {
   const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
@@ -34,6 +41,10 @@ const CASES = [
       hasTouch: c.mobile, isMobile: c.mobile
     });
     const page = await ctx.newPage();
+    await page.addInitScript(plein => {
+      try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
+    }, PLEIN);
+
     await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
     await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
     await page.waitForTimeout(300);

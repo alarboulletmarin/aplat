@@ -35,6 +35,10 @@ d'écran derrière mes icônes ?**
   la carte Famille, tire aussi une famille et une palette, jamais celles qui
   sont déjà à l'écran. La densité ne bouge dans aucun des deux : c'est un goût,
   pas un motif.
+- **Les dix derniers motifs reviennent d'un appui.** Une carte de vignettes,
+  sous la densité, garde ce qu'on a regardé et le rend d'un geste. Les
+  vignettes ne sont pas enregistrées, elles sont recalculées : le rendu est
+  déterministe, quatre réglages y suffisent.
 - **La résolution est détectée**, pas demandée. Elle reste modifiable, avec
   trois préréglages et une saisie libre entre 16 et 8000 px. La maquette prend
   la forme de l'appareil visé : téléphone, tablette ou ordinateur, déduits du
@@ -70,11 +74,15 @@ d'écran derrière mes icônes ?**
   mouchetis d'un pixel d'appareil, les vagues sont échantillonnées assez fin
   pour un écran 4K et les cellules de la trame calées sur des bornes entières.
 
-### Ajouté : rien ne sort de l'appareil, rien n'y est enregistré
+### Ajouté : rien ne sort de l'appareil, et ce qui y reste est nommé
 
-- **Rien n'est enregistré** : ni compte, ni cookie, ni stockage local, ni base
-  indexée. Les réglages tiennent dans l'URL, et rien d'autre ne survit à la
-  fermeture de l'onglet.
+- **Une seule chose est enregistrée** : les dix derniers motifs regardés,
+  quatre réglages chacun, dans le stockage local du navigateur. Ni image, ni
+  horodatage, ni identifiant, ni URL, ni compteur de visites. Deux cents octets
+  pour cinq entrées, un bouton pour tout effacer, et un motif n'y entre
+  qu'après être resté deux secondes et demie à l'écran. Ni compte, ni cookie,
+  ni base indexée par ailleurs ; les réglages du motif affiché, eux, tiennent
+  dans l'URL.
 - **Rien n'est envoyé.** La politique de sécurité du document coupe `fetch`,
   XHR, WebSocket, EventSource et `sendBeacon` ; les polices sont auto-hébergées,
   parce qu'un appel à un CDN transmet une adresse IP.

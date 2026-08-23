@@ -7,7 +7,7 @@ export const en: Textes = {
   document: {
     titre: 'Aplat: generative wallpapers',
     description:
-      'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing stored.',
+      'Generative wallpaper maker, computed entirely inside the browser. No account, no network, nothing sent.',
   },
   entete: {
     evitement: 'Skip to settings',
@@ -76,6 +76,14 @@ export const en: Textes = {
     presetTablette: 'Tablet',
     presetOrdinateur: 'Computer',
   },
+  historique: {
+    titre: 'Recent patterns',
+    vide: 'The patterns you look at land here, ten at most.',
+    effacer: 'Clear',
+    note:
+      'Kept on this device, in the browser: four settings per pattern, no image and no identifier.',
+    motif: '{famille}, {palette}, seed {graine}',
+  },
   partage: {
     titre: 'Sharing',
     copier: 'Copy the pattern link',
@@ -84,7 +92,7 @@ export const en: Textes = {
     note: 'The link carries the settings, nothing else.',
     graine: 'Seed',
     confidentialite:
-      'No account, no network, nothing stored. Everything is computed on this device; offline, the browser only keeps the application’s own files.',
+      'No account, no network. The last ten patterns are kept on this device, in the browser: four settings each, no image and no identifier, clearable with one button. Nothing else is stored; offline, the browser only keeps the application’s own files.',
   },
   preferences: {
     langue: 'Language',

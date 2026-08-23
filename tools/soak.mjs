@@ -12,6 +12,17 @@ let PORT = 0;
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+  /* L'historique est plein dès le départ : c'est le seul endroit où le nombre
+     de canevas peut croître, il est borné à dix, et on veut mesurer la dérive
+     avec ces dix-là déjà en place plutôt que de les voir arriver en cours de
+     route et conclure à une fuite. */
+  const PLEIN = JSON.stringify(
+    ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes', 'pointille', 'trame', 'colonnes', 'ecailles']
+      .map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))
+  );
+  await page.addInitScript(plein => {
+    try { localStorage.setItem('aplat:motifs', plein); } catch (e) { /* stockage refusé */ }
+  }, PLEIN);
   await page.goto(`http://127.0.0.1:${PORT}/?l=fr`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(800);
 

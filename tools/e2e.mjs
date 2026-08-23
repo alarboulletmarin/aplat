@@ -195,11 +195,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   }));
   t(th.attr === 'sombre' && th.url.includes('t=sombre'), 'thème : bascule et mémorisation dans l\'URL', th.bg);
 
-  /* --- 15. rien d'écrit sur l'appareil
-     L'application est installable : un cache existe donc, et l'annoncer
-     absent serait faux. Ce qu'on vérifie, c'est ce qu'il contient (les
-     fichiers de l'application, jamais un réglage ni une image) et qu'aucun
-     des mécanismes de stockage adressables ne porte quoi que ce soit. */
+  /* --- 15. ce qui est écrit sur l'appareil, et rien d'autre
+     Deux choses existent, et les annoncer absentes serait faux : le cache du
+     Service Worker, parce que l'application est installable, et l'historique
+     des motifs. On vérifie donc leur contenu, pas leur absence. Le cache ne
+     porte que les fichiers de l'application ; l'historique ne porte que dix
+     fois quatre réglages, sans image, sans horodatage, sans identifiant, sans
+     URL. Les autres mécanismes, eux, restent vides. */
   await page.evaluate(() => navigator.serviceWorker && navigator.serviceWorker.ready).catch(() => {});
   await page.waitForTimeout(600);
   const store = await page.evaluate(async () => {
@@ -212,14 +214,30 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }
     let bases = [];
     try { bases = (await indexedDB.databases()).map(b => b.name); } catch (e) { bases = []; }
+    const cles = Object.keys(localStorage);
     return {
-      ls: localStorage.length, ss: sessionStorage.length,
-      cookie: document.cookie.length, bases, entrees
+      cles, ss: sessionStorage.length,
+      cookie: document.cookie.length, bases, entrees,
+      motifs: localStorage.getItem('aplat:motifs')
     };
   });
-  t(store.ls === 0 && store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
-    'vie privée : rien d\'écrit sur l\'appareil',
-    `local ${store.ls}, session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
+  t(store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
+    'vie privée : ni session, ni cookie, ni base indexée',
+    `session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
+  const clesEnTrop = store.cles.filter(c => c !== 'aplat:motifs');
+  t(clesEnTrop.length === 0,
+    'vie privée : le stockage local ne porte que l\'historique des motifs',
+    store.cles.join(', ') || 'aucune clé');
+  {
+    let liste = null;
+    try { liste = JSON.parse(store.motifs || '[]'); } catch (e) { liste = null; }
+    const tableau = Array.isArray(liste) ? liste : null;
+    const champs = new Set(tableau ? tableau.flatMap(e => Object.keys(e || {})) : ['?']);
+    const suspect = /https?:|\d{10,}|[a-f0-9]{16,}/i.test(store.motifs || '');
+    t(tableau !== null && tableau.length <= 10 && [...champs].every(c => 'mpds'.includes(c)) && !suspect,
+      'vie privée : l\'historique ne porte que quatre réglages par motif, dix au plus',
+      `${tableau ? tableau.length : '?'} entrées, champs ${[...champs].join('')}, ${(store.motifs || '').length} octets`);
+  }
   const horsSite = store.entrees.filter(u => !u.startsWith('http://127.0.0.1:' + PORT));
   const avecEtat = store.entrees.filter(u => /[?&](m|p|d|s|r|t)=/.test(u));
   t(store.entrees.length > 0 && horsSite.length === 0 && avecEtat.length === 0,
@@ -906,6 +924,88 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'assombri : le PNG téléchargé est le même, octet pour octet',
       fs.statSync(chemin).size + ' o contre ' + fs.statSync(chemin2).size + ' o');
     await dctx.close();
+  }
+
+  /* --- 22. l'historique : ce qu'il retient, ce qu'il rend, ce qu'il oublie
+     La seule mémoire de l'application. Elle doit se remplir de ce qu'on a
+     vraiment regardé, tenir un rechargement, rendre un motif d'un appui, se
+     vider d'un bouton, et ne jamais dépasser dix. */
+  {
+    const hctx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
+    const hp = await hctx.newPage();
+    const lu = () => hp.evaluate(() => ({
+      vignettes: document.querySelectorAll('#liste-historique li').length,
+      stockage: JSON.parse(localStorage.getItem('aplat:motifs') || '[]'),
+      vide: !!document.querySelector('.historique-vide')
+    }));
+
+    await hp.goto('http://127.0.0.1:' + PORT + '/?l=fr&m=vagues&p=lime&d=1&s=4242', { waitUntil: 'networkidle' });
+    await hp.waitForTimeout(400);
+    const neuf = await lu();
+    t(neuf.vignettes === 0 && neuf.vide && neuf.stockage.length === 0,
+      'historique : rien tant que rien n\'a été regardé', JSON.stringify(neuf.stockage));
+
+    /* Un motif traversé en un clin d'oeil ne compte pas : sans ce délai,
+       parcourir les familles remplirait la liste de motifs jamais regardés. */
+    await hp.$eval('[data-famille="blobs"]', e => e.click());
+    await hp.waitForTimeout(500);
+    await hp.$eval('[data-famille="arches"]', e => e.click());
+    await hp.waitForTimeout(500);
+    const traverse = await lu();
+    t(traverse.stockage.length === 0,
+      'historique : un motif traversé ne s\'enregistre pas', traverse.stockage.length + ' entrées');
+
+    await hp.waitForTimeout(2600);
+    const regarde = await lu();
+    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'arches',
+      'historique : un motif regardé s\'enregistre', JSON.stringify(regarde.stockage));
+
+    /* Dix-huit familles regardées : la liste s'arrête à dix, la plus ancienne
+       tombe, et rien ne se répète. */
+    await hp.evaluate(() => {
+      const dix = ['vagues', 'blobs', 'arches', 'decoupes', 'obliques', 'ondes',
+        'pointille', 'trame', 'colonnes', 'ecailles', 'terrazzo', 'confettis'];
+      localStorage.setItem('aplat:motifs',
+        JSON.stringify(dix.map((m, i) => ({ m, p: 'lime', d: 1, s: i + 1 }))));
+    });
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(500);
+    const relu = await lu();
+    t(relu.vignettes === 10, 'historique : dix au plus, même si le stockage en porte douze',
+      relu.vignettes + ' vignettes');
+
+    const cible = await hp.evaluate(() => {
+      const b = document.querySelectorAll('#liste-historique li button')[3];
+      b.click();
+      return b.getAttribute('aria-label');
+    });
+    await hp.waitForTimeout(400);
+    const apres = await hp.evaluate(() => location.search);
+    t(/m=decoupes/.test(apres), 'historique : un appui restaure le motif',
+      `${cible} -> ${apres}`);
+
+    await hp.$eval('#btn-oublier', e => e.click());
+    await hp.waitForTimeout(300);
+    const efface = await hp.evaluate(() => ({
+      cle: localStorage.getItem('aplat:motifs'),
+      vignettes: document.querySelectorAll('#liste-historique li').length
+    }));
+    t(efface.cle === null && efface.vignettes === 0,
+      'historique : le bouton efface la clé, pas seulement l\'affichage',
+      String(efface.cle));
+
+    /* Un stockage se trafique à la main : ce qui en sort est traité comme une
+       barre d'adresse, avec les mêmes listes blanches. */
+    await hp.evaluate(() => localStorage.setItem('aplat:motifs',
+      '[{"m":"constructor","p":"lime","d":1,"s":1},{"m":"vagues","p":"lime","d":9,"s":1},{"m":"vagues","p":"lime","d":1,"s":7},"texte",42]'));
+    const errAvant = errors.length;
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(500);
+    const hostile = await lu();
+    t(hostile.vignettes === 1 && errors.length === errAvant,
+      'historique : un stockage trafiqué ne passe pas, et ne casse rien',
+      hostile.vignettes + ' vignette retenue sur 5 entrées');
+    await hctx.close();
   }
 
   await browser.close();

@@ -346,6 +346,8 @@ ne se coupe jamais.
 
 - Dark patterns, fausse urgence, frictions asymétriques.
 - Gamification : ni badge, ni série, ni barre de progression culpabilisante.
+- Un historique sans fin. Dix entrées, un bouton pour tout effacer, et pas de
+  « voir plus » : on revient sur ses pas, on ne remonte pas une archive.
 - Onboarding en modales, tour guidé, pop-up de bienvenue.
 - Plus d'un appel primaire par écran.
 - Emoji.

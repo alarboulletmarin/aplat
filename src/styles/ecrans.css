@@ -759,6 +759,26 @@
 .bento {
   padding: 18px;
 }
+
+/* --- Derniers motifs -------------------------------------------------------- */
+/* Dix vignettes au plus, dans une grille qui se replie. Pas de défilement
+   horizontal : une liste bornée n'a pas besoin d'être cachée. */
+.historique {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.historique-vide,
+.historique-n {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.historique-n {
+  margin-top: 11px;
+}
 .rangee-densite {
   display: flex;
   gap: 8px;

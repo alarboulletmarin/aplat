@@ -7,11 +7,12 @@ import {
 import { RES_MAX, RES_MIN, type Resolution } from './resolution'
 
 /**
- * L'URL est la seule mémoire d'Aplat.
+ * L'URL porte le motif affiché.
  *
- * Rien n'est écrit sur l'appareil : ni compte, ni cookie, ni stockage local.
- * L'état partageable tient dans la barre d'adresse ; c'est aussi ce qui rend
- * un motif transmissible sans passer par personne.
+ * Ni compte, ni cookie, ni base indexée : l'état partageable tient dans la
+ * barre d'adresse, et c'est aussi ce qui rend un motif transmissible sans
+ * passer par personne. La seule chose écrite sur l'appareil vit ailleurs, dans
+ * `historique.ts`, et ne décrit que des motifs déjà vus.
  */
 
 export type Theme = 'clair' | 'sombre' | 'systeme'
