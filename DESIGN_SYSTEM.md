@@ -191,7 +191,7 @@ rangée n'est plus une grille.
 
 Le partage n'est pas la moitié. Sous 760 px, la colonne de l'aperçu prend 38 %
 et le panneau 62 %. À parts égales, un téléphone de 390 px laisse 166 px au
-panneau, soit une seule vignette par rangée et dix-huit rangées à parcourir ;
+panneau, soit une seule vignette par rangée et trente-deux rangées à parcourir ;
 à 38 %, l'aperçu reste jugeable et les vignettes tiennent deux de front. Au-delà
 de 760 px on revient au partage de la maquette, à parts égales.
 
@@ -241,7 +241,7 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi dix-huit familles et onze palettes : dès
+restait presque rien pour choisir parmi trente-deux familles et onze palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
 du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
@@ -267,6 +267,23 @@ vers la source, parce qu'ils ne changent que l'affichage. La règle tient en une
 phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
+
+### Les trois groupes de familles
+
+La liste des familles est longue, et une liste longue se range. Trois groupes,
+et chacun a sa marque : l'arche pour les **abstraits**, la ligne de crête pour
+les **paysages**, la goutte à pointe pour les **figures**. Trois silhouettes
+distinctes, pas trois couleurs : en niveaux de gris elles tiennent toujours.
+
+Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
+silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
+des trames et des damiers, et le critère de séparation s'énonce en une phrase :
+un paysage a un haut et un bas.
+
+Les trois groupes se suivent d'un seul tenant dans la liste, dans cet ordre. Un
+test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
+grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
+sauterait de place à l'écran sans que rien ne le signale.
 
 ### La page d'accueil
 

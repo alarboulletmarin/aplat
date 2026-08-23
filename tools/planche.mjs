@@ -1,4 +1,4 @@
-/* Planche-contact : les 18 familles rendues à la résolution d'un téléphone,
+/* Planche-contact : les familles rendues à la résolution d'un téléphone,
    réduites côte à côte. Sert à juger d'un coup d'œil ce que produit le moteur. */
 import fs from 'node:fs'
 import path from 'node:path'

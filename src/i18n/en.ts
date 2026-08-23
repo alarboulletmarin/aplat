@@ -113,6 +113,7 @@ export const en: Textes = {
     titre: 'Settings',
     famille: 'Pattern family',
     groupeAbstraits: 'Abstract',
+    groupePaysages: 'Landscapes',
     groupeFigures: 'Figures',
     palette: 'Palette',
     surprise: 'Surprise me',

@@ -133,8 +133,14 @@ async function derouler(page) {
     toiles.peintes + '/' + toiles.total);
 
   /* Une vignette touchée retire sa graine : c'est le seul mouvement de la
-     page, et il doit changer quelque chose. */
-  const tuile = page.locator('.tuile').first();
+     page, et il doit changer quelque chose.
+
+     Sommets, et non la première venue : quatre familles du moteur sont des
+     pavages entièrement réguliers, sans un seul tirage, et une autre graine
+     n'y change rien. Arcade, qui ouvre la galerie, en fait partie. Le contrôle
+     porte donc sur une famille qui dépend vraiment de sa graine, faute de quoi
+     il échouerait en décrivant correctement le produit. */
+  const tuile = page.locator('.tuile').filter({ hasText: 'Sommets' }).first();
   const avant = await tuile.locator('canvas').evaluate(c => c.toDataURL().length);
   await tuile.click();
   await page.waitForTimeout(500);

@@ -10,6 +10,7 @@
  */
 
 export type IdFamille =
+  /* abstraits */
   | 'vagues'
   | 'blobs'
   | 'arches'
@@ -22,12 +23,28 @@ export type IdFamille =
   | 'ecailles'
   | 'terrazzo'
   | 'confettis'
+  | 'arcade'
+  | 'truchet'
+  | 'azulejos'
+  | 'vitrail'
+  | 'persiennes'
+  | 'mosaique'
+  | 'tresse'
+  /* paysages */
+  | 'sommets'
+  | 'horizon'
+  | 'nuages'
+  /* figures */
   | 'fleurs'
   | 'tournesol'
   | 'etoiles'
   | 'rayons'
   | 'lunes'
   | 'feuilles'
+  | 'agrumes'
+  | 'palmes'
+  | 'vases'
+  | 'poissons'
 
 export type IdPalette =
   | 'lime'
@@ -56,8 +73,13 @@ export interface Palette {
 
 export interface Famille {
   id: IdFamille
-  /** `abs` abstraits, `fig` figures : les deux groupes de la liste. */
-  groupe: 'abs' | 'fig'
+  /**
+   * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
+   * liste. Les paysages se sont détachés des abstraits quand ils ont été
+   * trois : une silhouette de montagne, un couchant et des nuages ne se
+   * cherchent pas au milieu des trames et des damiers.
+   */
+  groupe: 'abs' | 'pay' | 'fig'
   fr: string
   en: string
 }
@@ -94,6 +116,12 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
   'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'ardoise', 'prune', 'nuit', 'orage', 'encre',
 ]
 
+/**
+ * Les trente-deux familles, dans l'ordre de la liste : abstraits, paysages,
+ * figures. L'ordre est celui de la maquette, et il compte : on descend du
+ * plus géométrique au plus figuratif, et le premier de chaque groupe en donne
+ * le ton.
+ */
 export const FAMILLES: readonly Famille[] = [
   { id: 'vagues', groupe: 'abs', fr: 'Vagues', en: 'Waves' },
   { id: 'blobs', groupe: 'abs', fr: 'Blobs', en: 'Blobs' },
@@ -107,12 +135,26 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'ecailles', groupe: 'abs', fr: 'Écailles', en: 'Scales' },
   { id: 'terrazzo', groupe: 'abs', fr: 'Terrazzo', en: 'Terrazzo' },
   { id: 'confettis', groupe: 'abs', fr: 'Confettis', en: 'Confetti' },
+  { id: 'arcade', groupe: 'abs', fr: 'Arcade', en: 'Arcade' },
+  { id: 'truchet', groupe: 'abs', fr: 'Truchet', en: 'Truchet' },
+  { id: 'azulejos', groupe: 'abs', fr: 'Azulejos', en: 'Azulejos' },
+  { id: 'vitrail', groupe: 'abs', fr: 'Vitrail', en: 'Stained glass' },
+  { id: 'persiennes', groupe: 'abs', fr: 'Persiennes', en: 'Shutters' },
+  { id: 'mosaique', groupe: 'abs', fr: 'Mosaïque', en: 'Mosaic' },
+  { id: 'tresse', groupe: 'abs', fr: 'Tresse', en: 'Weave' },
+  { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
+  { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
+  { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'etoiles', groupe: 'fig', fr: 'Étoiles', en: 'Stars' },
   { id: 'rayons', groupe: 'fig', fr: 'Rayons', en: 'Sunbeams' },
   { id: 'lunes', groupe: 'fig', fr: 'Lunes', en: 'Moons' },
   { id: 'feuilles', groupe: 'fig', fr: 'Feuilles', en: 'Leaves' },
+  { id: 'agrumes', groupe: 'fig', fr: 'Agrumes', en: 'Citrus' },
+  { id: 'palmes', groupe: 'fig', fr: 'Palmes', en: 'Palms' },
+  { id: 'vases', groupe: 'fig', fr: 'Vases', en: 'Vases' },
+  { id: 'poissons', groupe: 'fig', fr: 'Poissons', en: 'Fish' },
 ]
 
 /** Les arrondis des fausses icônes de la maquette : jamais deux fois le même. */
@@ -658,6 +700,443 @@ export function formes(
       ctx.fillStyle = col(i + (i % 3))
       blob(ctx, W * rnd(), H * rnd(), unite * (0.014 + 0.032 * rnd()),
         5 + Math.floor(rnd() * 3), rnd, 0.95)
+    }
+    return
+  }
+
+  /* --- abstraits, seconde série ---------------------------------------------
+     Sept familles réglées, là où les douze premières sont libres : une grille
+     porte le motif, et c'est la grille qui donne le rythme. Elles se
+     reconnaissent à ça, une répétition qu'on peut suivre du doigt, quand les
+     blobs et le terrazzo n'en ont aucune. */
+
+  if (id === 'arcade') {
+    /* La marque, répétée jusqu'à remplir la page. Le nombre de rangées se
+       déduit du nombre de colonnes et non de la densité : une arche large et
+       basse n'est plus une arche, elle garde donc son élancement quel que soit
+       le format du fichier. */
+    const colonnes = [2, 4, 7][densite]
+    const largeur = W / colonnes
+    const rangees = Math.max(1, Math.round(H / (largeur * 1.3)))
+    const hauteur = H / rangees
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const cx = largeur * (c + 0.5)
+        const base = hauteur * (r + 1)
+        const rang = r * colonnes + c + r
+        ctx.fillStyle = col(rang)
+        arche(ctx, cx, base, largeur * 0.9, hauteur * 0.9)
+        ctx.fillStyle = col(rang + 2)
+        arche(ctx, cx, base, largeur * 0.34, hauteur * 0.4)
+      }
+    }
+    return
+  }
+
+  if (id === 'truchet') {
+    /* Deux quarts de disque opposés par tuile, dans l'un ou l'autre sens : les
+       arcs se raccordent d'une tuile à l'autre et dessinent des chemins que
+       personne n'a tracés. C'est tout le motif, et il tient à ce que les deux
+       quarts partent de coins diagonalement opposés. */
+    const colonnes = [4, 7, 12][densite]
+    const cote = W / colonnes
+    const rangees = Math.ceil(H / cote) + 1
+    ctx.fillStyle = col(0)
+    ctx.fillRect(0, 0, W, H)
+    const quart = (cx: number, cy: number, depart: number) => {
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.arc(cx, cy, cote / 2, depart, depart + Math.PI / 2)
+      ctx.closePath()
+      ctx.fill()
+    }
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const x = c * cote
+        const y = r * cote
+        ctx.fillStyle = col(1 + ((r + c) % 2))
+        if (rnd() < 0.5) {
+          quart(x, y, 0)
+          quart(x + cote, y + cote, Math.PI)
+        } else {
+          quart(x + cote, y, Math.PI / 2)
+          quart(x, y + cote, -Math.PI / 2)
+        }
+      }
+    }
+    return
+  }
+
+  if (id === 'azulejos') {
+    const colonnes = [2, 3, 5][densite]
+    const cote = W / colonnes
+    const rangees = Math.ceil(H / cote) + 1
+    ctx.fillStyle = col(3)
+    ctx.fillRect(0, 0, W, H)
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const x = c * cote + cote / 2
+        const y = r * cote + cote / 2
+        /* Les quatre disques sont posés sur les coins du carreau, à un rayon
+           de la diagonale : chacun est donc coupé en quatre par les bords et
+           se recompose avec ses voisins. C'est ce qui fait que le carrelage se
+           lit comme une surface et non comme une suite de vignettes. */
+        ctx.fillStyle = col(0)
+        for (let k = 0; k < 4; k += 1) {
+          const a = (k * Math.PI) / 2 + Math.PI / 4
+          ctx.beginPath()
+          ctx.arc(x + Math.cos(a) * cote * 0.707, y + Math.sin(a) * cote * 0.707,
+            cote * 0.29, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.fillStyle = col(1)
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(Math.PI / 4)
+        ctx.fillRect(-cote * 0.25, -cote * 0.25, cote * 0.5, cote * 0.5)
+        ctx.restore()
+        ctx.fillStyle = col(2)
+        for (let k = 0; k < 4; k += 1) {
+          const a = (k * Math.PI) / 2
+          feuille(ctx, x + Math.cos(a) * cote * 0.14, y + Math.sin(a) * cote * 0.14,
+            cote * 0.3, cote * 0.1, a)
+        }
+        ctx.fillStyle = col(0)
+        ctx.beginPath()
+        ctx.arc(x, y, cote * 0.1, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    return
+  }
+
+  if (id === 'vitrail') {
+    const colonnes = [3, 5, 8][densite]
+    const cote = W / colonnes
+    const rangees = Math.ceil(H / cote) + 1
+    ctx.fillStyle = col(2)
+    ctx.fillRect(0, 0, W, H)
+    /* Les sommets sont tirés une fois pour toutes, et deux carreaux voisins
+       partagent les leurs. Tirés carreau par carreau, les bords ne
+       coïncideraient plus : on verrait des losanges posés côte à côte, avec du
+       fond entre eux, au lieu d'un vitrail. Les sommets du pourtour ne bougent
+       pas, sinon le verre décollerait du cadre. */
+    const noeuds: [number, number][][] = []
+    for (let r = 0; r <= rangees; r += 1) {
+      noeuds[r] = []
+      for (let c = 0; c <= colonnes; c += 1) {
+        const bord = c === 0 || c === colonnes || r === 0 || r === rangees
+        noeuds[r][c] = [
+          c * cote + (bord ? 0 : (rnd() - 0.5) * cote * 0.5),
+          r * cote + (bord ? 0 : (rnd() - 0.5) * cote * 0.5),
+        ]
+      }
+    }
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const quadrilatere = [
+          noeuds[r][c], noeuds[r][c + 1], noeuds[r + 1][c + 1], noeuds[r + 1][c],
+        ]
+        const cx = quadrilatere.reduce((somme, p) => somme + p[0], 0) / 4
+        const cy = quadrilatere.reduce((somme, p) => somme + p[1], 0) / 4
+        ctx.fillStyle = col(r + c + (rnd() < 0.3 ? 1 : 0))
+        ctx.beginPath()
+        /* Chaque verre se retire de 7 % vers son centre : le plomb n'est pas
+           tracé, c'est le fond qui reste entre les carreaux. Un trait aurait
+           demandé une épaisseur, donc une valeur en pixels, donc un plomb plus
+           épais en vignette qu'en pleine résolution. */
+        quadrilatere.forEach((p, k) => {
+          const x = p[0] + (cx - p[0]) * 0.07
+          const y = p[1] + (cy - p[1]) * 0.07
+          if (k) ctx.lineTo(x, y)
+          else ctx.moveTo(x, y)
+        })
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+    return
+  }
+
+  if (id === 'persiennes') {
+    const n = [5, 9, 16][densite]
+    const diagonale = Math.hypot(W, H)
+    ctx.fillStyle = col(2)
+    ctx.fillRect(0, 0, W, H)
+    /* Les lames sont peintes sur la diagonale de l'image, dans un repère
+       tourné : c'est ce qui permet de les faire déborder de tous les côtés
+       sans jamais laisser un coin nu, quelle que soit l'inclinaison tirée. */
+    const inclinaison = (rnd() < 0.5 ? 1 : -1) * (0.08 + rnd() * 0.2)
+    ctx.save()
+    ctx.translate(W / 2, H / 2)
+    ctx.rotate(inclinaison)
+    ctx.translate(-diagonale / 2, -diagonale / 2)
+    const pas = diagonale / n
+    for (let i = 0; i < n; i += 1) {
+      const y = i * pas
+      const epaisseur = pas * (0.42 + 0.3 * rnd())
+      ctx.fillStyle = col(0)
+      ctx.fillRect(-diagonale * 0.2, y, diagonale * 1.4, epaisseur)
+      ctx.fillStyle = col(1)
+      ctx.fillRect(-diagonale * 0.2, y + epaisseur * 0.24, diagonale * 1.4, epaisseur * 0.34)
+    }
+    ctx.restore()
+    return
+  }
+
+  if (id === 'mosaique') {
+    const colonnes = [13, 22, 36][densite]
+    const cote = W / colonnes
+    const rangees = Math.ceil(H / cote) + 1
+    /* Les tesselles ne sont pas colorées au hasard : elles suivent la distance
+       à un foyer, en trois zones. C'est ce qui donne la forme au fond, et le
+       sixième de tesselles tirées à côté est ce qui l'empêche d'être un
+       dégradé propre. */
+    const cx = W * (0.2 + 0.6 * rnd())
+    const cy = H * (0.2 + 0.6 * rnd())
+    const rayon = Math.hypot(W, H) * (0.26 + 0.3 * rnd())
+    /* Plancher relatif, pas absolu : un joint d'un pixel se voit dans une
+       vignette de cent pixels et pas dans un fichier 4K, et la vignette
+       montrerait alors un motif plus ajouré que celui qu'on télécharge. */
+    const joint = Math.max(unite * 0.0008, cote * 0.14)
+    ctx.fillStyle = col(3)
+    ctx.fillRect(0, 0, W, H)
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const x = c * cote + (r % 2 ? cote * 0.5 : 0)
+        const y = r * cote
+        const distance = Math.hypot(x + cote / 2 - cx, y + cote / 2 - cy) / rayon
+        const zone = distance < 0.5 ? 0 : distance < 0.95 ? 1 : 2
+        ctx.fillStyle = col(zone + (rnd() < 0.16 ? 1 : 0))
+        ctx.fillRect(x + joint / 2, y + joint / 2, cote - joint, cote - joint)
+      }
+    }
+    return
+  }
+
+  if (id === 'tresse') {
+    const n = [3, 5, 8][densite]
+    const cote = W / n
+    const ruban = cote * 0.6
+    const jour = (cote - ruban) / 2
+    const rangees = Math.ceil(H / cote) + 1
+    ctx.fillStyle = col(3)
+    ctx.fillRect(0, 0, W, H)
+    ctx.fillStyle = col(0)
+    for (let c = 0; c < n; c += 1) ctx.fillRect(c * cote + jour, 0, ruban, H)
+    for (let r = 0; r < rangees; r += 1) {
+      const y = r * cote + jour
+      for (let c = 0; c < n; c += 1) {
+        ctx.fillStyle = col(1)
+        /* Tout l'entrelacs tient à cette parité : une case sur deux, le ruban
+           horizontal passe entier par-dessus le vertical ; sur l'autre, il est
+           interrompu et passe dessous. Sans elle, ce sont deux grilles
+           superposées, et l'oeil le voit tout de suite. */
+        if ((r + c) % 2 === 0) {
+          ctx.fillRect(c * cote, y, cote, ruban)
+        } else {
+          ctx.fillRect(c * cote, y, jour, ruban)
+          ctx.fillRect(c * cote + jour + ruban, y, jour, ruban)
+        }
+      }
+    }
+    return
+  }
+
+  /* --- paysages ---------------------------------------------------------------
+     Trois familles qui ont un haut et un bas. C'est ce qui les sépare des
+     abstraits, et c'est aussi ce qui les rend commodes en fond d'écran : la
+     zone des icônes tombe dans leur partie basse, la plus chargée, et la sonde
+     de lisibilité y trouve un aplat plutôt qu'un motif. */
+
+  if (id === 'sommets') {
+    const n = [3, 5, 8][densite]
+    for (let i = 0; i < n; i += 1) {
+      const base = H * (0.32 + (0.74 * i) / n)
+      const pointes = 2 + Math.floor(rnd() * 4)
+      const segment = W / pointes
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.moveTo(0, H)
+      ctx.lineTo(0, base - H * 0.05 * rnd())
+      for (let p = 0; p < pointes; p += 1) {
+        ctx.lineTo(segment * (p + 0.5), base - H * (0.07 + 0.17 * rnd()))
+        ctx.lineTo(segment * (p + 1), base - H * 0.03 * rnd())
+      }
+      ctx.lineTo(W, H)
+      ctx.closePath()
+      ctx.fill()
+    }
+    return
+  }
+
+  if (id === 'horizon') {
+    const n = [3, 6, 10][densite]
+    const hauteurAstre = H * (0.26 + 0.24 * rnd())
+    const rayonAstre = unite * (0.17 + 0.13 * rnd())
+    ctx.fillStyle = col(0)
+    ctx.beginPath()
+    ctx.arc(W * (0.28 + 0.44 * rnd()), hauteurAstre, rayonAstre, 0, Math.PI * 2)
+    ctx.fill()
+    /* La ligne d'horizon coupe l'astre au-dessus de son centre : c'est ce qui
+       le fait se coucher plutôt que flotter. Les bandes en partent, et leur
+       hauteur est tirée pour que l'eau ne soit pas un dégradé régulier. */
+    const ligne = hauteurAstre + rayonAstre * 0.42
+    const bande = (H - ligne) / n
+    for (let i = 0; i < n; i += 1) {
+      ctx.fillStyle = col(i + 1)
+      ctx.fillRect(0, ligne + bande * i, W, bande * (0.55 + 0.7 * rnd()))
+    }
+    /* Le filet de l'horizon garde un plancher d'un pixel. C'est le seul de
+       cette famille : en dessous il disparaît de la vignette, et une vignette
+       d'Horizon sans horizon ne nomme plus rien. En pleine résolution le terme
+       proportionnel l'emporte de loin. */
+    ctx.fillStyle = col(2)
+    ctx.fillRect(0, ligne, W, Math.max(1, H * 0.007))
+    return
+  }
+
+  if (id === 'nuages') {
+    const n = [3, 6, 11][densite]
+    for (let i = 0; i < n; i += 1) {
+      const R = unite * (0.075 + 0.075 * rnd())
+      const lobes = 3 + Math.floor(rnd() * 2)
+      const largeur = R * (lobes * 0.74 + 0.9)
+      const cx = W * (0.07 + 0.86 * rnd())
+      const cy = H * (0.1 + 0.8 * rnd())
+      ctx.fillStyle = col(i)
+      /* Un socle en gélule, puis des lobes posés dessus, les plus gros au
+         milieu : c'est la silhouette de nuage la plus courte qui se lise
+         comme telle. Le socle a la base plate qu'aurait une suite de disques
+         seule, mais sans les creux entre eux. */
+      gelule(ctx, cx - largeur / 2, cy, largeur, R * 0.84)
+      for (let k = 0; k < lobes; k += 1) {
+        const t = lobes === 1 ? 0.5 : k / (lobes - 1)
+        const lx = cx - largeur / 2 + R * 0.62 + t * (largeur - R * 1.24)
+        const lr = R * (0.5 + 0.46 * (1 - Math.abs(t - 0.5) * 1.3))
+        ctx.beginPath()
+        ctx.arc(lx, cy + R * 0.22 - lr * 0.52, lr, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    return
+  }
+
+  /* --- figures, seconde série ------------------------------------------------- */
+
+  if (id === 'agrumes') {
+    const n = [3, 6, 12][densite]
+    for (let i = 0; i < n; i += 1) {
+      const cx = W * (0.08 + 0.84 * rnd())
+      const cy = H * (0.07 + 0.86 * rnd())
+      const R = unite * (0.07 + 0.09 * rnd())
+      /* Trois disques concentriques : l'écorce, le ziste, puis les quartiers
+         par-dessus. Les quartiers sont des secteurs écartés de neuf
+         centièmes de radian, ce qui laisse voir le ziste entre eux sans avoir
+         à tracer de trait. */
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.arc(cx, cy, R, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = col(i + 2)
+      ctx.beginPath()
+      ctx.arc(cx, cy, R * 0.84, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = col(i + 1)
+      const quartiers = 6 + Math.floor(rnd() * 3)
+      const rotation = rnd() * Math.PI * 2
+      for (let k = 0; k < quartiers; k += 1) {
+        const a0 = rotation + (k / quartiers) * Math.PI * 2 + 0.09
+        const a1 = rotation + ((k + 1) / quartiers) * Math.PI * 2 - 0.09
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.arc(cx, cy, R * 0.72, a0, a1)
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+    return
+  }
+
+  if (id === 'palmes') {
+    const n = [3, 6, 11][densite]
+    for (let i = 0; i < n; i += 1) {
+      const x = W * (0.06 + 0.88 * rnd())
+      const y = H * (0.06 + 0.88 * rnd())
+      const L = unite * (0.15 + 0.16 * rnd())
+      const axe = rnd() * Math.PI * 2
+      const folioles = 7 + Math.floor(rnd() * 5)
+      ctx.fillStyle = col(i)
+      for (let k = 0; k < folioles; k += 1) {
+        const t = (k + 1) / folioles
+        /* Les folioles alternent de part et d'autre de la nervure et se
+           redressent vers la pointe : sans ce resserrement, la palme finit en
+           plumeau au lieu de finir en pointe. */
+        const ecart = (k % 2 ? 1 : -1) * (0.92 - 0.42 * t)
+        feuille(ctx, x + Math.cos(axe) * L * t * 0.9, y + Math.sin(axe) * L * t * 0.9,
+          L * (0.24 + 0.4 * Math.sin(t * Math.PI)), L * 0.085, axe + ecart)
+      }
+      ctx.fillStyle = col(i + 2)
+      feuille(ctx, x, y, L, L * 0.04, axe)
+    }
+    return
+  }
+
+  if (id === 'vases') {
+    const n = [2, 4, 7][densite]
+    /* Les vases sont posés sur une étagère et non semés : ce sont des objets,
+       ils ont un dessus et un dessous, et deux qui se chevaucheraient ne se
+       liraient plus. Le nombre de colonnes suit le rapport d'aspect, pour que
+       les cases restent à peu près carrées d'un format à l'autre. */
+    const colonnes = Math.max(1, Math.round(Math.sqrt((n * W) / H)))
+    const rangees = Math.max(1, Math.ceil(n / colonnes))
+    const largeurCase = W / colonnes
+    const hauteurCase = H / rangees
+    for (let i = 0; i < n; i += 1) {
+      const cx = largeurCase * ((i % colonnes) + 0.5)
+      const base = hauteurCase * (Math.floor(i / colonnes) + 0.9)
+      const hauteur = hauteurCase * (0.52 + 0.24 * rnd())
+      const ventre = largeurCase * (0.34 + 0.22 * rnd())
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.ellipse(cx, base - hauteur * 0.4, ventre / 2, hauteur * 0.4, 0, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillRect(cx - ventre * 0.15, base - hauteur, ventre * 0.3, hauteur * 0.52)
+      ctx.fillStyle = col(i + 1)
+      gelule(ctx, cx - ventre * 0.27, base - hauteur - hauteur * 0.05, ventre * 0.54, hauteur * 0.11)
+      gelule(ctx, cx - ventre * 0.21, base - hauteur * 0.06, ventre * 0.42, hauteur * 0.09)
+    }
+    return
+  }
+
+  if (id === 'poissons') {
+    const n = [4, 9, 18][densite]
+    for (let i = 0; i < n; i += 1) {
+      const x = W * (0.08 + 0.84 * rnd())
+      const y = H * (0.07 + 0.86 * rnd())
+      const L = unite * (0.1 + 0.11 * rnd())
+      /* Le sens est tiré, et il passe par une symétrie du repère : un poisson
+         dessiné puis retourné garde exactement les mêmes proportions, ce
+         qu'un second jeu de coordonnées n'aurait pas garanti. */
+      const sens = rnd() < 0.5 ? 1 : -1
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.scale(sens, 1)
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.ellipse(0, 0, L * 0.5, L * 0.27, 0, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(-L * 0.42, 0)
+      ctx.lineTo(-L * 0.82, -L * 0.26)
+      ctx.lineTo(-L * 0.82, L * 0.26)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillStyle = col(i + 2)
+      ctx.beginPath()
+      ctx.arc(L * 0.27, -L * 0.06, L * 0.055, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
     }
     return
   }

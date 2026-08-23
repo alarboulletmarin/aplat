@@ -156,6 +156,7 @@ export const fr = {
     titre: 'Réglages',
     famille: 'Famille de motif',
     groupeAbstraits: 'Abstraits',
+    groupePaysages: 'Paysages',
     groupeFigures: 'Figures',
     palette: 'Palette',
     /* Deux gestes voisins, deux libellés qui ne peuvent pas se confondre :

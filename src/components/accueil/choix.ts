@@ -29,17 +29,20 @@ export const FORMATS = [
   { resolution: TABLETTE, cle: 'tablette' },
 ] as const
 
-/* L'arche est la forme de la marque : c'est elle qui ouvre la page. Sur Nuit,
-   parce que la première maquette de la page est aussi la première démonstration
-   de ce qu'elle promet : des libellés d'icônes qui restent lisibles. Sur une
-   palette claire, la sonde passe les libellés en sombre et les quelques-uns qui
-   tombent sur une arche foncée disparaissent, ce qui est exactement le contraire
-   de l'argument. */
-export const HEROS: Motif = { famille: 'arches', palette: 'nuit', densite: 1, graine: 7314 }
+/* L'arcade, c'est la marque répétée : la forme du logo, en colonnade, jusqu'à
+   remplir l'écran. C'est elle qui ouvre la page dans la maquette.
 
-/* Un motif large et calme, qui laisse la barre de menus et les icônes de
-   bureau lisibles : c'est ce que la section démontre. */
-export const BUREAU: Motif = { famille: 'vagues', palette: 'ciel', densite: 1, graine: 2048 }
+   Sur Nuit et non sur une palette claire, parce que la première image de la
+   page est aussi la première démonstration de ce qu'elle promet : des libellés
+   d'icônes qui restent lisibles. Sur un fond clair, la sonde passe les libellés
+   en sombre, et ceux qui tombent sur une arche foncée disparaissent, ce qui est
+   exactement le contraire de l'argument. */
+export const HEROS: Motif = { famille: 'arcade', palette: 'nuit', densite: 1, graine: 7314 }
+
+/* Un paysage, et le plus calme des trois : sur un bureau, les icônes sont en
+   haut à gauche et le dock en bas, c'est-à-dire aux deux endroits que des
+   nuages laissent tranquilles. */
+export const BUREAU: Motif = { famille: 'nuages', palette: 'ciel', densite: 1, graine: 2048 }
 
 /* Le motif de la démonstration du voile : celui que l'application ouvre par
    défaut, aux quatre réglages près. Vagues sur Lime & crème demande le voile le
@@ -51,20 +54,21 @@ export const BUREAU: Motif = { famille: 'vagues', palette: 'ciel', densite: 1, g
 export const VOILE: Motif = { famille: 'vagues', palette: 'lime', densite: 1, graine: 7314 }
 
 /**
- * Les douze de la galerie : les deux groupes du moteur, abstraits puis
- * figures, et les onze palettes toutes représentées au moins une fois.
+ * Les douze de la galerie : les couples famille et palette de la maquette,
+ * dans son ordre. Les trois groupes du moteur y passent, et les onze palettes
+ * sont toutes représentées au moins une fois.
  */
 export const GALERIE: readonly Motif[] = [
-  { famille: 'arches', palette: 'soleil', densite: 1, graine: 1204 },
-  { famille: 'ondes', palette: 'ciel', densite: 1, graine: 3311 },
-  { famille: 'decoupes', palette: 'nuit', densite: 1, graine: 815 },
-  { famille: 'terrazzo', palette: 'encre', densite: 1, graine: 6402 },
-  { famille: 'ecailles', palette: 'ardoise', densite: 1, graine: 2790 },
-  { famille: 'vagues', palette: 'corail', densite: 1, graine: 5518 },
-  { famille: 'blobs', palette: 'lime', densite: 1, graine: 941 },
-  { famille: 'fleurs', palette: 'menthe', densite: 1, graine: 7726 },
-  { famille: 'obliques', palette: 'orage', densite: 1, graine: 3095 },
-  { famille: 'tournesol', palette: 'argile', densite: 1, graine: 1663 },
-  { famille: 'lunes', palette: 'prune', densite: 1, graine: 4870 },
-  { famille: 'colonnes', palette: 'soleil', densite: 2, graine: 2231 },
+  { famille: 'arcade', palette: 'soleil', densite: 1, graine: 1204 },
+  { famille: 'azulejos', palette: 'ciel', densite: 1, graine: 3311 },
+  { famille: 'sommets', palette: 'nuit', densite: 1, graine: 815 },
+  { famille: 'vitrail', palette: 'encre', densite: 1, graine: 6402 },
+  { famille: 'truchet', palette: 'lime', densite: 1, graine: 2790 },
+  { famille: 'horizon', palette: 'corail', densite: 1, graine: 5518 },
+  { famille: 'mosaique', palette: 'argile', densite: 1, graine: 941 },
+  { famille: 'agrumes', palette: 'menthe', densite: 1, graine: 7726 },
+  { famille: 'persiennes', palette: 'orage', densite: 1, graine: 3095 },
+  { famille: 'tresse', palette: 'prune', densite: 1, graine: 1663 },
+  { famille: 'ecailles', palette: 'ardoise', densite: 1, graine: 4870 },
+  { famille: 'vases', palette: 'soleil', densite: 1, graine: 2231 },
 ]

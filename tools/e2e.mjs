@@ -92,10 +92,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   });
   t(scale.every(d => d <= 6), 'moteur : même image à deux résolutions', 'écarts max ' + scale.join(','));
 
-  // --- 5. les 18 familles rendent sans erreur, et non vides
+  // --- 5. toutes les familles rendent sans erreur, et non vides
   const fams = await page.evaluate(() => {
     const M = window.MOTEUR;
     const bad = [];
+    const total = M.FAMILLES.length * 3;
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       const c = document.createElement('canvas'); c.width = 240; c.height = 520;
       const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
@@ -105,9 +106,35 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       for (let i = 0; i < px.length; i += 4 * 97) seen.add(px[i] + ',' + px[i + 1] + ',' + px[i + 2]);
       if (seen.size < 6) bad.push(f.id + '/d' + d + ': quasi uni (' + seen.size + ' teintes)');
     }
-    return bad;
+    return { bad, total };
   });
-  t(fams.length === 0, 'moteur : 18 familles x 3 densités rendent une image', fams.join(' | ') || '54 combinaisons');
+  t(fams.bad.length === 0, 'moteur : chaque famille x 3 densités rend une image',
+    fams.bad.join(' | ') || fams.total + ' combinaisons');
+
+  /* Ce que « Variante » promet : une autre graine, une autre image. Quatre
+     familles n'en tiennent rien, et c'est voulu : ce sont des pavages
+     entièrement réguliers, sans un seul tirage. Le bouton ne fait donc rien
+     dessus, ce qui est un défaut connu et non une surprise. Ce contrôle fige
+     la liste : une cinquième famille devenue sourde à sa graine se signale
+     ici, et une des quatre qui se mettrait à varier aussi. */
+  const REGULIERES = ['ecailles', 'arcade', 'azulejos', 'tresse'];
+  const graines = await page.evaluate(() => {
+    const M = window.MOTEUR;
+    const sourdes = [];
+    for (const f of M.FAMILLES) {
+      const rendu = (s) => {
+        const c = document.createElement('canvas'); c.width = 200; c.height = 420;
+        const ctx = c.getContext('2d', { alpha: false, willReadFrequently: true });
+        M.dessiner(ctx, 200, 420, { famille: f.id, palette: 'lime', densite: 1, graine: s });
+        return c.toDataURL();
+      };
+      if (rendu(101) === rendu(4242)) sourdes.push(f.id);
+    }
+    return sourdes;
+  });
+  t(graines.sort().join(',') === [...REGULIERES].sort().join(','),
+    'moteur : seuls les pavages réguliers ignorent leur graine',
+    graines.join(' ') || 'aucune');
 
   // --- 6. état vide
   await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
@@ -356,7 +383,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
+    /* Sept : les trois grilles de familles, les palettes, les densités, la
+       langue et le thème. Un groupe de familles ajouté sans son `radiogroup`
+       casserait le parcours clavier sans rien changer à l'affichage. */
+    t(kb.groups.length === 7, 'clavier : les sept groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
@@ -537,7 +567,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     t(Math.abs(inv.ecart) < 0.5, 'aperçu : le canevas porte le rapport d\'aspect visé', inv.ecart + ' %');
     t(inv.veil === 0 && inv.niveau === 0,
-      'aperçu : même voile et même verdict que le fichier, sur les 594 combinaisons',
+      'aperçu : même voile et même verdict que le fichier, sur toutes les combinaisons',
       inv.veil + ' voiles et ' + inv.niveau + ' verdicts divergents sur ' + inv.total);
 
     // un téléphone récent doit être classé comme un téléphone
