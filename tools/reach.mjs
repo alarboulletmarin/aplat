@@ -19,7 +19,8 @@ const CASES = [
   { name: 'phone paysage 844x390', vp: { width: 844, height: 390 }, dsf: 3, mobile: true },
   { name: 'tablet 834x1112', vp: { width: 834, height: 1112 }, dsf: 2, mobile: true },
   { name: 'desktop court 1180x550', vp: { width: 1180, height: 550 }, dsf: 2, mobile: false },
-  { name: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false }
+  { name: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false },
+  { name: 'desktop 1440x900', vp: { width: 1440, height: 900 }, dsf: 2, mobile: false }
 ];
 
 (async () => {

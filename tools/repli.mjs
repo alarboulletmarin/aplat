@@ -27,7 +27,8 @@ const CAS = [
   { nom: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true, replie: true, libre: 44 },
   { nom: 'phone paysage 844x390', vp: { width: 844, height: 390 }, dsf: 3, mobile: true, replie: false, libre: 55 },
   { nom: 'tablet 834x1112', vp: { width: 834, height: 1112 }, dsf: 2, mobile: true, replie: false, libre: 55 },
-  { nom: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 }
+  { nom: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 },
+  { nom: 'desktop 1440x900', vp: { width: 1440, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 }
 ];
 
 const ok = [], ko = [];

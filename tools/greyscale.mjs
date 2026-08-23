@@ -28,6 +28,7 @@ const OUT = path.resolve(ICI, '../.shots');
     await page.waitForTimeout(200);
 
     for (const [name, sel] of [
+      ['verdict', '.verdict'],
       ['densite', '#liste-densite'],
       ['langue', '#liste-langue'],
       ['theme', '#liste-theme'],

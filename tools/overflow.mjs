@@ -20,6 +20,7 @@ const VIEWS = [
   { name: 'phone paysage 844', w: 844, h: 390, dsf: 3 },
   { name: 'desk court 1180', w: 1180, h: 550, dsf: 2 },
   { name: 'desk 1280', w: 1280, h: 900, dsf: 2 },
+  { name: 'desk 1440', w: 1440, h: 900, dsf: 2 },
   { name: 'desk 1920', w: 1920, h: 1080, dsf: 1 }
 ];
 

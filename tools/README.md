@@ -26,11 +26,27 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | `a11y.mjs` | contrastes calculés sur le DOM, couleurs semi-transparentes recomposées sur leur pile de fonds, deux thèmes, deux langues |
 | `reach.mjs` | cherche une position de défilement où chaque contrôle répond au pointage, sous les deux barres collantes, puis vérifie la cible de 44 px et que la scène collée tient entière au-dessus de la barre d'action |
 | `repli.mjs` | le repli de l'aperçu au défilement : ce qu'il rend aux grilles, le dépli du verdict, et que chaque contrôle se dégage entièrement des deux couches collantes |
-| `overflow.mjs` | débordements sur 11 cadrages (dont deux fenêtres couchées) × 2 langues × 4 résolutions cibles, avec et sans libellés allongés de 30 %. Les libellés de carte y sont tenus à deux lignes et à zéro ellipse |
+| `overflow.mjs` | débordements sur 12 cadrages (dont deux fenêtres couchées) × 2 langues × 4 résolutions cibles, avec et sans libellés allongés de 30 %. Les libellés de carte y sont tenus à deux lignes et à zéro ellipse |
 | `band-test.mjs` | hauteur des marches du voile sur 32 cas |
 | `dither-check.mjs` | amplitude du grain du `#101A2E` au `#FFFFFF` |
 | `shot.mjs` | captures et absence de requête sortante |
 | `soak.mjs` | 400 actions enchaînées : dérive du tas, des nœuds, des canevas et des écouteurs |
+
+## La recette des quatre cadrages
+
+La revue d'ergonomie demande de tenir quatre cadrages : iPhone en portrait,
+iPhone en paysage, iPad en portrait, ordinateur en 1440 px. Chacun est dans les
+listes des outils ci-dessus, et voici qui répond de quoi.
+
+| Ce qu'on exige | Qui le vérifie |
+|---|---|
+| tous les contrôles atteignables, non recouverts, pied de page compris | `reach.mjs` (pointage et 44 px) et `repli.mjs` (dégagement complet des deux couches) |
+| la scène collée tient entière au-dessus de la barre d'action | `reach.mjs` |
+| la hauteur rendue aux grilles une fois défilé | `repli.mjs` |
+| un seul appel visuel primaire par écran | `shot.mjs` et `cadrages.mjs`, à l'œil : le lime ne sert qu'à Télécharger et à la carte de succès |
+| parcours clavier complet, focus visible et jamais masqué | `e2e.mjs` |
+| aucune information portée par la seule couleur | `a11y.mjs` (contraste des formes) et `greyscale.mjs` (captures désaturées) |
+| français et anglais complets, aucune chaîne en dur | `src/i18n/i18n.test.ts` (parité stricte) et `overflow.mjs` (gabarits à +30 %) |
 
 ## Les autres
 
