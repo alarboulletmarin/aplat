@@ -65,7 +65,7 @@ body:
       options:
         - Installée sur l'écran d'accueil (PWA)
         - Dans un onglet du navigateur
-        - Ouverte depuis un fichier local (file://)
+        - En mode hors ligne, ou avec un réseau coupé
         - Je ne sais pas
     validations:
       required: true

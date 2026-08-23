@@ -52,7 +52,7 @@ const COLLECT = (probes) => {
   if (dev) {
     const r = dev.getBoundingClientRect();
     const cs = getComputedStyle(dev);
-    out['~appareil'] = { w: Math.round(r.width), h: Math.round(r.height), br: cs.borderTopLeftRadius, bw: cs.borderTopWidth, mu: cs.getPropertyValue('--mu').trim(), cols: cs.getPropertyValue('--cols').trim() };
+    out['~appareil'] = { w: Math.round(r.width), h: Math.round(r.height), br: cs.borderTopLeftRadius, bw: cs.borderTopWidth, mu: cs.getPropertyValue('--mu').trim(), cols: (cs.getPropertyValue('--cols') || cs.getPropertyValue('--colonnes')).trim() };
   }
   const cards = [...document.querySelectorAll('div')].filter(d => {
     const cs = getComputedStyle(d);

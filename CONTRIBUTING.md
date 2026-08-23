@@ -4,7 +4,7 @@ Merci de regarder. Ce document dit ce qu'il faut savoir avant d'écrire une lign
 
 ## Le projet en trois phrases
 
-Aplat répond à une seule question : **à quoi ressemblera ce fond d'écran derrière mes icônes ?** Il ne calcule rien ailleurs que dans le navigateur : le motif, l'aperçu et le fichier exporté sortent tous du même code, sur l'appareil. Il n'a ni compte, ni serveur, ni stockage : ce qui est partageable tient dans l'URL, et rien d'autre ne survit à la fermeture de l'onglet.
+Aplat répond à une seule question : **à quoi ressemblera ce fond d'écran derrière mes icônes ?** Il ne calcule rien ailleurs que dans le navigateur : le motif, l'aperçu et le fichier exporté sortent tous du même code, sur l'appareil. Il n'a ni compte, ni serveur : ce qui est partageable tient dans l'URL, et rien d'autre ne survit à la fermeture de l'onglet — le seul cache est celui du Service Worker, qui ne contient que les fichiers de l'application.
 
 Une proposition qui contredit une de ces trois phrases sera refusée, même bien écrite.
 
@@ -40,7 +40,7 @@ npm run preview    # sert le build (Service Worker actif)
 
 Le Service Worker est désactivé en développement ; pour tester le mode hors ligne et l'installation, passez par `build` puis `preview`.
 
-Les vérifications headless vivent dans [`tools/`](tools/) et se lancent avec `npm run check` : parcours complet dans un vrai navigateur, URL hostiles, contrastes réels calculés sur le DOM, cibles tactiles, débordements avec des libellés allongés de 30 %, marches du voile, amplitude du grain, absence de requête sortante, ouverture en `file://`, endurance. Elles demandent Chromium via Playwright et ne sont jamais servies à l'utilisateur.
+Les vérifications headless vivent dans [`tools/`](tools/) et se lancent avec `npm run check` : parcours complet dans un vrai navigateur, URL hostiles, contrastes réels calculés sur le DOM, cibles tactiles, débordements avec des libellés allongés de 30 %, marches du voile, amplitude du grain, absence de requête sortante, installation et fonctionnement hors ligne, endurance. Elles demandent Chromium via Playwright et ne sont jamais servies à l'utilisateur.
 
 ## Les règles qui tiennent le code
 

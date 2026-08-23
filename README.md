@@ -1,10 +1,11 @@
 # Aplat
 
-Un générateur de fonds d'écran génératifs, exportés à la résolution exacte de
-l'appareil. Tout est calculé dans le navigateur.
+Des fonds d'écran génératifs, exportés à la résolution exacte de l'appareil.
+Tout est calculé dans le navigateur.
 
-Gratuit, sans compte, sans pub, sans traceur, sans serveur, sans stockage.
-Aucune donnée ne sort de l'appareil. Ce qui est partageable tient dans l'URL.
+Gratuit, sans compte, sans pub, sans traceur, sans serveur. Aucune donnée ne
+sort de l'appareil et rien n'y est enregistré : ce qui est partageable tient
+dans l'URL. Installable, et pleinement utilisable hors ligne.
 
 ---
 
@@ -18,21 +19,13 @@ restent lisibles dessus.
 transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 
 **La hiérarchie de l'écran.** Il n'y en a qu'un.
+
 - *Primaire* : le motif vu derrière de vraies icônes, et le bouton Télécharger.
   C'est là qu'on décide, c'est là qu'on finit.
 - *Secondaire* : les trois réglages — famille, palette, densité — et la
   résolution, déjà détectée, repliée tant qu'on n'y touche pas.
-- *Caché* : langue, thème, lien de partage. En bas, sous le trait, pour qui les
-  cherche.
-
-### Le parti visuel
-
-Une page imprimée, pas une pile de cartes. Le titre en pleine chasse et un filet
-de trois pixels tiennent l'en-tête ; les réglages sont dans un seul bloc cerné
-d'un trait franc et découpé par des filets ; les titres sont des titres, pas de
-petites capitales interlettrées. La sélection est un aplat inversé — encre
-pleine, texte papier — parce qu'un aplat se lit de loin, en niveaux de gris, et
-sans avoir à comparer deux nuances voisines.
+- *Caché* : langue, thème, lien de partage, version. En bas, sous le trait,
+  pour qui les cherche.
 
 ### Pourquoi une seule section
 
@@ -40,8 +33,11 @@ La valeur du produit est de **voir le rendu derrière les icônes avant de
 télécharger**. Toute navigation qui sépare les réglages de l'aperçu casse
 exactement ça : on réglerait à l'aveugle, puis on irait vérifier. L'aperçu est
 donc épinglé en haut de l'écran et les réglages défilent dessous ; sur
-ordinateur, les deux sont côte à côte. Pas d'onglet, pas de barre de
-navigation, pas d'étape.
+ordinateur, les deux sont côte à côte. Pas d'onglet, pas de barre de navigation,
+pas d'étape.
+
+Le parti visuel et les règles d'interface sont dans
+[`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
 
 ---
 
@@ -51,36 +47,48 @@ navigation, pas d'étape.
 |---|---|---|
 | **Vide** | Résolution absente ou incomplète. La maquette est remplacée par une hachure, avec « Indique une résolution ». Le bouton Télécharger est désactivé. | Saisir largeur et hauteur, ou reprendre un préréglage. |
 | **Chargement** | Trois points au centre de la maquette pendant le rendu. Le bouton passe à « Rendu en cours » et devient `aria-busy`. | Se résout seul. |
-| **Erreur** | Carte à bordure et triangle d'alerte, cause exacte : au-delà de 40 Mpx on dit le nombre ; si le navigateur a refusé d'allouer le canevas — ce que font les navigateurs mobiles au-delà d'une certaine surface, en rendant une image noire sans le dire — on dit d'essayer plus petit ; sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
+| **Erreur** | Carte à trait d'alerte et triangle, cause exacte : au-delà de 40 Mpx on dit le nombre ; si le navigateur a refusé d'allouer le canevas — ce que font les navigateurs mobiles au-delà d'une certaine surface, en rendant une image noire sans le dire — on dit d'essayer plus petit ; sinon on dit que le fichier n'a pas pu être créé. Bouton Réessayer. | Réessayer, ou baisser la résolution. |
 | **Succès** | Carte lime : dimensions produites, format, poids réel du fichier, et le geste pour passer de « téléchargé » à « dans la pellicule ». | Rien à faire, c'est fini. |
-| **Données trop longues** | Chaque libellé a son échappatoire prévue : ellipse sur les puces de réglage et les icônes de la maquette, retour à la ligne dans les cartes, colonnes qui s'étirent, `overflow-wrap` sur la résolution. Le bouton secondaire cède la place au primaire. | — |
+| **Données trop longues** | Chaque libellé a son échappatoire prévue : ellipse sur les puces de réglage et les icônes de la maquette, retour à la ligne dans les cartes, colonnes qui s'étirent, `overflow-wrap` sur les valeurs. Le bouton secondaire cède la place au primaire. | — |
 
-L'état de lisibilité est affiché en permanence, pas seulement en cas de
+Le verdict de lisibilité est affiché en permanence, pas seulement en cas de
 problème : rapport de contraste mesuré, couleur de libellé retenue, force du
 voile appliqué, et une phrase qui dit quoi faire si c'est juste.
 
 ---
 
-## Ouvrir
+## Démarrer
 
-Aucune construction, aucune dépendance. Ouvrir `index.html` — y compris en
-`file://`.
+```bash
+npm install
+npm run dev        # serveur de développement
+npm run build      # notices + types + build de production
+npm run preview    # sert le build, Service Worker actif
+npm run test       # tests unitaires
+npm run typecheck  # vérification TypeScript
+npm run check      # vérifications dans un vrai navigateur
+```
 
-```
-python3 -m http.server 8000    # ou n'importe quel serveur statique
-```
+Le Service Worker est désactivé en développement : pour éprouver l'installation
+et le mode hors ligne, passer par `build` puis `preview`.
 
 ## Ce que contient le dépôt
 
 ```
-index.html                 la page, entière
-src/app.css                jetons et styles — CSS pur, aucune librairie
-src/engine.js              le moteur génératif — palettes, familles, rendu
-src/i18n.js                les libellés FR et EN
-src/app.js                 l'interface
-assets/fonts/*.woff2       Anton et Archivo, auto-hébergées
-design/Aplat.dc.html       la maquette de référence
-tools/                     vérifications headless (hors livraison)
+index.html                    le document, et le thème posé avant la peinture
+vite.config.ts                build, PWA, politique de sécurité
+src/main.tsx                  point d'entrée
+src/App.tsx                   l'état, l'URL, l'export
+src/lib/moteur.ts             le moteur génératif — palettes, familles, rendu
+src/lib/{resolution,url,export,geometrie,format,build}.ts
+src/components/               l'interface, un fichier par pièce
+src/hooks/                    horloge, tailles, focus, ajustement
+src/i18n/{fr,en,index}.ts     les libellés, à parité stricte
+src/styles/                   tokens · reset · base · composants · écrans
+public/polices/*.woff2        Anton et Archivo, auto-hébergées
+scripts/                      icônes de la PWA, notices de licence
+design/Aplat.dc.html          la maquette de référence
+tools/                        vérifications headless (hors livraison)
 ```
 
 ## L'URL porte l'état
@@ -88,31 +96,51 @@ tools/                     vérifications headless (hors livraison)
 `?m=vagues&p=lime&d=1&s=7314&l=fr&r=1179x2556`
 
 `m` famille · `p` palette · `d` densité (0–2) · `s` graine · `l` langue ·
-`r` résolution · `t` thème, seulement s'il n'est pas « système ».
+`r` résolution, seulement si elle a été saisie à la main ·
+`t` thème, seulement s'il n'est pas « système ».
 
-Rien d'autre n'est transmis, rien n'est stocké. Copier le lien suffit à
-retrouver exactement la même image, sur n'importe quel appareil.
+Rien d'autre n'est transmis. Copier le lien suffit à retrouver exactement la
+même image, sur n'importe quel appareil. Une URL forgée ne peut produire qu'un
+motif valide : tout ce qui n'est pas reconnu retombe sur la valeur par défaut,
+et jamais par un accès indexé — `PALETTES['constructor']` est « vrai », et
+suffisait à faire lever le rendu tout entier.
+
+## Ce qui est enregistré, et ce qui ne l'est pas
+
+Aucun compte, aucun réseau à l'exécution, aucune mesure d'audience. Ni cookie,
+ni `localStorage`, ni `sessionStorage`, ni base indexée : les réglages vivent
+dans la barre d'adresse, et rien d'autre ne survit à la fermeture de l'onglet.
+
+L'application étant installable, un cache existe — celui du Service Worker. Il
+ne contient **que les fichiers de l'application** : le document, le script, la
+feuille de style, les polices, les icônes et les notices de licence. Aucun
+réglage, aucune image produite, aucune URL portant un état. C'est vérifié à
+chaque `npm run check`, en énumérant le contenu réel du cache.
+
+La politique de sécurité du document (`connect-src 'none'`) coupe `fetch`, XHR,
+WebSocket, EventSource et `sendBeacon` : « aucun réseau » est une propriété du
+document, pas une promesse.
 
 ---
 
 ## Le moteur
 
-`(famille, palette, densité, graine)` donne toujours la même image, à
-n'importe quelle résolution. Les formes sont tracées en coordonnées relatives :
-l'aperçu et le fichier exporté sont le même dessin, à deux échelles.
+`(famille, palette, densité, graine)` donne toujours la même image, à n'importe
+quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
+et le fichier exporté sont le même dessin, à deux échelles.
 
 **L'aperçu est le fichier.** Le canevas d'aperçu porte exactement le rapport
 d'aspect de la résolution visée — la bordure de la maquette d'appareil est
 défalquée — et la mesure de lisibilité porte sur les dimensions d'export, pas
 sur celles du canevas. Vérifié sur les 594 combinaisons : même voile, même
-verdict, au pourcent près.
+verdict.
 
 **Le voile de lisibilité.** Après les formes, le moteur mesure la luminance
 moyenne de la zone des icônes, choisit la couleur de libellé la plus sûre
 (claire ou sombre), puis pousse le fond vers elle juste ce qu'il faut. Le
 rapport obtenu est affiché ; le voile n'est appliqué que s'il sert.
 
-La mesure se fait sur une sonde de taille fixe, jamais sur l'image finale :
+La mesure se fait sur une sonde de surface fixe, jamais sur l'image finale :
 l'aperçu et l'export donnent exactement les mêmes chiffres, et un fond d'écran
 4K ne réclame pas un `getImageData` de 100 Mo.
 
@@ -153,21 +181,15 @@ forme jamais de blocs quand on agrandit l'image.
 L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
 dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
 que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
-champ de vision, pas toutes d'un coup — neuf sur dix-huit au premier affichage
-d'un téléphone.
-
-Après 400 changements de réglage enchaînés (`tools/soak.js`) : même nombre de
-nœuds, même nombre de canevas, même nombre d'écouteurs, +0,5 Mo de tas.
+champ de vision, pas toutes d'un coup — six ou sept sur dix-huit au premier
+affichage d'un téléphone.
 
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
-d'entrée de gamme (`tools/perf.js`) :
+d'entrée de gamme (`tools/perf.js`) : moins de 3 ms par action, quelle qu'elle
+soit.
 
-| action | avant | après |
-|---|---|---|
-| frappe dans le champ largeur | 67 ms | **30 ms** |
-| changement de palette | 163 ms | **20 ms** |
-| changement de famille | 52 ms | **13 ms** |
-| nouveau motif | 175 ms | **12 ms** |
+Après 400 changements de réglage enchaînés (`tools/soak.js`) : même nombre de
+nœuds, même nombre de canevas, même nombre d'écouteurs.
 
 ## Accessibilité
 
@@ -176,26 +198,29 @@ leur pile de fonds réelle avant d'appliquer la formule WCAG, dans les deux
 thèmes et les deux langues :
 
 - texte courant ≥ 4,5:1, texte large, bordures d'éléments d'interface et formes
-  porteuses de sens ≥ 3:1 — 73 textes, 48 bordures et le trait de la carte
-  d'erreur examinés dans chacune des six combinaisons de thème et de langue ;
-- test en niveaux de gris : la sélection passe par la bordure, le fond **et**
-  une coche — jamais par la seule couleur. La densité est aussi dite par un
-  motif de points, la lisibilité par trois formes distinctes (disque, demi-disque,
-  triangle), l'erreur par un triangle ;
+  porteuses de sens ≥ 3:1 — 69 textes et 45 bordures examinés dans chacune des
+  six combinaisons de thème et de langue, carte d'erreur comprise ;
+- test en niveaux de gris : la sélection est un aplat inversé, la densité un
+  nombre de points allumés, la lisibilité trois formes distinctes (disque,
+  demi-disque, triangle), le thème un disque plein, vide ou à moitié, l'erreur
+  un triangle. Jamais la couleur seule ;
 - le corail est réservé aux aplats et aux formes, jamais au texte ;
 - cibles tactiles ≥ 44 px, vérifiées de 320 à 1920 px de large, et
-  atteignabilité de chaque contrôle testée sous les deux barres collantes ;
-- focus visible partout et **jamais masqué** par les deux barres collantes : ni
-  le défilement déclenché par le focus ni `scrollIntoView` n'appliquent
+  atteignabilité de chacun des 43 contrôles testée sous les deux barres
+  collantes ;
+- focus visible partout et **jamais masqué** par ces deux barres : ni le
+  défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
   (WCAG 2.2, 2.4.11) ;
 - les cinq groupes de réglages sont de vrais groupes radio : un arrêt de
   tabulation par groupe, flèches et Début/Fin. Le parcours passe de 42 arrêts
   à 11 ;
 - lien d'évitement, points de repère, `aria-live` sur la lisibilité, sur le
-  résultat de l'export et sur la confirmation de copie ;
-- la fausse maquette d'écran est `aria-hidden` — un lecteur d'écran ne lit pas de
-  faux noms d'application ; l'aperçu porte une description de ce qu'il montre ;
+  résultat de l'export et sur la confirmation de copie — et rien n'y est
+  réécrit quand rien ne change ;
+- la fausse maquette d'écran est `aria-hidden` — un lecteur d'écran ne lit pas
+  de faux noms d'application ; l'aperçu porte une description de ce qu'il
+  montre ;
 - `prefers-reduced-motion` respecté : le fondu du canevas et l'animation
   d'attente s'effacent.
 
@@ -205,50 +230,50 @@ Tous mesurés, tous en faveur d'une contrainte du cahier des charges.
 
 | Écart | Pourquoi |
 |---|---|
-| `--line-strong` passe de `.45` à `.56` en thème clair | C'est le trait de toutes les puces de réglage et des champs. À `.45` il tombe à 2,7:1, sous les 3:1 exigés pour un élément d'interface. |
-| Trait de la carte d'erreur et de son triangle : jeton `--alert` | Le corail `#FF6648` tombe à 2,7:1 sur la carte. Le corail décoratif et celui des palettes ne bougent pas. |
-| Trait du bouton primaire en `--accent-ink` plutôt que `--ink` | En sombre `--ink` est la crème, qui disparaît sur l'aplat lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
+| `--filet-franc` passe de `.45` à `.56` en thème clair | C'est le trait de toutes les puces de réglage et des champs. À `.45` il tombe à 2,7:1, sous les 3:1 exigés pour un élément d'interface. |
+| Trait de la carte d'erreur et de son triangle : jeton `--alerte` | Le corail `#FF6648` tombe à 2,7:1 sur la carte. Le corail décoratif et celui des palettes ne bougent pas. |
+| Trait du bouton primaire en `--accent-encre` plutôt que `--encre` | En sombre `--encre` est la crème, qui disparaît sur l'aplat lime. En clair les deux valeurs sont identiques : le rendu de la maquette est inchangé. |
 | Le carré de sélection reçoit un filet à la couleur du texte | Sur la puce inversée du thème sombre — un aplat crème — le lime tombait à 1,1:1 et disparaissait. |
 | La colonne des préférences passe de 150 à 200 px de seuil | À 150, la colonne Thème tombait à 52 px par bouton : « Système » partait seul sur une deuxième rangée, étiré sur toute la largeur. |
 | Boutons langue et thème : plancher lié au contenu | Avec un plancher fixe la rangée ne se repliait jamais et « Français » se coupait en plein mot. |
 | Le bouton secondaire s'efface entièrement, le primaire ne rétrécit pas | Avec des facteurs voisins les deux libellés étaient coupés : « Télécharger » devenait « Téléch… » dès 320 px. |
-| Les cinq grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
+| Les grilles auto-fit passent de `minmax(Xpx, 1fr)` à `minmax(min(Xpx, 100%), 1fr)` | Le minimum forçait une piste plus large que l'écran sous 336 px. Au-dessus du seuil le rendu est identique au pixel. |
+| Le pied de page prend 44 px de haut par élément | Le lien vers la source n'est pas une mention légale en petit : l'AGPL en fait une obligation, et une obligation doit être cliquable. |
 | La boîte de contenu de l'appareil porte le rapport d'aspect, bordure défalquée | Le canevas est en `inset:0` : sans ça l'aperçu était un format décalé de 1,5 % et sa mesure de lisibilité portait sur une image qui n'existait pas. |
-| La grille d'icônes de la maquette perd des rangées si l'appareil est large — 16 icônes en téléphone (inchangé), 12 en tablette, 3 en ordinateur | Tout y est dimensionné en unités calées sur le petit côté ; sur un écran large la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
+| La grille d'icônes de la maquette perd des rangées si l'appareil est large | Tout y est dimensionné en unités calées sur le petit côté ; sur un écran large la grille complète emportait le dock et la barre de recherche hors du cadre, et la zone basse du fond d'écran n'était plus jugeable. |
 | Le type d'appareil est déduit du rapport d'aspect, plus du petit côté en pixels | Le seuil de 1200 px classait un iPhone 15 Pro Max (1290 × 2796) comme une tablette. |
 | La résolution détectée est forcée en portrait sur pointeur grossier | Android fait pivoter `screen.width` avec l'appareil, pas iOS : en paysage on proposait un fond d'écran couché. |
 | Les champs de résolution sont en `type="text" inputmode="numeric"` | `type="number"` renvoie une chaîne vide dès que la saisie est mal formée, alors que le champ affiche toujours le texte tapé. |
 | La saisie est bornée à 8000 dès la frappe, l'erreur de borne basse est visible | Le champ disait 9999, la carte 8 000, le lien `r=8000` et le fichier 8000 px. Et `aria-invalid` n'avait aucune expression visuelle. |
 | Le bloc lisibilité n'affiche rien tant qu'il n'a rien mesuré | Il partait sur un repli codé en dur — 5,4:1, voile 18 % — écrit dans une région live avant toute mesure. |
-| Les puces de réglage deviennent des groupes radio (`role="radio"` + `aria-checked` + tabulation tournante) | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
-| Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris (WCAG 2.2, 2.4.11). |
+| Les puces de réglage deviennent des groupes radio | Ces cinq groupes sont à choix unique : `aria-pressed` disait « bascule ». Le parcours clavier passe de 42 arrêts à 11. Le rendu ne change pas. |
+| Le défilement réserve la place des deux barres collantes, corrigé en JS | Ni le focus ni `scrollIntoView` n'appliquent `scroll-padding` aujourd'hui : un élément atteint au clavier finissait sous une barre, anneau de focus compris. |
 | Bouton d'export : `aria-disabled` pendant le rendu, `disabled` seulement à vide | `disabled` retirait le focus du bouton et renvoyait au début du document. |
 | Espaces insécables dans les chaînes françaises | Le texte se coupait devant « % », « : » et à l'intérieur des guillemets. |
 | Repli de copie manuelle quand le presse-papiers refuse | L'ancien code annonçait « Lien copié » même en cas d'échec, y compris quand l'API était absente. |
 | La résolution détectée ne part pas dans le lien | C'est une mesure de l'appareil, pas un réglage : le lien promet « les réglages, rien d'autre ». |
-| Politique de sécurité `connect-src 'none'` en balise meta | La page promet « aucun réseau » : autant en faire une propriété du document. |
-| Favicon en ligne, préchargements de polices retirés | Zéro requête pour l'icône ; en `file://` les préchargements CORS échouaient et la police était téléchargée deux fois. |
-| `display: standalone` retiré du manifeste | Sans cache de service worker — que le contrat interdit — une application installée ne s'ouvrirait pas sans réseau. |
+| Politique de sécurité `connect-src 'none'`, injectée au build | La page promet « aucun réseau » : autant en faire une propriété du document. Au build seulement, le développement ayant besoin de son WebSocket. |
 | Polices auto-hébergées au lieu de Google Fonts | « Sans traceur, aucune donnée ne sort » : un appel à `fonts.gstatic.com` transmet l'adresse IP. |
-| Le voile en bandes et le grain en mouchetis | Poids du fichier et tramage des palettes sombres, voir plus haut. |
-| `color-mix()` précalculé en `rgba()` | Même résultat exact, sans dépendre du support de `color-mix`. |
-| Lien d'évitement, points de repère, `aria-live`, `aria-hidden`, `role="img"` sur le canevas | Sans effet visuel au repos. |
+| `color-mix()` précalculé en `rgba()` | Même résultat exact, sans recalcul à chaque peinture d'une maquette qui se redessine à la frappe. |
 
 ### Fidélité mesurée
 
 Trois angles, tous automatisés et reproductibles.
 
-`tools/fidelity.js` relit les 300 déclarations et les 22 jetons des styles en
-ligne de `design/Aplat.dc.html`. Les 22 jetons et 282 déclarations se retrouvent
-tels quels ; les 18 restantes sont une à une les substitutions du tableau
-ci-dessus.
+`tools/fidelity.js` relit les 299 déclarations et les 22 jetons des styles en
+ligne de `design/Aplat.dc.html`, après avoir normalisé l'écriture des deux côtés
+et traduit les noms de jetons. **Les 22 jetons et 291 déclarations se retrouvent
+tels quels** ; les 8 restantes sont une à une les substitutions du tableau
+ci-dessus — quatre grilles bornées en `min(…, 100%)`, le pied de page, et le
+corail remplacé par `--alerte` là où il porte un trait d'interface.
 
 `tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en local,
-mêmes polices auto-hébergées, même graine — et compare 28 repères sur position,
+mêmes polices auto-hébergées, même graine — et compare 27 repères sur position,
 taille, corps, graisse, interlettrage, interligne, couleur, rayon, bordure et
-remplissage. **22 identiques au pixel près.** Les 6 écarts sont les boutons de
+remplissage. **19 identiques au pixel près.** Les écarts sont les boutons de
 langue et de thème, dont le plancher est lié au contenu pour ne plus couper les
-mots, et la boîte de l'appareil, dont la bordure est défalquée.
+mots, et le décalage vertical dû à la phrase de confidentialité, plus longue
+d'une ligne depuis qu'elle dit exactement ce que le cache contient.
 
 `tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,9 %** des
 pixels sont identiques. Les 3,1 % restants se lisent un par un sur la carte des
@@ -256,60 +281,48 @@ pixels sont identiques. Les 3,1 % restants se lisent un par un sur la carte des
 
 ## Vérifications
 
-```
-npm install          # playwright, uniquement pour les vérifications
-npm run check        # tout enchaîner
+```bash
+npm run test     # 62 tests unitaires, sans navigateur
+npm run check    # build, puis 98 contrôles dans Chromium
 ```
 
 | Outil | Ce qu'il vérifie |
 |---|---|
-| `tools/e2e.js` | 66 contrôles : URL et sa robustesse, déterminisme, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, clavier, focus non masqué, mouvement réduit |
+| `tools/e2e.js` | 80 contrôles : URL et sa robustesse, déterminisme, quatre états, téléchargement réel, course à l'export, échec de copie, politique réseau, contenu du cache, clavier, focus non masqué, mouvement réduit |
+| `tools/pwa.js` | 18 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé — page, motif, vignettes, polices et téléchargement réel |
 | `tools/a11y.js` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.js` | atteignabilité et taille des cibles, de 320 à 1920 px |
-| `tools/overflow.js` | débordements et troncatures sur 256 combinaisons de largeur, langue et résolution cible, avec et sans libellés allongés de 30 % |
-| `tools/export-audit.js` | poids et durée des PNG sur les 594 combinaisons |
+| `tools/overflow.js` | débordements sur 128 combinaisons de largeur, langue et résolution cible, avec et sans libellés allongés de 30 % |
+| `tools/fuzz-url.js` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `tools/band-test.js` | hauteur des marches du voile |
 | `tools/dither-check.js` | amplitude du grain sur toute la gamme tonale |
-| `tools/edges.js` | découpes agrandies sur les bords |
 | `tools/shot.js` | captures et absence de requête sortante |
-| `tools/greyscale.js` | test en niveaux de gris |
-| `tools/fileurl.js` | ouverture en `file://` : requêtes, doublons de police, erreurs console |
-| `tools/fuzz-url.js` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
-| `tools/planche.js` | planche-contact des 18 familles à la résolution d'un téléphone |
 | `tools/soak.js` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
+| `tools/export-audit.js` | poids et durée des PNG sur les 594 combinaisons |
 | `tools/perf.js` | coût de chaque action, processeur bridé six fois |
-| `tools/states.js` | captures des quatre états |
-| `tools/fidelity.js` | chaque déclaration de la maquette est-elle présente dans le portage |
-| `tools/geo-diff.js` · `tools/pixel-diff.js` | maquette d'origine et portage rendus côte à côte |
+| `tools/greyscale.js` · `tools/states.js` · `tools/planche.js` | captures en niveaux de gris, des cinq états, et des 18 familles |
+| `tools/fidelity.js` · `tools/geo-diff.js` · `tools/pixel-diff.js` | maquette d'origine et portage, comparés de trois façons |
 
-### Fidélité mesurée
-
-Trois angles, tous automatisés et reproductibles.
-
-`tools/fidelity.js` relit les 307 déclarations et les 21 jetons des styles en
-ligne de `design/Aplat.dc.html`. Les 21 jetons et 287 déclarations se retrouvent
-tels quels ; les 20 restantes sont une à une les substitutions du tableau
-ci-dessus — `color-mix` précalculé en rgba, `minmax(min(…))`, `--line-strong`
-sur les puces, `--accent-ink` sur les surfaces lime, `--alert` sur la carte
-d'erreur, `animation-delay` séparé.
-
-`tools/geo-diff.js` rend la maquette d'origine — React et Babel servis en local,
-mêmes polices auto-hébergées, même graine — et compare 28 repères sur position,
-taille, corps, graisse, interlettrage, interligne, couleur, rayon, bordure et
-remplissage. **21 identiques au pixel près.** Les 7 écarts sont : les trois
-boutons de thème et le bouton de langue, dont le plancher est désormais lié au
-contenu pour ne plus couper les mots ; la boîte de l'appareil, dont la bordure
-est défalquée pour que la boîte de contenu porte le rapport d'aspect visé ;
-et un artefact du gabarit, qui enveloppe le texte dans un élément de plus.
-
-`tools/pixel-diff.js` compare les deux rendus pixel à pixel : **96,4 %** des
-pixels sont identiques. Les 3,6 % restants se lisent un par un sur la carte des
-écarts et correspondent aux corrections assumées — bordures des puces, coche de
-sélection, rangées d'icônes retirées de la maquette d'écran, cellules de la
-trame calées sur des bornes entières, largeur des boutons de thème, et le grain.
+Le moteur n'est pas exposé sur `window` : une application qui l'ouvre pour ses
+propres tests l'ouvre à tout le monde. L'outillage en construit sa propre copie
+(`tools/banc.js`) et l'injecte dans la page quand il en a besoin.
 
 ## Licences
 
-Le code est publié sous licence MIT (`LICENSE`).
+Le code est publié sous licence **AGPL-3.0-only** ([`LICENSE`](LICENSE)). Le
+pied de page pointe le commit exact d'où sort le build : c'est ce que l'AGPL
+appelle la source correspondante, et un lien vers la branche principale ne la
+désigne pas.
+
 Anton et Archivo sont sous SIL Open Font License 1.1
-(`assets/fonts/OFL-Anton.txt`, `assets/fonts/OFL-Archivo.txt`).
+(`public/polices/OFL-Anton.txt`, `public/polices/OFL-Archivo.txt`).
+
+Les licences des composants tiers embarqués dans le build sont rassemblées à
+chaque `npm run build` dans `public/THIRD-PARTY.txt`.
+
+## Contribuer
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) dit ce que le projet refuse — c'est la
+partie qui ne se devine pas. [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) est la
+référence de l'interface. [`SECURITY.md`](SECURITY.md) dit comment signaler une
+faille, et ce qui n'en est pas une.
