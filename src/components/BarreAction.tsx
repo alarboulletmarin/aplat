@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { useRef } from 'react'
 import { decimal, nombre, poids } from '../lib/format'
 import type { Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
@@ -68,6 +69,7 @@ export function BarreAction({
   onTrois,
   onFormats,
   onVoile,
+  onFermerNote,
 }: {
   cadre: React.RefObject<HTMLDivElement | null>
   /** La proposition de mise à jour, quand il y en a une. */
@@ -97,9 +99,39 @@ export function BarreAction({
   onTrois: () => void
   onFormats: () => void
   onVoile: () => void
+  onFermerNote: () => void
 }) {
   const T = textes.barre
   const calcul = phase === 'calcul'
+
+  /* Le glissement qui retire la note de succès. Un seul doigt, vers le bas,
+     le sens dans lequel une carte posée en bas de l'écran peut partir. Le
+     bouton Fermer et la minuterie font le même travail sans geste : le
+     glissement est un raccourci, jamais le seul chemin. La carte suit le
+     doigt pendant le geste, c'est de la manipulation directe et non une
+     animation, donc rien à retenir pour `prefers-reduced-motion`. */
+  const glisse = useRef<{ depart: number; pointeur: number } | null>(null)
+  const SEUIL_GLISSE = 48
+
+  const prendreNote = (evenement: React.PointerEvent<HTMLDivElement>) => {
+    if ((evenement.target as HTMLElement).closest('button')) return
+    glisse.current = { depart: evenement.clientY, pointeur: evenement.pointerId }
+    evenement.currentTarget.setPointerCapture(evenement.pointerId)
+  }
+  const suivreNote = (evenement: React.PointerEvent<HTMLDivElement>) => {
+    if (!glisse.current || evenement.pointerId !== glisse.current.pointeur) return
+    const descente = Math.max(0, evenement.clientY - glisse.current.depart)
+    evenement.currentTarget.style.transform = descente ? `translateY(${descente}px)` : ''
+    evenement.currentTarget.style.opacity = descente ? String(Math.max(0.2, 1 - descente / 160)) : ''
+  }
+  const relacherNote = (evenement: React.PointerEvent<HTMLDivElement>, abandonne: boolean) => {
+    if (!glisse.current || evenement.pointerId !== glisse.current.pointeur) return
+    const descente = evenement.clientY - glisse.current.depart
+    glisse.current = null
+    evenement.currentTarget.style.transform = ''
+    evenement.currentTarget.style.opacity = ''
+    if (!abandonne && descente > SEUIL_GLISSE) onFermerNote()
+  }
 
   const message =
     echec === 'trop'
@@ -178,7 +210,14 @@ export function BarreAction({
       {children}
       <div className="barre-live" aria-live="polite">
         {phase === 'faite' && !vide && fichier && (
-          <div className="note note-faite" id="note-faite">
+          <div
+            className="note note-faite"
+            id="note-faite"
+            onPointerDown={prendreNote}
+            onPointerMove={suivreNote}
+            onPointerUp={(evenement) => relacherNote(evenement, false)}
+            onPointerCancel={(evenement) => relacherNote(evenement, true)}
+          >
             <span className="note-faite-i" aria-hidden="true">
               <i />
               <b />
@@ -196,6 +235,14 @@ export function BarreAction({
               </p>
               <p className="note-h">{T.astuce}</p>
             </div>
+            <button
+              type="button"
+              id="note-fermer"
+              className="note-fermer"
+              onClick={onFermerNote}
+            >
+              {T.fermer}
+            </button>
           </div>
         )}
 

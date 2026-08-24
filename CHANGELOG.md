@@ -9,6 +9,17 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : la carte « Image enregistrée » sait partir
+
+- **Elle se retire d'elle-même après douze secondes**, le double du temps de
+  lire ses trois lignes. Elle restait sinon à l'écran jusqu'au prochain
+  réglage, et une carte qui ne part jamais finit en décor : on cesse de la
+  lire, y compris la fois où elle dit autre chose.
+- **Un bouton Fermer et un glissement vers le bas** la retirent avant l'heure.
+  Le glissement est un raccourci, jamais le seul chemin : le bouton et la
+  minuterie font le même travail sans geste. La carte d'erreur, elle, ne part
+  toujours pas seule : une erreur non lue est une erreur perdue.
+
 ### Ajouté : cinq familles, une houle et des rampes
 
 - **Trente-sept familles au lieu de trente-deux.** Quatre abstraites où un

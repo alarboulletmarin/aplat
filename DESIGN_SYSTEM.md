@@ -571,7 +571,7 @@ Chaque écran a cinq états, tous dessinés.
 | **Vide** | hachure diagonale à la place de la maquette, « Indique une résolution », bouton désactivé |
 | **Chargement** | trois points au centre, bouton en « Rendu en cours » et `aria-busy` |
 | **Erreur** | carte à trait d'alerte et triangle, **la cause exacte**, bouton Réessayer |
-| **Succès** | carte lime : dimensions, format, poids réel, et le geste pour finir |
+| **Succès** | carte lime : dimensions, format, poids réel, le geste pour finir, un bouton Fermer ; elle se retire seule après douze secondes, ou d'un glissement vers le bas |
 | **Données trop longues** | libellés de carte sur deux lignes, jamais élidés ; ellipse sur les icônes de la maquette ; `overflow-wrap` sur les valeurs ; rangées retirées de la maquette |
 
 Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas de

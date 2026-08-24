@@ -196,6 +196,42 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   const w = buf.readUInt32BE(16), hh = buf.readUInt32BE(20);
   t(w === 1179 && hh === 2556, 'export : dimensions exactes du fichier', w + 'x' + hh);
 
+  /* --- 10 bis. la carte succès sait partir : un bouton, un glissement, le
+     temps. Elle restait sinon jusqu'au prochain réglage, en décor. La
+     minuterie se teste en payant les douze secondes : un retrait automatique
+     qui casserait ne se verrait nulle part ailleurs qu'ici. */
+  t(await page.isEnabled('#note-fermer'), 'succès : bouton Fermer actif');
+  await tap('#note-fermer');
+  await page.waitForTimeout(250);
+  t(await page.evaluate(() => !document.getElementById('note-faite')),
+    'succès : le bouton Fermer retire la carte');
+
+  await Promise.all([page.waitForEvent('download', { timeout: 30000 }), tap('#btn-export')]);
+  await page.waitForTimeout(600);
+  t(await page.evaluate(() => !!document.getElementById('note-faite')),
+    'succès : la carte revient au téléchargement suivant');
+  const carte = await page.locator('#note-faite').boundingBox();
+  await page.mouse.move(carte.x + carte.width / 2, carte.y + 18);
+  await page.mouse.down();
+  await page.mouse.move(carte.x + carte.width / 2, carte.y + 130, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+  t(await page.evaluate(() => !document.getElementById('note-faite')),
+    'succès : un glissement vers le bas retire la carte');
+
+  await Promise.all([page.waitForEvent('download', { timeout: 30000 }), tap('#btn-export')]);
+  await page.waitForTimeout(600);
+  await page.waitForTimeout(12600);
+  t(await page.evaluate(() => !document.getElementById('note-faite')),
+    'succès : la carte se retire seule après douze secondes');
+
+  /* Un dernier export laisse une carte fraîche : l'étape suivante vérifie
+     qu'un réglage touché l'efface, ce qui suppose qu'elle soit là. */
+  await Promise.all([page.waitForEvent('download', { timeout: 30000 }), tap('#btn-export')]);
+  await page.waitForTimeout(600);
+  t(await page.evaluate(() => !!document.getElementById('note-faite')),
+    'succès : carte en place avant le test des onglets');
+
   /* --- 11. les trois onglets de familles, et un réglage touché efface la
      carte succès. « Étoiles » est dans les figures : l'atteindre demande
      d'ouvrir son onglet, ce qui est exactement ce que la grille plate ne

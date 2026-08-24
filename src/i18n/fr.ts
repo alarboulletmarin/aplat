@@ -293,6 +293,7 @@ export const fr = {
     mo: 'Mo',
     astuce:
       'Sur téléphone : appui long sur l’image téléchargée, puis « Ajouter aux photos ».',
+    fermer: 'Fermer',
     erreurTitre: 'Le rendu a échoué',
     erreurTrop: '{mpx} Mpx dépassent ce que le navigateur peut produire. Reste sous 40 Mpx.',
     erreurGenerale: 'Impossible de créer le fichier. Réessaie.',

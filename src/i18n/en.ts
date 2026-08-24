@@ -213,6 +213,7 @@ export const en: Textes = {
     ko: 'kB',
     mo: 'MB',
     astuce: 'On a phone: press and hold the downloaded image, then “Add to Photos”.',
+    fermer: 'Close',
     erreurTitre: 'Rendering failed',
     erreurTrop: '{mpx} Mpx is more than the browser can produce. Stay under 40 Mpx.',
     erreurGenerale: 'The file could not be created. Please try again.',

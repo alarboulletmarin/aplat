@@ -60,6 +60,17 @@ const EPHEMERE_INITIAL: Ephemere = {
 }
 
 /**
+ * Le temps que la note de succès reste à l'écran.
+ *
+ * Elle restait sinon jusqu'au prochain réglage, et une carte qui ne part
+ * jamais finit en décor : on cesse de la lire, y compris la fois où elle dit
+ * autre chose. Douze secondes : le double du temps de lire ses trois lignes,
+ * et assez pour commencer l'appui long que l'astuce décrit. La note d'erreur,
+ * elle, ne part pas seule : une erreur non lue est une erreur perdue.
+ */
+const NOTE_VISIBLE_MS = 12000
+
+/**
  * Une seule page. Trois réglages. Un seul appel primaire : télécharger.
  *
  * Rien n'est envoyé : l'état partageable tient dans l'URL, et l'image est
@@ -166,6 +177,22 @@ export function App() {
       ...(edition === undefined ? {} : { edition }),
     }))
   }, [])
+
+  /** La note de succès se ferme : d'un bouton, d'un glissement, ou du temps. */
+  const fermerNote = useCallback(() => {
+    setEphemere((precedent) =>
+      precedent.phase === 'faite' ? { ...precedent, phase: 'repos' } : precedent,
+    )
+  }, [])
+
+  /* Le retrait au temps passe par un effet et non par `finir()` : l'effet est
+     défait dès que la phase bouge, si bien qu'un export relancé pendant le
+     compte ne peut pas voir sa note emportée par la minuterie du précédent. */
+  useEffect(() => {
+    if (ephemere.phase !== 'faite') return
+    const minuterie = setTimeout(fermerNote, NOTE_VISIBLE_MS)
+    return () => clearTimeout(minuterie)
+  }, [ephemere.phase, fermerNote])
 
   /* La mémoire de motifs. Elle n'entre pas dans `Reglages` : ce qui est dans
      l'URL décrit le motif affiché, l'historique décrit ceux d'avant. */
@@ -652,6 +679,7 @@ export function App() {
             setEphemere((precedent) => ({ ...precedent, formats: !precedent.formats }))
           }
           onVoile={() => changer({ voile: !reglages.voile })}
+          onFermerNote={fermerNote}
         >
           <MiseAJour textes={T} />
         </BarreAction>
