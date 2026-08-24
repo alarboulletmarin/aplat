@@ -16,7 +16,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,
-  ASSOMBRISSEMENT, assombrir, sansVoile,
+  CIBLE_SOMBRE, forceSombre, luminanceAssombrie, OMBRE_MAX, sansVoile,
   FAMILLES, graineDeDessin, luminance, niveau, ORDRE_PALETTES, PALETTES, palette,
   SEUIL_AA, SEUIL_UI,
 } from './moteur'
@@ -183,58 +183,87 @@ describe('voile', () => {
   })
 })
 
-describe('fond assombri', () => {
-  it('ne touche ni à la couleur de libellé ni au voile', () => {
-    /* Le fichier ne change pas : le voile y est déjà brûlé, et c'est le
-       système qui assombrit à l'affichage. */
-    const mesure = { libelles: 'clair' as const, voile: 0.31, luminance: 0.4, contraste: 3.9 }
-    const sombre = assombrir(mesure)
-    expect(sombre.libelles).toBe(mesure.libelles)
-    expect(sombre.voile).toBe(mesure.voile)
-  })
+describe('version sombre', () => {
+  /* Ce que ces tests protègent est le défaut qui a fait recommencer la
+     fonction. L'assombrissement était d'abord une opacité fixe posée avant le
+     voile ; le voile de la version claire visait déjà 0,17 et y arrivait, si
+     bien que les deux versions ressortaient de la même clarté, et deux
+     palettes sur onze ressortaient même plus claires en « sombre ». Une
+     version sombre qui n'est pas plus sombre n'est pas une version.
 
-  it('fait gagner un libellé clair et perdre un libellé sombre', () => {
-    const clair = { libelles: 'clair' as const, voile: 0.31, luminance: 0.4, contraste: 3.9 }
-    const fonce = { libelles: 'sombre' as const, voile: 0.2, luminance: 0.4, contraste: 8 }
-    expect(assombrir(clair).contraste).toBeGreaterThan(clair.contraste)
-    expect(assombrir(fonce).contraste).toBeLessThan(fonce.contraste)
-  })
-
-  it('ne bouge rien quand la force est nulle', () => {
-    const mesure = { libelles: 'clair' as const, voile: 0.31, luminance: 0.4, contraste: 3.9 }
-    expect(assombrir(mesure, 0).contraste).toBeCloseTo(mesure.contraste, 6)
-  })
-
-  it('reste borné, jusqu’au noir complet', () => {
-    for (const libelles of ['clair', 'sombre'] as const) {
-      for (const contraste of [1.01, 3, 4.5, 21]) {
-        for (const force of [0, 0.2, ASSOMBRISSEMENT, 0.9, 1]) {
-          const r = assombrir({ libelles, voile: 0, luminance: 0.4, contraste }, force).contraste
-          expect(Number.isFinite(r), `${libelles} ${contraste} ${force}`).toBe(true)
-          expect(r, `${libelles} ${contraste} ${force}`).toBeGreaterThan(0)
-          expect(r, `${libelles} ${contraste} ${force}`).toBeLessThanOrEqual(21.1)
-        }
-      }
+     La cible corrige cela par construction : elle est sous celle du voile, donc
+     hors de sa portée. `tools/e2e.mjs` mesure ensuite l'image réelle et le
+     fichier téléchargé ; ici on éprouve le calcul. */
+  it('amène n’importe quelle luminance sur la cible', () => {
+    for (const L of [0.05, 0.12, 0.24, 0.4, 0.62, 0.88, 1]) {
+      const apres = luminanceAssombrie(L, forceSombre(L))
+      expect(apres, String(L)).toBeCloseTo(CIBLE_SOMBRE, 6)
     }
   })
 
-  it('reste monotone : plus on assombrit, plus un libellé clair gagne', () => {
-    const mesure = { libelles: 'clair' as const, voile: 0, luminance: 0.4, contraste: 3.9 }
+  it('descend toujours sous le seuil que le voile vise', () => {
+    /* 0,17 est la cible du voile pour des libellés clairs. La version sombre
+       doit passer dessous, sans quoi le voile la rattraperait et les deux
+       versions se ressembleraient, ce qui est exactement ce qui s'était
+       passé. */
+    expect(CIBLE_SOMBRE).toBeLessThan(0.17)
+  })
+
+  it('ne cherche pas à éclaircir un motif déjà sous la cible', () => {
+    /* Un aplat noir ne sait pas éclaircir. Rendre une force négative
+       produirait une opacité illégale, et un motif déjà sombre n'a rien à y
+       gagner. */
+    for (const L of [0, 0.01, CIBLE_SOMBRE]) {
+      expect(forceSombre(L), String(L)).toBe(0)
+    }
+  })
+
+  it('reste bornée, même sur un fond blanc', () => {
+    for (const L of [0.9, 1, 4]) {
+      const force = forceSombre(L)
+      expect(force, String(L)).toBeGreaterThan(0)
+      expect(force, String(L)).toBeLessThanOrEqual(OMBRE_MAX)
+    }
+  })
+
+  it('assombrit d’autant plus que le motif est clair', () => {
     let precedent = 0
-    for (const force of [0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8]) {
-      const r = assombrir(mesure, force).contraste
-      expect(r, String(force)).toBeGreaterThan(precedent)
-      precedent = r
+    for (const L of [0.1, 0.2, 0.4, 0.6, 0.8]) {
+      const force = forceSombre(L)
+      expect(force, String(L)).toBeGreaterThan(precedent)
+      precedent = force
     }
+  })
+
+  it('rend la version sombre lisible par construction', () => {
+    /* À la cible, des libellés clairs donnent 1,05 / (0,05 + 0,05), soit
+       10,5:1. C'est très au-dessus du seuil AA, et ça vaut pour toutes les
+       familles et toutes les palettes : la version sombre n'a pas de mauvais
+       cas. */
+    expect(CIBLE_SOMBRE).toBeLessThan(0.5)
+    expect(1.05 / (CIBLE_SOMBRE + 0.05)).toBeGreaterThan(4.5)
+  })
+
+  it('suit la formule du canal, pas une approximation', () => {
+    /* Un aplat noir à l'opacité `a` multiplie chaque canal sRGB par `1 - a` ;
+       la luminance relative passe par la puissance 2,4 de la linéarisation.
+       Le chiffre est écrit en clair à côté de la formule : si l'exposant
+       changeait un jour sans raison, ce test le dirait. */
+    expect(luminanceAssombrie(1, 0.4)).toBeCloseTo(0.6 ** 2.4, 12)
+    expect(luminanceAssombrie(1, 0.4)).toBeCloseTo(0.2935, 4)
+  })
+
+  it('refuse de rendre une luminance négative', () => {
+    expect(luminanceAssombrie(-0.3, 0.4)).toBe(0)
   })
 })
 
 describe('niveau de lisibilité', () => {
   it('suit les seuils WCAG, sans arrondi complaisant', () => {
-    expect(niveau({ libelles: 'clair', voile: 0, luminance: 0.4, contraste: 4.5 })).toBe('bonne')
-    expect(niveau({ libelles: 'clair', voile: 0, luminance: 0.4, contraste: 4.49 })).toBe('juste')
-    expect(niveau({ libelles: 'clair', voile: 0, luminance: 0.4, contraste: 3 })).toBe('juste')
-    expect(niveau({ libelles: 'clair', voile: 0, luminance: 0.4, contraste: 2.99 })).toBe('insuffisante')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 4.5 })).toBe('bonne')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 4.49 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 3 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 2.99 })).toBe('insuffisante')
   })
 
   /* Le défaut que ce test tient fermé : le titre disait « correcte » pour
@@ -242,7 +271,7 @@ describe('niveau de lisibilité', () => {
      rassure au-dessous du seuil vaut moins que pas de mot du tout. */
   it('ne dit « bonne » qu’au-dessus du seuil AA du petit texte', () => {
     for (const contraste of [1, 2.5, 2.99, 3, 3.5, 4.49]) {
-      expect(niveau({ libelles: 'clair', voile: 0, luminance: 0.4, contraste }), String(contraste))
+      expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste }), String(contraste))
         .not.toBe('bonne')
     }
     expect(SEUIL_AA).toBe(4.5)
@@ -258,10 +287,10 @@ describe('niveau de lisibilité', () => {
 describe('voile retiré', () => {
   it('recalcule le rapport sur la luminance d’avant voile', () => {
     const L = 0.62
-    const clair = sansVoile({ libelles: 'clair', voile: 0.3, contraste: 4.2, luminance: L })
+    const clair = sansVoile({ libelles: 'clair', voile: 0.3, ombre: 0, contraste: 4.2, luminance: L })
     expect(clair.voile).toBe(0)
     expect(clair.contraste).toBeCloseTo(1.05 / (L + 0.05), 6)
-    const fonce = sansVoile({ libelles: 'sombre', voile: 0.2, contraste: 9, luminance: L })
+    const fonce = sansVoile({ libelles: 'sombre', voile: 0.2, ombre: 0, contraste: 9, luminance: L })
     expect(fonce.contraste).toBeCloseTo((L + 0.05) / 0.068, 6)
   })
 
@@ -269,17 +298,17 @@ describe('voile retiré', () => {
     /* Le sens de la variation est ce qui compte : le voile pousse le fond vers
        la couleur de libellé la plus sûre, donc le retirer fait toujours perdre
        du contraste. */
-    const avec = { libelles: 'clair' as const, voile: 0.4, contraste: 4.9, luminance: 0.7 }
+    const avec = { libelles: 'clair' as const, voile: 0.4, ombre: 0, contraste: 4.9, luminance: 0.7 }
     expect(sansVoile(avec).contraste).toBeLessThan(avec.contraste)
   })
 
   it('ne touche à rien quand la sonde n’a posé aucun voile', () => {
-    const mesure = { libelles: 'clair' as const, voile: 0, contraste: 6, luminance: 0.1 }
+    const mesure = { libelles: 'clair' as const, voile: 0, ombre: 0, contraste: 6, luminance: 0.1 }
     expect(sansVoile(mesure)).toBe(mesure)
   })
 
   it('ne change ni la couleur de libellé ni la luminance mesurée', () => {
-    const mesure = { libelles: 'sombre' as const, voile: 0.31, contraste: 7, luminance: 0.5 }
+    const mesure = { libelles: 'sombre' as const, voile: 0.31, ombre: 0, contraste: 7, luminance: 0.5 }
     const nu = sansVoile(mesure)
     expect(nu.libelles).toBe(mesure.libelles)
     expect(nu.luminance).toBe(mesure.luminance)

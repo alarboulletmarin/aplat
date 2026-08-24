@@ -199,6 +199,28 @@
   font-size: 13px;
 }
 
+/* La version claire ou sombre, sur le gabarit de la densité : deux puces au
+   lieu de trois, et la pastille montre ce qu'elle fait au lieu de le nommer.
+
+   Les deux teintes sont écrites en dur, comme celles de la marque : ce sont
+   les couleurs du fichier produit, pas celles de l'interface, et elles ne
+   doivent donc pas suivre le thème de l'application. La sombre est la crème du
+   produit ramenée sur `CIBLE_SOMBRE`, c'est-à-dire exactement ce que la version
+   sombre fait au motif. Le filet les détache dans les deux thèmes, et le mot
+   dit lequel c'est : le choix ne se lit jamais à la seule couleur. */
+.opt-version-p {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #f7f3e6;
+  box-shadow: inset 0 0 0 1.5px rgba(11, 18, 33, 0.55);
+}
+.opt-version[data-version='sombre'] .opt-version-p {
+  background: #4a4945;
+  box-shadow: inset 0 0 0 1.5px rgba(247, 243, 230, 0.5);
+}
+
 .opt-langue {
   flex: 1 1 auto;
   min-width: max-content;

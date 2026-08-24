@@ -169,6 +169,43 @@ describe('voile de lisibilité', () => {
 })
 
 /**
+ * La version sombre est un fichier, pas un aperçu : elle voyage donc dans
+ * l'adresse comme le voile. Elle a remplacé un rideau qu'on tirait sur
+ * l'aperçu, qui ne voyageait nulle part parce qu'il ne montrait rien qu'on pût
+ * télécharger.
+ */
+describe('version sombre', () => {
+  it('vaut claire par défaut, et ne s’écrit que sombre', () => {
+    expect(lireUrl('', DETECTE).sombre).toBe(false)
+    const claire = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(claire).not.toContain('n=')
+    const sombre = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, sombre: true }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(sombre).toContain('n=1')
+    expect(lireUrl(sombre, DETECTE).sombre).toBe(true)
+  })
+
+  it('ne s’allume que sur « 1 », jamais sur une valeur abîmée', () => {
+    for (const brut of ['n=', 'n=0', 'n=oui', 'n=true', 'n=01']) {
+      expect(lireUrl(`?${brut}`, DETECTE).sombre, brut).toBe(false)
+    }
+  })
+
+  it('ne se confond pas avec le thème de l’application', () => {
+    /* Deux réglages voisins par le nom et étrangers par l'effet : `t=sombre`
+       habille la page, `n=1` assombrit le fichier. Un lien peut porter l'un,
+       l'autre, ou les deux, et aucun des deux ne doit décider pour l'autre. */
+    const seulLeTheme = lireUrl('?t=sombre', DETECTE)
+    expect(seulLeTheme.theme).toBe('sombre')
+    expect(seulLeTheme.sombre).toBe(false)
+    const seuleLImage = lireUrl('?n=1', DETECTE)
+    expect(seuleLImage.theme).toBe('systeme')
+    expect(seuleLImage.sombre).toBe(true)
+  })
+})
+
+/**
  * Une palette composée n'existe que sur l'appareil qui l'a composée. Le lien
  * porte donc ses teintes, sans quoi il ouvrirait un autre motif chez la
  * personne qui le reçoit.

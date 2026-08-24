@@ -32,25 +32,24 @@ const CONSEILS = {
  * porte dans les deux formes. Ce qui compte pendant qu'on choisit un motif,
  * c'est le verdict ; le reste attend d'être demandé.
  *
- * Il suit deux choses que l'aperçu ne dit pas de lui-même. Le voile, quand on
- * l'a retiré du fichier : le rapport est alors celui du motif nu, et le détail
- * le nomme autrement qu'un voile nul mesuré, parce que ce n'est pas la même
- * chose. Et le fond assombri d'un thème sombre, annoncé à côté du rapport du
- * fichier plutôt qu'à sa place : c'est ce que le rideau montre de part et
- * d'autre de son trait, et deux chiffres posés côte à côte se lisent mieux
- * qu'un seul qui bascule au passage de la limite.
+ * Un seul chiffre, et c'est celui du fichier. Il en a porté deux un temps,
+ * celui du fichier et celui d'un fond qu'un thème sombre aurait assombri : ce
+ * second chiffre était l'aveu qu'on jugeait une image qu'on ne livrait pas.
+ * La version sombre est aujourd'hui un fichier comme l'autre, mesurée par la
+ * même sonde, et il n'y a donc plus rien à simuler à côté.
+ *
+ * Il suit en revanche le voile, quand on l'a retiré du fichier : le rapport est
+ * alors celui du motif nu, et le détail le nomme autrement qu'un voile nul
+ * mesuré, parce que ce n'est pas la même chose.
  */
 export function Verdict({
   mesure,
-  sombre = null,
   textes,
   langue,
   replie = false,
   voileRetire = false,
 }: {
   mesure: Mesure | null
-  /** La même mesure sur fond assombri, quand le rideau est là pour la montrer. */
-  sombre?: Mesure | null
   textes: Textes
   langue: Langue
   /** La scène est repliée : le verdict tient sur une ligne, dépliable. */
@@ -82,16 +81,12 @@ export function Verdict({
       ? remplir(T.voile, { n: String(Math.round(mesure.voile * 100)) })
       : T.sansVoile
   const libelles = mesure.libelles === 'clair' ? T.libellesClairs : T.libellesSombres
-  const detail = `${remplir(T.detail, {
+  const detail = remplir(T.detail, {
     contraste,
     libelles,
     voile,
     conseil: T[CONSEILS[rang]],
-  })}${
-    sombre
-      ? ` ${remplir(T.rideauDetail, { contraste: decimal(sombre.contraste, langue) })}`
-      : ''
-  }`
+  })
   const forme = (
     <span className="verdict-i" aria-hidden="true">
       <span className={`verdict-${rang}`} />

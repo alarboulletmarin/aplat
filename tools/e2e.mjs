@@ -405,12 +405,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    /* Cinq, tant qu'aucune palette n'a été composée : la grille de familles de
-       l'onglet ouvert, les palettes livrées, les densités, la langue et le
-       thème. La grille des palettes composées est la sixième, et elle
-       n'apparaît que lorsqu'il y en a. Un groupe ajouté sans son `radiogroup`
-       casserait le parcours clavier sans rien changer à l'affichage. */
-    t(kb.groups.length === 5, 'clavier : les cinq groupes sont des groupes radio', kb.groups.length + ' groupes');
+    /* Six, tant qu'aucune palette n'a été composée : la grille de familles de
+       l'onglet ouvert, les palettes livrées, les densités, la version, la
+       langue et le thème. La grille des palettes composées est la septième, et
+       elle n'apparaît que lorsqu'il y en a. Un groupe ajouté sans son
+       `radiogroup` casserait le parcours clavier sans rien changer à
+       l'affichage. */
+    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
@@ -923,12 +924,18 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await sctx3.close();
   }
 
-  /* --- 21. le rideau clair/sombre montre les deux, et ne touche pas au fichier
-     Un thème sombre assombrit le fond d'écran : les libellés clairs y gagnent.
-     Le rideau s'ouvre au milieu, les deux conditions sont donc là d'emblée,
-     sous les mêmes libellés ; le verdict annonce les deux rapports côte à côte
-     plutôt que d'en basculer un ; et le PNG téléchargé, qui porte le voile
-     calculé pour le fond tel quel, ne bouge pas d'un octet. */
+  /* --- 21. la version sombre est un fichier, pas un aperçu
+     C'est le défaut que cette section tient fermé, et il était grave : un
+     rideau qu'on tirait sur l'aperçu montrait le motif « tel qu'un thème sombre
+     l'assombrirait », sans jamais toucher au fichier. Poussé à fond, l'écran
+     n'était plus que cette image ; on téléchargeait, et le PNG arrivait clair.
+     L'aperçu mentait, et c'est la seule chose que ce produit promet de ne
+     jamais faire.
+
+     La version sombre est donc devenue un réglage : un aplat noir peint dans le
+     fichier, mesuré par la sonde comme n'importe quelle autre image. Ce qui se
+     vérifie ici est cette promesse et rien d'autre : ce qu'on voit est ce qu'on
+     reçoit, dans les deux positions. */
   {
     const dctx = await browser.newContext({
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
@@ -937,116 +944,166 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
     await dp.waitForTimeout(400);
 
-    /* Le geste, tel qu'il se produit : `input` pendant la glissade, `change` au
-       relâchement. La valeur passe par le mutateur natif, sans quoi le suivi de
-       valeur du navigateur ne verrait pas le changement. */
-    const glisser = (valeur) => dp.evaluate((v) => {
-      const el = document.getElementById('rideau-glissiere');
-      const mutateur = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-      mutateur.call(el, String(v));
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, valeur);
-
-    /* L'aplat est posé une fois pour toutes et translaté hors cadre au repos :
-       c'est sa transformation qui dit la position, pas sa présence. Elle est
-       lue en pixels par le navigateur, et comparée à la largeur de l'aperçu. */
-    const lire = () => dp.evaluate(() => {
-      const aplat = document.querySelector('.apercu-assombri');
-      const boite = aplat ? aplat.getBoundingClientRect().width : 0;
-      const matrice = aplat ? new DOMMatrixReadOnly(getComputedStyle(aplat).transform) : null;
-      return {
-        detail: document.getElementById('verdict-detail').textContent,
-        position: document.getElementById('rideau-glissiere').value,
-        decale: matrice && boite ? Math.round((matrice.m41 / boite) * 100) : null,
-        empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96)
+    /* La luminance moyenne sur la bande des icônes, la même que celle que la
+       sonde regarde. Elle sert à comparer deux choses que rien d'autre ne
+       compare : l'aperçu à l'écran et le fichier sur le disque. Passer par les
+       octets ne dirait rien, deux encodages d'une même image différant déjà. */
+    const luminance = (source) => dp.evaluate((src) => new Promise((resoudre) => {
+      const mesurer = (cv) => {
+        const y0 = Math.round(cv.height * 0.24);
+        const hauteur = Math.max(1, Math.round(cv.height * 0.92) - y0);
+        const d = cv.getContext('2d').getImageData(0, y0, cv.width, hauteur).data;
+        const lin = (c) => {
+          const v = c / 255;
+          return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+        };
+        let somme = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4 * 37) {
+          somme += 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+          n += 1;
+        }
+        resoudre(n ? somme / n : 0);
       };
-    });
+      if (src === 'apercu') { mesurer(document.getElementById('apercu')); return; }
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas');
+        cv.width = img.width;
+        cv.height = img.height;
+        cv.getContext('2d').drawImage(img, 0, 0);
+        mesurer(cv);
+      };
+      img.src = src;
+    }), source);
 
-    const depart = await lire();
-    await glisser(40);
-    await dp.waitForTimeout(400);
-    const tire = await lire();
+    const telecharger = async (etiquette) => {
+      const [fichier] = await Promise.all([
+        dp.waitForEvent('download', { timeout: 30000 }),
+        dp.$eval('#btn-export', e => e.click())
+      ]);
+      const chemin = path.join(OUT, etiquette + '-' + fichier.suggestedFilename());
+      await fichier.saveAs(chemin);
+      const lum = await luminance(
+        'data:image/png;base64,' + fs.readFileSync(chemin).toString('base64')
+      );
+      return { nom: fichier.suggestedFilename(), chemin, lum };
+    };
 
-    /* Les rapports du détail, dans l'ordre où ils sont écrits. Le premier est
-       celui du fichier, le dernier celui du fond assombri ; entre les deux, le
-       conseil cite le seuil AA, qu'il ne faut pas confondre avec une mesure. */
+    const dire = () => dp.evaluate(() => ({
+      url: location.search,
+      coche: [...document.querySelectorAll('#liste-version [role="radio"]')]
+        .map((b) => b.dataset.version + ':' + b.getAttribute('aria-checked')).join(' '),
+      detail: document.getElementById('verdict-detail').textContent,
+      ligne: document.getElementById('barre-voile').textContent,
+      alternative: document.getElementById('apercu').getAttribute('aria-label')
+    }));
+
+    /* Deux puces, et le choix se lit sur elles : une bascule aurait obligé à
+       lire son état pour savoir laquelle des deux images on regarde. */
+    const claire = await dire();
+    t(claire.coche === 'claire:true sombre:false',
+      'version : deux puces, et la claire est celle qu\'on livre par défaut', claire.coche);
+    t(!/n=1/.test(claire.url), 'version : l\'adresse ne dit rien tant qu\'elle est claire');
+
+    const apercuClair = await luminance('apercu');
+    const fichierClair = await telecharger('claire');
+    t(!/-sombre/.test(fichierClair.nom),
+      'version : le nom du fichier clair ne porte aucune mention', fichierClair.nom);
+
+    /* La promesse, du côté clair : l'aperçu est le fichier. La comparaison porte
+       sur la luminance et non sur les octets, l'aperçu étant rendu à la taille
+       de sa boîte et le fichier à celle de l'écran visé ; c'est bien la même
+       image, à deux échelles. */
+    t(Math.abs(apercuClair - fichierClair.lum) < 0.03,
+      'version : en clair, l\'aperçu est le fichier',
+      `aperçu ${apercuClair.toFixed(3)}, fichier ${fichierClair.lum.toFixed(3)}`);
+
+    await dp.$eval('#liste-version [data-version="sombre"]', e => e.click());
+    await dp.waitForTimeout(600);
+
+    const sombre = await dire();
+    t(sombre.coche === 'claire:false sombre:true',
+      'version : la puce sombre prend le choix', sombre.coche);
+    t(/n=1/.test(sombre.url),
+      'version : elle part dans l\'adresse, parce qu\'elle change le fichier', sombre.url);
+
+    const apercuSombre = await luminance('apercu');
+    t(apercuSombre < apercuClair * 0.75,
+      'version : l\'aperçu s\'assombrit pour de bon, ce n\'est pas un habillage',
+      `${apercuClair.toFixed(3)} -> ${apercuSombre.toFixed(3)}`);
+
+    const fichierSombre = await telecharger('sombre');
+    t(/-sombre\.png$/.test(fichierSombre.nom),
+      'version : le nom du fichier le dit', fichierSombre.nom);
+    t(!fs.readFileSync(fichierClair.chemin).equals(fs.readFileSync(fichierSombre.chemin)),
+      'version : les deux PNG diffèrent, la puce agit bien sur le fichier',
+      fs.statSync(fichierClair.chemin).size + ' o contre ' + fs.statSync(fichierSombre.chemin).size + ' o');
+
+    /* Et la promesse, du côté sombre. C'est exactement le contrôle qui manquait
+       au rideau : poussé au sombre, il montrait une image que le téléchargement
+       ne rendait pas. */
+    t(Math.abs(apercuSombre - fichierSombre.lum) < 0.03,
+      'version : en sombre, l\'aperçu est encore le fichier',
+      `aperçu ${apercuSombre.toFixed(3)}, fichier ${fichierSombre.lum.toFixed(3)}`);
+    t(fichierSombre.lum < fichierClair.lum * 0.75,
+      'version : le fichier téléchargé est bien le sombre, pas le clair',
+      `${fichierClair.lum.toFixed(3)} -> ${fichierSombre.lum.toFixed(3)}`);
+
+    /* Un seul rapport, et c'est celui du fichier. Le verdict en annonçait deux
+       du temps du rideau, celui du fichier et celui d'une simulation : ce second
+       chiffre était l'aveu qu'on jugeait une image qu'on ne livrait pas. */
     const rapports = (texte) => [...texte.matchAll(/(\d+[.,]\d+):1/g)]
       .map((m) => parseFloat(m[1].replace(',', '.')));
-    const dernier = (liste) => liste[liste.length - 1];
-    t(depart.position === '50' && tire.position === '40',
-      'rideau : il s\'ouvre au milieu, et la glissière dit sa position',
-      `${depart.position} -> ${tire.position}`);
-    t(depart.decale === 50, 'rideau : au repos, l\'aplat couvre la moitié droite',
-      String(depart.decale) + ' %');
-    t(tire.decale === 40, 'rideau : il se décale exactement à la position du trait',
-      String(tire.decale) + ' %');
-    const deux = rapports(depart.detail);
-    t(deux.length >= 2, 'rideau : le verdict annonce les deux rapports à la fois',
-      deux.join(' puis '));
-    t(dernier(deux) > deux[0], 'rideau : le fond assombri fait gagner des libellés clairs',
-      `${deux[0]}:1 dans le fichier, ${dernier(deux)}:1 assombri`);
-    t(rapports(tire.detail).join() === deux.join(),
-      'rideau : les deux rapports ne dépendent pas de la position du trait',
-      rapports(tire.detail).join(' puis '));
-    t(/ne change pas/.test(depart.detail),
-      'rideau : le détail dit que le fichier ne change pas', depart.detail.slice(-60));
-    t(depart.empreinte === tire.empreinte,
-      'rideau : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
+    t(rapports(claire.detail).length === rapports(sombre.detail).length,
+      'version : le verdict garde le même nombre de chiffres dans les deux',
+      rapports(claire.detail).join(' / ') + ' contre ' + rapports(sombre.detail).join(' / '));
+    t(!/ne change pas/.test(sombre.detail),
+      'version : le verdict n\'a plus de simulation à excuser', sombre.detail.slice(0, 70));
+    t(rapports(sombre.detail)[0] !== rapports(claire.detail)[0],
+      'version : le rapport suit l\'image, il est mesuré sur elle',
+      rapports(claire.detail)[0] + ':1 puis ' + rapports(sombre.detail)[0] + ':1');
+    t(/[Ss]ombre/.test(sombre.alternative) && !/[Ss]ombre/.test(claire.alternative),
+      'version : le texte alternatif la dit, l\'image n\'est pas la même',
+      sombre.alternative.slice(-60));
 
-    /* Le défaut que ce contrôle tient fermé : poussé à fond, le rideau
-       remplissait l'aperçu de sombre. Il n'y avait plus rien d'autre à l'écran
-       que cette image, on téléchargeait le fichier clair qu'on n'avait pas sous
-       les yeux, et l'aperçu cessait d'être le fichier. Il se borne désormais :
-       une bande du fichier reste toujours visible, et le navigateur ramène de
-       lui-même toute valeur poussée au-delà. */
-    await glisser(0);
-    await dp.waitForTimeout(400);
-    const fond = await lire();
-    t(fond.position === '20', 'rideau : il refuse d\'aller jusqu\'au bout du sombre',
-      `poussé à 0, il s\'arrête à ${fond.position}`);
-    t(fond.decale === 20, 'rideau : une bande du fichier reste visible, quoi qu\'on fasse',
-      String(100 - fond.decale) + ' % assombri au plus');
-    t(rapports(fond.detail).join() === deux.join(),
-      'rideau : au bout de sa course, le verdict dit toujours les deux rapports',
-      rapports(fond.detail).join(' puis '));
+    /* La ligne sous le bouton dit ce que le fichier contient, et elle doit dire
+       vrai jusqu'au bout : la version sombre passe sous le seuil que le voile
+       vise, la sonde n'a donc plus de voile à poser, et annoncer là un voile
+       inclus serait le même genre de mensonge que celui du rideau. */
+    t(/[Vv]ersion sombre/.test(sombre.ligne) && !/[Vv]ersion sombre/.test(claire.ligne),
+      'version : la ligne sous le bouton la nomme', sombre.ligne.slice(0, 70));
+    t(/inclus dans le fichier/.test(claire.ligne),
+      'version : en clair, la ligne annonce le voile', claire.ligne.slice(0, 70));
+    t(!/inclus dans le fichier/.test(sombre.ligne) && /sans voile/.test(sombre.detail),
+      'version : en sombre, elle n\'annonce pas un voile que le fichier ne porte pas',
+      sombre.ligne.slice(0, 90));
 
-    /* Le geste ne doit rien coûter d'autre que de la composition : les jetons
-       du rideau sont posés sur l'aplat et sur le cadre du rideau, jamais sur
-       l'appareil, dont le sous-arbre est la maquette entière. Posés là, ils
-       coûtaient cinq millisecondes de recalcul de style par image sur un
-       processeur d'entrée de gamme, et une image sur quatre tombait. */
-    const jetons = await dp.evaluate(() => {
-      const lu = (n) => n.style.getPropertyValue('--rideau');
-      return {
-        appareil: lu(document.getElementById('appareil')),
-        aplat: lu(document.querySelector('.apercu-assombri')),
-        rideau: lu(document.getElementById('rideau'))
-      };
-    });
-    t(jetons.appareil === '' && jetons.aplat !== '' && jetons.rideau !== '',
-      'rideau : ses jetons ne touchent pas au sous-arbre de la maquette',
-      JSON.stringify(jetons));
+    /* Le lien porte le choix : c'est ce qui distingue un réglage d'un affichage,
+       et le rideau n'en était pas un. */
+    await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556&n=1', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(500);
+    const recu = await dire();
+    t(recu.coche === 'claire:false sombre:true',
+      'version : un lien reçu rouvre la même version', recu.coche);
+    const apercuRecu = await luminance('apercu');
+    t(Math.abs(apercuRecu - apercuSombre) < 0.02,
+      'version : et la même image, au rechargement',
+      `${apercuSombre.toFixed(3)} -> ${apercuRecu.toFixed(3)}`);
 
-    /* Et le fichier, pour de vrai, pris au plus sombre que le rideau permette :
-       c'est exactement là qu'on croyait télécharger l'image qu'on regardait. */
-    const [dl2] = await Promise.all([
-      dp.waitForEvent('download', { timeout: 30000 }),
-      dp.$eval('#btn-export', e => e.click())
-    ]);
-    const chemin = path.join(OUT, 'assombri-' + dl2.suggestedFilename());
-    await dl2.saveAs(chemin);
-    await glisser(100);
-    await dp.waitForTimeout(400);
-    const [dl3] = await Promise.all([
-      dp.waitForEvent('download', { timeout: 30000 }),
-      dp.$eval('#btn-export', e => e.click())
-    ]);
-    const chemin2 = path.join(OUT, 'clair-' + dl3.suggestedFilename());
-    await dl3.saveAs(chemin2);
-    t(fs.readFileSync(chemin).equals(fs.readFileSync(chemin2)),
-      'rideau : le PNG téléchargé est le même, octet pour octet',
-      fs.statSync(chemin).size + ' o contre ' + fs.statSync(chemin2).size + ' o');
+    /* Le thème de l'application et la version du fichier portent les mêmes mots
+       et ne font pas la même chose. Un lien peut porter l'un sans l'autre, et
+       aucun des deux ne doit décider pour l'autre. */
+    await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556&t=sombre', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(500);
+    const habille = await dp.evaluate(() => ({
+      theme: document.documentElement.dataset.theme,
+      coche: [...document.querySelectorAll('#liste-version [role="radio"]')]
+        .map((b) => b.dataset.version + ':' + b.getAttribute('aria-checked')).join(' ')
+    }));
+    t(habille.theme === 'sombre' && habille.coche === 'claire:true sombre:false',
+      'version : le thème sombre de la page n\'assombrit pas le fichier',
+      JSON.stringify(habille));
+
     await dctx.close();
   }
 
@@ -1158,6 +1215,30 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const svg = await attraper('#format-svg');
     const texte = fs.readFileSync(svg.chemin, 'utf8');
     t(/\.svg$/.test(svg.nom) && texte.startsWith('<?xml'), 'formats : le SVG est un vrai SVG', svg.nom);
+
+    /* Le vectoriel est le même fichier dans un autre format, version sombre
+       comprise : il doit porter l'aplat noir, à l'opacité que la sonde a dosée,
+       et sur toute la surface. C'est ici plutôt qu'en test unitaire parce que
+       la sonde réclame un canevas, donc un navigateur. */
+    /* La signature de l'ombre, et d'elle seule : le voile écrit lui aussi des
+       `fill-opacity`, mais sur la teinte de son libellé, jamais sur du noir
+       pur. C'est ce couple qu'il faut chercher, pas l'opacité seule. */
+    const ombreDe = (svg) => svg.match(/fill="#000000" fill-opacity="([0-9.]+)"/);
+    t(!ombreDe(texte), 'formats : le SVG clair ne porte aucun aplat de version');
+
+    /* Un réglage ne referme pas la feuille : elle reste ouverte pendant qu'on
+       change de version, et il n'y a donc rien à rouvrir entre les deux. */
+    await fp.$eval('#liste-version [data-version="sombre"]', e => e.click());
+    await fp.waitForTimeout(500);
+    const svgSombre = await attraper('#format-svg');
+    const texteSombre = fs.readFileSync(svgSombre.chemin, 'utf8');
+    const ombre = ombreDe(texteSombre);
+    t(/-sombre\.svg$/.test(svgSombre.nom), 'formats : le SVG sombre se nomme comme le PNG', svgSombre.nom);
+    t(Boolean(ombre) && Number(ombre[1]) > 0.2,
+      'formats : le SVG sombre porte l\'aplat de la version, dosé par la sonde',
+      ombre ? ombre[1] : 'aucun');
+    await fp.$eval('#liste-version [data-version="claire"]', e => e.click());
+    await fp.waitForTimeout(400);
     t(/viewBox="0 0 1179 2556"/.test(texte), 'formats : le SVG porte la résolution visée');
     /* Le voile est peint en rgba() sur un canevas ; dans un SVG, cette notation
        n'appartient pas à la norme 1.1 et un outil de dessin y perdrait les
@@ -1269,7 +1350,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         id: g.id,
         stops: [...g.querySelectorAll('.opt')].filter(o => o.tabIndex >= 0).length
       })));
-    t(clavier.length === 6, 'palette : la grille des composées est un sixième groupe radio',
+    t(clavier.length === 7, 'palette : la grille des composées est un septième groupe radio',
       clavier.map(g => g.id).join(', '));
     t(clavier.every(g => g.stops === 1),
       'palette : chaque grille garde un arrêt de tabulation, celle de la sélection comme l\'autre',

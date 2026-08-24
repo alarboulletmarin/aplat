@@ -317,23 +317,6 @@
   height: 100%;
   display: block;
 }
-/* L'aplat qui simule le fond assombri d'un thème sombre. Son opacité vient de
-   `ASSOMBRISSEMENT`, en style en ligne : une seule valeur, dans le moteur, qui
-   sert à la fois à peindre et à recalculer le rapport de contraste.
-
-   Il fait la largeur de l'aperçu et se décale de la position du rideau : ce qui
-   dépasse est coupé par l'appareil, et ce qui reste est la moitié assombrie. Au
-   repos il est entièrement dehors. Une transformation plutôt qu'un `clip-path`,
-   qui repeignait la surface entière à chaque pixel glissé. */
-.apercu-assombri {
-  position: absolute;
-  inset: 0;
-  display: block;
-  pointer-events: none;
-  transform: translateX(var(--rideau, 50%));
-  will-change: transform;
-}
-
 /* maquette téléphone / tablette */
 .maq {
   position: absolute;
@@ -740,9 +723,6 @@
    de 4,5:1, disque à moitié entre 3:1 et 4,5:1, triangle en dessous. Elles
    partagent la même encre : le niveau se lit en niveaux de gris comme en
    couleur, et la forme change en même temps que le mot. */
-/* La bascule d'assombrissement tient au bout de la rangée tant que le texte
-   garde trente caractères de large ; sous cette largeur elle passe à la ligne
-   plutôt que d'étrangler le détail en colonne de six mots. */
 .verdict {
   display: flex;
   flex-wrap: wrap;
@@ -783,7 +763,7 @@
 }
 /* Le verdict replié : une ligne, dépliable au doigt. Le chevron dit qu'il y a
    quelque chose dessous, et tourne quand c'est ouvert. Le détail prend toute
-   la largeur sous la rangée, la bascule d'assombrissement en occupe le bout. */
+   la largeur sous la rangée. */
 .verdict-replie {
   display: flex;
   flex-wrap: wrap;
@@ -832,137 +812,6 @@
 .verdict-bascule[aria-expanded='true'] .verdict-chevron {
   transform: rotate(180deg);
 }
-/* --- Le rideau clair/sombre ---------------------------------------------------
-   Un trait qu'on fait glisser sur l'aperçu, et la moitié droite se voit comme
-   un thème sombre l'assombrirait. Il remplace la bascule qui montrait l'un
-   *puis* l'autre : une limite qui passe sous les mêmes libellés se juge d'un
-   regard, deux états successifs demandent de se souvenir du premier.
-
-   La glissière est un `input[type=range]` et non un geste maison : les flèches,
-   Origine et Fin y marchent sans une ligne de script, et le nom accessible dit
-   la position. Elle ne couvre qu'une bande de quarante-quatre pixels au milieu
-   de l'appareil : sur téléphone l'aperçu est collé en haut de l'écran, et une
-   glissière plein cadre y prendrait le geste de défilement. */
-.rideau {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-/* Le suiveur fait la largeur de l'aperçu et se décale de la position du
-   rideau : un `translateX` en pourcentage compte la largeur de la boîte
-   elle-même, donc celle de l'aperçu, et il se compose sans recalculer la mise
-   en page. Le trait est posé à son bord gauche, une fois pour toutes.
-
-   Deux tons, parce qu'un trait d'une seule couleur disparaît sur la moitié des
-   palettes : une lame crème cernée d'un filet sombre tient sur les deux. */
-.rideau-suivi {
-  position: absolute;
-  inset: 0;
-  transform: translateX(var(--rideau, 50%));
-  will-change: transform;
-}
-.rideau-trait {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -1.5px;
-  width: 3px;
-  background: #f7f3e6;
-  box-shadow: 0 0 0 1px rgba(11, 18, 33, 0.5);
-}
-/* La poignée : un disque et deux pointes opposées, qui disent le sens du geste
-   sans un mot. Elle ne porte aucune information que le nom accessible de la
-   glissière ne porte déjà ; deux étiquettes « Clair » et « Sombre » posées sur
-   l'aperçu couvriraient justement ce qu'on est venu regarder. */
-.rideau-poignee {
-  position: absolute;
-  top: 50%;
-  left: -15px;
-  width: 30px;
-  height: 30px;
-  margin-top: -15px;
-  border-radius: 50%;
-  background: #f7f3e6;
-  box-shadow: 0 0 0 1px rgba(11, 18, 33, 0.5);
-  /* En pixels et non en pourcentage : un pourcentage compterait les trente
-     pixels de la poignée, pas la largeur de l'aperçu. C'est aussi ce qui permet
-     de la borner contre les bords sans borner le trait. */
-  transform: translateX(var(--poignee, -60px));
-  will-change: transform;
-}
-.rideau-poignee i {
-  position: absolute;
-  top: 50%;
-  width: 5px;
-  height: 8px;
-  margin-top: -4px;
-  background: #0b1221;
-}
-.rideau-poignee i:nth-child(1) {
-  left: 6px;
-  clip-path: polygon(100% 0, 100% 100%, 0 50%);
-}
-.rideau-poignee i:nth-child(2) {
-  right: 6px;
-  clip-path: polygon(0 0, 0 100%, 100% 50%);
-}
-/* Le curseur fait deux pixels de large : la valeur d'un `range` se calcule sur
-   la course du curseur, et un curseur épais décalerait le trait de sa moitié
-   au bord. Ce qu'on voit et ce qu'on saisit sont donc au même endroit. */
-.rideau-glissiere {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  width: 100%;
-  height: 44px;
-  margin: 0;
-  padding: 0;
-  transform: translateY(-50%);
-  pointer-events: auto;
-  cursor: ew-resize;
-  appearance: none;
-  background: transparent;
-  border: 0;
-  /* Le geste vertical reste au défilement, l'horizontal au rideau. Sans cette
-     ligne, un doigt qui remonte la page en partant de l'aperçu déplacerait le
-     trait au lieu de faire défiler. */
-  touch-action: pan-y;
-}
-.rideau-glissiere::-webkit-slider-runnable-track {
-  height: 44px;
-  background: transparent;
-}
-.rideau-glissiere::-moz-range-track {
-  height: 44px;
-  background: transparent;
-}
-.rideau-glissiere::-webkit-slider-thumb {
-  appearance: none;
-  width: 2px;
-  height: 44px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  cursor: ew-resize;
-}
-.rideau-glissiere::-moz-range-thumb {
-  width: 2px;
-  height: 44px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  cursor: ew-resize;
-}
-/* Vers l'intérieur : l'appareil coupe ce qui déborde, et un anneau posé dehors
-   n'y serait jamais visible. */
-.rideau-glissiere:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: -3px;
-  border-radius: 6px;
-}
-
 .verdict-t {
   font-weight: 700;
   font-size: 15px;
@@ -1181,12 +1030,13 @@
   gap: 8px;
 }
 .historique-vide,
-.historique-n {
+/* La note sous une carte : ce que le réglage fait, en une ligne, sous les
+   puces qui le commandent. */
+.historique-n,
+.bento-n {
+  margin-top: 11px;
   font-size: 13px;
   color: var(--encre-douce);
-}
-.historique-n {
-  margin-top: 11px;
 }
 .rangee-densite {
   display: flex;

@@ -419,3 +419,64 @@ export function ChoixDensite({
     </div>
   )
 }
+
+/**
+ * Clair ou sombre : DESIGN_SYSTEM.md, section 7.
+ *
+ * Deux fichiers, pas deux aperçus. La version sombre est le même motif avec un
+ * aplat noir brûlé dedans : c'est ce que montre la scène et c'est ce que rend
+ * le téléchargement, au bit près.
+ *
+ * Elle a d'abord été un rideau qu'on tirait sur l'aperçu, pour comparer les
+ * deux d'un même regard. L'idée était bonne et le résultat mauvais : le rideau
+ * ne montrait qu'une simulation, si bien que l'aperçu et le fichier disaient
+ * deux choses différentes, et l'aperçu avait toujours tort. Une image qu'on ne
+ * peut pas télécharger n'avait rien à faire dans le cadre.
+ *
+ * D'où sa place ici, dans le panneau, avec les autres réglages qui décident du
+ * fichier, et non près du bouton Télécharger : c'est un réglage du motif, au
+ * même titre que la densité. Deux puces plutôt qu'une bascule, parce qu'une
+ * bascule oblige à lire son état pour savoir ce qu'on regarde, là où deux puces
+ * le montrent. La pastille dessine ce qu'elle fait, et le mot le dit : le
+ * niveau ne se lit jamais à la seule couleur.
+ */
+export function ChoixVersion({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  /** Vrai quand la version sombre est choisie. */
+  valeur: boolean
+  textes: Textes
+  onChoisir: (sombre: boolean) => void
+}) {
+  const T = textes.reglages
+  const options = [
+    { sombre: false, nom: T.versionClaire, titre: T.versionTitreClaire },
+    { sombre: true, nom: T.versionSombre, titre: T.versionTitreSombre },
+  ]
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-version">
+        <Arche />
+        <span>{T.version}</span>
+      </h2>
+      <GroupeRadio id="liste-version" etiquettes="h-version" className="rangee-densite">
+        {options.map((option) => (
+          <OptionRadio
+            key={String(option.sombre)}
+            choisi={option.sombre === valeur}
+            onChoisir={() => onChoisir(option.sombre)}
+            className="opt opt-densite opt-version"
+            titre={option.titre}
+            data-version={option.sombre ? 'sombre' : 'claire'}
+          >
+            <span className="opt-version-p" aria-hidden="true" />
+            <span className="opt-densite-t">{option.nom}</span>
+          </OptionRadio>
+        ))}
+      </GroupeRadio>
+      <p className="bento-n">{T.versionNote}</p>
+    </div>
+  )
+}

@@ -29,7 +29,7 @@ import { useRevisionFenetre } from './hooks/useRevisionFenetre'
 import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
-import { ChoixDensite, ChoixFamille, ChoixPalette } from './components/Reglages'
+import { ChoixDensite, ChoixFamille, ChoixPalette, ChoixVersion } from './components/Reglages'
 import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
@@ -149,8 +149,8 @@ export function App() {
       vide
         ? null
         : mesurer(motif.famille, motif.palette, motif.densite, motif.graine,
-            resolution.largeur, resolution.hauteur),
-    [motif, resolution.largeur, resolution.hauteur, vide],
+            resolution.largeur, resolution.hauteur, reglages.sombre),
+    [motif, resolution.largeur, resolution.hauteur, vide, reglages.sombre],
   )
 
   /** Un réglage touché efface le résultat précédent, mais jamais un export en cours. */
@@ -349,10 +349,13 @@ export function App() {
       return
     }
 
-    const travail = { motif, largeur, hauteur, voile: reglages.voile, format }
+    const travail = {
+      motif, largeur, hauteur, voile: reglages.voile, sombre: reglages.sombre, format,
+    }
     const nom = nomFichier(travail.motif, largeur, hauteur, {
       format,
       voile: reglages.voile,
+      sombre: reglages.sombre,
     })
 
     exportEnCours.current = true
@@ -363,7 +366,7 @@ export function App() {
     setTimeout(() => {
       if (format === 'svg') {
         try {
-          const rendu = rendreSVG(travail.motif, largeur, hauteur, travail.voile)
+          const rendu = rendreSVG(travail.motif, largeur, hauteur, travail.voile, travail.sombre)
           if (rendu.elements > ELEMENTS_MAX) throw new ErreurExport('svgDense')
           const blob = encoderSVG(travail)
           telecharger(blob, nom)
@@ -397,6 +400,7 @@ export function App() {
     }
     const courant = motif
     const voile = reglages.voile
+    const sombre = reglages.sombre
     exportEnCours.current = true
     setEphemere((precedent) => ({ ...precedent, phase: 'calcul', echec: null }))
 
@@ -409,6 +413,7 @@ export function App() {
             largeur: format.largeur,
             hauteur: format.hauteur,
             voile,
+            sombre,
             format: 'png',
           }).then(
             (blob) =>
@@ -416,7 +421,7 @@ export function App() {
                 total += blob.size
                 telecharger(
                   blob,
-                  nomFichier(courant, format.largeur, format.hauteur, { voile }),
+                  nomFichier(courant, format.largeur, format.hauteur, { voile, sombre }),
                 )
                 /* Un navigateur qui reçoit trois téléchargements dans la même
                    milliseconde n'en garde souvent qu'un. Un demi-battement
@@ -449,6 +454,7 @@ export function App() {
       largeur: resolution.largeur,
       hauteur: resolution.hauteur,
       voile: reglages.voile,
+      sombre: reglages.sombre,
       format: 'png' as const,
     }
     exportEnCours.current = true
@@ -474,13 +480,16 @@ export function App() {
     if (!ephemere.formats || vide) return false
     try {
       return (
-        rendreSVG(motif, resolution.largeur, resolution.hauteur, reglages.voile).elements
-        <= ELEMENTS_MAX
+        rendreSVG(motif, resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre)
+          .elements <= ELEMENTS_MAX
       )
     } catch {
       return false
     }
-  }, [ephemere.formats, vide, motif, resolution.largeur, resolution.hauteur, reglages.voile])
+  }, [
+    ephemere.formats, vide, motif,
+    resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre,
+  ])
 
   const webpPossible = useMemo(() => webpDisponible(), [])
 
@@ -501,6 +510,7 @@ export function App() {
             type={type}
             mesure={mesure}
             voile={reglages.voile}
+            sombre={reglages.sombre}
             langue={reglages.langue}
             textes={T}
             calculEnCours={ephemere.phase === 'calcul'}
@@ -551,6 +561,14 @@ export function App() {
               valeur={reglages.densite}
               textes={T}
               onChoisir={(densite: Densite) => changer({ densite })}
+            />
+            {/* La version vient après la densité et avant l'historique : c'est
+                le dernier réglage qui décide de l'image, et le premier qu'on
+                revoit une fois le motif trouvé. */}
+            <ChoixVersion
+              valeur={reglages.sombre}
+              textes={T}
+              onChoisir={(sombre: boolean) => changer({ sombre })}
             />
             <Historique
               liste={historique}
@@ -614,6 +632,11 @@ export function App() {
           resolution={resolution}
           vide={vide}
           voile={reglages.voile}
+          /* Ce que la sonde a réellement posé, et non ce que le réglage
+             demande : la version sombre passe sous le seuil que le voile vise,
+             et il n'y a alors rien à annoncer comme inclus. */
+          voilePeint={Boolean(mesure && mesure.voile > 0.02)}
+          sombre={reglages.sombre}
           langue={reglages.langue}
           textes={T}
           formats={ephemere.formats}

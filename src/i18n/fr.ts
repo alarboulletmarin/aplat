@@ -123,6 +123,10 @@ export const fr = {
     alternative:
       'Motif {famille}, palette {palette}, densité {densite}, graine {graine}. Aperçu derrière une grille d’icônes factices.',
     note: 'Maquette d’écran : heure, widget et icônes sont fictifs, ils servent à juger la lisibilité.',
+    /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
+       ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne
+       peut pas le deviner du réglage. */
+    alternativeSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
     videTitre: 'Indique une résolution',
     videCorps: 'Largeur et hauteur en pixels, ou reviens à la détection.',
   },
@@ -156,21 +160,6 @@ export const fr = {
     /* Le voile retiré à la main. Il ne se dit pas comme un voile nul mesuré :
        l'un est ce que la sonde a trouvé, l'autre est une décision. */
     voileRetire: 'voile retiré du fichier',
-    /* Le rideau clair/sombre. Le mot « approché » n'est pas une précaution
-       oratoire : aucune plateforme ne publie la force de son assombrissement,
-       et le produit ne prétend pas mesurer ce qu'il estime. */
-    rideau: 'Comparer le clair et le sombre',
-    rideauTitre: 'Glisse pour découvrir la même graine telle qu’un thème sombre l’assombrit',
-    rideauClair: 'Clair',
-    /* Le nom du bout de la course, pas celui d'un aperçu entièrement sombre :
-       le rideau s'arrête avant, et laisse toujours voir une bande du fichier. */
-    rideauSombre: 'Sombre',
-    rideauValeur: 'assombri sur {n} % de la largeur',
-    /* Le mot « à peu près » n'est pas une précaution oratoire : aucune
-       plateforme ne publie la force de son assombrissement, et le produit ne
-       prétend pas mesurer ce qu'il estime. */
-    rideauDetail:
-      'À droite du trait, le fond tel qu’un thème sombre l’assombrirait, à peu près : {contraste}:1. Le fichier téléchargé, lui, ne change pas.',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {
@@ -187,6 +176,16 @@ export const fr = {
     calme: 'Calme',
     moyen: 'Moyen',
     dense: 'Dense',
+    /* La version claire ou sombre. Ce n'est pas le thème de l'application, qui
+       est au pied de page : c'est le fichier lui-même, et les mots doivent le
+       dire sans détour. Le mot « version » plutôt que « thème » ou « mode »
+       pour cette seule raison : on choisit entre deux fichiers. */
+    version: 'Version',
+    versionClaire: 'Claire',
+    versionSombre: 'Sombre',
+    versionNote: 'La version sombre est assombrie dans le fichier : c’est elle qu’on télécharge.',
+    versionTitreClaire: 'Le motif tel que la palette le donne',
+    versionTitreSombre: 'Le même motif, assombri dans le fichier téléchargé',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
      les onze livrées, parce que ce sont des palettes et non un autre réglage. */
@@ -308,6 +307,15 @@ export const fr = {
        sombre que celle qu'il croyait avoir choisie, et rien ne le disait. */
     voileInclus: 'Le voile de lisibilité est inclus dans le fichier.',
     voileAbsent: 'Le voile de lisibilité est retiré du fichier.',
+    /* Le voile demandé, mais que la sonde n'a pas eu à poser. C'est le cas
+       courant de la version sombre, qui descend bien sous le seuil que le
+       voile vise, et le cas rare d'une palette déjà sombre. Dire « inclus dans
+       le fichier » là serait faux, et c'est exactement le genre de phrase que
+       ce produit ne doit pas écrire. */
+    voileNul: 'Le fichier n’a pas besoin de voile de lisibilité.',
+    /* La version, nommée sous le bouton qui la télécharge : c'est là qu'on
+       décide, et le nom du fichier le dira ensuite. */
+    versionSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
     voileRetirer: 'Retirer',
     voileRemettre: 'Remettre',
     voileTitre: 'Le voile assombrit le bas de l’image pour que les libellés d’icônes tiennent le seuil',

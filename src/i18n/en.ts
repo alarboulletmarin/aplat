@@ -89,6 +89,7 @@ export const en: Textes = {
     alternative:
       'Pattern {famille}, palette {palette}, density {densite}, seed {graine}. Previewed behind a grid of placeholder icons.',
     note: 'Screen mock-up: the clock, widget and icons are placeholders, they are there to judge legibility.',
+    alternativeSombre: 'Dark version: the pattern is dimmed inside the file.',
     videTitre: 'Enter a resolution',
     videCorps: 'Width and height in pixels, or go back to detection.',
   },
@@ -109,13 +110,6 @@ export const en: Textes = {
     titreNiveau: 'Icon label legibility: {niveau}',
     resume: 'Legibility {niveau}, {contraste}:1',
     voileRetire: 'veil removed from the file',
-    rideau: 'Compare light and dark',
-    rideauTitre: 'Drag to reveal the same seed as a dark theme would dim it',
-    rideauClair: 'Light',
-    rideauSombre: 'Dark',
-    rideauValeur: 'dimmed across {n}% of the width',
-    rideauDetail:
-      'Right of the line, the background as a dark theme would dim it, roughly: {contraste}:1. The downloaded file itself does not change.',
     detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {
@@ -130,6 +124,12 @@ export const en: Textes = {
     calme: 'Calm',
     moyen: 'Medium',
     dense: 'Dense',
+    version: 'Version',
+    versionClaire: 'Light',
+    versionSombre: 'Dark',
+    versionNote: 'The dark version is dimmed inside the file: that is what you download.',
+    versionTitreClaire: 'The pattern as the palette gives it',
+    versionTitreSombre: 'The same pattern, dimmed inside the downloaded file',
   },
   palettes: {
     miennes: 'My palettes',
@@ -223,6 +223,8 @@ export const en: Textes = {
     reessayer: 'Try again',
     voileInclus: 'The legibility veil is included in the file.',
     voileAbsent: 'The legibility veil is left out of the file.',
+    voileNul: 'This file needs no legibility veil.',
+    versionSombre: 'Dark version: the pattern is dimmed inside the file.',
     voileRetirer: 'Remove',
     voileRemettre: 'Put back',
     voileTitre: 'The veil darkens the lower image so icon labels hold the threshold',

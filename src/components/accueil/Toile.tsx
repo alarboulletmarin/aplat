@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useEffect, useRef } from 'react'
-import { dessiner, dessinerSansVoile, type Motif } from '../../lib/moteur'
+import { dessiner, type Motif } from '../../lib/moteur'
 import type { Resolution } from '../../lib/resolution'
 import { useTaille } from '../../hooks/useTaille'
 import { useVisible } from '../../hooks/useVisible'
@@ -83,8 +83,11 @@ export function Toile({
 
       const ctx = noeud.getContext('2d', { alpha: false })
       if (!ctx) return
-      const trace = voile ? dessiner : dessinerSansVoile
-      trace(ctx, l, h, { famille, palette, densite, graine }, mesureL, mesureH)
+      dessiner(ctx, l, h, { famille, palette, densite, graine }, {
+        voile,
+        mesureW: mesureL,
+        mesureH,
+      })
       noeud.dataset.peint = '1'
     }
 

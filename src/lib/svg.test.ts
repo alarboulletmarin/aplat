@@ -11,8 +11,10 @@
  * converti. Un seul suffit à rendre le fichier illisible, et rien ne le dirait
  * avant qu'on l'ouvre ailleurs.
  *
- * Le voile n'est pas demandé ici : il passe par la sonde de lisibilité, qui
- * réclame un canevas, donc un navigateur. C'est `tools/` qui l'éprouve.
+ * Ni le voile ni l'ombre de la version sombre ne sont demandés ici : les deux
+ * passent par la sonde de lisibilité, qui réclame un canevas, donc un
+ * navigateur. C'est `tools/e2e.mjs` qui les éprouve, sur le document
+ * réellement téléchargé.
  */
 import { describe, expect, it } from 'vitest'
 import { FAMILLES, type Motif } from './moteur'

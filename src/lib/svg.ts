@@ -33,7 +33,7 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  alea, formes, graineDeDessin, mesurer, palette, peindreVoile,
+  alea, formes, graineDeDessin, mesurer, palette, peindreOmbre, peindreVoile,
   type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
@@ -410,14 +410,15 @@ class Notaire implements Pinceau {
 /* ---------- le document ----------------------------------------------------- */
 
 /**
- * Le motif entier en SVG : le fond, les formes, le voile s'il est demandé.
+ * Le motif entier en SVG : le fond, les formes, l'assombrissement de la version
+ * sombre, le voile s'il est demandé.
  *
  * L'ordre des couches est celui du moteur, à ceci près que le grain n'y est
  * pas : un SVG ne porte pas de bruit sans image embarquée, qui pèserait plus
  * que le motif lui-même.
  */
 export function svgDuMotif(
-  motif: Motif, largeur: number, hauteur: number, voile: boolean,
+  motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
 ): RenduSVG {
   const P = palette(motif.palette)
   const notaire = new Notaire()
@@ -429,11 +430,21 @@ export function svgDuMotif(
     alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
     Math.min(largeur, hauteur),
   )
-  if (voile) {
+  /* La sonde est appelée dans les deux cas, et non plus seulement quand le
+     voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
+     même titre que le voile. Elle reste hors du chemin quand aucune des deux
+     couches n'est demandée, parce qu'elle réclame un canevas, donc un
+     navigateur, et que le document doit pouvoir se construire sans.
+
+     Les deux couches passent par les mêmes fonctions que le canevas, si bien
+     que le SVG est le même fichier dans un autre format, et non une
+     approximation vectorielle de l'autre. */
+  if (voile || sombre) {
     const mesure: Mesure = mesurer(
-      motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur,
+      motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
     )
-    peindreVoile(notaire, largeur, hauteur, mesure)
+    peindreOmbre(notaire, largeur, hauteur, mesure)
+    if (voile) peindreVoile(notaire, largeur, hauteur, mesure)
   }
 
   const description =
@@ -462,12 +473,13 @@ export function svgDuMotif(
 let dernier: { cle: string; rendu: RenduSVG } | null = null
 
 export function rendreSVG(
-  motif: Motif, largeur: number, hauteur: number, voile: boolean,
+  motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
 ): RenduSVG {
-  const cle = [motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile]
-    .join('|')
+  const cle = [
+    motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile, sombre,
+  ].join('|')
   if (dernier && dernier.cle === cle) return dernier.rendu
-  const rendu = svgDuMotif(motif, largeur, hauteur, voile)
+  const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre)
   dernier = { cle, rendu }
   return rendu
 }

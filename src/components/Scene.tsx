@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { useRef, type CSSProperties } from 'react'
 import {
-  useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties,
-} from 'react'
-import {
-  ASSOMBRISSEMENT, assombrir, famille, palette, sansVoile,
+  famille, palette, sansVoile,
   type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
 import {
-  BORDURE_APPAREIL, geometrieAppareil, hauteurScene, hauteurVignette,
-  jetonsLibelle, paysageCourt,
+  geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
 } from '../lib/geometrie'
 import type { Resolution, TypeAppareil } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
@@ -41,41 +38,6 @@ import { Verdict } from './Verdict'
  * n'est pas redessiné, que la maquette ne se réajuste pas, et que la
  * transition ne coûte qu'une composition.
  */
-/** Le rayon de la poignée du rideau, égal à celui de `.rideau-poignee`. */
-const RAYON_POIGNEE = 15
-
-/**
- * Où le rideau se tient au départ : au milieu.
- *
- * Il a commencé tout à droite, l'aperçu entier montrant le fichier tel quel, et
- * c'était la mauvaise réponse à la bonne question. Un comparateur qui s'ouvre
- * fermé ne compare rien : il fallait avoir l'idée de tirer le trait pour
- * découvrir qu'il y avait deux états, et toute position autre que l'extrême
- * droite montrait du sombre sans montrer de clair à côté.
- *
- * Au milieu, les deux conditions sont là d'emblée, sous les mêmes libellés, et
- * c'est exactement ce qu'on est venu juger. Le fichier, lui, reste entier : il
- * est à gauche du trait, et le verdict le nomme.
- */
-const RIDEAU_DEPART = 50
-
-/**
- * Jusqu'où le rideau peut aller vers le sombre : jamais jusqu'au bout.
- *
- * Poussé à fond, il remplissait l'aperçu de sombre, et il n'y avait plus rien
- * d'autre à l'écran que cette image. On téléchargeait alors le fichier clair,
- * qu'on n'avait pas sous les yeux : l'aperçu avait cessé d'être le fichier, ce
- * que le produit promet partout ailleurs. Le mot « simulation » dans le détail
- * du verdict ne rattrapait rien, parce qu'on ne lit pas une note quand l'image
- * occupe tout le champ.
- *
- * Une bande du fichier reste donc toujours visible, un cinquième de la largeur.
- * Le rideau ne peut plus se fermer, il ne peut que comparer, et c'est
- * exactement ce qu'il est. L'autre extrémité, elle, va au bout sans rien
- * promettre de faux : le fichier entier est le fichier.
- */
-const RIDEAU_MIN = 20
-
 export function Scene({
   cadre,
   motif,
@@ -83,6 +45,7 @@ export function Scene({
   type,
   mesure,
   voile,
+  sombre,
   langue,
   textes,
   calculEnCours,
@@ -96,6 +59,8 @@ export function Scene({
   mesure: Mesure | null
   /** Le voile de lisibilité est-il peint dans le fichier, donc dans l'aperçu. */
   voile: boolean
+  /** La version sombre est-elle demandée : le motif assombri, dans le fichier. */
+  sombre: boolean
   langue: Langue
   textes: Textes
   calculEnCours: boolean
@@ -107,35 +72,6 @@ export function Scene({
   const tailleBoite = useTaille(boite)
   const fenetre = useTailleFenetre()
   const instant = useHorloge(langue)
-
-  /* Le rideau clair/sombre : la position du trait, en pourcentage de la
-     largeur, comptée depuis la gauche. Cent, donc rien d'assombri, tant qu'on
-     n'y touche pas.
-
-     Une aide à la lecture, pas un réglage : il ne part ni dans l'URL ni dans le
-     fichier, et repart au milieu au rechargement. C'est le même geste que la
-     bascule qu'il remplace, mais continu : un thème sombre ne se juge pas à
-     « avant » et « après » posés l'un après l'autre, il se juge en voyant la
-     limite passer sur le motif, sous les mêmes libellés.
-
-     Il ne va jamais jusqu'au bout du côté sombre : voir `RIDEAU_MIN`.
-
-     L'état ne suit pas la glissade image par image, et c'est délibéré. Pendant
-     qu'on glisse, seuls deux jetons CSS sont écrits sur l'appareil : rien ne
-     re-rend, rien ne se recalcule, et le navigateur n'a qu'à recomposer deux
-     couches déjà peintes. L'état est posé au relâchement, sur l'événement
-     `change` que le clavier émet aussi à chaque flèche. Ce qui doit être en
-     direct l'est, c'est-à-dire l'image ; ce qui peut attendre la fin du geste
-     l'attend, c'est-à-dire le chiffre du verdict. */
-  const [separation, setSeparation] = useState(RIDEAU_DEPART)
-  const glissiere = useRef<HTMLInputElement>(null)
-  const cadreRideau = useRef<HTMLDivElement>(null)
-  const aplat = useRef<HTMLSpanElement>(null)
-  /* La largeur utile de l'aperçu, tenue à jour hors du geste. La lire dans le
-     DOM pendant la glissade forcerait un recalcul de mise en page par image,
-     ce qui est exactement ce qu'on cherche à éviter ; elle est de toute façon
-     déjà calculée par la géométrie. */
-  const largeurRideau = useRef(0)
 
   const vide = !resolution.largeur || !resolution.hauteur
 
@@ -177,8 +113,6 @@ export function Scene({
       ? Math.min(hauteurBoite, geometrie.hauteur)
       : hauteurBoite
 
-  const largeurUtile = Math.max(1, (geometrie?.largeur ?? 0) - 2 * BORDURE_APPAREIL)
-
   const style: CSSProperties = geometrie
     ? ({
         width: `${geometrie.largeur}px`,
@@ -195,90 +129,29 @@ export function Scene({
   const nomDensite = [textes.reglages.calme, textes.reglages.moyen, textes.reglages.dense][
     motif.densite
   ]
+  /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
+     ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne peut
+     pas le déduire des quatre réglages qu'il énumère. */
   const description =
     vide || calculEnCours
       ? null
-      : remplir(textes.scene.alternative, {
+      : `${remplir(textes.scene.alternative, {
           famille: nomFamille,
           palette: palette(motif.palette)[langue],
           densite: nomDensite,
           graine: String(motif.graine),
-        })
+        })}${sombre ? ` ${textes.scene.alternativeSombre}` : ''}`
 
-  /**
-   * Pose la position du rideau dans le DOM, sans passer par l'état.
-   *
-   * Deux jetons, posés sur les deux seules boîtes qui les lisent : l'aplat
-   * assombri, qui n'a pas d'enfant, et le cadre du rideau, qui en a trois. Les
-   * poser sur l'appareil, qui les aurait transmis aux deux, coûtait cinq
-   * millisecondes de recalcul de style par image sur un processeur bridé six
-   * fois : un jeton personnalisé se propage à tout le sous-arbre, et ce
-   * sous-arbre est la maquette entière, cent vingt nœuds. Mesuré, pas supposé.
-   *
-   * Le premier jeton est un pourcentage : il translate deux boîtes de la
-   * largeur de l'aperçu, donc un `translateX` en pourcentage les pose
-   * exactement à la limite. Le second est en pixels, parce que la poignée fait
-   * trente pixels et qu'un pourcentage y compterait sa propre largeur ; c'est
-   * aussi là qu'elle est bornée pour rester entière contre les bords.
-   */
-  const poser = useCallback((valeur: number) => {
-    const largeur = Math.max(1, largeurRideau.current)
-    const x = (valeur / 100) * largeur
-    const bornee =
-      Math.min(Math.max(x, RAYON_POIGNEE), Math.max(RAYON_POIGNEE, largeur - RAYON_POIGNEE))
-    for (const noeud of [aplat.current, cadreRideau.current]) {
-      if (!noeud) continue
-      noeud.style.setProperty('--rideau', `${valeur}%`)
-      noeud.style.setProperty('--poignee', `${bornee.toFixed(1)}px`)
-    }
-  }, [])
+  /* Le verdict porte sur le fichier tel qu'il sera, et il n'a qu'un chiffre à
+     donner. Il en a annoncé deux un temps, celui du fichier et celui d'un fond
+     qu'un thème sombre aurait assombri : c'était l'aveu qu'on jugeait une image
+     qu'on ne livrait pas. La version sombre est maintenant un fichier, mesuré
+     comme l'autre, et le verdict n'a plus rien à simuler.
 
-  /* Le seul chemin par lequel React pose le rideau : au montage, au
-     relâchement, et quand la largeur de l'aperçu change. Jamais en style en
-     ligne, sans quoi un rendu venu d'ailleurs (l'heure de la maquette, par
-     exemple) le ramènerait à la position d'avant le geste en cours. Avant la
-     peinture, pour que la poignée n'apparaisse pas d'abord au mauvais endroit. */
-  useLayoutEffect(() => {
-    largeurRideau.current = largeurUtile
-    poser(Number(glissiere.current?.value ?? separation))
-  }, [largeurUtile, separation, poser, replie, vide, calculEnCours])
-
-  /* Les deux écoutes sont natives, et posées à la main.
-     
-     `input` d'abord : il pose l'image, et rien d'autre. `change` ensuite, pour
-     l'état : au doigt comme à la souris il arrive au relâchement, une fois, et
-     au clavier à chaque flèche. React ne donne pas cet événement, son
-     `onChange` étant `input`, d'où l'écoute directe ; c'est aussi ce qui permet
-     à la glissière de rester non contrôlée pendant le geste.
-
-     Rien n'est posé entre les deux : le verdict ne dépend plus de la position du
-     rideau, puisqu'il annonce les deux rapports en même temps. Glisser ne coûte
-     donc aucun rendu, pas même différé. */
-  useEffect(() => {
-    const noeud = glissiere.current
-    if (!noeud) return
-    const suivre = () => poser(Number(noeud.value))
-    const relever = () => setSeparation(Number(noeud.value))
-    noeud.addEventListener('input', suivre)
-    noeud.addEventListener('change', relever)
-    return () => {
-      noeud.removeEventListener('input', suivre)
-      noeud.removeEventListener('change', relever)
-    }
-  }, [poser, replie, vide, calculEnCours])
-
-  /* Le verdict porte sur le fichier tel qu'il sera, et il annonce à côté ce
-     qu'un thème sombre en ferait. Les deux ensemble, et non l'un ou l'autre
-     selon la position du rideau : c'est justement ce que le rideau montre, et
-     un chiffre qui bascule au passage du trait se lit deux fois moins bien que
-     deux chiffres posés côte à côte.
-
-     Le voile retiré, lui, change le contraste du fichier lui-même, et il
-     s'applique donc avant : assombrir une image qu'on n'exporte pas n'aurait
-     aucun sens. */
-  const rideauVisible = !vide && !calculEnCours && !replie && Boolean(geometrie)
+     Le voile retiré, lui, change le contraste du fichier sans changer la
+     mesure : c'est la seule correction qui reste, et elle porte bien sur ce
+     qu'on télécharge. */
   const brute = vide || !mesure ? null : voile ? mesure : sansVoile(mesure)
-  const sombre = brute && rideauVisible ? assombrir(brute) : null
 
   /* La maquette ne dépend que du type d'appareil, de la langue et de la
      géométrie : c'est ce qui remet son ajustement à zéro, rien d'autre. */
@@ -302,30 +175,11 @@ export function Scene({
               motif={motif}
               resolution={resolution}
               voile={voile}
+              sombre={sombre}
               largeur={Math.max(0, (geometrie?.largeur ?? 0) - 8)}
               hauteur={Math.max(0, (geometrie?.hauteur ?? 0) - 8)}
               description={description}
               revision={revision}
-            />
-          )}
-
-          {/* L'assombrissement est peint par-dessus le motif et sous la
-              maquette : ce sont bien les libellés sur un fond assombri qu'on
-              juge. Le fichier téléchargé, lui, ne le porte pas.
-
-              Il fait la largeur de l'aperçu et se décale vers la droite de la
-              position du rideau : ce qui dépasse est coupé par l'appareil, et
-              ce qui reste est exactement la moitié assombrie. La même graine se
-              voit donc en clair et en sombre d'un seul regard, sous les mêmes
-              libellés. Posé une fois pour toutes, même au repos où il est
-              entièrement dehors : le promouvoir en pleine glissade coûterait
-              une image. */}
-          {!vide && (
-            <span
-              className="apercu-assombri"
-              ref={aplat}
-              aria-hidden="true"
-              style={{ background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})` }}
             />
           )}
 
@@ -359,50 +213,6 @@ export function Scene({
             </div>
           )}
 
-          {/* La glissière ne couvre qu'une bande de quarante-quatre pixels au
-              milieu de l'appareil, et non toute sa surface : sur téléphone
-              l'aperçu est collé en haut de l'écran, et une glissière plein
-              cadre y aurait pris le geste de défilement. Elle disparaît avec
-              le repli, faute de place et faute d'objet : replié, on parcourt
-              les motifs ; déplié, on les juge. */}
-          {rideauVisible && (
-            <div className="rideau" id="rideau" ref={cadreRideau}>
-              <span className="rideau-suivi" aria-hidden="true">
-                <span className="rideau-trait" />
-              </span>
-              {/* La poignée est bornée à quinze pixels des bords, le trait ne
-                  l'est pas : au repos, le rideau est à cent et le trait tombe
-                  sur le bord même, où une poignée centrée serait coupée en deux
-                  et ne se verrait plus. Le trait dit la limite, la poignée dit
-                  qu'on peut la prendre ; l'écart des deux ne dépasse jamais la
-                  largeur d'un doigt, et seulement contre les bords. */}
-              <span className="rideau-poignee" aria-hidden="true">
-                <i />
-                <i />
-              </span>
-              <input
-                ref={glissiere}
-                type="range"
-                id="rideau-glissiere"
-                className="rideau-glissiere"
-                min={RIDEAU_MIN}
-                max={100}
-                step={1}
-                defaultValue={separation}
-                aria-label={textes.lisibilite.rideau}
-                aria-valuetext={
-                  separation >= 100
-                    ? textes.lisibilite.rideauClair
-                    : separation <= RIDEAU_MIN
-                      ? textes.lisibilite.rideauSombre
-                      : remplir(textes.lisibilite.rideauValeur, {
-                          n: String(100 - separation),
-                        })
-                }
-                title={textes.lisibilite.rideauTitre}
-              />
-            </div>
-          )}
         </div>
       </div>
 
@@ -412,7 +222,6 @@ export function Scene({
 
       <Verdict
         mesure={brute}
-        sombre={sombre}
         textes={textes}
         langue={langue}
         replie={verdictReplie}

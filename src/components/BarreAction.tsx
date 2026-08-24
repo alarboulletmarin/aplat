@@ -53,6 +53,8 @@ export function BarreAction({
   resolution,
   vide,
   voile,
+  voilePeint,
+  sombre,
   langue,
   textes,
   formats,
@@ -76,6 +78,10 @@ export function BarreAction({
   resolution: Resolution
   vide: boolean
   voile: boolean
+  /** Le voile est demandé, et la sonde a effectivement eu à le poser. */
+  voilePeint: boolean
+  /** La version sombre est choisie : le fichier porte l'aplat de la version. */
+  sombre: boolean
   langue: Langue
   textes: Textes
   /** Le dépli des autres formats est ouvert. */
@@ -296,9 +302,15 @@ export function BarreAction({
         </div>
       </div>
 
-      {/* La ligne du voile. Elle n'est pas une note de bas de page : c'est la
+      {/* La ligne du fichier. Elle n'est pas une note de bas de page : c'est la
           seule chose de l'écran qui dise ce que le fichier contient de plus
           que le motif choisi.
+
+          Elle dit ce qui est peint, et non ce qui est demandé. La nuance a un
+          cas courant : la version sombre descend sous le seuil que le voile
+          vise, si bien que la sonde n'a plus de voile à poser. Écrire là « le
+          voile est inclus dans le fichier » serait faux, et c'est exactement le
+          genre de phrase que ce produit ne doit pas écrire.
 
           Les deux libellés du bouton sont posés l'un sur l'autre, et celui qui
           ne sert pas garde sa place sans se montrer : sa largeur est donc celle
@@ -307,7 +319,10 @@ export function BarreAction({
           prend toute la place qui reste, ce qui ancre le bouton au bord plutôt
           qu'à la fin du texte, dont la longueur change aussi. */}
       <p className="barre-voile" id="barre-voile">
-        <span>{voile ? T.voileInclus : T.voileAbsent}</span>
+        <span>
+          {sombre ? `${T.versionSombre} ` : ''}
+          {voile ? (voilePeint ? T.voileInclus : T.voileNul) : T.voileAbsent}
+        </span>
         <button
           type="button"
           id="btn-voile"

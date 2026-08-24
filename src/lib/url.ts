@@ -34,6 +34,16 @@ export interface Reglages {
    * toujours : les liens écrits avant lui continuent d'ouvrir la même image.
    */
   voile: boolean
+  /**
+   * La version sombre : le motif assombri, dans le fichier lui-même.
+   *
+   * À ne pas confondre avec `theme`, juste au-dessus, qui habille
+   * l'application. Celui-ci ne change rien à l'interface et tout à l'image :
+   * c'est un aplat noir brûlé dans le PNG, au même titre que le voile, et il a
+   * sa place ici pour la même raison. Son absence vaut « claire », qui est ce
+   * que le produit a toujours livré.
+   */
+  sombre: boolean
   largeurSaisie: string
   hauteurSaisie: string
 }
@@ -48,6 +58,7 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   densite: 1,
   graine: 7314,
   voile: true,
+  sombre: false,
   largeurSaisie: '',
   hauteurSaisie: '',
 }
@@ -135,6 +146,10 @@ export function lireUrl(
        laisse : une adresse abîmée ne doit pas rendre une image plus claire que
        celle qu'on croit avoir choisie. */
     voile: q.get('v') !== '0',
+    /* Symétrique du voile, et à l'envers pour la même raison : seul « 1 »
+       assombrit. Une adresse abîmée rend l'image que le produit livre par
+       défaut, jamais une plus sombre que celle qu'on croit avoir choisie. */
+    sombre: q.get('n') === '1',
     langue: affichage.langue,
     theme: affichage.theme,
     largeurSaisie: String(resolutionValide ? l : detecte.largeur),
@@ -159,6 +174,7 @@ export function ecrireUrl(
   q.set('d', String(reglages.densite))
   q.set('s', String(reglages.graine))
   if (!reglages.voile) q.set('v', '0')
+  if (reglages.sombre) q.set('n', '1')
   q.set('l', reglages.langue)
   /* Une palette composée à la main n'existe que sur l'appareil qui l'a
      composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre

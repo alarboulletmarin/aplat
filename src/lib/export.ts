@@ -20,7 +20,7 @@
  * Ce qui ne change pas : toutes passent par le même moteur, à la même graine,
  * et l'aperçu reste le fichier.
  */
-import { dessiner, dessinerSansVoile, type Motif } from './moteur'
+import { dessiner, type Motif } from './moteur'
 import { rendreSVG } from './svg'
 
 export type EchecExport = 'capacite' | 'generale' | 'formatRefuse' | 'presse' | 'svgDense'
@@ -58,14 +58,18 @@ export function extension(format: Format): string {
  *
  * Le voile retiré s'y écrit aussi : deux fichiers d'un même motif, l'un avec
  * son voile et l'autre sans, ne se distinguent pas à l'oeil dans une pellicule,
- * et le nom est le seul endroit qui puisse le dire.
+ * et le nom est le seul endroit qui puisse le dire. La version sombre, elle, se
+ * distingue très bien à l'oeil, mais c'est le même motif et la même graine :
+ * sans le mot dans le nom, les deux fichiers se rangeraient l'un sur l'autre.
  */
 export function nomFichier(
   motif: Motif, largeur: number, hauteur: number,
-  { format = 'png', voile = true }: { format?: Format; voile?: boolean } = {},
+  { format = 'png', voile = true, sombre = false }:
+    { format?: Format; voile?: boolean; sombre?: boolean } = {},
 ): string {
+  const version = sombre ? '-sombre' : ''
   const sansVoile = voile ? '' : '-sansvoile'
-  return `aplat-${motif.famille}-${motif.palette}-${motif.graine}-${largeur}x${hauteur}${sansVoile}.${extension(format)}`
+  return `aplat-${motif.famille}-${motif.palette}-${motif.graine}-${largeur}x${hauteur}${version}${sansVoile}.${extension(format)}`
 }
 
 /**
@@ -131,6 +135,8 @@ export interface Travail {
   hauteur: number
   /** Le voile de lisibilité est-il brûlé dans le fichier. */
   voile: boolean
+  /** La version sombre : le motif assombri, dans le fichier lui-même. */
+  sombre: boolean
   format: Format
 }
 
@@ -142,7 +148,7 @@ export interface Travail {
  * c'est lui qui doit vérifier que le résultat tient sous le plafond.
  */
 export function encoderImage(travail: Travail): Promise<Blob> {
-  const { motif, largeur, hauteur, voile, format } = travail
+  const { motif, largeur, hauteur, voile, sombre, format } = travail
   return new Promise((resoudre, rejeter) => {
     if (format === 'webp' && !webpDisponible()) {
       rejeter(new ErreurExport('formatRefuse'))
@@ -155,8 +161,7 @@ export function encoderImage(travail: Travail): Promise<Blob> {
       canevas.height = hauteur
       const ctx = canevas.getContext('2d', { alpha: false })
       if (!ctx) throw new Error('pas de contexte 2d')
-      const peindre = voile ? dessiner : dessinerSansVoile
-      peindre(ctx, largeur, hauteur, motif)
+      dessiner(ctx, largeur, hauteur, motif, { voile, sombre })
 
       if (canevasNoir(ctx, largeur, hauteur)) {
         relacher(canevas)
@@ -182,9 +187,9 @@ export function encoderImage(travail: Travail): Promise<Blob> {
 
 /** L'ancien nom, gardé parce qu'il dit exactement ce qu'il fait. */
 export function encoderPNG(
-  motif: Motif, largeur: number, hauteur: number, voile = true,
+  motif: Motif, largeur: number, hauteur: number, voile = true, sombre = false,
 ): Promise<Blob> {
-  return encoderImage({ motif, largeur, hauteur, voile, format: 'png' })
+  return encoderImage({ motif, largeur, hauteur, voile, sombre, format: 'png' })
 }
 
 /**
@@ -192,8 +197,8 @@ export function encoderPNG(
  * pour que le fichier ait encore un sens.
  */
 export function encoderSVG(travail: Travail): Blob {
-  const { motif, largeur, hauteur, voile } = travail
-  const rendu = rendreSVG(motif, largeur, hauteur, voile)
+  const { motif, largeur, hauteur, voile, sombre } = travail
+  const rendu = rendreSVG(motif, largeur, hauteur, voile, sombre)
   if (!rendu.elements) throw new ErreurExport('generale')
   return new Blob([rendu.texte], { type: 'image/svg+xml;charset=utf-8' })
 }
