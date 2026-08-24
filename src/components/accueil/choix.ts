@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { Motif } from '../../lib/moteur'
-import type { Resolution } from '../../lib/resolution'
+import { FAMILLES, ORDRE_PALETTES, type Motif } from '../../lib/moteur'
+import { ORDINATEUR, TABLETTE, TELEPHONE } from '../../lib/resolution'
+import { GRAINE_MAX } from '../../lib/url'
 
 /**
  * Ce que la page d'accueil montre : douze motifs choisis, et trois formats.
@@ -17,10 +18,10 @@ import type { Resolution } from '../../lib/resolution'
  * ne sait pas produire.
  */
 
-/** Le format des trois maquettes, en pixels de fichier. */
-export const TELEPHONE: Resolution = { largeur: 1179, hauteur: 2556 }
-export const ORDINATEUR: Resolution = { largeur: 2560, hauteur: 1440 }
-export const TABLETTE: Resolution = { largeur: 2048, hauteur: 2732 }
+/* Le format des trois maquettes, en pixels de fichier. Ils viennent du même
+   endroit que les préréglages de l'application : la présentation ne peut pas
+   montrer une taille que l'outil ne propose pas. */
+export { ORDINATEUR, TABLETTE, TELEPHONE }
 
 /** Les trois formats du bandeau, dans l'ordre où on les lit. */
 export const FORMATS = [
@@ -58,6 +59,36 @@ export const VOILE: Motif = { famille: 'vagues', palette: 'lime', densite: 1, gr
  * dans son ordre. Les trois groupes du moteur y passent, et les onze palettes
  * sont toutes représentées au moins une fois.
  */
+/**
+ * Un autre motif, tiré au sort, jamais le même que celui qu'on regarde.
+ *
+ * La page entière est cliquable : chaque écran est un bouton, et l'appuyer
+ * change le fond d'écran. C'est la démonstration la plus courte du produit,
+ * puisque c'est exactement ce que fait « Surprends-moi » dans l'application, et
+ * c'est aussi ce qui répond à la question que la page pose : « ça donne quoi,
+ * les autres ? »
+ *
+ * Le tirage exclut la famille et la palette en cours : un appui sur deux qui ne
+ * changerait rien de visible ferait passer la page pour figée.
+ */
+export function tirerMotif(precedent: Motif): Motif {
+  const tirer = <V,>(liste: readonly V[], sauf: V): V => {
+    const restantes = liste.filter((valeur) => valeur !== sauf)
+    const choix = restantes.length ? restantes : liste
+    return choix[Math.floor(Math.random() * choix.length)]
+  }
+  return {
+    famille: tirer(FAMILLES.map((f) => f.id), precedent.famille),
+    palette: tirer(ORDRE_PALETTES, precedent.palette),
+    densite: precedent.densite,
+    graine: tirerGraine(),
+  }
+}
+
+export function tirerGraine(): number {
+  return Math.floor(Math.random() * GRAINE_MAX) + 1
+}
+
 export const GALERIE: readonly Motif[] = [
   { famille: 'arcade', palette: 'soleil', densite: 1, graine: 1204 },
   { famille: 'azulejos', palette: 'ciel', densite: 1, graine: 3311 },

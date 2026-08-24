@@ -4,7 +4,7 @@ import { useRef, type ChangeEvent } from 'react'
 import { nombre } from '../lib/format'
 import type { Langue } from '../lib/moteur'
 import {
-  chiffres, horsBornes, typeAppareil,
+  chiffres, horsBornes, ORDINATEUR, TABLETTE, TELEPHONE, typeAppareil,
   type Resolution,
 } from '../lib/resolution'
 import type { Textes } from '../i18n'
@@ -21,6 +21,10 @@ interface Preset {
  * Les tailles proposées. Un préréglage identique à la résolution détectée est
  * retiré : il n'y a aucune raison de proposer deux fois la même chose.
  *
+ * Les trois formats de référence viennent de `lib/resolution.ts`, où l'export
+ * des trois appareils les lit aussi : deux listes auraient fini par diverger,
+ * et cet export aurait livré un format que le panneau ne propose pas.
+ *
  * Les quatre premières nomment un appareil, la dernière une taille. Le 4K est
  * là parce qu'on le demande par son nom : l'écran d'ordinateur s'arrête à
  * 2 560 × 1 440, et rien ne disait qu'on pouvait aller plus haut alors que la
@@ -35,9 +39,9 @@ function presets(textes: Textes, detecte: Resolution): Preset[] {
   const T = textes.resolution
   return [
     { id: 'detectee', libelle: T.presetAppareil, largeur: detecte.largeur, hauteur: detecte.hauteur },
-    { id: 'telephone', libelle: T.presetTelephone, largeur: 1179, hauteur: 2556 },
-    { id: 'tablette', libelle: T.presetTablette, largeur: 2048, hauteur: 2732 },
-    { id: 'ordinateur', libelle: T.presetOrdinateur, largeur: 2560, hauteur: 1440 },
+    { id: 'telephone', libelle: T.presetTelephone, ...TELEPHONE },
+    { id: 'tablette', libelle: T.presetTablette, ...TABLETTE },
+    { id: 'ordinateur', libelle: T.presetOrdinateur, ...ORDINATEUR },
     { id: 'uhd', libelle: T.presetUHD, largeur: 3840, hauteur: 2160 },
   ].filter(
     (p) =>

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { useState } from 'react'
 import { famille, FAMILLES, ORDRE_PALETTES, palette, type Langue } from '../../lib/moteur'
 import { GRAINE_MAX } from '../../lib/url'
 import { nombre } from '../../lib/format'
 import { remplir, type Textes } from '../../i18n'
 import { Appareil } from './Appareil'
 import { Frise } from './Frise'
-import { HEROS, TELEPHONE } from './choix'
+import { HEROS, TELEPHONE, tirerMotif } from './choix'
 
 /** Les trois densités du moteur : calme, moyen, dense. */
 const DENSITES = 3
@@ -24,6 +25,11 @@ const DENSITES = 3
  * Les quatre chiffres sont lus dans le moteur, jamais recopiés. Une famille
  * ajoutée les corrige d'elle-même, et la page ne peut pas promettre un
  * catalogue que l'application n'a pas.
+ *
+ * L'écran est un bouton, et la ligne sous les appels le dit : la page entière
+ * se manipule, il n'y a pas à le deviner. Le motif de départ reste celui du
+ * choix arrêté, parce que la première image qu'on voit d'un produit ne se joue
+ * pas aux dés ; c'est l'appui qui la change, jamais l'ouverture.
  */
 export function Heros({
   langue,
@@ -35,7 +41,8 @@ export function Heros({
   lien: string
 }) {
   const A = textes.accueil
-  const nomFamille = famille(HEROS.famille)?.[langue] ?? HEROS.famille
+  const [motif, setMotif] = useState(HEROS)
+  const nomFamille = famille(motif.famille)?.[langue] ?? motif.famille
 
   const chiffres = [
     { valeur: FAMILLES.length, mot: A.chiffres.motifs },
@@ -70,21 +77,27 @@ export function Heros({
           </div>
 
           <p className="heros-mention">{A.heros.mention}</p>
+          <p className="heros-interaction">
+            <span className="pastille" aria-hidden="true" />
+            {A.heros.interaction}
+          </p>
         </div>
 
         <figure className="heros-ecran">
           <Appareil
-            motif={HEROS}
+            motif={motif}
             resolution={TELEPHONE}
             langue={langue}
             textes={textes}
             className="appareil-telephone"
+            etiquette={A.heros.changer}
+            onChanger={() => setMotif((precedent) => tirerMotif(precedent))}
           />
-          <figcaption className="heros-legende">
+          <figcaption className="heros-legende" aria-live="polite">
             <span className="pastille" aria-hidden="true" />
             {remplir(A.heros.legende, {
               famille: nomFamille,
-              palette: palette(HEROS.palette)[langue],
+              palette: palette(motif.palette)[langue],
             })}
           </figcaption>
         </figure>

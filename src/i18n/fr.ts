@@ -57,6 +57,11 @@ export const fr = {
          change de motif toute seule, et une image qui tourne sans être nommée
          passe pour une décoration. */
       legende: '{famille}, palette {palette}',
+      /* Dit une fois, en haut, ce que toute la page fait. Sans cette phrase,
+         il faut avoir l'idée de toucher une image pour découvrir que la page
+         entière est le générateur. */
+      interaction: 'Chaque écran de cette page est un bouton. Touche-le, le motif change.',
+      changer: 'Changer le motif de cet écran de téléphone',
     },
     /* Les quatre chiffres du bandeau. Ils ne sont pas écrits ici : le
        composant les lit dans le moteur, si bien qu'une famille ajoutée les
@@ -76,6 +81,7 @@ export const fr = {
     ecrans: {
       titre: 'De la poche au bureau',
       note: 'La résolution de ton écran est détectée toute seule. Ou tu saisis la tienne.',
+      changer: 'Changer le motif de cet écran d’ordinateur',
     },
     promesses: {
       unTitre: 'Rien ne sort d’ici',
@@ -89,6 +95,7 @@ export const fr = {
         'Aplat mesure le contraste sous la grille d’icônes et pose un voile, juste ce qu’il faut.',
       sansVoile: 'sans voile',
       avecVoile: 'voile automatique',
+      changer: 'Changer le motif de la démonstration du voile',
     },
     appel: {
       titre: 'Prends une graine',
@@ -116,6 +123,10 @@ export const fr = {
     alternative:
       'Motif {famille}, palette {palette}, densité {densite}, graine {graine}. Aperçu derrière une grille d’icônes factices.',
     note: 'Maquette d’écran : heure, widget et icônes sont fictifs, ils servent à juger la lisibilité.',
+    /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
+       ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne
+       peut pas le deviner du réglage. */
+    alternativeSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
     videTitre: 'Indique une résolution',
     videCorps: 'Largeur et hauteur en pixels, ou reviens à la détection.',
   },
@@ -146,31 +157,62 @@ export const fr = {
     /* La forme repliée, sur une ligne. Le mot d'abord, le chiffre ensuite :
        c'est le mot qui décide, le chiffre qui l'appuie. */
     resume: 'Lisibilité {niveau}, {contraste}:1',
-    /* L'aperçu assombri. Le mot « approché » n'est pas une précaution
-       oratoire : aucune plateforme ne publie la force de son assombrissement,
-       et le produit ne prétend pas mesurer ce qu'il estime. */
-    assombri: 'Assombri',
-    assombriTitre: 'Simule le fond assombri d’un thème sombre, sans changer le fichier',
-    assombriNote:
-      'Aperçu assombri, comme un thème sombre le ferait, à peu près. Le fichier téléchargé, lui, ne change pas.',
+    /* Le voile retiré à la main. Il ne se dit pas comme un voile nul mesuré :
+       l'un est ce que la sonde a trouvé, l'autre est une décision. */
+    voileRetire: 'voile retiré du fichier',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {
     titre: 'Réglages',
     famille: 'Famille de motif',
+    /* Les trois groupes sont devenus trois onglets. Le mot du groupe ne change
+       pas pour autant : c'est le même classement, montré autrement. */
     groupeAbstraits: 'Abstraits',
     groupePaysages: 'Paysages',
     groupeFigures: 'Figures',
+    onglets: 'Groupes de familles',
     palette: 'Palette',
-    /* Deux gestes voisins, deux libellés qui ne peuvent pas se confondre :
-       « Autre variante » redessine le même motif avec une autre graine,
-       « Surprends-moi » tire une autre famille et une autre palette. */
-    surprise: 'Surprends-moi',
-    surpriseTitre: 'Tire au hasard une famille, une palette et une graine',
     densite: 'Densité',
     calme: 'Calme',
     moyen: 'Moyen',
     dense: 'Dense',
+    /* La version claire ou sombre. Ce n'est pas le thème de l'application, qui
+       est au pied de page : c'est le fichier lui-même, et les mots doivent le
+       dire sans détour. Le mot « version » plutôt que « thème » ou « mode »
+       pour cette seule raison : on choisit entre deux fichiers. */
+    version: 'Version',
+    versionClaire: 'Claire',
+    versionSombre: 'Sombre',
+    versionNote: 'La version sombre est assombrie dans le fichier : c’est elle qu’on télécharge.',
+    versionTitreClaire: 'Le motif tel que la palette le donne',
+    versionTitreSombre: 'Le même motif, assombri dans le fichier téléchargé',
+  },
+  /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
+     les onze livrées, parce que ce sont des palettes et non un autre réglage. */
+  palettes: {
+    miennes: 'Mes palettes',
+    composer: 'Composer une palette',
+    modifier: 'Modifier {nom}',
+    supprimer: 'Supprimer {nom}',
+    nom: 'Nom de la palette',
+    nomDefaut: 'Ma palette',
+    fond: 'Fond',
+    nuancier: 'Nuancier de {nom}',
+    teinte: 'Teinte {n}',
+    ajouterTeinte: 'Ajouter une teinte',
+    retirerTeinte: 'Retirer la teinte {n}',
+    enregistrer: 'Enregistrer',
+    annuler: 'Annuler',
+    bornes: 'Le fond, puis deux à cinq teintes. Six couleurs au plus.',
+    invalide: 'Six chiffres hexadécimaux par couleur, comme 17243F.',
+    pleine: 'Douze palettes au plus. Supprime-en une pour en composer une autre.',
+    vide: 'Aucune palette composée. La tienne tiendra ici.',
+    /* Une palette arrivée par un lien. Elle est utilisable tout de suite et
+       n'est écrite nulle part tant qu'on ne l'a pas enregistrée : un lien reçu
+       ne remplit pas le stockage de qui l'ouvre. */
+    recue: 'Palette reçue par le lien. Enregistre-la pour la garder sur cet appareil.',
+    garder: 'Enregistrer la palette reçue',
+    note: 'Gardées sur cet appareil, dans le navigateur : un nom et des couleurs, rien d’autre.',
   },
   resolution: {
     titre: 'Résolution de l’image',
@@ -200,8 +242,16 @@ export const fr = {
     vide: 'Les motifs que tu regardes s’ajoutent ici, dix au plus.',
     effacer: 'Effacer',
     note:
-      'Gardés sur cet appareil, dans le navigateur : quatre réglages par motif, ni image ni identifiant.',
+      'Gardés sur cet appareil, dans le navigateur : quatre réglages par motif, ni image ni identifiant. Les épinglés restent quand les autres passent.',
     motif: '{famille}, {palette}, graine {graine}',
+    /* L'épingle est un second bouton par vignette, donc un second libellé.
+       Il nomme le motif comme le premier : sans le nom, dix épingles se
+       ressemblent toutes à l'oreille. */
+    epingler: 'Épingler {motif}',
+    desepingler: 'Retirer l’épingle de {motif}',
+    epingle: 'Épinglé',
+    epinglerCourt: 'Épingler',
+    pleines: 'Six épingles au plus : la liste reste une mémoire courte.',
   },
   partage: {
     titre: 'Partage',
@@ -215,7 +265,7 @@ export const fr = {
        l'historique garde bien quelque chose, à savoir dix fois quatre
        réglages. Une promesse plus large que le produit ne vaut rien. */
     confidentialite:
-      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur : quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
+      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur : quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Les palettes que tu composes y sont gardées de la même façon, un nom et des couleurs, supprimables une à une. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   preferences: {
     langue: 'Langue',
@@ -230,6 +280,12 @@ export const fr = {
        entière, et contient le mot visible : l'un ne contredit pas l'autre. */
     nouveau: 'Variante',
     nouveauTitre: 'Redessine le même motif avec une autre graine',
+    /* Deux gestes voisins, deux libellés qui ne peuvent pas se confondre :
+       « Variante » redessine le même motif avec une autre graine,
+       « Surprends-moi » tire une autre famille et une autre palette. Ils sont
+       maintenant côte à côte, ce qui rend la distinction plus utile encore. */
+    surprise: 'Surprends-moi',
+    surpriseTitre: 'Tire au hasard une famille, une palette et une graine',
     telecharger: 'Télécharger',
     rendu: 'Rendu en cours',
     enregistre: 'Image enregistrée',
@@ -242,7 +298,46 @@ export const fr = {
     erreurGenerale: 'Impossible de créer le fichier. Réessaie.',
     erreurCapacite:
       'Cet appareil n’a pas pu produire une image de cette taille. Essaie une résolution plus petite.',
+    erreurFormat: 'Ce navigateur ne sait pas encoder ce format. Le PNG, lui, passe partout.',
+    erreurPresse: 'Le presse-papiers a refusé l’image. Télécharge-la, c’est le même fichier.',
+    erreurSvg: 'Ce motif compte trop de formes pour un SVG utile. Le PNG reste la bonne sortie.',
     reessayer: 'Réessayer',
+    /* La ligne sous le bouton. Le voile est brûlé dans le fichier : quelqu'un
+       qui télécharge sans avoir lu la page d'accueil recevait une image plus
+       sombre que celle qu'il croyait avoir choisie, et rien ne le disait. */
+    voileInclus: 'Le voile de lisibilité est inclus dans le fichier.',
+    voileAbsent: 'Le voile de lisibilité est retiré du fichier.',
+    /* Le voile demandé, mais que la sonde n'a pas eu à poser. C'est le cas
+       courant de la version sombre, qui descend bien sous le seuil que le
+       voile vise, et le cas rare d'une palette déjà sombre. Dire « inclus dans
+       le fichier » là serait faux, et c'est exactement le genre de phrase que
+       ce produit ne doit pas écrire. */
+    voileNul: 'Le fichier n’a pas besoin de voile de lisibilité.',
+    /* La version, nommée sous le bouton qui la télécharge : c'est là qu'on
+       décide, et le nom du fichier le dira ensuite. */
+    versionSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
+    voileRetirer: 'Retirer',
+    voileRemettre: 'Remettre',
+    voileTitre: 'Le voile assombrit le bas de l’image pour que les libellés d’icônes tiennent le seuil',
+    /* Les autres sorties. Elles ne servent pas la même chose, et le libellé le
+       dit : la ligne du haut est le fond d'écran, les autres sont des usages. */
+    formats: 'Autres formats',
+    formatsTitre: 'PNG doublé, WebP, SVG, presse-papiers, les trois appareils',
+    formatsFermer: 'Fermer les formats',
+    formatPng2x: 'PNG 2x',
+    formatPng2xNote: 'Deux fois plus de pixels, pour un écran plus grand que celui-ci.',
+    formatWebp: 'WebP',
+    formatWebpNote: 'La même image, deux à trois fois plus légère, pour l’envoyer.',
+    formatSvg: 'SVG',
+    formatSvgNote: 'Le motif en vectoriel, à reprendre ailleurs. Sans le grain, qu’un SVG ne porte pas.',
+    formatSvgDense: 'Indisponible : ce motif compte trop de formes.',
+    formatCopie: 'Copier l’image',
+    formatCopieNote: 'Un PNG dans le presse-papiers, à coller dans une conversation.',
+    copiee: 'Image copiée',
+    formatTrois: 'Les trois appareils',
+    formatTroisNote: 'La même graine en téléphone, tablette et ordinateur, en une fois.',
+    enregistresTrois: 'Trois images enregistrées',
+    metaTrois: 'Téléphone, tablette et ordinateur. PNG, {poids} en tout.',
   },
   miseAJour: {
     texte: 'Une nouvelle version d’Aplat est prête.',
@@ -252,6 +347,11 @@ export const fr = {
   pied: {
     source: 'Code source',
     licence: 'AGPL-3.0',
+    /* Aplat est gratuit, sans compte et sans pub, et le restera. Le lien de
+       soutien est donc une porte, pas une caisse : il est dans le pied, à côté
+       de la licence, et rien dans l'application ne le rappelle. */
+    soutien: 'Offrir un café',
+    soutienTitre: 'Soutenir Aplat sur Ko-fi. Le lien ouvre un autre site.',
   },
   maquette: {
     recherche: 'Rechercher',

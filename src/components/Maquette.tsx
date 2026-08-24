@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef } from 'react'
+import { memo, useRef } from 'react'
 import { RAYONS } from '../lib/moteur'
 import type { Textes } from '../i18n'
 import type { Instant } from '../hooks/useHorloge'
@@ -13,6 +13,22 @@ import { useAjustement } from '../hooks/useAjustement'
  * Tout y est factice et le dit. La note sous l'aperçu le rappelle, et
  * l'ensemble est retiré de l'arbre d'accessibilité : ce sont des formes, pas
  * des informations.
+ *
+ * Les deux maquettes sont mémoïsées, et ce n'est pas une précaution de
+ * principe. `useAjustement` mesure la boîte après chaque rendu, dans un effet
+ * de mise en page sans liste de dépendances : c'est la seule façon de retirer
+ * une rangée puis de remesurer, mais cela force un recalcul de mise en page sur
+ * la centaine de nœuds de la grille. Tant que rien de la scène ne bougeait
+ * entre deux clics, personne ne le payait. Le rideau clair/sombre, lui, change
+ * un état de la scène à chaque pixel glissé : sans la mémoïsation, il coûtait
+ * un recalcul complet par image, et vingt-cinq images sur cent tombaient sur un
+ * processeur d'entrée de gamme.
+ *
+ * Les quatre propriétés sont stables par construction : le dictionnaire est un
+ * objet de module, l'instant vient d'un `useMemo`, les colonnes et la signature
+ * sont des valeurs simples. La comparaison superficielle suffit donc, et une
+ * propriété ajoutée sans l'être casserait l'ajustement de façon visible plutôt
+ * que silencieuse.
  */
 
 function IconeFactice({ classe, indice }: { classe: string; indice: number }) {
@@ -25,7 +41,7 @@ function IconeFactice({ classe, indice }: { classe: string; indice: number }) {
   )
 }
 
-export function MaquetteTelephone({
+function TelephoneNu({
   textes,
   instant,
   colonnes,
@@ -94,7 +110,7 @@ export function MaquetteTelephone({
   )
 }
 
-export function MaquetteBureau({
+function BureauNu({
   textes,
   instant,
   signature,
@@ -152,3 +168,6 @@ export function MaquetteBureau({
     </div>
   )
 }
+
+export const MaquetteTelephone = memo(TelephoneNu)
+export const MaquetteBureau = memo(BureauNu)

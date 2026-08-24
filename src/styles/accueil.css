@@ -665,3 +665,40 @@
     max-width: 340px;
   }
 }
+
+/* --- La page entière se manipule ------------------------------------------------
+   Chaque écran de la présentation est un bouton : l'appuyer tire un autre
+   motif. C'est la démonstration la plus courte du produit, puisque c'est
+   exactement ce que fait « Surprends-moi » dans l'application, et c'est ce qui
+   répond à la question que la page pose, « ça donne quoi, les autres ? ».
+
+   Le bouton est une couche posée sur l'appareil et non son enveloppe :
+   l'envelopper changerait sa géométrie, dont dépendent le module de la maquette
+   et le rapport d'aspect du canevas. */
+.appareil-declic {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: pointer;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  appearance: none;
+}
+.appareil-declic:focus-visible {
+  outline: 3px solid var(--focus);
+  /* Vers l'intérieur : les deux boîtes qui portent ce bouton coupent ce qui
+     déborde, et un anneau posé dehors n'y serait jamais visible. */
+  outline-offset: -3px;
+}
+/* Dit une fois, en haut, ce que toute la page fait. Sans cette ligne, il faut
+   avoir l'idée de toucher une image pour découvrir que la page entière est le
+   générateur. */
+.heros-interaction {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 11px;
+  font-size: 13.5px;
+  color: var(--encre-douce);
+}

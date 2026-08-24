@@ -5,6 +5,7 @@ import type { Langue } from '../lib/moteur'
 import type { Theme } from '../lib/url'
 import type { Textes } from '../i18n'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
+import { Soutien } from './Soutien'
 
 /**
  * Le pied : les réglages de l'application, la version, et le lien vers la
@@ -89,6 +90,7 @@ export function Pied({
           {textes.pied.source}
         </a>
         <span>{textes.pied.licence}</span>
+        <Soutien textes={textes} />
       </div>
     </footer>
   )

@@ -14,6 +14,19 @@ export const COMMIT: string = __APP_COMMIT__
 const DEPOT = 'https://github.com/alarboulletmarin/aplat'
 
 /**
+ * Le lien de soutien, écrit une fois.
+ *
+ * Il vit ici, à côté du dépôt, parce que c'est la même chose : deux adresses
+ * qui sortent du site et que le pied de page désigne. Rien n'est chargé depuis
+ * Ko-fi ; seule l'adresse est connue.
+ */
+const SOUTIEN = 'https://ko-fi.com/T6T01WC5ZC'
+
+export function lienSoutien(): string {
+  return SOUTIEN
+}
+
+/**
  * Les deux fonctions prennent un objet plutôt que des positions : sans ça,
  * l'une commencerait par le commit et l'autre par la version, deux chaînes que
  * rien ne distingue au typage. Un appel écrit par analogie avec l'autre

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { mesurer, RAYONS } from '../../lib/moteur'
 import { jetonsLibelle } from '../../lib/geometrie'
 import type { Textes } from '../../i18n'
 import { Toile } from './Toile'
-import { TELEPHONE, VOILE } from './choix'
+import { TELEPHONE, tirerGraine, VOILE } from './choix'
 
 /**
  * Les trois choses qu'Aplat fait autrement, dont une se démontre.
@@ -18,11 +18,19 @@ import { TELEPHONE, VOILE } from './choix'
  * Les deux vignettes partagent la même sonde, donc la même couleur de
  * libellés : seule la couche de voile change d'une image à l'autre. Sans quoi
  * la comparaison montrerait deux différences et n'en démontrerait aucune.
+ *
+ * Les deux sont cliquables, comme le reste de la page, mais elles ne tirent
+ * qu'une graine : la famille et la palette restent celles du choix arrêté. La
+ * démonstration porte sur Vagues et Lime & crème parce que c'est là que le
+ * voile travaille le plus, et un tirage libre l'aurait parfois posée sur un
+ * couple où il ne sert à rien, c'est-à-dire sur une paire d'images identiques.
  */
 export function Promesses({ textes }: { textes: Textes }) {
   const P = textes.accueil.promesses
+  const [graine, setGraine] = useState(VOILE.graine)
+  const motif = { ...VOILE, graine }
   const mesure = mesurer(
-    VOILE.famille, VOILE.palette, VOILE.densite, VOILE.graine,
+    motif.famille, motif.palette, motif.densite, motif.graine,
     TELEPHONE.largeur, TELEPHONE.hauteur,
   )
   const jetons = jetonsLibelle(mesure.libelles) as CSSProperties
@@ -32,7 +40,7 @@ export function Promesses({ textes }: { textes: Textes }) {
     <figure className="voile-cote">
       <div className={`voile-boite${voile ? ' voile-boite-active' : ''}`} style={jetons}>
         <Toile
-          motif={VOILE}
+          motif={motif}
           resolution={TELEPHONE}
           voile={voile}
           className="voile-toile"
@@ -48,6 +56,12 @@ export function Promesses({ textes }: { textes: Textes }) {
             </span>
           ))}
         </div>
+        <button
+          type="button"
+          className="appareil-declic"
+          aria-label={P.changer}
+          onClick={() => setGraine(tirerGraine())}
+        />
       </div>
       <figcaption className={`voile-mot${voile ? ' voile-mot-actif' : ''}`}>{mot}</figcaption>
     </figure>

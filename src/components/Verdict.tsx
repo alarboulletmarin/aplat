@@ -32,30 +32,30 @@ const CONSEILS = {
  * porte dans les deux formes. Ce qui compte pendant qu'on choisit un motif,
  * c'est le verdict ; le reste attend d'être demandé.
  *
- * La bascule « Assombri » est ici, au bout de la même rangée, parce que c'est
- * le verdict qu'elle change : un thème sombre assombrit le fond d'écran, et la
- * lisibilité des libellés en dépend. Elle disparaît quand l'aperçu est replié
- * en vignette, faute de place et faute d'objet : replié, on parcourt les
- * motifs ; déplié, on les juge.
+ * Un seul chiffre, et c'est celui du fichier. Il en a porté deux un temps,
+ * celui du fichier et celui d'un fond qu'un thème sombre aurait assombri : ce
+ * second chiffre était l'aveu qu'on jugeait une image qu'on ne livrait pas.
+ * La version sombre est aujourd'hui un fichier comme l'autre, mesurée par la
+ * même sonde, et il n'y a donc plus rien à simuler à côté.
+ *
+ * Il suit en revanche le voile, quand on l'a retiré du fichier : le rapport est
+ * alors celui du motif nu, et le détail le nomme autrement qu'un voile nul
+ * mesuré, parce que ce n'est pas la même chose.
  */
 export function Verdict({
   mesure,
   textes,
   langue,
   replie = false,
-  bascule = false,
-  assombri = false,
-  onAssombrir,
+  voileRetire = false,
 }: {
   mesure: Mesure | null
   textes: Textes
   langue: Langue
   /** La scène est repliée : le verdict tient sur une ligne, dépliable. */
   replie?: boolean
-  /** L'aperçu est replié en vignette : la bascule d'assombrissement s'efface. */
-  bascule?: boolean
-  assombri?: boolean
-  onAssombrir?: () => void
+  /** Le voile a été retiré du fichier, à la main. */
+  voileRetire?: boolean
 }) {
   const T = textes.lisibilite
   const [ouvert, setOuvert] = useState(false)
@@ -75,35 +75,23 @@ export function Verdict({
   const rang = niveau(mesure)
   const mot = T[rang]
   const contraste = decimal(mesure.contraste, langue)
-  const voile =
-    mesure.voile > 0.02
+  const voile = voileRetire
+    ? T.voileRetire
+    : mesure.voile > 0.02
       ? remplir(T.voile, { n: String(Math.round(mesure.voile * 100)) })
       : T.sansVoile
   const libelles = mesure.libelles === 'clair' ? T.libellesClairs : T.libellesSombres
-  const detail = `${remplir(T.detail, {
+  const detail = remplir(T.detail, {
     contraste,
     libelles,
     voile,
     conseil: T[CONSEILS[rang]],
-  })}${assombri ? ` ${T.assombriNote}` : ''}`
+  })
   const forme = (
     <span className="verdict-i" aria-hidden="true">
       <span className={`verdict-${rang}`} />
     </span>
   )
-  const bouton = bascule && onAssombrir ? (
-    <button
-      type="button"
-      id="btn-assombri"
-      className="btn-assombri"
-      aria-pressed={assombri}
-      title={T.assombriTitre}
-      onClick={onAssombrir}
-    >
-      <span className="ico-lune" aria-hidden="true" />
-      <span>{T.assombri}</span>
-    </button>
-  ) : null
 
   if (replie) {
     return (
@@ -122,7 +110,6 @@ export function Verdict({
           </span>
           <span className="verdict-chevron" aria-hidden="true" />
         </button>
-        {bouton}
         {/* `hidden` plutôt qu'un rendu conditionnel : l'identifiant que
             désigne `aria-controls` doit exister avant le dépli, et le détail
             reste lisible aux vérifications comme aux recherches de la page. */}
@@ -144,7 +131,6 @@ export function Verdict({
           {detail}
         </p>
       </div>
-      {bouton}
     </div>
   )
 }

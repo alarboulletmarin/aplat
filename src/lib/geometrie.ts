@@ -42,8 +42,13 @@ export const PAYSAGE_COURT = 560
  * compacte, l'encoche de l'appareil, le verdict de lisibilité et les marges de
  * la scène. Une hauteur, pas une fraction : à 390 px de haut, 62 % de l'écran
  * ne laissent pas de quoi poser une barre de 56 px.
+ *
+ * Elle est passée de 168 à 212 le jour où la barre a gagné sa ligne du voile :
+ * une ligne de plus sous le bouton, c'est une ligne de moins pour la scène, et
+ * les deux valeurs bougent ensemble ou pas du tout. `tools/reach.mjs` le tient
+ * fermé en vérifiant que le verdict reste entier au-dessus de la barre.
  */
-const RESERVE_PAYSAGE = 168
+const RESERVE_PAYSAGE = 212
 
 /**
  * Ce que l'en-tête collant prend au-dessus d'elle, en paysage court : la scène
@@ -73,7 +78,10 @@ export function paysageCourt(fenetre: Boite): boolean {
 export function hauteurScene(fenetre: Boite): number {
   const h = fenetre.hauteur || 800
   if (paysageCourt(fenetre)) {
-    return Math.round(Math.max(150, Math.min(420, h - RESERVE_PAYSAGE - ENTETE_PAYSAGE)))
+    /* Le plancher a suivi la réserve, et pour la même raison : à 390 px de haut
+       il n'y a plus 150 px à donner à l'aperçu sans que le verdict passe sous
+       la barre, et un aperçu coupé ne sert à rien du tout. */
+    return Math.round(Math.max(118, Math.min(420, h - RESERVE_PAYSAGE - ENTETE_PAYSAGE)))
   }
   const etroit = fenetre.largeur < 760
   return Math.round(
@@ -91,10 +99,16 @@ export function hauteurScene(fenetre: Boite): number {
  * presque rien pour choisir parmi trente-deux familles et onze palettes. Replié,
  * l'aperçu garde de quoi juger la silhouette du motif, et rend le reste aux
  * grilles.
+ *
+ * La part est descendue de 22 à 18 % le jour où la barre a gagné sa ligne du
+ * voile : la place se reprend là où elle sert le moins, et une vignette de
+ * silhouette la supporte mieux qu'une grille de familles. Sous 360 px, c'est le
+ * seul endroit où il restait quelque chose à reprendre : la barre, le verdict
+ * replié et les cibles de 44 px y sont tous au minimum.
  */
 export function hauteurVignette(fenetre: Boite): number {
   const h = fenetre.hauteur || 800
-  return Math.round(Math.max(120, Math.min(180, h * 0.22)))
+  return Math.round(Math.max(98, Math.min(156, h * 0.18)))
 }
 
 /**

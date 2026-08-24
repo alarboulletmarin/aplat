@@ -224,6 +224,21 @@
     grid-template-columns: 1fr;
     gap: 22px;
   }
+  /* Sur une colonne, la scène recouvre les réglages : chaque pixel de
+     rembourrage qu'elle rend est un pixel de grille. */
+  .scene {
+    gap: 9px;
+    padding: 6px 0 8px;
+  }
+}
+/* Sur téléphone, la barre porte une ligne de plus qu'avant, celle du voile.
+   Elle se resserre pour la loger sans la reprendre aux grilles : c'est le
+   rembourrage qui cède, jamais la surface au doigt. */
+@media (max-width: 479px) {
+  .barre {
+    padding: 9px 0 calc(9px + env(safe-area-inset-bottom));
+    gap: 7px;
+  }
 }
 /* Au-delà de 760 px, le partage de la maquette : à parts égales, et une seule
    colonne si la fenêtre ne peut pas en porter deux de 320 px. */
@@ -302,16 +317,6 @@
   height: 100%;
   display: block;
 }
-/* L'aplat qui simule le fond assombri d'un thème sombre. Son opacité vient de
-   `ASSOMBRISSEMENT`, en style en ligne : une seule valeur, dans le moteur, qui
-   sert à la fois à peindre et à recalculer le rapport de contraste. */
-.apercu-assombri {
-  position: absolute;
-  inset: 0;
-  display: block;
-  pointer-events: none;
-}
-
 /* maquette téléphone / tablette */
 .maq {
   position: absolute;
@@ -718,9 +723,6 @@
    de 4,5:1, disque à moitié entre 3:1 et 4,5:1, triangle en dessous. Elles
    partagent la même encre : le niveau se lit en niveaux de gris comme en
    couleur, et la forme change en même temps que le mot. */
-/* La bascule d'assombrissement tient au bout de la rangée tant que le texte
-   garde trente caractères de large ; sous cette largeur elle passe à la ligne
-   plutôt que d'étrangler le détail en colonne de six mots. */
 .verdict {
   display: flex;
   flex-wrap: wrap;
@@ -761,7 +763,7 @@
 }
 /* Le verdict replié : une ligne, dépliable au doigt. Le chevron dit qu'il y a
    quelque chose dessous, et tourne quand c'est ouvert. Le détail prend toute
-   la largeur sous la rangée, la bascule d'assombrissement en occupe le bout. */
+   la largeur sous la rangée. */
 .verdict-replie {
   display: flex;
   flex-wrap: wrap;
@@ -810,48 +812,6 @@
 .verdict-bascule[aria-expanded='true'] .verdict-chevron {
   transform: rotate(180deg);
 }
-/* La bascule d'assombrissement : un aplat inversé quand elle est enfoncée,
-   comme les puces de choix. En niveaux de gris, l'état se lit au remplissage,
-   jamais à la teinte. */
-.btn-assombri {
-  flex: 0 0 auto;
-  margin-left: auto;
-  align-self: flex-start;
-  min-height: 44px;
-  padding: 0 13px;
-  cursor: pointer;
-  border-radius: 16px 16px 5px 5px;
-  border: 1.5px solid var(--filet-franc);
-  background: transparent;
-  color: var(--encre);
-  font-weight: 600;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  scroll-margin-top: calc(var(--bar, 0px) + var(--scene-h, 0px) + 12px);
-  scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
-}
-.btn-assombri[aria-pressed='true'] {
-  border-color: var(--encre);
-  background: var(--encre);
-  color: var(--papier);
-}
-.verdict-replie .btn-assombri {
-  align-self: center;
-}
-/* Un croissant : un anneau dont deux quarts manquent, tourné. Il ne dépend que
-   de `currentColor`, et suit donc l'inversion sans rien savoir du fond. */
-.ico-lune {
-  flex: 0 0 auto;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  /* Un disque plein dans lequel un second disque, décalé en haut à droite,
-     mord. Le dégradé radial ne sert pas de dégradé : ses deux arrêts sont
-     collés, il découpe. */
-  background: radial-gradient(circle 7px at 12.5px 1.5px, transparent 98%, currentColor 100%);
-}
 .verdict-t {
   font-weight: 700;
   font-size: 15px;
@@ -867,7 +827,13 @@
 /* --- Réglages ------------------------------------------------------------------ */
 /* Un seul bloc, cerné d'un trait franc, découpé par des filets ; pas quatre
    cartes flottantes. C'est le découpage d'une page imprimée. */
+/* Le panneau est un contexte de requête de conteneur. La raison tient en un
+   chiffre : sur un téléphone de 390 px, il tient dans une colonne de 207 px, et
+   la largeur de la fenêtre ne dit rien de celle-là. Les onglets de familles s'y
+   règlent, et sur rien d'autre. */
 .panneau {
+  container-type: inline-size;
+  container-name: panneau;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -918,16 +884,14 @@
 .groupe-2 {
   margin: 17px 0 9px;
 }
-/* Trois formes du vocabulaire : l'arche pour les abstraits, la ligne de crête
-   pour les paysages, l'étoile à pointes pour les figures. Elles repèrent le
-   groupe, le mot le nomme, et les trois se distinguent par la silhouette et
-   non par la couleur : en niveaux de gris elles tiennent toujours.
+/* La goutte du sous-titre repère le groupe, le mot le nomme, et elle se
+   distingue par la silhouette et non par la couleur : en niveaux de gris elle
+   tient toujours.
 
-   L'arche est mordue à sa base par une seconde arche à la couleur de la
-   surface : c'est le dessin de la marque, repris en petit. La même géométrie
-   sert à la note de mise à jour, pour qu'il n'y ait qu'une arche dans la page
-   et non deux qui se ressemblent. */
-.groupe-arche,
+   L'arche mordue, elle, ne sert plus qu'à la note de mise à jour depuis que les
+   trois groupes de familles sont des onglets : un aplat en arche dont la base
+   est mordue par une seconde arche à la couleur de la surface, c'est le dessin
+   de la marque repris en petit, et il n'y en a qu'un dans la page. */
 .note-maj-i {
   position: relative;
   flex: 0 0 auto;
@@ -935,7 +899,6 @@
   height: 15px;
   overflow: hidden;
 }
-.groupe-arche i,
 .note-maj-i i {
   position: absolute;
   left: 0;
@@ -945,7 +908,6 @@
   background: var(--deco-1);
   border-radius: 999px 999px 0 0;
 }
-.groupe-arche b,
 .note-maj-i b {
   position: absolute;
   left: 34%;
@@ -955,19 +917,93 @@
   background: var(--surface);
   border-radius: 999px 999px 0 0;
 }
-.groupe-sommet {
-  flex: 0 0 auto;
-  width: 15px;
-  height: 12px;
-  background: var(--violet);
-  clip-path: polygon(0 100%, 32% 22%, 54% 62%, 74% 0, 100% 100%);
-}
-.groupe-etoile {
+.groupe-carre {
   flex: 0 0 auto;
   width: 13px;
   height: 13px;
   background: var(--deco-2);
   border-radius: 50% 50% 50% 0;
+}
+
+/* --- Les trois onglets de familles ---------------------------------------------
+   Trente-deux vignettes en grille plate, dans une colonne étroite, mettaient
+   mille pixels entre la première et la dernière : on ne pouvait pas comparer
+   deux motifs éloignés. Trois onglets ramènent chaque liste à ce qu'un écran
+   montre.
+
+   Ils ne cachent rien : les trois sont là, chacun porte son compte, et l'onglet
+   ouvert est toujours celui de la famille en cours. L'aplat inversé de la puce
+   de choix sert ici aussi, pour que « ouvert » se lise au remplissage et non à
+   la teinte. */
+/* Empilés par défaut, sur une rangée dès que la colonne peut porter trois mots.
+   Dans cet ordre, et non l'inverse : un navigateur qui ne connaîtrait pas les
+   requêtes de conteneur garde la pile, qui est lisible, plutôt que la rangée,
+   où « Abstraits » se réduirait à « A… ». */
+.onglets {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+@container panneau (min-width: 330px) {
+  .onglets {
+    flex-direction: row;
+  }
+}
+.onglet {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  cursor: pointer;
+  border-radius: 16px 16px 5px 5px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+/* Empilés, les onglets se lisent comme une liste : le mot à gauche, le compte
+   au bout, alignés d'une ligne à l'autre. */
+.onglets:not([data-rangee]) .onglet {
+  justify-content: space-between;
+}
+@container panneau (min-width: 330px) {
+  .onglet {
+    justify-content: center;
+  }
+}
+.onglet > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Même règle que l'interrupteur du voile : l'aplat inversé suffit, et un trait
+   qui s'épaissit déplacerait les deux autres onglets d'un pixel à chaque
+   changement, la rangée étant à largeurs partagées. */
+.onglet[aria-selected='true'] {
+  border-color: var(--encre);
+  background: var(--encre);
+  color: var(--papier);
+}
+/* Le compte n'est pas décoratif : il dit ce qu'on trouvera derrière l'onglet
+   avant de l'ouvrir, et c'est ce qui remplace la vue d'ensemble perdue. */
+.onglet-n {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+}
+.onglet[aria-selected='true'] .onglet-n {
+  color: var(--papier);
+  opacity: 0.72;
 }
 
 .grille-familles {
@@ -994,12 +1030,13 @@
   gap: 8px;
 }
 .historique-vide,
-.historique-n {
+/* La note sous une carte : ce que le réglage fait, en une ligne, sous les
+   puces qui le commandent. */
+.historique-n,
+.bento-n {
+  margin-top: 11px;
   font-size: 13px;
   color: var(--encre-douce);
-}
-.historique-n {
-  margin-top: 11px;
 }
 .rangee-densite {
   display: flex;
@@ -1055,6 +1092,76 @@
 }
 .barre-live {
   display: contents;
+}
+
+/* --- Les autres formats -------------------------------------------------------
+   Un dépli attaché au primaire, posé au-dessus de la rangée : la barre est
+   collée en bas de l'écran, et une liste qui pousserait vers le bas sortirait
+   de la fenêtre. */
+.feuille {
+  border: 2px solid var(--encre);
+  border-radius: 20px 20px 6px 6px;
+  background: var(--surface);
+  padding: 7px;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.feuille-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  list-style: none;
+}
+.feuille-b {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 11px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 14px 14px 4px 4px;
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.feuille-b:hover {
+  background: var(--surface-2);
+}
+.feuille-b[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+.feuille-t {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.feuille-n {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+  overflow-wrap: anywhere;
+}
+
+/* --- La ligne du voile ---------------------------------------------------------
+   Sous le bouton, et pas ailleurs : c'est la seule chose de l'écran qui dise ce
+   que le fichier contient de plus que le motif choisi. Quelqu'un qui télécharge
+   sans avoir lu la page d'accueil recevait une image plus sombre que celle
+   qu'il croyait avoir choisie, et rien ne le lui disait. */
+.barre-voile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+/* La phrase prend toute la place qui reste : c'est ce qui ancre l'interrupteur
+   au bord de la barre plutôt qu'à la fin du texte, dont la longueur change
+   quand on l'appuie. */
+.barre-voile > span {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* --- Pied de page ---------------------------------------------------------------- */

@@ -19,6 +19,18 @@ describe('nom du fichier', () => {
     ).toBe('aplat-terrazzo-orage-4242-1179x2556.png')
   })
 
+  it('distingue la version sombre, que la pellicule ne distinguerait pas', () => {
+    /* Même motif, même graine, même format : sans le mot, les deux fichiers se
+       rangeraient l'un sur l'autre. */
+    const motif = { famille: 'vagues' as const, palette: 'lime' as const, densite: 1 as const, graine: 7314 }
+    expect(nomFichier(motif, 1179, 2556, { sombre: true }))
+      .toBe('aplat-vagues-lime-7314-1179x2556-sombre.png')
+    expect(nomFichier(motif, 1179, 2556, { sombre: true, voile: false }))
+      .toBe('aplat-vagues-lime-7314-1179x2556-sombre-sansvoile.png')
+    expect(nomFichier(motif, 1179, 2556, { sombre: false }))
+      .toBe(nomFichier(motif, 1179, 2556))
+  })
+
   it('ne contient rien qu’un système de fichiers refuserait', () => {
     const nom = nomFichier(
       { famille: 'decoupes', palette: 'ardoise', densite: 0, graine: 1 },

@@ -196,10 +196,30 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   const w = buf.readUInt32BE(16), hh = buf.readUInt32BE(20);
   t(w === 1179 && hh === 2556, 'export : dimensions exactes du fichier', w + 'x' + hh);
 
-  // --- 11. changer de réglage efface la carte succès
+  /* --- 11. les trois onglets de familles, et un réglage touché efface la
+     carte succès. « Étoiles » est dans les figures : l'atteindre demande
+     d'ouvrir son onglet, ce qui est exactement ce que la grille plate ne
+     demandait pas et ce pour quoi elle mettait mille pixels entre deux
+     motifs. */
+  const onglets = await page.evaluate(() => ({
+    ouvert: document.querySelector('.onglet[aria-selected="true"]').dataset.groupe,
+    visibles: document.querySelectorAll('#liste-familles .opt').length,
+    comptes: [...document.querySelectorAll('.onglet-n')].map(n => parseInt(n.textContent, 10))
+  }));
+  t(onglets.ouvert === 'abs', 'onglets : celui de la famille en cours est ouvert', onglets.ouvert);
+  t(onglets.visibles === onglets.comptes[0],
+    'onglets : la grille montre exactement ce que l\'onglet annonce',
+    onglets.visibles + ' pour ' + onglets.comptes[0]);
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 32,
+    'onglets : les trois couvrent les trente-deux familles', onglets.comptes.join(' + '));
+
+  await page.$eval('#onglet-fig', e => e.click());
+  await page.waitForTimeout(300);
   await tap('[data-famille="etoiles"]');
   await page.waitForTimeout(300);
   t(await page.evaluate(() => !document.getElementById('note-faite')), 'succès effacé au changement de réglage');
+  t(await page.evaluate(() => document.querySelector('.onglet[aria-selected="true"]').dataset.groupe === 'fig'),
+    'onglets : celui qu\'on a ouvert le reste');
 
   // --- 13. langue
   await tap('[data-langue="en"]');
@@ -251,10 +271,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
     'vie privée : ni session, ni cookie, ni base indexée',
     `session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
-  const clesEnTrop = store.cles.filter(c => c !== 'aplat:motifs');
+  const clesEnTrop = store.cles.filter(c => c !== 'aplat:motifs' && c !== 'aplat:palettes');
   t(clesEnTrop.length === 0,
-    'vie privée : le stockage local ne porte que l\'historique des motifs',
+    'vie privée : le stockage local ne porte que les motifs et les palettes composées',
     store.cles.join(', ') || 'aucune clé');
+  t(!store.cles.includes('aplat:palettes'),
+    'vie privée : rien n\'est écrit pour les palettes tant qu\'on n\'en compose aucune');
   {
     let liste = null;
     try { liste = JSON.parse(store.motifs || '[]'); } catch (e) { liste = null; }
@@ -296,7 +318,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     await tap('[data-palette="encre"]');
     await page.waitForTimeout(300);
-    await page.evaluate(() => document.getElementById('liste-abstraits').scrollIntoView({ block: 'center' }));
+    await page.evaluate(() => document.getElementById('liste-familles').scrollIntoView({ block: 'center' }));
     await page.waitForTimeout(800);
 
     const vign = await page.evaluate(() => {
@@ -383,10 +405,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    /* Sept : les trois grilles de familles, les palettes, les densités, la
-       langue et le thème. Un groupe de familles ajouté sans son `radiogroup`
-       casserait le parcours clavier sans rien changer à l'affichage. */
-    t(kb.groups.length === 7, 'clavier : les sept groupes sont des groupes radio', kb.groups.length + ' groupes');
+    /* Six, tant qu'aucune palette n'a été composée : la grille de familles de
+       l'onglet ouvert, les palettes livrées, les densités, la version, la
+       langue et le thème. La grille des palettes composées est la septième, et
+       elle n'apparaît que lorsqu'il y en a. Un groupe ajouté sans son
+       `radiogroup` casserait le parcours clavier sans rien changer à
+       l'affichage. */
+    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
@@ -899,10 +924,18 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await sctx3.close();
   }
 
-  /* --- 21. l'aperçu assombri change le verdict, jamais le fichier
-     Un thème sombre assombrit le fond d'écran : les libellés clairs y gagnent.
-     L'aperçu doit le montrer et le verdict le dire, mais le PNG téléchargé
-     porte le voile calculé pour le fond tel quel, et ne bouge pas d'un octet. */
+  /* --- 21. la version sombre est un fichier, pas un aperçu
+     C'est le défaut que cette section tient fermé, et il était grave : un
+     rideau qu'on tirait sur l'aperçu montrait le motif « tel qu'un thème sombre
+     l'assombrirait », sans jamais toucher au fichier. Poussé à fond, l'écran
+     n'était plus que cette image ; on téléchargeait, et le PNG arrivait clair.
+     L'aperçu mentait, et c'est la seule chose que ce produit promet de ne
+     jamais faire.
+
+     La version sombre est donc devenue un réglage : un aplat noir peint dans le
+     fichier, mesuré par la sonde comme n'importe quelle autre image. Ce qui se
+     vérifie ici est cette promesse et rien d'autre : ce qu'on voit est ce qu'on
+     reçoit, dans les deux positions. */
   {
     const dctx = await browser.newContext({
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
@@ -911,49 +944,444 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
     await dp.waitForTimeout(400);
 
-    const lire = () => dp.evaluate(() => ({
+    /* La luminance moyenne sur la bande des icônes, la même que celle que la
+       sonde regarde. Elle sert à comparer deux choses que rien d'autre ne
+       compare : l'aperçu à l'écran et le fichier sur le disque. Passer par les
+       octets ne dirait rien, deux encodages d'une même image différant déjà. */
+    const luminance = (source) => dp.evaluate((src) => new Promise((resoudre) => {
+      const mesurer = (cv) => {
+        const y0 = Math.round(cv.height * 0.24);
+        const hauteur = Math.max(1, Math.round(cv.height * 0.92) - y0);
+        const d = cv.getContext('2d').getImageData(0, y0, cv.width, hauteur).data;
+        const lin = (c) => {
+          const v = c / 255;
+          return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+        };
+        let somme = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4 * 37) {
+          somme += 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+          n += 1;
+        }
+        resoudre(n ? somme / n : 0);
+      };
+      if (src === 'apercu') { mesurer(document.getElementById('apercu')); return; }
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas');
+        cv.width = img.width;
+        cv.height = img.height;
+        cv.getContext('2d').drawImage(img, 0, 0);
+        mesurer(cv);
+      };
+      img.src = src;
+    }), source);
+
+    const telecharger = async (etiquette) => {
+      const [fichier] = await Promise.all([
+        dp.waitForEvent('download', { timeout: 30000 }),
+        dp.$eval('#btn-export', e => e.click())
+      ]);
+      const chemin = path.join(OUT, etiquette + '-' + fichier.suggestedFilename());
+      await fichier.saveAs(chemin);
+      const lum = await luminance(
+        'data:image/png;base64,' + fs.readFileSync(chemin).toString('base64')
+      );
+      return { nom: fichier.suggestedFilename(), chemin, lum };
+    };
+
+    const dire = () => dp.evaluate(() => ({
+      url: location.search,
+      coche: [...document.querySelectorAll('#liste-version [role="radio"]')]
+        .map((b) => b.dataset.version + ':' + b.getAttribute('aria-checked')).join(' '),
       detail: document.getElementById('verdict-detail').textContent,
-      titre: document.getElementById('verdict-titre').textContent,
-      presse: document.getElementById('btn-assombri').getAttribute('aria-pressed'),
-      voile: !!document.querySelector('.apercu-assombri'),
-      empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96)
+      ligne: document.getElementById('barre-voile').textContent,
+      alternative: document.getElementById('apercu').getAttribute('aria-label')
     }));
-    const clair = await lire();
-    await dp.$eval('#btn-assombri', e => e.click());
-    await dp.waitForTimeout(400);
-    const sombre = await lire();
 
-    const rapport = (texte) => parseFloat((texte.match(/(\d+[.,]\d+):1/) || [0, '0'])[1].replace(',', '.'));
-    t(clair.presse === 'false' && sombre.presse === 'true',
-      'assombri : la bascule dit son état', `${clair.presse} -> ${sombre.presse}`);
-    t(!clair.voile && sombre.voile, 'assombri : l\'aplat est peint sur l\'aperçu');
-    t(rapport(sombre.detail) > rapport(clair.detail),
-      'assombri : le rapport annoncé monte pour des libellés clairs',
-      `${rapport(clair.detail)}:1 -> ${rapport(sombre.detail)}:1`);
-    t(/ne change pas/.test(sombre.detail) && !/ne change pas/.test(clair.detail),
-      'assombri : le détail dit que le fichier ne change pas', sombre.detail.slice(-60));
-    t(clair.empreinte === sombre.empreinte,
-      'assombri : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
+    /* Deux puces, et le choix se lit sur elles : une bascule aurait obligé à
+       lire son état pour savoir laquelle des deux images on regarde. */
+    const claire = await dire();
+    t(claire.coche === 'claire:true sombre:false',
+      'version : deux puces, et la claire est celle qu\'on livre par défaut', claire.coche);
+    t(!/n=1/.test(claire.url), 'version : l\'adresse ne dit rien tant qu\'elle est claire');
 
-    /* Et le fichier, pour de vrai. */
-    const [dl2] = await Promise.all([
-      dp.waitForEvent('download', { timeout: 30000 }),
-      dp.$eval('#btn-export', e => e.click())
-    ]);
-    const chemin = path.join(OUT, 'assombri-' + dl2.suggestedFilename());
-    await dl2.saveAs(chemin);
-    await dp.$eval('#btn-assombri', e => e.click());
-    await dp.waitForTimeout(400);
-    const [dl3] = await Promise.all([
-      dp.waitForEvent('download', { timeout: 30000 }),
-      dp.$eval('#btn-export', e => e.click())
-    ]);
-    const chemin2 = path.join(OUT, 'clair-' + dl3.suggestedFilename());
-    await dl3.saveAs(chemin2);
-    t(fs.readFileSync(chemin).equals(fs.readFileSync(chemin2)),
-      'assombri : le PNG téléchargé est le même, octet pour octet',
-      fs.statSync(chemin).size + ' o contre ' + fs.statSync(chemin2).size + ' o');
+    const apercuClair = await luminance('apercu');
+    const fichierClair = await telecharger('claire');
+    t(!/-sombre/.test(fichierClair.nom),
+      'version : le nom du fichier clair ne porte aucune mention', fichierClair.nom);
+
+    /* La promesse, du côté clair : l'aperçu est le fichier. La comparaison porte
+       sur la luminance et non sur les octets, l'aperçu étant rendu à la taille
+       de sa boîte et le fichier à celle de l'écran visé ; c'est bien la même
+       image, à deux échelles. */
+    t(Math.abs(apercuClair - fichierClair.lum) < 0.03,
+      'version : en clair, l\'aperçu est le fichier',
+      `aperçu ${apercuClair.toFixed(3)}, fichier ${fichierClair.lum.toFixed(3)}`);
+
+    await dp.$eval('#liste-version [data-version="sombre"]', e => e.click());
+    await dp.waitForTimeout(600);
+
+    const sombre = await dire();
+    t(sombre.coche === 'claire:false sombre:true',
+      'version : la puce sombre prend le choix', sombre.coche);
+    t(/n=1/.test(sombre.url),
+      'version : elle part dans l\'adresse, parce qu\'elle change le fichier', sombre.url);
+
+    const apercuSombre = await luminance('apercu');
+    t(apercuSombre < apercuClair * 0.75,
+      'version : l\'aperçu s\'assombrit pour de bon, ce n\'est pas un habillage',
+      `${apercuClair.toFixed(3)} -> ${apercuSombre.toFixed(3)}`);
+
+    const fichierSombre = await telecharger('sombre');
+    t(/-sombre\.png$/.test(fichierSombre.nom),
+      'version : le nom du fichier le dit', fichierSombre.nom);
+    t(!fs.readFileSync(fichierClair.chemin).equals(fs.readFileSync(fichierSombre.chemin)),
+      'version : les deux PNG diffèrent, la puce agit bien sur le fichier',
+      fs.statSync(fichierClair.chemin).size + ' o contre ' + fs.statSync(fichierSombre.chemin).size + ' o');
+
+    /* Et la promesse, du côté sombre. C'est exactement le contrôle qui manquait
+       au rideau : poussé au sombre, il montrait une image que le téléchargement
+       ne rendait pas. */
+    t(Math.abs(apercuSombre - fichierSombre.lum) < 0.03,
+      'version : en sombre, l\'aperçu est encore le fichier',
+      `aperçu ${apercuSombre.toFixed(3)}, fichier ${fichierSombre.lum.toFixed(3)}`);
+    t(fichierSombre.lum < fichierClair.lum * 0.75,
+      'version : le fichier téléchargé est bien le sombre, pas le clair',
+      `${fichierClair.lum.toFixed(3)} -> ${fichierSombre.lum.toFixed(3)}`);
+
+    /* Un seul rapport, et c'est celui du fichier. Le verdict en annonçait deux
+       du temps du rideau, celui du fichier et celui d'une simulation : ce second
+       chiffre était l'aveu qu'on jugeait une image qu'on ne livrait pas. */
+    const rapports = (texte) => [...texte.matchAll(/(\d+[.,]\d+):1/g)]
+      .map((m) => parseFloat(m[1].replace(',', '.')));
+    t(rapports(claire.detail).length === rapports(sombre.detail).length,
+      'version : le verdict garde le même nombre de chiffres dans les deux',
+      rapports(claire.detail).join(' / ') + ' contre ' + rapports(sombre.detail).join(' / '));
+    t(!/ne change pas/.test(sombre.detail),
+      'version : le verdict n\'a plus de simulation à excuser', sombre.detail.slice(0, 70));
+    t(rapports(sombre.detail)[0] !== rapports(claire.detail)[0],
+      'version : le rapport suit l\'image, il est mesuré sur elle',
+      rapports(claire.detail)[0] + ':1 puis ' + rapports(sombre.detail)[0] + ':1');
+    t(/[Ss]ombre/.test(sombre.alternative) && !/[Ss]ombre/.test(claire.alternative),
+      'version : le texte alternatif la dit, l\'image n\'est pas la même',
+      sombre.alternative.slice(-60));
+
+    /* La ligne sous le bouton dit ce que le fichier contient, et elle doit dire
+       vrai jusqu'au bout : la version sombre passe sous le seuil que le voile
+       vise, la sonde n'a donc plus de voile à poser, et annoncer là un voile
+       inclus serait le même genre de mensonge que celui du rideau. */
+    t(/[Vv]ersion sombre/.test(sombre.ligne) && !/[Vv]ersion sombre/.test(claire.ligne),
+      'version : la ligne sous le bouton la nomme', sombre.ligne.slice(0, 70));
+    t(/inclus dans le fichier/.test(claire.ligne),
+      'version : en clair, la ligne annonce le voile', claire.ligne.slice(0, 70));
+    t(!/inclus dans le fichier/.test(sombre.ligne) && /sans voile/.test(sombre.detail),
+      'version : en sombre, elle n\'annonce pas un voile que le fichier ne porte pas',
+      sombre.ligne.slice(0, 90));
+
+    /* Le lien porte le choix : c'est ce qui distingue un réglage d'un affichage,
+       et le rideau n'en était pas un. */
+    await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556&n=1', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(500);
+    const recu = await dire();
+    t(recu.coche === 'claire:false sombre:true',
+      'version : un lien reçu rouvre la même version', recu.coche);
+    const apercuRecu = await luminance('apercu');
+    t(Math.abs(apercuRecu - apercuSombre) < 0.02,
+      'version : et la même image, au rechargement',
+      `${apercuSombre.toFixed(3)} -> ${apercuRecu.toFixed(3)}`);
+
+    /* Le thème de l'application et la version du fichier portent les mêmes mots
+       et ne font pas la même chose. Un lien peut porter l'un sans l'autre, et
+       aucun des deux ne doit décider pour l'autre. */
+    await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556&t=sombre', { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(500);
+    const habille = await dp.evaluate(() => ({
+      theme: document.documentElement.dataset.theme,
+      coche: [...document.querySelectorAll('#liste-version [role="radio"]')]
+        .map((b) => b.dataset.version + ':' + b.getAttribute('aria-checked')).join(' ')
+    }));
+    t(habille.theme === 'sombre' && habille.coche === 'claire:true sombre:false',
+      'version : le thème sombre de la page n\'assombrit pas le fichier',
+      JSON.stringify(habille));
+
     await dctx.close();
+  }
+
+  /* --- 21b. le voile est dans le fichier, et l'interrupteur l'en retire
+     C'est le défaut que cette section tient fermé : le voile était brûlé dans
+     le PNG sans que rien de l'écran ne le dise, et quelqu'un qui téléchargeait
+     sans avoir lu la présentation recevait une image plus sombre que celle
+     qu'il croyait avoir choisie. */
+  {
+    const vctx = await browser.newContext({
+      viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
+    });
+    const vp = await vctx.newPage();
+    await vp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
+    await vp.waitForTimeout(400);
+
+    const dire = () => vp.evaluate(() => ({
+      ligne: document.getElementById('barre-voile').textContent,
+      presse: document.getElementById('btn-voile').getAttribute('aria-pressed'),
+      url: location.search,
+      empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96),
+      detail: document.getElementById('verdict-detail').textContent
+    }));
+
+    /* Un bouton qui change de taille ou de place à l'instant où on l'appuie se
+       dérobe sous le doigt. Ici deux choses changeaient : le libellé, plus long
+       dans un sens que dans l'autre, et la phrase à côté, plus courte une fois
+       le voile retiré. Les deux mots occupent maintenant la même cellule, et la
+       phrase prend toute la place qui reste. */
+    const boite = () => vp.evaluate(() => {
+      const b = document.getElementById('btn-voile').getBoundingClientRect();
+      return [+b.x.toFixed(1), +b.y.toFixed(1), +b.width.toFixed(1)];
+    });
+    const boiteAvant = await boite();
+
+    const avec = await dire();
+    t(/inclus dans le fichier/.test(avec.ligne),
+      'voile : une ligne sous le bouton dit qu\'il est dans le fichier', avec.ligne.slice(0, 60));
+    t(!/v=0/.test(avec.url), 'voile : l\'adresse ne dit rien tant qu\'il est là');
+
+    const [avecFichier] = await Promise.all([
+      vp.waitForEvent('download', { timeout: 30000 }),
+      vp.$eval('#btn-export', e => e.click())
+    ]);
+    const cheminAvec = path.join(OUT, 'voile-' + avecFichier.suggestedFilename());
+    await avecFichier.saveAs(cheminAvec);
+
+    await vp.$eval('#btn-voile', e => e.click());
+    await vp.waitForTimeout(500);
+    const sans = await dire();
+    t(/retiré du fichier/.test(sans.ligne), 'voile : la ligne suit l\'interrupteur', sans.ligne.slice(0, 60));
+    t(sans.presse === 'true', 'voile : l\'interrupteur dit son état');
+    const boiteApres = await boite();
+    t(JSON.stringify(boiteAvant) === JSON.stringify(boiteApres),
+      'voile : l\'interrupteur ne bouge pas d\'un pixel quand on l\'appuie',
+      JSON.stringify(boiteAvant) + ' -> ' + JSON.stringify(boiteApres));
+    t(/v=0/.test(sans.url), 'voile : le retrait part dans l\'adresse, il change le fichier');
+    t(sans.empreinte !== avec.empreinte, 'voile : l\'aperçu est redessiné, il reste le fichier');
+    t(/voile retiré/.test(sans.detail), 'voile : le verdict le nomme autrement qu\'un voile nul mesuré',
+      sans.detail.slice(0, 70));
+
+    const [sansFichier] = await Promise.all([
+      vp.waitForEvent('download', { timeout: 30000 }),
+      vp.$eval('#btn-export', e => e.click())
+    ]);
+    t(/-sansvoile\.png$/.test(sansFichier.suggestedFilename()),
+      'voile : le nom du fichier le dit', sansFichier.suggestedFilename());
+    const cheminSans = path.join(OUT, sansFichier.suggestedFilename());
+    await sansFichier.saveAs(cheminSans);
+    t(!fs.readFileSync(cheminAvec).equals(fs.readFileSync(cheminSans)),
+      'voile : les deux PNG diffèrent, l\'interrupteur agit bien sur le fichier',
+      fs.statSync(cheminAvec).size + ' o contre ' + fs.statSync(cheminSans).size + ' o');
+    await vctx.close();
+  }
+
+  /* --- 21c. les autres formats
+     Quatre sorties de plus derrière un dépli, et le presse-papiers. Ce qui doit
+     tenir : chacune livre le type qu'elle annonce, et le SVG se refuse quand le
+     motif compte trop de formes plutôt que de livrer un fichier inouvrable. */
+  {
+    const fctx = await browser.newContext({
+      viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
+    });
+    const fp = await fctx.newPage();
+    await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=arches&p=nuit&d=0&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
+    await fp.waitForTimeout(400);
+
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(300);
+    const ouvert = await fp.evaluate(() => ({
+      deplie: document.getElementById('btn-formats').getAttribute('aria-expanded'),
+      sorties: [...document.querySelectorAll('#feuille-formats .feuille-b')].map(b => b.id),
+      svgActif: !document.getElementById('format-svg').disabled
+    }));
+    t(ouvert.deplie === 'true', 'formats : le dépli dit son état');
+    t(ouvert.sorties.length === 5, 'formats : cinq sorties de plus', ouvert.sorties.join(', '));
+    t(ouvert.svgActif, 'formats : le SVG est offert pour une famille géométrique calme');
+
+    const attraper = async (id) => {
+      const [dl] = await Promise.all([
+        fp.waitForEvent('download', { timeout: 45000 }),
+        fp.$eval(id, e => e.click())
+      ]);
+      const chemin = path.join(OUT, dl.suggestedFilename());
+      await dl.saveAs(chemin);
+      return { nom: dl.suggestedFilename(), chemin, octets: fs.statSync(chemin).size };
+    };
+
+    const svg = await attraper('#format-svg');
+    const texte = fs.readFileSync(svg.chemin, 'utf8');
+    t(/\.svg$/.test(svg.nom) && texte.startsWith('<?xml'), 'formats : le SVG est un vrai SVG', svg.nom);
+
+    /* Le vectoriel est le même fichier dans un autre format, version sombre
+       comprise : il doit porter l'aplat noir, à l'opacité que la sonde a dosée,
+       et sur toute la surface. C'est ici plutôt qu'en test unitaire parce que
+       la sonde réclame un canevas, donc un navigateur. */
+    /* La signature de l'ombre, et d'elle seule : le voile écrit lui aussi des
+       `fill-opacity`, mais sur la teinte de son libellé, jamais sur du noir
+       pur. C'est ce couple qu'il faut chercher, pas l'opacité seule. */
+    const ombreDe = (svg) => svg.match(/fill="#000000" fill-opacity="([0-9.]+)"/);
+    t(!ombreDe(texte), 'formats : le SVG clair ne porte aucun aplat de version');
+
+    /* Un réglage ne referme pas la feuille : elle reste ouverte pendant qu'on
+       change de version, et il n'y a donc rien à rouvrir entre les deux. */
+    await fp.$eval('#liste-version [data-version="sombre"]', e => e.click());
+    await fp.waitForTimeout(500);
+    const svgSombre = await attraper('#format-svg');
+    const texteSombre = fs.readFileSync(svgSombre.chemin, 'utf8');
+    const ombre = ombreDe(texteSombre);
+    t(/-sombre\.svg$/.test(svgSombre.nom), 'formats : le SVG sombre se nomme comme le PNG', svgSombre.nom);
+    t(Boolean(ombre) && Number(ombre[1]) > 0.2,
+      'formats : le SVG sombre porte l\'aplat de la version, dosé par la sonde',
+      ombre ? ombre[1] : 'aucun');
+    await fp.$eval('#liste-version [data-version="claire"]', e => e.click());
+    await fp.waitForTimeout(400);
+    t(/viewBox="0 0 1179 2556"/.test(texte), 'formats : le SVG porte la résolution visée');
+    /* Le voile est peint en rgba() sur un canevas ; dans un SVG, cette notation
+       n'appartient pas à la norme 1.1 et un outil de dessin y perdrait les
+       bandes. L'opacité doit donc être sortie dans `fill-opacity`. */
+    t(!/rgba?\(/.test(texte), 'formats : le SVG n\'écrit aucune couleur fonctionnelle');
+    t(/fill-opacity=/.test(texte), 'formats : le voile y passe par fill-opacity');
+    const teintes = [...texte.matchAll(/fill="([^"]*)"/g)].map(m => m[1]);
+    t(teintes.length > 0 && teintes.every(c => /^#[0-9A-F]{6}$/.test(c)),
+      'formats : toutes ses couleurs sont hexadécimales', teintes.length + ' remplissages');
+
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(200);
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(200);
+    const png2x = await attraper('#format-png2x');
+    const tete = fs.readFileSync(png2x.chemin).subarray(0, 8);
+    t(tete.equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+      'formats : le PNG 2x est un PNG', png2x.nom);
+    t(/2358x5112/.test(png2x.nom), 'formats : le PNG 2x fait deux fois la résolution', png2x.nom);
+
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(200);
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(200);
+    const webp = await attraper('#format-webp');
+    const entete = fs.readFileSync(webp.chemin).subarray(0, 12).toString('latin1');
+    t(/^RIFF/.test(entete) && /WEBP/.test(entete), 'formats : le WebP est un WebP', webp.nom);
+    t(webp.octets < png2x.octets, 'formats : le WebP est plus léger que le PNG doublé',
+      webp.octets + ' o contre ' + png2x.octets + ' o');
+
+    /* Le garde-fou du SVG ne se déclenche sur aucune famille livrée : la plus
+       peuplée, Mosaïque en dense, compte moins de mille formes, et le plafond
+       est à vingt-quatre mille. La sortie doit donc être offerte partout, y
+       compris sur la trame la plus serrée, et le fichier rester plus léger que
+       le PNG qu'il remplace. */
+    await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=mosaique&p=nuit&d=2&s=7314&r=2560x1440', { waitUntil: 'networkidle' });
+    await fp.waitForTimeout(400);
+    await fp.$eval('#btn-formats', e => e.click());
+    await fp.waitForTimeout(600);
+    const dense = await fp.evaluate(() => ({
+      actif: !document.getElementById('format-svg').disabled,
+      note: document.querySelector('#format-svg .feuille-n').textContent
+    }));
+    t(dense.actif, 'formats : le SVG est offert même sur la famille la plus peuplée');
+    t(/grain/.test(dense.note), 'formats : et la note dit ce que le vectoriel ne porte pas', dense.note);
+    const svgDense = await attraper('#format-svg');
+    t(svgDense.octets < 400000, 'formats : le SVG dense reste un fichier raisonnable',
+      Math.round(svgDense.octets / 1024) + ' Ko');
+    await fctx.close();
+  }
+
+  /* --- 21d. une palette composée à la main
+     La deuxième chose qu'Aplat écrit sur l'appareil, et la première qui voyage
+     dans un lien. Ce qui doit tenir : elle se compose, elle se dessine, elle
+     part dans l'adresse avec ses teintes, et elle se supprime. */
+  {
+    const pctx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
+    const pp = await pctx.newPage();
+    await pp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
+    await pp.waitForTimeout(400);
+
+    await pp.$eval('#btn-composer-palette', e => e.click());
+    await pp.waitForTimeout(300);
+    const poser = async (id, valeur) => {
+      await pp.evaluate(([selecteur, v]) => {
+        const el = document.getElementById(selecteur);
+        const mutateur = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        mutateur.call(el, v);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }, [id, valeur]);
+      await pp.waitForTimeout(120);
+    };
+    await poser('palette-nom', 'OLED');
+    await poser('palette-teinte-0', '#000000');
+    await poser('palette-teinte-1', '#DFF478');
+    await poser('palette-teinte-2', '#FF6648');
+    await pp.waitForTimeout(400);
+
+    const brouillon = await pp.evaluate(() => ({
+      apercu: !!document.querySelector('.editeur-apercu canvas[data-peint]'),
+      actif: !document.getElementById('btn-enregistrer-palette').disabled
+    }));
+    t(brouillon.apercu, 'palette : la vignette montre le motif pendant qu\'on compose');
+    t(brouillon.actif, 'palette : trois teintes recevables suffisent à enregistrer');
+
+    await pp.$eval('#btn-enregistrer-palette', e => e.click());
+    await pp.waitForTimeout(600);
+    const apres = await pp.evaluate(() => ({
+      url: location.search,
+      puces: [...document.querySelectorAll('#liste-palettes-perso .opt')].map(o => o.textContent.trim()),
+      choisie: document.querySelector('#liste-palettes-perso .opt[aria-checked="true"]')?.textContent.trim(),
+      stockage: localStorage.getItem('aplat:palettes'),
+      apercu: document.getElementById('apercu').dataset.peint
+    }));
+    t(/k=000000-DFF478-FF6648/.test(apres.url),
+      'palette : le lien porte les teintes, pas seulement le nom', apres.url);
+    t(/p=x/.test(apres.url), 'palette : et un nom dérivé des couleurs');
+    t(apres.puces.length === 1 && /OLED/.test(apres.puces[0]),
+      'palette : la puce entre dans la grille', apres.puces.join(', '));
+    t(/OLED/.test(apres.choisie || ''), 'palette : elle devient la palette du motif');
+    t(/OLED/.test(apres.stockage || ''), 'palette : elle est gardée sur l\'appareil');
+    t(apres.apercu === '1', 'palette : l\'aperçu la dessine');
+
+    /* Deux grilles de palettes, donc deux groupes radio, donc deux portes
+       d'entrée au clavier. Celle qui ne contient pas la sélection n'a aucune
+       option cochée : sans porte d'entrée, elle deviendrait injoignable. */
+    const clavier = await pp.evaluate(() => [...document.querySelectorAll('[role="radiogroup"]')]
+      .map(g => ({
+        id: g.id,
+        stops: [...g.querySelectorAll('.opt')].filter(o => o.tabIndex >= 0).length
+      })));
+    t(clavier.length === 7, 'palette : la grille des composées est un septième groupe radio',
+      clavier.map(g => g.id).join(', '));
+    t(clavier.every(g => g.stops === 1),
+      'palette : chaque grille garde un arrêt de tabulation, celle de la sélection comme l\'autre',
+      clavier.map(g => g.id + ':' + g.stops).join(' '));
+
+    /* Le lien, ouvert ailleurs, doit rendre la même image sans rien écrire. */
+    const rctx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
+    const rp = await rctx.newPage();
+    await rp.goto('http://127.0.0.1:' + PORT + '/app' + apres.url, { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(600);
+    const recue = await rp.evaluate(() => ({
+      choisie: document.querySelector('#liste-palettes-perso .opt[aria-checked="true"]')?.textContent.trim(),
+      note: document.querySelector('.palette-note')?.textContent || '',
+      stockage: localStorage.getItem('aplat:palettes')
+    }));
+    t(!!recue.choisie, 'palette reçue : le lien la rend utilisable sans l\'avoir', recue.choisie);
+    t(/Enregistre-la/.test(recue.note), 'palette reçue : et propose de la garder', recue.note.slice(0, 50));
+    t(recue.stockage === null, 'palette reçue : rien n\'est écrit tant qu\'on ne l\'a pas gardée');
+    await rctx.close();
+
+    await pp.$eval('#btn-supprimer-palette', e => e.click());
+    await pp.waitForTimeout(500);
+    const vide = await pp.evaluate(() => ({
+      puces: document.querySelectorAll('#liste-palettes-perso .opt').length,
+      palette: new URLSearchParams(location.search).get('p'),
+      stockage: localStorage.getItem('aplat:palettes')
+    }));
+    t(vide.puces === 0, 'palette : la suppression la retire de la grille');
+    t(vide.palette === 'lime', 'palette : le motif retombe sur une palette livrée', vide.palette);
+    t(vide.stockage === '[]', 'palette : et le stockage est vidé de la sienne', String(vide.stockage));
+    await pctx.close();
   }
 
   /* --- 22. l'historique : ce qu'il retient, ce qu'il rend, ce qu'il oublie
@@ -1036,6 +1464,99 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'historique : un stockage trafiqué ne passe pas, et ne casse rien',
       hostile.vignettes + ' vignette retenue sur 5 entrées');
     await hctx.close();
+  }
+
+  /* --- 23. l'épingle : ce que dix entrées ne savaient pas faire
+     Garder celle qu'on a aimée pendant qu'on en regarde dix autres. Elle ne
+     doit ni allonger la liste, ni pouvoir la remplir entièrement, ni laisser
+     tomber ce qu'elle est censée garder. */
+  {
+    const ectx = await browser.newContext({ viewport: { width: 900, height: 1400 }, locale: 'fr-FR' });
+    const ep = await ectx.newPage();
+    await ep.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=arches&p=nuit&d=1&s=101&r=1179x2556', { waitUntil: 'networkidle' });
+    await ep.waitForTimeout(400);
+
+    const etat = () => ep.evaluate(() => ({
+      presse: document.getElementById('btn-epingler').getAttribute('aria-pressed'),
+      epingles: document.querySelectorAll('#liste-historique .historique-b[data-epingle]').length,
+      premier: document.querySelector('#liste-historique .historique-b')?.getAttribute('aria-label') || '',
+      stockage: localStorage.getItem('aplat:motifs')
+    }));
+
+    /* Épingler n'attend pas les deux secondes et demie du passage : c'est un
+       geste, et un bouton qui répondrait « pas encore » serait le pire des
+       deux mondes. */
+    const boiteEpingle = () => ep.evaluate(() => {
+      const b = document.getElementById('btn-epingler').getBoundingClientRect();
+      return [+b.x.toFixed(1), +b.width.toFixed(1)];
+    });
+    const epingleAvant = await boiteEpingle();
+    await ep.$eval('#btn-epingler', e => e.click());
+    await ep.waitForTimeout(400);
+    const gardee = await etat();
+    t(gardee.presse === 'true', 'épingle : le bouton dit son état');
+    t(gardee.epingles === 1, 'épingle : la vignette porte sa coche', gardee.epingles + ' épinglée');
+    t(/"f":1/.test(gardee.stockage || ''), 'épingle : elle est gardée sur l\'appareil');
+    t(/Épinglé/.test(gardee.premier), 'épingle : elle s\'entend dans le nom du bouton, pas seulement à la forme',
+      gardee.premier);
+    /* Deux pièges ici, et le premier appui les réunit : le mot raccourcit
+       (« Épingler » puis « Épinglé »), et « Effacer » apparaît à côté puisque
+       la liste cesse d'être vide. Le bouton reste pourtant où il est. */
+    const epingleApres = await boiteEpingle();
+    t(JSON.stringify(epingleAvant) === JSON.stringify(epingleApres),
+      'épingle : le bouton ne bouge pas d\'un pixel quand on l\'appuie',
+      JSON.stringify(epingleAvant) + ' -> ' + JSON.stringify(epingleApres));
+
+    /* Dix motifs traversés ensuite : l'épinglée doit rester, et rester en
+       tête, pendant que les autres passent. */
+    for (let i = 0; i < 12; i++) {
+      await ep.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=' + (500 + i) + '&r=1179x2556', { waitUntil: 'domcontentloaded' });
+      await ep.waitForTimeout(2700);
+    }
+    const apres = await ep.evaluate(() => {
+      const liste = JSON.parse(localStorage.getItem('aplat:motifs') || '[]');
+      return {
+        total: liste.length,
+        epingles: liste.filter(e => e.f === 1).length,
+        tete: liste[0],
+        garde: liste.some(e => e.m === 'arches' && e.s === 101)
+      };
+    });
+    t(apres.total === 10, 'épingle : la liste reste bornée à dix', apres.total + ' entrées');
+    t(apres.garde, 'épingle : le motif épinglé a survécu à douze motifs regardés');
+    t(apres.tete && apres.tete.f === 1 && apres.tete.m === 'arches',
+      'épingle : il tient la tête, les autres passent dessous', JSON.stringify(apres.tete));
+    t(apres.epingles === 1, 'épingle : une seule, personne n\'en a ajouté');
+    await ectx.close();
+  }
+
+  /* --- 24. les trois appareils en une fois
+     Le lien de partage porte déjà la graine ; la même image sur trois écrans
+     ne devait être qu'à un bouton près. Trois fichiers partent l'un après
+     l'autre, aux trois formats de référence, et la note le dit. */
+  {
+    const tctx = await browser.newContext({
+      viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
+    });
+    const tp = await tctx.newPage();
+    const recus = [];
+    tp.on('download', dl => recus.push(dl.suggestedFilename()));
+    await tp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=arches&p=nuit&d=0&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
+    await tp.waitForTimeout(400);
+    await tp.$eval('#btn-formats', e => e.click());
+    await tp.waitForTimeout(200);
+    await tp.$eval('#format-trois', e => e.click());
+    await tp.waitForTimeout(9000);
+    t(recus.length === 3, 'trois appareils : trois fichiers partent', recus.join(', '));
+    t(recus.some(n => /1179x2556/.test(n)) && recus.some(n => /2048x2732/.test(n))
+      && recus.some(n => /2560x1440/.test(n)),
+      'trois appareils : téléphone, tablette et ordinateur', recus.join(', '));
+    t(new Set(recus.map(n => n.split('-')[3])).size === 1,
+      'trois appareils : la même graine sur les trois', recus.join(', '));
+    const note = await tp.evaluate(() => document.getElementById('note-meta')?.textContent || '');
+    t(/Téléphone/.test(note) && /(Mo|Ko)/.test(note),
+      'trois appareils : la note dit ce qui a été enregistré', note);
+    await tctx.close();
   }
 
   await browser.close();

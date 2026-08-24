@@ -68,18 +68,30 @@ export interface Palette {
   fr: string
   en: string
   fond: string
-  couleurs: readonly [string, string, string, string]
+  /**
+   * Deux à cinq teintes posées sur le fond. Les onze palettes livrées en
+   * comptent quatre ; une palette personnalisée en compte ce que la personne a
+   * choisi, et `formes()` les prend par un modulo, ce qui n'a jamais demandé
+   * un nombre fixe.
+   */
+  couleurs: readonly string[]
 }
+
+/**
+ * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
+ * liste. Les paysages se sont détachés des abstraits quand ils ont été trois :
+ * une silhouette de montagne, un couchant et des nuages ne se cherchent pas au
+ * milieu des trames et des damiers.
+ *
+ * Ils sont devenus trois onglets dans le panneau, et le type est donc nommé :
+ * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
+ * passer un groupe qui n'existe pas.
+ */
+export type Groupe = 'abs' | 'pay' | 'fig'
 
 export interface Famille {
   id: IdFamille
-  /**
-   * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
-   * liste. Les paysages se sont détachés des abstraits quand ils ont été
-   * trois : une silhouette de montagne, un couchant et des nuages ne se
-   * cherchent pas au milieu des trames et des damiers.
-   */
-  groupe: 'abs' | 'pay' | 'fig'
+  groupe: Groupe
   fr: string
   en: string
 }
@@ -93,6 +105,22 @@ export interface Mesure {
   libelles: 'clair' | 'sombre'
   voile: number
   contraste: number
+  /**
+   * La luminance moyenne relevée sous la grille d'icônes, avant voile. Elle est
+   * gardée parce que le voile est devenu facultatif : sans elle, on ne saurait
+   * pas dire ce que vaut le contraste d'un fichier exporté sans voile, et le
+   * verdict annoncerait un chiffre qui n'est pas celui de l'image.
+   */
+  luminance: number
+  /**
+   * L'opacité de l'aplat noir de la version sombre, nulle en version claire.
+   *
+   * Elle est à côté du voile parce que c'est le même genre de chose : une
+   * couche que la sonde dose et que le rendu peint. Elle est ici plutôt que
+   * dans un réglage parce qu'elle dépend du motif : ramener toutes les palettes
+   * à la même obscurité demande d'assombrir chacune différemment.
+   */
+  ombre: number
 }
 
 /* ---------- données ------------------------------------------------------- */
@@ -162,6 +190,64 @@ export const RAYONS: readonly string[] = [
   '50%', '3px', '50% 50% 50% 0', '3px 11px 3px 11px', '50% 0 50% 0', '2px',
 ]
 
+/* ---------- palettes personnalisées ---------------------------------------- */
+
+/**
+ * Le registre des palettes que la personne a composées.
+ *
+ * Le moteur ne lit ni n'écrit rien : `lib/palettes.ts` tient le stockage et
+ * l'adresse, et vient poser ici ce qui doit pouvoir être dessiné. Sans ce
+ * registre, `palette()` retomberait sur Lime & crème et l'aperçu montrerait
+ * autre chose que ce qui est choisi.
+ *
+ * Les identifiants personnalisés sont dérivés des couleurs elles-mêmes (voir
+ * `empreintePalette`). Deux conséquences, et ce sont les deux raisons du
+ * choix : modifier une palette lui donne un autre identifiant, donc la mémoire
+ * de `mesurer()` ne peut pas rendre une mesure périmée ; et un lien qui porte
+ * l'identifiant et les couleurs se vérifie tout seul, l'un devant redonner
+ * l'autre.
+ */
+const PERSOS = new Map<string, Palette>()
+
+/** Le préfixe qui distingue une palette composée d'une palette livrée. */
+export const PREFIXE_PERSO = 'x'
+
+/** L'empreinte d'un jeu de couleurs, telle qu'elle nomme la palette. */
+export function empreintePalette(fond: string, couleurs: readonly string[]): string {
+  return PREFIXE_PERSO + empreinte36([fond, ...couleurs].join('-').toUpperCase())
+}
+
+/** FNV-1a complet, en base 36 : court à lire, assez large pour ne pas cogner. */
+function empreinte36(texte: string): string {
+  let h = 2166136261
+  for (let i = 0; i < texte.length; i += 1) {
+    h = Math.imul(h ^ texte.charCodeAt(i), 16777619) >>> 0
+  }
+  return h.toString(36)
+}
+
+/**
+ * Remplace le registre par la liste donnée. Remplace, et n'ajoute pas : une
+ * palette supprimée doit cesser d'être dessinable au même instant, sans quoi
+ * elle survivrait dans l'aperçu après avoir disparu de la liste.
+ */
+export function enregistrerPalettes(liste: readonly (Palette & { id: string })[]): void {
+  PERSOS.clear()
+  for (const entree of liste) {
+    if (!entree.id.startsWith(PREFIXE_PERSO)) continue
+    PERSOS.set(entree.id, {
+      fr: entree.fr,
+      en: entree.en,
+      fond: entree.fond,
+      couleurs: [...entree.couleurs],
+    })
+  }
+}
+
+export function estPaletteCustom(valeur: unknown): boolean {
+  return typeof valeur === 'string' && PERSOS.has(valeur)
+}
+
 /* ---------- listes blanches ------------------------------------------------ */
 
 /**
@@ -173,8 +259,15 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
+/**
+ * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
+ *
+ * Le registre fait donc partie de la liste blanche : une adresse qui nomme une
+ * palette composée que cet appareil ne connaît pas retombe sur la valeur par
+ * défaut, exactement comme une adresse qui nomme n'importe quoi d'autre.
+ */
 export function estPalette(valeur: unknown): valeur is IdPalette {
-  return ORDRE_PALETTES.includes(valeur as IdPalette)
+  return ORDRE_PALETTES.includes(valeur as IdPalette) || estPaletteCustom(valeur)
 }
 
 export function estDensite(valeur: unknown): valeur is Densite {
@@ -182,7 +275,9 @@ export function estDensite(valeur: unknown): valeur is Densite {
 }
 
 export function palette(id: IdPalette): Palette {
-  return estPalette(id) ? PALETTES[id] : PALETTES.lime
+  const perso = PERSOS.get(id as string)
+  if (perso) return perso
+  return ORDRE_PALETTES.includes(id) ? PALETTES[id] : PALETTES.lime
 }
 
 export function famille(id: IdFamille): Famille | undefined {
@@ -236,7 +331,48 @@ export function luminance(r: number, v: number, b: number): number {
 
 type Ctx = CanvasRenderingContext2D
 
-function blob(ctx: Ctx, cx: number, cy: number, r: number, n: number, rnd: Alea, secousse = 0.6) {
+/**
+ * Le sous-ensemble du contexte 2D que le tracé emprunte.
+ *
+ * Il est nommé parce qu'il est devenu un contrat : `lib/svg.ts` en écrit une
+ * seconde implémentation, qui note les formes au lieu de les peindre, et c'est
+ * ce qui permet d'exporter le même motif en vectoriel sans jamais recopier une
+ * famille. Une famille ajoutée est donc exportable en SVG le jour même, et une
+ * primitive ajoutée ici casse la compilation là-bas plutôt qu'à l'exécution.
+ *
+ * Ce qui n'y est pas est exactement ce qu'un SVG ne sait pas rendre : le grain,
+ * qui passe par un motif d'image, et la sonde, qui relit des pixels.
+ */
+export interface Pinceau {
+  fillStyle: string | CanvasGradient | CanvasPattern
+  globalAlpha: number
+  globalCompositeOperation: GlobalCompositeOperation
+  save(): void
+  restore(): void
+  translate(x: number, y: number): void
+  rotate(angle: number): void
+  scale(x: number, y: number): void
+  setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
+  beginPath(): void
+  closePath(): void
+  moveTo(x: number, y: number): void
+  lineTo(x: number, y: number): void
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void
+  arc(
+    x: number, y: number, rayon: number,
+    depart: number, fin: number, antihoraire?: boolean,
+  ): void
+  arcTo(x1: number, y1: number, x2: number, y2: number, rayon: number): void
+  ellipse(
+    x: number, y: number, rx: number, ry: number, rotation: number,
+    depart: number, fin: number, antihoraire?: boolean,
+  ): void
+  roundRect?(x: number, y: number, largeur: number, hauteur: number, rayon: number): void
+  fill(regle?: CanvasFillRule): void
+  fillRect(x: number, y: number, largeur: number, hauteur: number): void
+}
+
+function blob(ctx: Pinceau, cx: number, cy: number, r: number, n: number, rnd: Alea, secousse = 0.6) {
   const points: [number, number][] = []
   for (let i = 0; i < n; i += 1) {
     const angle = (i / n) * Math.PI * 2
@@ -260,7 +396,7 @@ function blob(ctx: Ctx, cx: number, cy: number, r: number, n: number, rnd: Alea,
   ctx.fill()
 }
 
-function arche(ctx: Ctx, cx: number, base: number, largeur: number, hauteur: number) {
+function arche(ctx: Pinceau, cx: number, base: number, largeur: number, hauteur: number) {
   const r = largeur / 2
   const h = Math.max(hauteur, r * 1.02)
   ctx.beginPath()
@@ -273,7 +409,7 @@ function arche(ctx: Ctx, cx: number, base: number, largeur: number, hauteur: num
 }
 
 function marguerite(
-  ctx: Ctx, cx: number, cy: number, R: number, n: number, rotation: number,
+  ctx: Pinceau, cx: number, cy: number, R: number, n: number, rotation: number,
   petale: string, coeur: string,
 ) {
   ctx.fillStyle = petale
@@ -289,7 +425,7 @@ function marguerite(
   ctx.fill()
 }
 
-function gelule(ctx: Ctx, x: number, y: number, largeur: number, hauteur: number) {
+function gelule(ctx: Pinceau, x: number, y: number, largeur: number, hauteur: number) {
   const r = Math.min(largeur, hauteur) / 2
   ctx.beginPath()
   if (ctx.roundRect) {
@@ -309,7 +445,7 @@ function gelule(ctx: Ctx, x: number, y: number, largeur: number, hauteur: number
   ctx.fill()
 }
 
-function etoile(ctx: Ctx, cx: number, cy: number, R: number, pointes: number, creux: number, rotation: number) {
+function etoile(ctx: Pinceau, cx: number, cy: number, R: number, pointes: number, creux: number, rotation: number) {
   ctx.beginPath()
   for (let i = 0; i < pointes * 2; i += 1) {
     const a = rotation + (i * Math.PI) / pointes
@@ -323,7 +459,7 @@ function etoile(ctx: Ctx, cx: number, cy: number, R: number, pointes: number, cr
   ctx.fill()
 }
 
-function feuille(ctx: Ctx, x: number, y: number, longueur: number, largeur: number, angle: number) {
+function feuille(ctx: Pinceau, x: number, y: number, longueur: number, largeur: number, angle: number) {
   ctx.save()
   ctx.translate(x, y)
   ctx.rotate(angle)
@@ -336,7 +472,7 @@ function feuille(ctx: Ctx, x: number, y: number, longueur: number, largeur: numb
   ctx.restore()
 }
 
-function croissant(ctx: Ctx, cx: number, cy: number, R: number, angle: number, entaille: number) {
+function croissant(ctx: Pinceau, cx: number, cy: number, R: number, angle: number, entaille: number) {
   ctx.beginPath()
   ctx.arc(cx, cy, R, 0, Math.PI * 2)
   ctx.moveTo(cx + Math.cos(angle) * R * entaille + R * 0.9, cy + Math.sin(angle) * R * entaille)
@@ -345,7 +481,7 @@ function croissant(ctx: Ctx, cx: number, cy: number, R: number, angle: number, e
 }
 
 function tournesol(
-  ctx: Ctx, cx: number, cy: number, R: number, rnd: Alea,
+  ctx: Pinceau, cx: number, cy: number, R: number, rnd: Alea,
   petale: string, petale2: string, coeur: string, graines: string, unite: number,
 ) {
   const n = 13 + Math.floor(rnd() * 6)
@@ -387,7 +523,7 @@ function tournesol(
  * indépendant de la résolution.
  */
 export function formes(
-  ctx: Ctx, W: number, H: number, id: IdFamille,
+  ctx: Pinceau, W: number, H: number, id: IdFamille,
   C: readonly string[], densite: Densite, rnd: Alea, unite: number,
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
@@ -1230,6 +1366,60 @@ export function peindreGrain(ctx: Ctx, W: number, H: number): void {
   ctx.restore()
 }
 
+/* ---------- la version sombre ------------------------------------------------ */
+
+/**
+ * Où la version sombre amène le motif : une luminance, pas une opacité.
+ *
+ * C'est le point qu'une première version avait manqué, et il tient à ceci : le
+ * voile de lisibilité vise déjà 0,17, et il y arrive. Poser par-dessus un aplat
+ * noir d'opacité fixe ne donnait donc rien de plus sombre, le voile de l'autre
+ * version ayant fait le même chemin par un autre moyen. Mesuré : sur huit
+ * palettes du catalogue, la version dite sombre ressortait de la même clarté
+ * que la claire, à un centième près, et sur deux elle ressortait plus claire.
+ *
+ * Une cible, elle, ne peut pas être rattrapée par le voile : 0,05 est
+ * nettement sous le seuil que le voile vise, et l'écart se voit. Elle rend
+ * aussi toutes les palettes également sombres, ce qui est exactement ce qu'on
+ * attend d'une version sombre : la même obscurité, quel que soit le motif.
+ *
+ * Et elle porte son propre verdict. À 0,05, le rapport des libellés clairs est
+ * de 10,5:1, très au-dessus du seuil AA : la version sombre est lisible par
+ * construction, pour toutes les familles et toutes les palettes.
+ */
+export const CIBLE_SOMBRE = 0.05
+
+/** Au-delà, il ne resterait plus de motif à regarder. */
+export const OMBRE_MAX = 0.85
+
+/**
+ * L'opacité de l'aplat noir qui amène `L` sur la cible.
+ *
+ * L'inverse de `luminanceAssombrie`, borné des deux côtés. En bas parce qu'un
+ * motif déjà plus sombre que la cible n'a rien à gagner à être éclairci, ce
+ * qu'un aplat noir ne saurait de toute façon pas faire ; en haut parce qu'au
+ * delà il ne resterait qu'un rectangle noir.
+ */
+export function forceSombre(L: number, cible = CIBLE_SOMBRE): number {
+  if (!(L > cible)) return 0
+  return Math.min(OMBRE_MAX, 1 - (cible / L) ** (1 / 2.4))
+}
+
+/**
+ * La luminance relative d'une image assombrie par un aplat noir.
+ *
+ * Un aplat noir à l'opacité `a` multiplie chaque canal sRGB par `1 - a`. La
+ * luminance relative, elle, passe par la puissance 2,4 de la linéarisation :
+ * elle est donc multipliée par `(1 - a)` élevé à cette puissance.
+ *
+ * C'est ce qui permet à la sonde d'assombrir sans repeindre : la moyenne des
+ * pixels assombris est la moyenne assombrie, et le résultat est au pixel près
+ * celui qu'on obtiendrait en mesurant l'image peinte.
+ */
+export function luminanceAssombrie(L: number, force: number): number {
+  return Math.max(0, L) * (1 - force) ** 2.4
+}
+
 /* ---------- sonde de lisibilité --------------------------------------------- */
 
 /*
@@ -1263,11 +1453,12 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 
 export function mesurer(
   id: IdFamille, idPalette: IdPalette, densite: Densite, graine: number,
-  largeur: number, hauteur: number,
+  largeur: number, hauteur: number, sombre = false,
 ): Mesure {
   const P = palette(idPalette)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
-  const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
+  const cle =
+    `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}|${sombre ? 's' : 'c'}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -1303,6 +1494,19 @@ export function mesurer(
     }
   }
 
+  /* L'ombre est dosée ici, avant tout le reste, et c'est ce qui rend le verdict
+     vrai : la couleur des libellés, la force du voile et le rapport de
+     contraste sont ceux du fichier assombri, pas ceux d'un autre fichier
+     corrigé après coup. Assombrir la luminance revient exactement à assombrir
+     l'image, parce que la sonde en fait la moyenne et qu'un aplat noir
+     multiplie chaque pixel par le même facteur.
+
+     Le voile qui suit trouvera presque toujours qu'il n'a plus rien à faire :
+     la cible sombre est sous la sienne. C'est voulu, et c'est ce qui évite deux
+     couches qui se disputent la même luminance. */
+  const ombre = sombre ? forceSombre(L) : 0
+  if (ombre > 0) L = luminanceAssombrie(L, ombre)
+
   const libelles = L > 0.5 ? 'sombre' : 'clair'
   let voile = 0
   if (libelles === 'clair') {
@@ -1318,7 +1522,7 @@ export function mesurer(
     : L * (1 - voile) + 0.95 * voile
   const contraste = libelles === 'clair' ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068
 
-  const mesure: Mesure = { libelles, voile, contraste }
+  const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre }
   memoire.set(cle, mesure)
   if (memoire.size > MEMOIRE_MAX) {
     const premiere = memoire.keys().next()
@@ -1355,7 +1559,20 @@ export function alphaDuVoile(u: number, force: number): number {
   return Math.min(0.62, force * facteur)
 }
 
-export function peindreVoile(ctx: Ctx, W: number, H: number, mesure: Mesure): void {
+/**
+ * L'aplat noir de la version sombre : un seul rectangle, à l'opacité dosée.
+ *
+ * Uniforme, là où le voile est dégradé. Le voile ne couvre que la zone des
+ * icônes parce qu'il n'a rien à faire ailleurs ; l'ombre, elle, est la version
+ * du fond d'écran, et un fond d'écran sombre l'est d'un bord à l'autre.
+ */
+export function peindreOmbre(ctx: Pinceau, W: number, H: number, mesure: Mesure): void {
+  if (!(mesure.ombre > 0.004)) return
+  ctx.fillStyle = `rgba(0,0,0,${mesure.ombre.toFixed(4)})`
+  ctx.fillRect(0, 0, W, H)
+}
+
+export function peindreVoile(ctx: Pinceau, W: number, H: number, mesure: Mesure): void {
   const force = mesure.voile
   if (!(force > 0.004)) return
   const rgb = mesure.libelles === 'clair' ? '11,18,33' : '250,247,236'
@@ -1381,52 +1598,60 @@ export interface Motif {
 }
 
 /**
- * Dessine l'image entière et renvoie ce que la sonde a mesuré.
+ * Ce qui distingue deux fichiers d'un même motif.
  *
- * `mesureW` et `mesureH` : les dimensions à utiliser pour la lisibilité quand
- * elles diffèrent de celles du canevas. L'aperçu est dessiné dans une boîte de
- * quelques pixels plus petite que la géométrie visée (la bordure de l'appareil)
- * et doit malgré tout mesurer le format réellement exporté, sans quoi le voile
- * brûlé dans l'aperçu n'est pas celui du fichier.
+ * Ni l'un ni l'autre ne touche à la famille, à la palette, à la densité ou à
+ * la graine : ce sont les quatre réglages qui font l'image, et ils sont
+ * ailleurs. Ces deux-là décident de ce qui est brûlé par-dessus.
  */
-export function dessiner(
-  ctx: Ctx, W: number, H: number, motif: Motif,
-  mesureW = 0, mesureH = 0,
-): Mesure {
-  const mesure = mesurer(
-    motif.famille, motif.palette, motif.densite, motif.graine,
-    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H,
-  )
-  rendre(ctx, W, H, motif, mesure, true)
-  return mesure
+export interface OptionsRendu {
+  /** Le voile de lisibilité est-il peint. Oui par défaut, comme depuis toujours. */
+  voile?: boolean
+  /** La version sombre : le motif assombri, dans le fichier lui-même. */
+  sombre?: boolean
+  /**
+   * Les dimensions à utiliser pour la lisibilité quand elles diffèrent de
+   * celles du canevas. L'aperçu est dessiné dans une boîte de quelques pixels
+   * plus petite que la géométrie visée (la bordure de l'appareil) et doit
+   * malgré tout mesurer le format réellement exporté, sans quoi le voile brûlé
+   * dans l'aperçu n'est pas celui du fichier.
+   */
+  mesureW?: number
+  mesureH?: number
 }
 
 /**
- * Le même rendu, voile de lisibilité en moins.
+ * Dessine l'image entière et renvoie ce que la sonde a mesuré.
  *
- * Il ne sert qu'à une chose : montrer côte à côte, sur la page d'accueil, ce
- * que le voile change sous une grille d'icônes. Il passe par le même `rendre`
- * que le rendu complet plutôt que de refaire l'ordre des couches ailleurs :
- * une copie de cet ordre finirait par diverger, et la démonstration montrerait
- * alors autre chose que ce que le produit fait.
- *
- * Aucun export ne l'emprunte : le fichier téléchargé porte toujours son voile.
+ * Un seul point d'entrée pour tous les rendus du produit : l'aperçu, les
+ * vignettes, la page d'accueil, l'export. Il y en a eu deux un temps, l'un avec
+ * voile et l'autre sans, et la seconde option a suffi à montrer pourquoi c'est
+ * une mauvaise idée : chaque nouveau choix aurait doublé la liste. Les choix
+ * sont donc dans un sac nommé, et l'ordre des couches n'est écrit qu'une fois.
  */
-export function dessinerSansVoile(
-  ctx: Ctx, W: number, H: number, motif: Motif,
-  mesureW = 0, mesureH = 0,
+export function dessiner(
+  ctx: Ctx, W: number, H: number, motif: Motif, options: OptionsRendu = {},
 ): Mesure {
+  const { voile = true, sombre = false, mesureW = 0, mesureH = 0 } = options
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
-    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H,
+    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre,
   )
-  rendre(ctx, W, H, motif, mesure, false)
+  rendre(ctx, W, H, motif, mesure, voile)
   return mesure
 }
 
-/* L'ordre des couches, écrit une fois : le fond, les formes, le voile, le
-   grain. Le grain passe en dernier parce qu'il doit aussi casser les bandes du
-   voile, et non seulement celles des aplats. */
+/* L'ordre des couches, écrit une fois : le fond, les formes, l'ombre de la
+   version sombre, le voile, le grain.
+
+   L'ombre et le voile viennent tous deux de la mesure, et dans cet ordre. Le
+   voile est dosé pour la luminance de l'image qu'il couvre ; assombrir après
+   lui donnerait un voile dosé pour une image qui n'existe plus, donc des
+   libellés mesurés sur autre chose que le fichier. La sonde les dose dans le
+   même ordre, et c'est ce qui fait qu'ils ne se disputent pas.
+
+   Le grain passe en dernier parce qu'il doit aussi casser les bandes du voile,
+   et non seulement celles des aplats. */
 function rendre(
   ctx: Ctx, W: number, H: number, motif: Motif, mesure: Mesure, voile: boolean,
 ): void {
@@ -1442,6 +1667,7 @@ function rendre(
   formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
     alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
 
+  peindreOmbre(ctx, W, H, mesure)
   if (voile) peindreVoile(ctx, W, H, mesure)
   peindreGrain(ctx, W, H)
   ctx.restore()
@@ -1469,34 +1695,20 @@ export function niveau(mesure: Mesure): Niveau {
 }
 
 /**
- * L'assombrissement qu'un système applique au fond d'écran en thème sombre.
+ * La même mesure, telle qu'elle se lirait si le voile n'était pas peint.
  *
- * Aucune plateforme ne publie sa valeur : 0,4 est une approximation, et
- * l'interface le dit plutôt que de laisser croire à une mesure. Ce qui compte
- * est le sens de la variation, qui ne dépend pas de la valeur exacte : un
- * libellé clair y gagne, un libellé sombre y perd.
+ * Le voile est devenu facultatif : quelqu'un qui le retire reçoit une image
+ * plus claire que celle que la sonde a jugée, et le verdict doit alors porter
+ * sur ce fichier-là. Le calcul repart de la luminance relevée avant voile,
+ * qui est justement ce que `mesurer()` garde pour ça.
  */
-export const ASSOMBRISSEMENT = 0.4
-
-/**
- * La même mesure, telle qu'elle se lirait sur un fond assombri.
- *
- * Le fichier, lui, ne change pas : le voile qui y est brûlé a été calculé pour
- * le fond tel quel, et c'est un système d'exploitation qui assombrit à
- * l'affichage. On ne touche donc ni à `libelles` ni à `voile` ; seul le rapport
- * de contraste est recalculé, et `niveau()` suit tout seul.
- *
- * Le calcul remonte à la luminance d'après voile en inversant la formule qui
- * l'a produite, l'assombrit, puis redescend. Un aplat noir posé à l'opacité `a`
- * multiplie chaque canal sRGB par `1 - a` ; la luminance relative, elle, passe
- * par la puissance 2,4 de la linéarisation, d'où l'exposant.
- */
-export function assombrir(mesure: Mesure, force = ASSOMBRISSEMENT): Mesure {
-  const clair = mesure.libelles === 'clair'
-  const avant = clair ? 1.05 / mesure.contraste - 0.05 : mesure.contraste * 0.068 - 0.05
-  const apres = Math.max(0, avant) * (1 - force) ** 2.4
+export function sansVoile(mesure: Mesure): Mesure {
+  if (!(mesure.voile > 0)) return mesure
+  const L = mesure.luminance
   return {
     ...mesure,
-    contraste: clair ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068,
+    voile: 0,
+    contraste: mesure.libelles === 'clair' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.068,
   }
 }
+

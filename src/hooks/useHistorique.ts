@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Motif } from '../lib/moteur'
-import { ajouter, ecrire, effacer, lire, versEntree, type Entree } from '../lib/historique'
+import {
+  ajouter, basculer, ecrire, effacer, identique, lire, versEntree, type Entree,
+} from '../lib/historique'
 
 /**
  * Le temps qu'un motif doit rester à l'écran avant d'entrer dans l'historique.
@@ -23,9 +25,18 @@ export const DELAI = 2500
  */
 export function useHistorique(motif: Motif): {
   liste: Entree[]
+  epingler: () => void
   oublier: () => void
 } {
   const [liste, setListe] = useState<Entree[]>(lire)
+
+  /* Le motif en cours, lu par `epingler` sans entrer dans ses dépendances :
+     un rappel qui change d'identité à chaque réglage refait le rendu de la
+     carte entière, donc des dix vignettes. */
+  const courant = useRef(motif)
+  useEffect(() => {
+    courant.current = motif
+  }, [motif])
 
   useEffect(() => {
     const minuterie = setTimeout(() => {
@@ -39,10 +50,31 @@ export function useHistorique(motif: Motif): {
     return () => clearTimeout(minuterie)
   }, [motif])
 
+  /**
+   * Épingle ou désépingle le motif en cours.
+   *
+   * Il n'a pas à attendre les deux secondes et demie : épingler est un geste,
+   * pas un passage, et faire répondre « pas encore » à un bouton qu'on vient
+   * d'appuyer serait le pire des deux mondes. Le motif entre donc dans la
+   * liste au moment de l'épingle s'il n'y était pas.
+   */
+  const epingler = useCallback(() => {
+    setListe((precedente) => {
+      const entree = versEntree(courant.current)
+      const base = precedente.some((autre) => identique(autre, entree))
+        ? precedente
+        : (ajouter(precedente, entree) as Entree[])
+      const suivante = basculer(base, entree)
+      if (suivante === precedente) return precedente
+      ecrire(suivante)
+      return suivante as Entree[]
+    })
+  }, [])
+
   const oublier = useCallback(() => {
     effacer()
     setListe([])
   }, [])
 
-  return { liste, oublier }
+  return { liste, epingler, oublier }
 }

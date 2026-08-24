@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef, useState, type CSSProperties } from 'react'
+import { useRef, type CSSProperties } from 'react'
 import {
-  ASSOMBRISSEMENT, assombrir, famille, palette,
+  famille, palette, sansVoile,
   type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
 import {
@@ -44,6 +44,8 @@ export function Scene({
   resolution,
   type,
   mesure,
+  voile,
+  sombre,
   langue,
   textes,
   calculEnCours,
@@ -55,6 +57,10 @@ export function Scene({
   resolution: Resolution
   type: TypeAppareil
   mesure: Mesure | null
+  /** Le voile de lisibilité est-il peint dans le fichier, donc dans l'aperçu. */
+  voile: boolean
+  /** La version sombre est-elle demandée : le motif assombri, dans le fichier. */
+  sombre: boolean
   langue: Langue
   textes: Textes
   calculEnCours: boolean
@@ -66,9 +72,6 @@ export function Scene({
   const tailleBoite = useTaille(boite)
   const fenetre = useTailleFenetre()
   const instant = useHorloge(langue)
-  /* Une aide à la lecture, pas un réglage : elle ne part ni dans l'URL ni dans
-     le fichier, et repart à zéro au rechargement. */
-  const [assombri, setAssombri] = useState(false)
 
   const vide = !resolution.largeur || !resolution.hauteur
 
@@ -126,15 +129,29 @@ export function Scene({
   const nomDensite = [textes.reglages.calme, textes.reglages.moyen, textes.reglages.dense][
     motif.densite
   ]
+  /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
+     ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne peut
+     pas le déduire des quatre réglages qu'il énumère. */
   const description =
     vide || calculEnCours
       ? null
-      : remplir(textes.scene.alternative, {
+      : `${remplir(textes.scene.alternative, {
           famille: nomFamille,
           palette: palette(motif.palette)[langue],
           densite: nomDensite,
           graine: String(motif.graine),
-        })
+        })}${sombre ? ` ${textes.scene.alternativeSombre}` : ''}`
+
+  /* Le verdict porte sur le fichier tel qu'il sera, et il n'a qu'un chiffre à
+     donner. Il en a annoncé deux un temps, celui du fichier et celui d'un fond
+     qu'un thème sombre aurait assombri : c'était l'aveu qu'on jugeait une image
+     qu'on ne livrait pas. La version sombre est maintenant un fichier, mesuré
+     comme l'autre, et le verdict n'a plus rien à simuler.
+
+     Le voile retiré, lui, change le contraste du fichier sans changer la
+     mesure : c'est la seule correction qui reste, et elle porte bien sur ce
+     qu'on télécharge. */
+  const brute = vide || !mesure ? null : voile ? mesure : sansVoile(mesure)
 
   /* La maquette ne dépend que du type d'appareil, de la langue et de la
      géométrie : c'est ce qui remet son ajustement à zéro, rien d'autre. */
@@ -157,21 +174,12 @@ export function Scene({
             <Apercu
               motif={motif}
               resolution={resolution}
+              voile={voile}
+              sombre={sombre}
               largeur={Math.max(0, (geometrie?.largeur ?? 0) - 8)}
               hauteur={Math.max(0, (geometrie?.hauteur ?? 0) - 8)}
               description={description}
               revision={revision}
-            />
-          )}
-
-          {/* L'assombrissement est peint par-dessus le motif et sous la
-              maquette : ce sont bien les libellés sur un fond assombri qu'on
-              juge. Le fichier téléchargé, lui, ne le porte pas. */}
-          {!vide && assombri && (
-            <span
-              className="apercu-assombri"
-              aria-hidden="true"
-              style={{ background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})` }}
             />
           )}
 
@@ -204,6 +212,7 @@ export function Scene({
               </span>
             </div>
           )}
+
         </div>
       </div>
 
@@ -212,13 +221,11 @@ export function Scene({
       </p>
 
       <Verdict
-        mesure={vide || !mesure ? null : assombri ? assombrir(mesure) : mesure}
+        mesure={brute}
         textes={textes}
         langue={langue}
         replie={verdictReplie}
-        bascule={!replie}
-        assombri={assombri}
-        onAssombrir={() => setAssombri((precedent) => !precedent)}
+        voileRetire={!voile}
       />
     </section>
   )

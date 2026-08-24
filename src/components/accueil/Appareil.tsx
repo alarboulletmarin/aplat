@@ -22,6 +22,12 @@ import { Toile } from './Toile'
  * de la place, elle ne fait pas tenir un appareil dans le reste d'une colonne.
  * Il n'en reste qu'à publier `--mu`, le module dont dépendent toutes les
  * tailles de la maquette, et qui vaut un centième du petit côté.
+ *
+ * L'écran est un bouton quand `onChanger` est donné : c'est ce qui rend la page
+ * entière manipulable, et c'est la démonstration la plus courte du produit.
+ * Le bouton est une couche posée sur l'appareil et non son enveloppe : envelopper
+ * la boîte changerait sa géométrie, dont dépendent le module de la maquette et
+ * le rapport d'aspect du canevas.
  */
 export function Appareil({
   motif,
@@ -31,6 +37,8 @@ export function Appareil({
   textes,
   description,
   className,
+  onChanger,
+  etiquette,
 }: {
   motif: Motif
   /** Le format visé : la sonde mesure celui du fichier, pas celui de la boîte. */
@@ -41,6 +49,10 @@ export function Appareil({
   textes: Textes
   description?: string
   className: string
+  /** Tire un autre motif. Absent, l'écran reste une image. */
+  onChanger?: () => void
+  /** Le nom accessible du bouton, obligatoire dès qu'il y en a un. */
+  etiquette?: string
 }) {
   const cadre = useRef<HTMLDivElement>(null)
   const { largeur, hauteur } = useTaille(cadre)
@@ -84,6 +96,14 @@ export function Appareil({
             signature={signature}
           />
         ))}
+      {onChanger && (
+        <button
+          type="button"
+          className="appareil-declic"
+          aria-label={etiquette}
+          onClick={onChanger}
+        />
+      )}
     </div>
   )
 }

@@ -44,7 +44,7 @@ const OUT = path.resolve(ICI, '../.shots');
       ['langue', '#liste-langue'],
       ['theme', '#liste-theme'],
       ['palette', '#liste-palettes'],
-      ['famille', '#liste-abstraits']
+      ['famille', '#liste-familles']
     ]) {
       const elh = await page.$(sel);
       if (!elh) continue;

@@ -98,20 +98,24 @@ describe('hauteur de la scène', () => {
 })
 
 describe('hauteur de la vignette', () => {
-  it('reste entre 120 et 180 px, proportionnée à la fenêtre', () => {
-    expect(hauteurVignette({ largeur: 390, hauteur: 844 })).toBe(180)
-    expect(hauteurVignette({ largeur: 320, hauteur: 568 })).toBe(125)
-    expect(hauteurVignette({ largeur: 300, hauteur: 400 })).toBe(120)
+  /* La part est descendue de 22 à 18 % le jour où la barre a gagné sa ligne du
+     voile : la place se reprend là où elle sert le moins, et une vignette de
+     silhouette la supporte mieux qu'une grille de familles. */
+  it('reste entre 98 et 156 px, proportionnée à la fenêtre', () => {
+    expect(hauteurVignette({ largeur: 390, hauteur: 844 })).toBe(152)
+    expect(hauteurVignette({ largeur: 320, hauteur: 568 })).toBe(102)
+    expect(hauteurVignette({ largeur: 300, hauteur: 400 })).toBe(98)
+    expect(hauteurVignette({ largeur: 430, hauteur: 1200 })).toBe(156)
   })
 
   it('rend au moins la moitié de l’écran aux grilles, sur un téléphone', () => {
     /* La recette : sur iPhone en portrait, une fois défilé, il doit rester au
        moins 55 % de la hauteur pour les motifs. La scène repliée vaut la
        vignette, ses marges (32 px) et le verdict d'une ligne (57 px) ; la
-       barre d'action en vaut 84. */
+       barre d'action en vaut 138 depuis qu'elle porte la ligne du voile. */
     const fenetre = { largeur: 390, hauteur: 844 }
     const scene = hauteurVignette(fenetre) + 32 + 57
-    const libre = (fenetre.hauteur - scene - 84) / fenetre.hauteur
+    const libre = (fenetre.hauteur - scene - 138) / fenetre.hauteur
     expect(libre).toBeGreaterThan(0.55)
   })
 })

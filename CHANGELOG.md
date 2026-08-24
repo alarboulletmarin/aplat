@@ -9,6 +9,185 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : le voile se voit, se dit, et se retire
+
+- **Une ligne sous le bouton Télécharger dit ce que le fichier contient.** Le
+  voile de lisibilité y était brûlé sans que rien de l'écran ne le dise : il est
+  déjà peint dans l'aperçu, et personne ne compare une image à une image qu'il
+  n'a pas vue. Quelqu'un qui téléchargeait sans avoir lu la présentation
+  recevait donc une image plus sombre que celle qu'il croyait avoir choisie.
+- **Un interrupteur l'enlève**, du fichier comme de l'aperçu. Le retrait part
+  dans l'adresse (`v=0`) et dans le nom du fichier, parce qu'il change l'image ;
+  le verdict de lisibilité se recalcule pour le motif nu, et le nomme autrement
+  qu'un voile nul mesuré : l'un est ce que la sonde a trouvé, l'autre est une
+  décision.
+- La barre gagne cinquante-quatre pixels sur téléphone, et tout ce qui pouvait
+  être repris ailleurs l'a été : rembourrage et interligne de la barre, ceux de
+  la scène sous 360 px, et la vignette repliée passée de 22 à 18 % de la
+  fenêtre. Deux planchers de `tools/repli.mjs` baissent d'un et de trois points,
+  et la raison est écrite à côté des chiffres.
+
+### Ajouté : un rideau pour voir la même graine en clair et en sombre
+
+- **Un trait qu'on fait glisser sur l'aperçu**, et la moitié qu'il découvre se
+  voit comme un thème sombre l'assombrirait. Il remplace la bascule
+  « Assombri », qui montrait l'un *puis* l'autre : une limite qui passe sous les
+  mêmes libellés se juge d'un regard, deux états successifs demandent de se
+  souvenir du premier.
+- **Il s'ouvre au milieu.** Tout à droite, l'aperçu montrait le fichier entier
+  et rien d'autre : il fallait avoir l'idée de tirer le trait pour découvrir
+  qu'il y avait deux états, et toute autre position montrait du sombre sans
+  montrer de clair à côté. Un comparateur qui s'ouvre fermé ne compare rien.
+- **Il ne se ferme jamais.** Poussé à fond, il remplissait l'aperçu de sombre :
+  il n'y avait plus rien d'autre à l'écran que cette image, on téléchargeait le
+  fichier clair qu'on n'avait pas sous les yeux, et l'aperçu cessait d'être le
+  fichier. Une bande du fichier reste maintenant toujours visible, un cinquième
+  de la largeur. Le rideau ne peut plus être pris pour un aperçu ; il ne peut
+  que comparer.
+- **Le verdict annonce les deux rapports à la fois**, celui du fichier et celui
+  du fond assombri, au lieu d'en basculer un au passage du trait. Le niveau
+  annoncé reste celui du fichier, qui est ce qu'on télécharge. Le rideau ne
+  touche plus à l'état du tout : glisser ne coûte aucun rendu.
+- C'est un `input[type=range]`, pas un geste maison : les flèches, Origine et
+  Fin y marchent sans une ligne de script. Le curseur fait deux pixels de large,
+  sans quoi la valeur d'un `range`, qui se calcule sur la course du curseur,
+  décalerait le trait de sa moitié au bord. La bande saisissable ne fait que
+  quarante-quatre pixels de haut : plein cadre, elle prendrait le geste de
+  défilement sur téléphone.
+- Le fichier ne change toujours pas d'un octet, et la vérification le compare
+  pour de bon.
+- **Il est fluide, et ça n'allait pas de soi.** Une limite qui saute ne se juge
+  pas. Trois corrections, mesurées au processeur bridé six fois : les maquettes
+  d'écran sont mémoïsées, parce que `useAjustement` force un recalcul de mise en
+  page sur ses cent vingt nœuds à chaque rendu ; les boîtes se déplacent par
+  `transform` et non par `left` ni `clip-path` ; et les deux jetons de position
+  sont posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil,
+  qui les aurait transmis à toute la maquette. Cinq millisecondes de recalcul de
+  style par image et une image sur quatre perdue avant, moins de deux
+  millisecondes et aucune tâche longue après. L'état React, lui, suit le geste
+  sept fois par seconde et non soixante : l'image est en direct, le chiffre du
+  verdict aussi, sans rendu intercalé entre deux images.
+
+### Ajouté : les palettes qu'on écrit soi-même
+
+- **De trois à six couleurs, un nom, douze palettes au plus**, gardées sur
+  l'appareil et supprimables une à une. Onze palettes suffisent à faire un fond
+  d'écran, elles ne suffisent pas à faire *le sien* : une marque a ses deux
+  teintes, un écran OLED demande un noir vrai.
+- **Le lien les emporte.** Une palette composée n'existe que sur l'appareil qui
+  l'a composée ; sans ses teintes, le lien ouvrirait un autre motif chez la
+  personne qui le reçoit. Son nom interne est l'empreinte de ses couleurs, si
+  bien que les deux se vérifient l'un l'autre : une adresse dont l'empreinte ne
+  correspond pas aux couleurs est refusée. Une palette reçue est utilisable tout
+  de suite et n'est écrite nulle part tant qu'on ne l'a pas enregistrée.
+- **L'éditeur montre le motif, pas trois carrés de couleur.** Il est dans le
+  panneau, à sa place, et la vignette se redessine à chaque teinte recevable.
+  Deux champs par couleur : le nuancier du système quand on cherche, les six
+  chiffres quand on sait.
+- Le moteur n'en connaît qu'un registre : `formes()` prend ses couleurs par un
+  modulo et n'a jamais demandé un nombre fixe. Le rendu ne fait donc aucune
+  différence entre une palette livrée et une palette écrite.
+
+### Ajouté : quatre sorties de plus, et les trois appareils en une fois
+
+- **PNG 2x, WebP, SVG, presse-papiers, et les trois appareils**, derrière un
+  dépli attaché au bouton Télécharger. Elles ne servent pas la même chose, et
+  chacune le dit en une ligne : le PNG doublé pour un écran qu'on ne connaît pas
+  encore, le WebP pour envoyer, le SVG pour reprendre le motif ailleurs, le
+  presse-papiers pour une conversation.
+- **Le SVG ne recopie pas une ligne du moteur.** `formes()` ne connaît qu'un
+  pinceau, et `src/lib/svg.ts` en fournit un second, qui note les tracés au lieu
+  de les peindre : une famille ajoutée est exportable en vectoriel le jour même,
+  et une primitive ajoutée sans être notée là-bas casse la compilation plutôt
+  que de sortir un fichier faux. Le grain n'y passe pas, c'est une trame
+  d'image, et la description du fichier le dit.
+- **Les trois appareils partent en trois téléchargements**, pas en archive : un
+  fichier compressé demanderait une bibliothèque embarquée pour un gain nul sur
+  un téléphone où l'on ne sait pas l'ouvrir. Ils sont encodés en série, parce
+  que trois canevas de plusieurs mégapixels alloués ensemble sont justement ce
+  qu'un appareil modeste refuse.
+
+### Changé : « Surprends-moi » rejoint la barre, les familles passent en onglets
+
+- **Les deux tirages au sort sont côte à côte**, dans la barre, avec
+  « Télécharger ». Ils répondent à la même question et on ne sait pas lequel on
+  veut avant de voir ; les séparer, l'un dans la barre et l'autre à mille pixels
+  plus bas, revenait à cacher la moitié du geste. Le primaire ne cède rien :
+  sous 600 px les deux secondaires gardent leur pictogramme et rendent leur mot,
+  qui reste dans leur nom accessible, et sous 360 px c'est le pictogramme du
+  primaire qui cède, jamais son libellé.
+- **Trente-deux familles en trois onglets.** À plat, dans une colonne étroite,
+  « Vagues » et « Poissons » étaient à mille pixels l'un de l'autre : le coût
+  n'était pas le défilement, c'était qu'on ne pouvait pas comparer deux motifs
+  éloignés. Rien n'est caché pour autant : les trois onglets sont visibles
+  ensemble et chacun porte le nombre de familles qu'il contient.
+- **L'onglet ouvert est celui de la famille en cours.** C'est là qu'est la
+  mémoire du dernier onglet, et elle vaut mieux qu'un réglage enregistré : elle
+  est dans l'adresse, donc elle survit à un rechargement comme à un lien partagé
+  sans rien écrire sur l'appareil.
+
+### Ajouté : l'épingle dans « Derniers motifs »
+
+- **Six épingles au plus, sur dix entrées.** Elles gardent celui qu'on a aimé
+  pendant qu'on en regarde dix autres, tiennent la tête de la liste et ne
+  tombent jamais. Les quatre places qui restent suffisent à voir passer les
+  motifs : une liste qu'on épingle en entier cesserait d'être un historique.
+- L'épingle porte sur le motif en cours, depuis un bouton en tête de carte : une
+  épingle par vignette ferait vingt cibles à vingt pixels de côté, là où le
+  produit n'en accepte aucune sous quarante-quatre. Elle n'attend pas les deux
+  secondes et demie du passage, parce que c'est un geste et non un passage.
+
+### Changé : la page d'accueil se manipule
+
+- **Chaque écran de la présentation est un bouton.** Le toucher tire un autre
+  motif, et une ligne sous les appels le dit plutôt que de le laisser deviner.
+  C'est la démonstration la plus courte du produit, puisque c'est exactement ce
+  que fait « Surprends-moi » dans l'outil.
+- **Quinze rendus sur une page, ça se paie.** Aux toiles qui n'étaient peintes
+  qu'à l'approche du champ de vision s'ajoutent deux précautions : on peint
+  quand le fil principal est libre, et on descend à un pixel par point dès que
+  l'appareil demande à économiser (`Save-Data`, ou le mouvement réduit). Sans la
+  première, les toiles d'une même section devenaient visibles ensemble et se
+  peignaient l'une derrière l'autre dans la même image, ce qui refaisait
+  exactement le pic que le rendu différé cherchait à éviter.
+
+### Corrigé : une bascule ne se dérobe plus sous le doigt
+
+- **L'interrupteur du voile et l'épingle changeaient de place quand on les
+  appuyait.** Trois causes réunies : le libellé change à chaque appui et sa
+  largeur avec lui, la phrase voisine raccourcit, et « Effacer » apparaît à côté
+  de l'épingle dès que la liste cesse d'être vide.
+- Les deux mots occupent maintenant la même cellule, le bouton fait la largeur
+  du plus long dans les deux langues, le texte voisin prend toute la place qui
+  reste, et la bascule est le dernier élément de sa rangée. Le trait ne
+  s'épaissit plus non plus à l'état enfoncé : la compensation par le rembourrage
+  ne tient pas sur un trait d'un pixel et demi, que les navigateurs arrondissent
+  selon la densité de l'écran. L'aplat inversé suffit, et les onglets de
+  familles suivent la même règle.
+- Une vérification relève la boîte des deux bascules avant et après l'appui, au
+  dixième de pixel.
+
+### Corrigé : la maquette d'écran retrouve sa hauteur toute seule
+
+- La mémoïsation des maquettes a mis au jour un défaut plus ancien :
+  `useAjustement` gardait sa signature dans une référence, si bien que la remise
+  à plein ne provoquait aucun rendu quand le compte était déjà plein. La passe
+  de mesure qui suit n'arrivait jamais d'elle-même, et la boucle ne devait sa
+  convergence qu'aux rendus que le parent lui donnait par ailleurs. La grille
+  dépassait de trois pixels sur un téléphone de 360 px. La signature est
+  maintenant dans l'état, et la boucle se suffit à elle-même.
+
+### Ajouté : un lien de soutien, dans le pied
+
+- **Une tasse dessinée, pas une image de CDN.** Le bouton officiel de Ko-fi est
+  servi par leur serveur ; la page ne fait aucune requête vers un tiers, et
+  `tools/shot.mjs` le vérifie. Le pictogramme est donc dessiné en aplats, comme
+  tous les autres.
+- Il vit dans le pied des deux pages, à côté de la licence et de la source, et
+  rien dans le produit ne le rappelle : ni bandeau, ni relance après un
+  téléchargement, ni compteur. Aplat est gratuit, sans compte et sans pub, et le
+  restera.
+
 ### Ajouté : la marque ramène chez soi, et le 4K se choisit d'un geste
 
 - **La marque, en haut, est un lien vers « / ».** Depuis l'application, c'est

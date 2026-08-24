@@ -15,6 +15,8 @@ import type { Resolution } from '../lib/resolution'
 export function Apercu({
   motif,
   resolution,
+  voile,
+  sombre,
   largeur,
   hauteur,
   description,
@@ -22,6 +24,10 @@ export function Apercu({
 }: {
   motif: Motif
   resolution: Resolution
+  /** Le voile est-il peint dans le fichier. L'aperçu suit, sans quoi il ment. */
+  voile: boolean
+  /** La version sombre est-elle demandée. Même règle : l'aperçu est le fichier. */
+  sombre: boolean
   /** Taille rendue de la boîte, en pixels CSS. */
   largeur: number
   hauteur: number
@@ -49,13 +55,19 @@ export function Apercu({
 
     const ctx = noeud.getContext('2d', { alpha: false })
     if (!ctx) return
-    dessiner(ctx, pw, ph, motif, resolution.largeur, resolution.hauteur)
+    dessiner(ctx, pw, ph, motif, {
+      voile,
+      sombre,
+      mesureW: resolution.largeur,
+      mesureH: resolution.hauteur,
+    })
     noeud.dataset.peint = '1'
 
     /* Le fondu dit « le motif a changé ». Il n'a rien à dire quand seule la
        fenêtre a bougé : sur téléphone, le repli de la barre d'URL pendant le
        défilement faisait clignoter l'aperçu. */
-    const signature = [motif.famille, motif.palette, motif.densite, motif.graine].join('|')
+    const signature =
+      [motif.famille, motif.palette, motif.densite, motif.graine, voile, sombre].join('|')
     const change = precedent.current !== null && precedent.current !== signature
     precedent.current = signature
     if (change && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -66,7 +78,7 @@ export function Apercu({
         noeud.style.opacity = '1'
       })
     }
-  }, [motif, resolution.largeur, resolution.hauteur, largeur, hauteur, revision])
+  }, [motif, resolution.largeur, resolution.hauteur, voile, sombre, largeur, hauteur, revision])
 
   return (
     <canvas

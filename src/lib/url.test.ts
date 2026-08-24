@@ -15,6 +15,8 @@ import {
   ecrireAffichage, ecrireUrl, langueParDefaut, lireAffichage, lireUrl,
   REGLAGES_PAR_DEFAUT,
 } from './url'
+import { enregistrerPalettes } from './moteur'
+import { composer, versPalette } from './palettes'
 import { depuisSaisie } from './resolution'
 
 const DETECTE = { largeur: 1179, hauteur: 2556 }
@@ -136,5 +138,103 @@ describe('les réglages d’affichage, communs aux deux pages', () => {
     const complet = lireUrl(recherche, DETECTE)
     const affichage = lireAffichage(recherche)
     expect(affichage).toEqual({ langue: complet.langue, theme: complet.theme })
+  })
+})
+
+/**
+ * Le voile est un réglage depuis qu'un interrupteur le commande : il change le
+ * fichier, donc il est dans l'adresse. Son absence vaut « oui », parce que
+ * c'est ce que le produit fait depuis toujours et que les liens écrits avant
+ * lui doivent continuer d'ouvrir la même image.
+ */
+describe('voile de lisibilité', () => {
+  it('vaut oui par défaut, et ne s’écrit que retiré', () => {
+    expect(lireUrl('', DETECTE).voile).toBe(true)
+    const avec = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(avec).not.toContain('v=')
+    const sans = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, voile: false }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(sans).toContain('v=0')
+    expect(lireUrl(sans, DETECTE).voile).toBe(false)
+  })
+
+  it('ne se retire que sur « 0 », jamais sur une valeur abîmée', () => {
+    /* Une adresse cassée ne doit pas rendre une image plus claire que celle
+       qu'on croit avoir choisie. */
+    for (const brut of ['v=', 'v=1', 'v=non', 'v=00', 'v=false']) {
+      expect(lireUrl(`?${brut}`, DETECTE).voile, brut).toBe(true)
+    }
+  })
+})
+
+/**
+ * La version sombre est un fichier, pas un aperçu : elle voyage donc dans
+ * l'adresse comme le voile. Elle a remplacé un rideau qu'on tirait sur
+ * l'aperçu, qui ne voyageait nulle part parce qu'il ne montrait rien qu'on pût
+ * télécharger.
+ */
+describe('version sombre', () => {
+  it('vaut claire par défaut, et ne s’écrit que sombre', () => {
+    expect(lireUrl('', DETECTE).sombre).toBe(false)
+    const claire = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(claire).not.toContain('n=')
+    const sombre = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, sombre: true }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(sombre).toContain('n=1')
+    expect(lireUrl(sombre, DETECTE).sombre).toBe(true)
+  })
+
+  it('ne s’allume que sur « 1 », jamais sur une valeur abîmée', () => {
+    for (const brut of ['n=', 'n=0', 'n=oui', 'n=true', 'n=01']) {
+      expect(lireUrl(`?${brut}`, DETECTE).sombre, brut).toBe(false)
+    }
+  })
+
+  it('ne se confond pas avec le thème de l’application', () => {
+    /* Deux réglages voisins par le nom et étrangers par l'effet : `t=sombre`
+       habille la page, `n=1` assombrit le fichier. Un lien peut porter l'un,
+       l'autre, ou les deux, et aucun des deux ne doit décider pour l'autre. */
+    const seulLeTheme = lireUrl('?t=sombre', DETECTE)
+    expect(seulLeTheme.theme).toBe('sombre')
+    expect(seulLeTheme.sombre).toBe(false)
+    const seuleLImage = lireUrl('?n=1', DETECTE)
+    expect(seuleLImage.theme).toBe('systeme')
+    expect(seuleLImage.sombre).toBe(true)
+  })
+})
+
+/**
+ * Une palette composée n'existe que sur l'appareil qui l'a composée. Le lien
+ * porte donc ses teintes, sans quoi il ouvrirait un autre motif chez la
+ * personne qui le reçoit.
+ */
+describe('palette composée dans l’adresse', () => {
+  const MIENNE = composer('Ma marque', ['#101010', '#DFF478', '#FF6648'])!
+
+  it('écrit les teintes à côté du nom, et se relit', () => {
+    enregistrerPalettes([versPalette(MIENNE)])
+    const reglages = {
+      ...REGLAGES_PAR_DEFAUT,
+      palette: MIENNE.id as never,
+      largeurSaisie: String(DETECTE.largeur),
+      hauteurSaisie: String(DETECTE.hauteur),
+    }
+    const requete = ecrireUrl(reglages, DETECTE, DETECTE)
+    expect(requete).toContain(`p=${MIENNE.id}`)
+    expect(requete).toContain('k=101010-DFF478-FF6648')
+    expect(lireUrl(requete, DETECTE)).toEqual(reglages)
+    enregistrerPalettes([])
+  })
+
+  it('retombe sur la palette par défaut quand l’appareil ne la connaît pas', () => {
+    enregistrerPalettes([])
+    const lu = lireUrl(`?p=${MIENNE.id}&k=101010-DFF478-FF6648`, DETECTE)
+    expect(lu.palette).toBe(REGLAGES_PAR_DEFAUT.palette)
+  })
+
+  it('n’écrit aucune teinte pour les palettes livrées', () => {
+    expect(ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)).not.toContain('k=')
   })
 })

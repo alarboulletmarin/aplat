@@ -141,7 +141,7 @@ describe('promesses de l’interface', () => {
      Un qualificatif se cale sur une bande, et la bande se nomme. */
   it('donne un mot et un conseil à chaque bande de niveau()', () => {
     for (const contraste of [1, 2.99, 3, 4.49, 4.5, 21]) {
-      const rang = niveau({ libelles: 'clair', voile: 0, contraste })
+      const rang = niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste })
       for (const [langue, dictionnaire] of Object.entries(DICTIONNAIRES)) {
         expect(dictionnaire.lisibilite[rang], `${langue} ${contraste}`).toBeTruthy()
       }

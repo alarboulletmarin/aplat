@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import {
-  estDensite, estFamille, estPalette,
+  estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
   type Densite, type IdFamille, type IdPalette, type Langue,
 } from './moteur'
+import { encoderTeintes } from './palettes'
 import { RES_MAX, RES_MIN, type Resolution } from './resolution'
 
 /**
@@ -24,6 +25,25 @@ export interface Reglages {
   palette: IdPalette
   densite: Densite
   graine: number
+  /**
+   * Le voile de lisibilité est-il brûlé dans le fichier.
+   *
+   * C'est un réglage et non un affichage : il change le PNG téléchargé, donc il
+   * a sa place ici, dans l'adresse, avec les quatre autres. Son absence vaut
+   * « oui », parce que c'est ce que le produit fait par défaut et depuis
+   * toujours : les liens écrits avant lui continuent d'ouvrir la même image.
+   */
+  voile: boolean
+  /**
+   * La version sombre : le motif assombri, dans le fichier lui-même.
+   *
+   * À ne pas confondre avec `theme`, juste au-dessus, qui habille
+   * l'application. Celui-ci ne change rien à l'interface et tout à l'image :
+   * c'est un aplat noir brûlé dans le PNG, au même titre que le voile, et il a
+   * sa place ici pour la même raison. Son absence vaut « claire », qui est ce
+   * que le produit a toujours livré.
+   */
+  sombre: boolean
   largeurSaisie: string
   hauteurSaisie: string
 }
@@ -37,6 +57,8 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   palette: 'lime',
   densite: 1,
   graine: 7314,
+  voile: true,
+  sombre: false,
   largeurSaisie: '',
   hauteurSaisie: '',
 }
@@ -120,6 +142,14 @@ export function lireUrl(
     palette: estPalette(palette) ? palette : REGLAGES_PAR_DEFAUT.palette,
     densite: estDensite(densite) ? densite : REGLAGES_PAR_DEFAUT.densite,
     graine: graine > 0 && graine <= GRAINE_MAX ? graine : REGLAGES_PAR_DEFAUT.graine,
+    /* Seul « 0 » retire le voile. Tout le reste, y compris l'absence, le
+       laisse : une adresse abîmée ne doit pas rendre une image plus claire que
+       celle qu'on croit avoir choisie. */
+    voile: q.get('v') !== '0',
+    /* Symétrique du voile, et à l'envers pour la même raison : seul « 1 »
+       assombrit. Une adresse abîmée rend l'image que le produit livre par
+       défaut, jamais une plus sombre que celle qu'on croit avoir choisie. */
+    sombre: q.get('n') === '1',
     langue: affichage.langue,
     theme: affichage.theme,
     largeurSaisie: String(resolutionValide ? l : detecte.largeur),
@@ -143,7 +173,17 @@ export function ecrireUrl(
   q.set('p', reglages.palette)
   q.set('d', String(reglages.densite))
   q.set('s', String(reglages.graine))
+  if (!reglages.voile) q.set('v', '0')
+  if (reglages.sombre) q.set('n', '1')
   q.set('l', reglages.langue)
+  /* Une palette composée à la main n'existe que sur l'appareil qui l'a
+     composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre
+     motif chez la personne qui le reçoit, ce qui est exactement ce que le
+     produit promet de ne jamais faire. L'identifiant est l'empreinte de ces
+     teintes : les deux se vérifient l'un l'autre à la lecture. */
+  if (reglages.palette.startsWith(PREFIXE_PERSO)) {
+    q.set('k', encoderTeintes(palette(reglages.palette)))
+  }
   const surMesure =
     resolution.largeur > 0 && resolution.hauteur > 0 &&
     !(resolution.largeur === detecte.largeur && resolution.hauteur === detecte.hauteur)
