@@ -56,7 +56,7 @@ export const VOILE: Motif = { famille: 'vagues', palette: 'lime', densite: 1, gr
 
 /**
  * Les douze de la galerie : les couples famille et palette de la maquette,
- * dans son ordre. Les trois groupes du moteur y passent, et les onze palettes
+ * dans son ordre. Les quatre groupes du moteur y passent, et les onze palettes
  * sont toutes représentées au moins une fois.
  */
 /**
@@ -100,6 +100,6 @@ export const GALERIE: readonly Motif[] = [
   { famille: 'agrumes', palette: 'menthe', densite: 1, graine: 7726 },
   { famille: 'persiennes', palette: 'orage', densite: 1, graine: 3095 },
   { famille: 'tresse', palette: 'prune', densite: 1, graine: 1663 },
-  { famille: 'ecailles', palette: 'ardoise', densite: 1, graine: 4870 },
+  { famille: 'acropole', palette: 'ardoise', densite: 1, graine: 4870 },
   { famille: 'vases', palette: 'soleil', densite: 1, graine: 2231 },
 ]

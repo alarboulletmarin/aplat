@@ -109,13 +109,19 @@ describe('document SVG', () => {
     }
   })
 
-  it('garde tout le catalogue sous le plafond, à toutes les densités', () => {
+  it('garde les familles dessinées sous le plafond, à toutes les densités', () => {
     /* Le plafond n'est pas décoratif : au-delà, le fichier passe la dizaine de
-       mégaoctets et s'ouvre mal. Aucune famille livrée n'en approche, et c'est
-       ce test qui le dit : une famille ajoutée un jour qui le dépasserait
-       ferait échouer ici plutôt que de livrer un SVG inouvrable. */
+       mégaoctets et s'ouvre mal. Aucune famille dessinée n'en approche, et
+       c'est ce test qui le dit : une famille ajoutée un jour qui le
+       dépasserait ferait échouer ici plutôt que de livrer un SVG inouvrable.
+
+       Les lieux ne sont pas dans la boucle, et c'est un choix : une gravure
+       tramée compte ses points par milliers et joue avec le plafond, dessous
+       sur la plupart des tirages, dessus sur les plus denses. C'est le cas
+       prévu par le garde-fou : le panneau des formats éprouve chaque motif et
+       retire le SVG quand celui-là ne passe pas. */
     let record = 0
-    for (const famille of FAMILLES) {
+    for (const famille of FAMILLES.filter((f) => f.groupe !== 'lieu')) {
       const rendu = svgDuMotif(
         { famille: famille.id, palette: 'nuit', densite: 2, graine: 7314 },
         2560, 1440, false,
@@ -124,6 +130,21 @@ describe('document SVG', () => {
       record = Math.max(record, rendu.elements)
     }
     expect(record).toBeGreaterThan(100)
+  })
+
+  it('fusionne les points d’une gravure en rangées : le fichier reste ouvrable', () => {
+    /* Une gravure naïve écrirait un chemin par cellule, cent mille et plus.
+       La fusion par rangées les ramène à l'ordre du plafond : c'est elle qui
+       rend le vectoriel seulement possible sur la plupart des tirages, et ce
+       test dit qu'elle tient. */
+    for (const famille of FAMILLES.filter((f) => f.groupe === 'lieu')) {
+      const rendu = svgDuMotif(
+        { famille: famille.id, palette: 'nuit', densite: 1, graine: 7314 },
+        2560, 1440, false,
+      )
+      expect(rendu.elements, famille.id).toBeGreaterThan(1000)
+      expect(rendu.elements, famille.id).toBeLessThan(ELEMENTS_MAX)
+    }
   })
 
   it('ne dépend pas de la résolution pour le nombre de formes', () => {

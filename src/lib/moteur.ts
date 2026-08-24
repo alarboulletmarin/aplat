@@ -9,6 +9,8 @@
  * ce qu'on voit derrière les icônes est exactement le fichier téléchargé.
  */
 
+import { estLieu, peindreLieu, type IdLieu } from './lieux'
+
 export type IdFamille =
   /* abstraits */
   | 'vagues'
@@ -38,6 +40,8 @@ export type IdFamille =
   | 'sommets'
   | 'horizon'
   | 'nuages'
+  /* lieux : les gravures tramées de lib/lieux.ts */
+  | IdLieu
   /* figures */
   | 'fleurs'
   | 'tournesol'
@@ -83,16 +87,18 @@ export interface Palette {
 }
 
 /**
- * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
- * liste. Les paysages se sont détachés des abstraits quand ils ont été trois :
- * une silhouette de montagne, un couchant et des nuages ne se cherchent pas au
- * milieu des trames et des damiers.
+ * `abs` abstraits, `pay` paysages, `lieu` lieux, `fig` figures : les quatre
+ * groupes de la liste. Les paysages se sont détachés des abstraits quand ils
+ * ont été trois : une silhouette de montagne, un couchant et des nuages ne se
+ * cherchent pas au milieu des trames et des damiers. Les lieux se sont
+ * détachés des paysages pour la même raison : une gravure à deux tons ne se
+ * cherche pas au milieu des aplats.
  *
- * Ils sont devenus trois onglets dans le panneau, et le type est donc nommé :
+ * Ils sont devenus des onglets dans le panneau, et le type est donc nommé :
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'pay' | 'fig'
+export type Groupe = 'abs' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -150,10 +156,10 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les trente-sept familles, dans l'ordre de la liste : abstraits, paysages,
- * figures. L'ordre est celui de la maquette, et il compte : on descend du
- * plus géométrique au plus figuratif, et le premier de chaque groupe en donne
- * le ton.
+ * Les quarante et une familles, dans l'ordre de la liste : abstraits,
+ * paysages, lieux, figures. L'ordre est celui de la maquette, et il compte :
+ * on descend du plus géométrique au plus figuratif, et le premier de chaque
+ * groupe en donne le ton.
  */
 export const FAMILLES: readonly Famille[] = [
   { id: 'vagues', groupe: 'abs', fr: 'Vagues', en: 'Waves' },
@@ -182,6 +188,10 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
+  { id: 'acropole', groupe: 'lieu', fr: 'Acropole', en: 'Acropolis' },
+  { id: 'phare', groupe: 'lieu', fr: 'Phare', en: 'Lighthouse' },
+  { id: 'pyramides', groupe: 'lieu', fr: 'Pyramides', en: 'Pyramids' },
+  { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
@@ -591,6 +601,15 @@ export function formes(
   C: readonly string[], densite: Densite, rnd: Alea, unite: number,
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
+
+  /* Les lieux ont leur propre geste, la gravure tramée, et leur propre
+     module : quatre scènes décrites par un champ, une trame qui les grave.
+     Ils passent par le même pinceau, la même graine et la même palette que
+     tout le monde ; seul le dessin change de nature. */
+  if (estLieu(id)) {
+    peindreLieu(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
 
   if (id === 'blobs') {
     const n = [3, 6, 10][densite]

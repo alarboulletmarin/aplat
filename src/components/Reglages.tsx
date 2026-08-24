@@ -18,23 +18,24 @@ import { EditeurPalette } from './EditeurPalette'
  * modifiable si besoin.
  */
 
-/** Les trois groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
+/** Les quatre groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
 const GROUPES = [
   { id: 'abs', cle: 'groupeAbstraits' },
   { id: 'pay', cle: 'groupePaysages' },
+  { id: 'lieu', cle: 'groupeLieux' },
   { id: 'fig', cle: 'groupeFigures' },
 ] as const satisfies readonly { id: Groupe; cle: keyof Textes['reglages'] }[]
 
 /**
- * Les trente-deux familles, en trois onglets.
+ * Les familles, en quatre onglets.
  *
  * La grille plate posait un problème qu'aucun défilement ne résout : « Vagues »
  * et « Poissons » sont à mille pixels l'un de l'autre dans une colonne étroite,
- * et on ne peut donc pas les comparer. Trois onglets ramènent chaque liste à ce
+ * et on ne peut donc pas les comparer. Les onglets ramènent chaque liste à ce
  * qu'un écran montre, et le geste pour passer de l'une à l'autre coûte un appui
  * au lieu d'un défilement.
  *
- * Rien n'est caché pour autant : les trois onglets sont visibles ensemble, ils
+ * Rien n'est caché pour autant : les onglets sont visibles ensemble, ils
  * portent le nombre de familles qu'ils contiennent, et l'onglet ouvert est
  * toujours celui de la famille en cours. C'est là que se trouve la mémoire du
  * dernier onglet, et elle est meilleure qu'un réglage enregistré : elle est
@@ -69,8 +70,8 @@ export function ChoixFamille({
   const contient = liste.some((f) => f.id === valeur)
 
   /* Les flèches parcourent les onglets sans les ouvrir : ouvrir au passage
-     remplacerait trente-deux vignettes à chaque touche, et le clavier
-     traverserait trois rendus complets pour atteindre le troisième onglet. */
+     remplacerait toutes les vignettes du groupe à chaque touche, et le clavier
+     traverserait plusieurs rendus complets pour atteindre le dernier onglet. */
   const surTouche = (evenement: KeyboardEvent<HTMLDivElement>) => {
     const deplacements = ['ArrowRight', 'ArrowLeft', 'Home', 'End']
     if (!deplacements.includes(evenement.key)) return
