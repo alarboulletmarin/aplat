@@ -42,6 +42,23 @@ button {
   margin: 0;
 }
 
+/* Rien de ce qui s'appuie n'est un texte à copier. Variante et Surprends-moi
+   sont faits pour être martelés, et le deuxième clic d'une rafale se mettait à
+   surligner le libellé du bouton, puis le texte voisin. Les champs, eux,
+   restent sélectionnables, et la ligne est explicite : sous Safari, un
+   `user-select: none` posé sur le label parent descend jusque dans le champ
+   qu'il contient. */
+button,
+label,
+select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
