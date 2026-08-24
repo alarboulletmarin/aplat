@@ -1,13 +1,15 @@
 /* Chromium.
  *
- * Playwright attend une révision précise de Chromium ; celle installée ici est
- * plus ancienne. On désigne l'exécutable plutôt que d'en télécharger un autre.
+ * Playwright retrouve seul le navigateur que `npx playwright install chromium`
+ * a posé pour sa version. Un chemin écrit en dur ici ne vaudrait que sur une
+ * machine : `CHROMIUM_EXE` reste l'échappatoire des environnements qui ne
+ * peuvent pas télécharger et désignent un exécutable déjà présent.
  */
 import { chromium } from 'playwright'
-const EXE = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 async function launch(opts = {}) {
-  return chromium.launch(Object.assign({ executablePath: EXE }, opts));
+  const exe = process.env.CHROMIUM_EXE;
+  return chromium.launch(exe ? Object.assign({ executablePath: exe }, opts) : opts);
 }
 
 export { launch }
