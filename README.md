@@ -77,9 +77,11 @@ plein, disque à moitié, triangle.
 Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
 la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Il
 s'ouvre au milieu, les deux conditions sont donc là d'emblée, sous les mêmes
-libellés ; le fichier est à gauche du trait. Le verdict annonce les deux
-rapports côte à côte, celui du fichier et celui du fond assombri, plutôt que
-d'en basculer un au passage du trait.
+libellés ; le fichier est à gauche du trait, et une bande en reste toujours
+visible, un cinquième de la largeur, parce qu'un rideau qui se ferme
+entièrement cesse d'être une comparaison pour devenir un aperçu faux. Le
+verdict annonce les deux rapports côte à côte, celui du fichier et celui du
+fond assombri, plutôt que d'en basculer un au passage du trait.
 Il remplace une bascule qui montrait l'un *puis* l'autre : une limite qui passe
 sous les mêmes libellés se juge d'un regard, deux états successifs demandent de
 se souvenir du premier. C'est un `input[type=range]` et non un geste maison, si

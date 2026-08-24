@@ -596,6 +596,20 @@ comparateur qui s'ouvre fermé ne compare rien. Au milieu, les deux conditions
 sont là d'emblée, sous les mêmes libellés, et le fichier reste entier : il est à
 gauche du trait, et le verdict le nomme.
 
+**Il ne se ferme jamais**, et c'est la règle qui compte le plus. Poussé à fond,
+il remplissait l'aperçu de sombre : il n'y avait plus rien d'autre à l'écran que
+cette image, on téléchargeait le fichier clair qu'on n'avait pas sous les yeux,
+et l'aperçu cessait d'être le fichier. Le mot « simulation » dans le détail du
+verdict ne rattrapait rien, parce qu'on ne lit pas une note quand l'image occupe
+tout le champ. Une bande du fichier reste donc toujours visible, un cinquième de
+la largeur : le rideau ne peut plus être pris pour un aperçu, il ne peut que
+comparer, et c'est exactement ce qu'il est. L'autre extrémité, elle, va au bout
+sans rien promettre de faux, le fichier entier étant le fichier.
+
+C'est le cas général d'une règle qui vaut partout : **rien ne doit pouvoir
+occuper l'aperçu en entier sans être le fichier**. Une aide à la lecture qui
+remplit le cadre cesse d'être une aide et devient un mensonge.
+
 **Le verdict annonce les deux rapports à la fois**, celui du fichier et celui du
 fond assombri, plutôt que d'en basculer un au passage du trait. Deux chiffres
 posés côte à côte se lisent mieux qu'un seul qui change de sens sans prévenir,

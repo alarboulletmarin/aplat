@@ -38,6 +38,12 @@ d'écran derrière mes icônes ?**
   et rien d'autre : il fallait avoir l'idée de tirer le trait pour découvrir
   qu'il y avait deux états, et toute autre position montrait du sombre sans
   montrer de clair à côté. Un comparateur qui s'ouvre fermé ne compare rien.
+- **Il ne se ferme jamais.** Poussé à fond, il remplissait l'aperçu de sombre :
+  il n'y avait plus rien d'autre à l'écran que cette image, on téléchargeait le
+  fichier clair qu'on n'avait pas sous les yeux, et l'aperçu cessait d'être le
+  fichier. Une bande du fichier reste maintenant toujours visible, un cinquième
+  de la largeur. Le rideau ne peut plus être pris pour un aperçu ; il ne peut
+  que comparer.
 - **Le verdict annonce les deux rapports à la fois**, celui du fichier et celui
   du fond assombri, au lieu d'en basculer un au passage du trait. Le niveau
   annoncé reste celui du fichier, qui est ce qu'on télécharge. Le rideau ne

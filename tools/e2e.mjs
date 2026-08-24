@@ -994,6 +994,23 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(depart.empreinte === tire.empreinte,
       'rideau : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
 
+    /* Le défaut que ce contrôle tient fermé : poussé à fond, le rideau
+       remplissait l'aperçu de sombre. Il n'y avait plus rien d'autre à l'écran
+       que cette image, on téléchargeait le fichier clair qu'on n'avait pas sous
+       les yeux, et l'aperçu cessait d'être le fichier. Il se borne désormais :
+       une bande du fichier reste toujours visible, et le navigateur ramène de
+       lui-même toute valeur poussée au-delà. */
+    await glisser(0);
+    await dp.waitForTimeout(400);
+    const fond = await lire();
+    t(fond.position === '20', 'rideau : il refuse d\'aller jusqu\'au bout du sombre',
+      `poussé à 0, il s\'arrête à ${fond.position}`);
+    t(fond.decale === 20, 'rideau : une bande du fichier reste visible, quoi qu\'on fasse',
+      String(100 - fond.decale) + ' % assombri au plus');
+    t(rapports(fond.detail).join() === deux.join(),
+      'rideau : au bout de sa course, le verdict dit toujours les deux rapports',
+      rapports(fond.detail).join(' puis '));
+
     /* Le geste ne doit rien coûter d'autre que de la composition : les jetons
        du rideau sont posés sur l'aplat et sur le cadre du rideau, jamais sur
        l'appareil, dont le sous-arbre est la maquette entière. Posés là, ils
@@ -1011,7 +1028,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'rideau : ses jetons ne touchent pas au sous-arbre de la maquette',
       JSON.stringify(jetons));
 
-    /* Et le fichier, pour de vrai. */
+    /* Et le fichier, pour de vrai, pris au plus sombre que le rideau permette :
+       c'est exactement là qu'on croyait télécharger l'image qu'on regardait. */
     const [dl2] = await Promise.all([
       dp.waitForEvent('download', { timeout: 30000 }),
       dp.$eval('#btn-export', e => e.click())

@@ -59,6 +59,23 @@ const RAYON_POIGNEE = 15
  */
 const RIDEAU_DEPART = 50
 
+/**
+ * Jusqu'où le rideau peut aller vers le sombre : jamais jusqu'au bout.
+ *
+ * Poussé à fond, il remplissait l'aperçu de sombre, et il n'y avait plus rien
+ * d'autre à l'écran que cette image. On téléchargeait alors le fichier clair,
+ * qu'on n'avait pas sous les yeux : l'aperçu avait cessé d'être le fichier, ce
+ * que le produit promet partout ailleurs. Le mot « simulation » dans le détail
+ * du verdict ne rattrapait rien, parce qu'on ne lit pas une note quand l'image
+ * occupe tout le champ.
+ *
+ * Une bande du fichier reste donc toujours visible, un cinquième de la largeur.
+ * Le rideau ne peut plus se fermer, il ne peut que comparer, et c'est
+ * exactement ce qu'il est. L'autre extrémité, elle, va au bout sans rien
+ * promettre de faux : le fichier entier est le fichier.
+ */
+const RIDEAU_MIN = 20
+
 export function Scene({
   cadre,
   motif,
@@ -100,6 +117,8 @@ export function Scene({
      bascule qu'il remplace, mais continu : un thème sombre ne se juge pas à
      « avant » et « après » posés l'un après l'autre, il se juge en voyant la
      limite passer sur le motif, sous les mêmes libellés.
+
+     Il ne va jamais jusqu'au bout du côté sombre : voir `RIDEAU_MIN`.
 
      L'état ne suit pas la glissade image par image, et c'est délibéré. Pendant
      qu'on glisse, seuls deux jetons CSS sont écrits sur l'appareil : rien ne
@@ -366,7 +385,7 @@ export function Scene({
                 type="range"
                 id="rideau-glissiere"
                 className="rideau-glissiere"
-                min={0}
+                min={RIDEAU_MIN}
                 max={100}
                 step={1}
                 defaultValue={separation}
@@ -374,7 +393,7 @@ export function Scene({
                 aria-valuetext={
                   separation >= 100
                     ? textes.lisibilite.rideauClair
-                    : separation <= 0
+                    : separation <= RIDEAU_MIN
                       ? textes.lisibilite.rideauSombre
                       : remplir(textes.lisibilite.rideauValeur, {
                           n: String(100 - separation),

@@ -162,6 +162,8 @@ export const fr = {
     rideau: 'Comparer le clair et le sombre',
     rideauTitre: 'Glisse pour découvrir la même graine telle qu’un thème sombre l’assombrit',
     rideauClair: 'Clair',
+    /* Le nom du bout de la course, pas celui d'un aperçu entièrement sombre :
+       le rideau s'arrête avant, et laisse toujours voir une bande du fichier. */
     rideauSombre: 'Sombre',
     rideauValeur: 'assombri sur {n} % de la largeur',
     /* Le mot « à peu près » n'est pas une précaution oratoire : aucune
