@@ -293,17 +293,18 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Trente-deux familles, trois groupes.**
+**Trente-sept familles, trois groupes.**
 
-- **Abstraits** (dix-neuf) : les douze libres, qui sèment des formes sur un
-  aplat, et sept réglées, où une grille porte le motif. Les secondes se
-  reconnaissent à une répétition qu'on peut suivre du doigt, ce que les blobs
-  et le terrazzo n'ont pas.
+- **Abstraits** (vingt-trois) : les douze libres, qui sèment des formes sur un
+  aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
+  répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
+  pas ; et quatre déformées, où un champ lisse plie une forme répétée, ce qui
+  se reconnaît à une règle qu'on voit se tordre.
 - **Paysages** (trois) : Sommets, Horizon, Nuages. Elles ont un haut et un bas,
   et c'est ce qui les sépare des abstraits. C'est aussi ce qui les rend
   commodes en fond d'écran : la grille d'icônes tombe dans leur partie basse,
   et la sonde de lisibilité y trouve un aplat plutôt qu'un motif.
-- **Figures** (dix) : des objets posés sur un fond, reconnaissables un par un.
+- **Figures** (onze) : des objets posés sur un fond, reconnaissables un par un.
 
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
 Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
@@ -322,8 +323,8 @@ un motif plus ajouré, ou perd son horizon.
 **L'aperçu est le fichier.** Le canevas d'aperçu porte exactement le rapport
 d'aspect de la résolution visée (la bordure de la maquette d'appareil est
 défalquée), et la mesure de lisibilité porte sur les dimensions d'export, pas
-sur celles du canevas. Vérifié sur les 1 056 combinaisons : même voile, même
-verdict.
+sur celles du canevas. Vérifié sur les 1 056 combinaisons des trente-deux
+premières familles : même voile, même verdict.
 
 **Le voile de lisibilité.** Après les formes, le moteur mesure la luminance
 moyenne de la zone des icônes, choisit la couleur de libellé la plus sûre
@@ -363,20 +364,21 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **1 056 combinaisons** (32 familles × 11 palettes × 3 densités) en
+Mesuré sur les **1 221 combinaisons** (37 familles × 11 palettes × 3 densités) en
 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
 | médiane | 0,94 Mo | **0,43 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,72 Mo** |
-| maximum | 2,33 Mo | **1,04 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,75 Mo** |
+| maximum | 2,33 Mo | **1,35 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
-la seconde série. Le maximum est monté de 0,98 à 1,04 Mo : il est tenu par
-Azulejos en densité dense, dont le carrelage remplit la page de courbes, et
-c'est le prix honnête d'un motif qui couvre tout plutôt que de semer des formes
-sur un aplat.
+la seconde série, puis à celle des cinq familles déformées. Le maximum est
+passé de 0,98 à 1,04 Mo avec Azulejos en densité dense, dont le carrelage
+remplit la page de courbes, puis à 1,35 Mo avec Mirage en dense, dont chaque
+rayure pliée traverse la page de haut en bas : c'est le prix honnête d'un
+motif qui couvre tout plutôt que de semer des formes sur un aplat.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -437,7 +439,7 @@ appareil modeste refuse.
 L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
 dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
 que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
-champ de vision, pas toutes d'un coup : six ou sept sur trente-deux au premier
+champ de vision, pas toutes d'un coup : six ou sept sur trente-sept au premier
 affichage d'un téléphone.
 
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
@@ -485,7 +487,7 @@ thèmes et les deux langues :
   familles une vraie barre d'onglets, et l'historique une barre d'outils : un
   arrêt de tabulation par groupe, flèches et Début/Fin. Les flèches des onglets
   déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait trois
-  rendus complets de trente-deux vignettes pour atteindre le troisième ;
+  rendus complets de trente-sept vignettes pour atteindre le troisième ;
 - le rideau clair/sombre est un `input[type=range]`, pas un geste maison : les
   flèches, Origine et Fin y marchent sans une ligne de script, et son nom
   accessible dit la position. `touch-action: pan-y` laisse le geste vertical au
@@ -585,9 +587,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 056 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 221 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 32 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 37 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

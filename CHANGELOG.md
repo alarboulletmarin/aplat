@@ -9,6 +9,27 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : cinq familles, une houle et des rampes
+
+- **Trente-sept familles au lieu de trente-deux.** Quatre abstraites où un
+  champ lisse plie une forme répétée, quand les réglées la posaient sur une
+  grille : Mirage, des rayures verticales pliées par un remous qui serpente ;
+  Terrasses, des courbes de niveau emboîtées qui descendent la palette ;
+  Bassin, des galets arrondis et le fond qui circule entre eux en un seul
+  réseau ; Strates, des couches verticales bordées chacune de sa propre
+  houle. Et une figure : Corolle, une seule grande fleur à la manière des
+  papiers découpés, dont les nervures sont le fond qui affleure entre les
+  pétales.
+- **Le moteur gagne deux gestes, pas un second moteur.** Une houle
+  déterministe, trois sinusoïdes tirées à la graine, et un mélange de teintes
+  qui tend des rampes à travers la palette. Tout le reste passe par le
+  pinceau existant : les cinq familles sont des aplats fermés, exportables en
+  SVG le jour même, et les cinq varient avec leur graine, la liste des quatre
+  pavages sourds ne bouge pas.
+- **Les fichiers restent légers** : médiane inchangée à 0,43 Mo sur les 1 221
+  combinaisons, maximum monté de 1,04 à 1,35 Mo, tenu par Mirage en densité
+  dense, dont chaque rayure pliée traverse la page de haut en bas.
+
 ### Ajouté : le voile se voit, se dit, et se retire
 
 - **Une ligne sous le bouton Télécharger dit ce que le fichier contient.** Le

@@ -17,7 +17,7 @@ import { describe, expect, it } from 'vitest'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,
   CIBLE_SOMBRE, forceSombre, luminanceAssombrie, OMBRE_MAX, sansVoile,
-  FAMILLES, graineDeDessin, luminance, niveau, ORDRE_PALETTES, PALETTES, palette,
+  FAMILLES, graineDeDessin, luminance, melange, niveau, ORDRE_PALETTES, PALETTES, palette,
   SEUIL_AA, SEUIL_UI,
 } from './moteur'
 
@@ -121,6 +121,30 @@ describe('données', () => {
       expect(PALETTES[id].fr.length).toBeGreaterThan(0)
       expect(PALETTES[id].en.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('mélange de teintes', () => {
+  /* Les rampes de Terrasses et de Strates passent par ici, et leur sortie va
+     droit dans un attribut `fill` : six chiffres hexadécimaux, rien d'autre. */
+  it('rend les bornes telles quelles, en majuscules', () => {
+    expect(melange('#17243f', '#F7F3E6', 0)).toBe('#17243F')
+    expect(melange('#17243f', '#f7f3e6', 1)).toBe('#F7F3E6')
+  })
+
+  it('mélange canal par canal, à mi-chemin', () => {
+    expect(melange('#000000', '#FFFFFF', 0.5)).toBe('#808080')
+    expect(melange('#FF0000', '#00FF00', 0.5)).toBe('#808000')
+  })
+
+  it('borne la position plutôt que d’extrapoler', () => {
+    expect(melange('#102030', '#405060', -1)).toBe('#102030')
+    expect(melange('#102030', '#405060', 2)).toBe('#405060')
+  })
+
+  it('rend la première teinte plutôt qu’un attribut illisible', () => {
+    expect(melange('#17243F', 'rebeccapurple', 0.5)).toBe('#17243F')
+    expect(melange('', '#17243F', 0.5)).toBe('')
   })
 })
 

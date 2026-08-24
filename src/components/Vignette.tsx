@@ -8,7 +8,7 @@ import { useVisible } from '../hooks/useVisible'
  * L'aperçu d'une famille, dans sa puce.
  *
  * Seules les vignettes réellement à l'écran sont dessinées : sur un téléphone
- * il y en a six ou sept, pas trente-deux, et chacune est un rendu complet du
+ * il y en a six ou sept, pas trente-sept, et chacune est un rendu complet du
  * moteur. Celles qui reviennent dans le champ sont dessinées à ce moment-là.
  */
 export function Vignette({

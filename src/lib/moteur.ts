@@ -30,6 +30,10 @@ export type IdFamille =
   | 'persiennes'
   | 'mosaique'
   | 'tresse'
+  | 'mirage'
+  | 'terrasses'
+  | 'bassin'
+  | 'strates'
   /* paysages */
   | 'sommets'
   | 'horizon'
@@ -37,6 +41,7 @@ export type IdFamille =
   /* figures */
   | 'fleurs'
   | 'tournesol'
+  | 'corolle'
   | 'etoiles'
   | 'rayons'
   | 'lunes'
@@ -145,7 +150,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les trente-deux familles, dans l'ordre de la liste : abstraits, paysages,
+ * Les trente-sept familles, dans l'ordre de la liste : abstraits, paysages,
  * figures. L'ordre est celui de la maquette, et il compte : on descend du
  * plus géométrique au plus figuratif, et le premier de chaque groupe en donne
  * le ton.
@@ -170,11 +175,16 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'persiennes', groupe: 'abs', fr: 'Persiennes', en: 'Shutters' },
   { id: 'mosaique', groupe: 'abs', fr: 'Mosaïque', en: 'Mosaic' },
   { id: 'tresse', groupe: 'abs', fr: 'Tresse', en: 'Weave' },
+  { id: 'mirage', groupe: 'abs', fr: 'Mirage', en: 'Mirage' },
+  { id: 'terrasses', groupe: 'abs', fr: 'Terrasses', en: 'Terraces' },
+  { id: 'bassin', groupe: 'abs', fr: 'Bassin', en: 'Pool' },
+  { id: 'strates', groupe: 'abs', fr: 'Strates', en: 'Strata' },
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
+  { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
   { id: 'etoiles', groupe: 'fig', fr: 'Étoiles', en: 'Stars' },
   { id: 'rayons', groupe: 'fig', fr: 'Rayons', en: 'Sunbeams' },
   { id: 'lunes', groupe: 'fig', fr: 'Lunes', en: 'Moons' },
@@ -513,6 +523,60 @@ function tournesol(
     ctx.arc(cx + Math.cos(a) * rayon, cy + Math.sin(a) * rayon, point, 0, Math.PI * 2)
     ctx.fill()
   }
+}
+
+/**
+ * Une ondulation lisse et déterministe : trois sinusoïdes dont les fréquences
+ * et les phases sont tirées à la construction, sommées puis ramenées vers
+ * [-1, 1]. Un sinus nu se reconnaît au premier regard ; la somme, plus courte
+ * qu'un bruit de gradient et sans grille sous-jacente, ne se reconnaît plus.
+ * `t` se compte en périodes : la valeur fait à peu près un aller-retour
+ * chaque fois que `t` avance de un.
+ */
+function houle(rnd: Alea): (t: number) => number {
+  const termes = [1, 2, 3].map((rang) => ({
+    poids: 1 / rang,
+    frequence: rang * (0.6 + 0.8 * rnd()),
+    phase: rnd() * Math.PI * 2,
+  }))
+  const total = termes.reduce((somme, terme) => somme + terme.poids, 0)
+  return (t) => termes.reduce(
+    (somme, { poids, frequence, phase }) =>
+      somme + poids * Math.sin(t * frequence * Math.PI * 2 + phase),
+    0,
+  ) / total
+}
+
+/**
+ * Le mélange de deux teintes hexadécimales, canal par canal en sRGB.
+ *
+ * Il sert aux rampes : une palette compte quatre teintes, une famille en
+ * terrasses en pose jusqu'à douze, et les paliers intermédiaires sont pris
+ * entre deux teintes voisines de la liste. Le sRGB suffit ici : les bornes
+ * d'un palier sont proches, et un espace perceptuel ne changerait rien qu'on
+ * voie.
+ *
+ * Une teinte qui ne se lit pas rend `a` tel quel plutôt qu'un attribut
+ * illisible : une palette composée passe par ici, et le SVG n'accepte que six
+ * chiffres hexadécimaux.
+ */
+export function melange(a: string, b: string, t: number): string {
+  if (!/^#[0-9a-f]{6}$/i.test(a) || !/^#[0-9a-f]{6}$/i.test(b)) return a
+  const part = Math.max(0, Math.min(1, t))
+  const canal = (i: number) => {
+    const de = Number.parseInt(a.slice(1 + i * 2, 3 + i * 2), 16)
+    const vers = Number.parseInt(b.slice(1 + i * 2, 3 + i * 2), 16)
+    return Math.round(de + (vers - de) * part).toString(16).padStart(2, '0')
+  }
+  return `#${canal(0)}${canal(1)}${canal(2)}`.toUpperCase()
+}
+
+/** La teinte à la position `t` d'une rampe qui traverse la palette entière. */
+function palier(C: readonly string[], t: number): string {
+  if (C.length < 2) return C[0]
+  const position = Math.max(0, Math.min(1, t)) * (C.length - 1)
+  const cran = Math.min(C.length - 2, Math.floor(position))
+  return melange(C[cran], C[cran + 1], position - cran)
 }
 
 /* ---------- familles -------------------------------------------------------- */
@@ -1079,6 +1143,227 @@ export function formes(
     return
   }
 
+  /* --- abstraits, troisième série ---------------------------------------------
+     Quatre familles où une même forme est déformée par un champ lisse plutôt
+     que posée sur une grille ou semée. Elles tiennent toutes dans le pinceau
+     existant, des aplats fermés : il ne leur manquait qu'une houle
+     déterministe et une rampe de teintes. */
+
+  if (id === 'mirage') {
+    /* Des rayures verticales pliées par un remous. Chaque rayure garde sa
+       largeur et ne fait que se déplacer : c'est ce que fait une nappe d'eau
+       sur ce qu'on voit au travers, et c'est aussi ce qui garantit qu'une
+       rayure ne se croise jamais elle-même. Le remous est une houle portée
+       par une enveloppe : fort près de son foyer, nul ailleurs, si bien que
+       les rayures du bord restent droites et disent la règle que celles du
+       centre enfreignent. L'enveloppe est un couloir vertical qui serpente,
+       et non un foyer ponctuel : un foyer pliait chaque rayure d'une phase
+       différente et l'oeil y lisait une marche en travers de l'image, là où
+       le couloir plie toutes les rayures du même geste. Le disque est peint
+       dessous : il n'apparaît qu'entre les rayures, comme derrière des
+       barreaux. */
+    const colonnes = [9, 14, 22][densite]
+    const pas = Math.max(0.75, H / 2400)
+    const largeur = W / colonnes
+    const demi = largeur * 0.27
+    const remous = houle(rnd)
+    const serpente = houle(rnd)
+    const fx = W * (0.3 + 0.4 * rnd())
+    const portee = W * (0.16 + 0.1 * rnd())
+    const ampleur = largeur * (2.5 + 1.5 * rnd())
+    ctx.fillStyle = col(1)
+    ctx.beginPath()
+    ctx.arc(W * (0.25 + 0.5 * rnd()), H * (0.25 + 0.5 * rnd()),
+      unite * (0.22 + 0.14 * rnd()), 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = col(0)
+    for (let i = 0; i < colonnes; i += 1) {
+      const centre = largeur * (i + 0.5)
+      const decalage = (y: number) => {
+        const couloir = fx + serpente((y / H) * 1.6) * W * 0.14
+        const distance = (centre - couloir) / portee
+        return ampleur * Math.exp(-distance * distance) * remous(y / unite)
+      }
+      ctx.beginPath()
+      ctx.moveTo(centre + decalage(0) - demi, 0)
+      for (let y = pas; y < H; y += pas) ctx.lineTo(centre + decalage(y) - demi, y)
+      ctx.lineTo(centre + decalage(H) - demi, H)
+      ctx.lineTo(centre + decalage(H) + demi, H)
+      for (let y = H - pas; y > 0; y -= pas) ctx.lineTo(centre + decalage(y) + demi, y)
+      ctx.lineTo(centre + decalage(0) + demi, 0)
+      ctx.closePath()
+      ctx.fill()
+    }
+    return
+  }
+
+  if (id === 'terrasses') {
+    /* Des courbes de niveau emboîtées, comme une carte d'un relief qui
+       n'existe pas. Le contour est tiré une fois puis seulement réduit :
+       c'est ce qui fait que les paliers se suivent, quand des blobs retirés
+       à chaque palier auraient donné des flaques sans parenté. Le foyer
+       dérive d'un palier à l'autre, et c'est cette dérive qui ouvre les
+       terrasses d'un côté plutôt que d'en faire une cible. Les teintes
+       suivent la rampe de la palette, du premier ton au dernier ; le relief
+       satellite la descend en sens inverse, pour que les deux ne se fondent
+       pas là où ils se touchent. */
+    const paliers = [5, 8, 12][densite]
+    const pointes = 9
+    const massif = {
+      cx: W * (0.28 + 0.44 * rnd()),
+      cy: H * (0.3 + 0.4 * rnd()),
+    }
+    const loin = Math.max(
+      Math.hypot(massif.cx, massif.cy),
+      Math.hypot(W - massif.cx, massif.cy),
+      Math.hypot(massif.cx, H - massif.cy),
+      Math.hypot(W - massif.cx, H - massif.cy),
+    )
+    const relief = (
+      cx: number, cy: number, base: number, n: number, inverse: boolean,
+    ) => {
+      const rayons = Array.from({ length: pointes }, () => base * (0.82 + 0.5 * rnd()))
+      const dx = (rnd() - 0.5) * unite * 0.09
+      const dy = (rnd() - 0.5) * unite * 0.09
+      for (let i = 0; i < n; i += 1) {
+        const reduction = (1 - i / (n + 0.6)) ** 0.92
+        const fx = cx + dx * i
+        const fy = cy + dy * i
+        ctx.fillStyle = palier(C, inverse ? 1 - i / (n - 1) : i / (n - 1))
+        const points: [number, number][] = rayons.map((rayon, k) => {
+          const angle = (k / pointes) * Math.PI * 2
+          return [fx + Math.cos(angle) * rayon * reduction, fy + Math.sin(angle) * rayon * reduction]
+        })
+        ctx.beginPath()
+        ctx.moveTo((points[pointes - 1][0] + points[0][0]) / 2, (points[pointes - 1][1] + points[0][1]) / 2)
+        for (let k = 0; k < pointes; k += 1) {
+          const suivant = points[(k + 1) % pointes]
+          ctx.quadraticCurveTo(points[k][0], points[k][1],
+            (points[k][0] + suivant[0]) / 2, (points[k][1] + suivant[1]) / 2)
+        }
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+    /* Le premier palier doit couvrir la page entière : son rayon le plus
+       court part du coin le plus lointain, jamais d'une taille absolue, et
+       la marge tient compte du lissage, qui fait passer la courbe par les
+       milieux des cordes, en deçà des pointes. */
+    relief(massif.cx, massif.cy, loin * 1.45, paliers, false)
+    relief(
+      W * (0.2 + 0.6 * rnd()), H * (0.55 + 0.35 * rnd()),
+      unite * (0.3 + 0.22 * rnd()), Math.max(3, Math.round(paliers * 0.6)), true,
+    )
+    return
+  }
+
+  if (id === 'bassin') {
+    /* L'eau d'une piscine vue d'au-dessus : des galets arrondis, et le fond
+       qui circule entre eux en un seul réseau. Les sommets sont partagés
+       entre carreaux voisins, comme au vitrail, et c'est ce partage qui fait
+       le réseau : des galets tirés chacun pour soi laisseraient des flaques
+       de fond au lieu de chenaux. Le lissage passe par les milieux des
+       côtés, si bien que deux galets voisins longent le même chenal. */
+    const colonnes = [4, 6, 9][densite]
+    const cote = W / colonnes
+    const rangees = Math.ceil(H / cote) + 1
+    const noeuds: [number, number][][] = []
+    for (let r = 0; r <= rangees; r += 1) {
+      noeuds[r] = []
+      for (let c = 0; c <= colonnes; c += 1) {
+        const bord = c === 0 || c === colonnes || r === 0 || r === rangees
+        noeuds[r][c] = [
+          c * cote + (bord ? 0 : (rnd() - 0.5) * cote * 0.55),
+          r * cote + (bord ? 0 : (rnd() - 0.5) * cote * 0.55),
+        ]
+      }
+    }
+    for (let r = 0; r < rangees; r += 1) {
+      for (let c = 0; c < colonnes; c += 1) {
+        const quadrilatere = [
+          noeuds[r][c], noeuds[r][c + 1], noeuds[r + 1][c + 1], noeuds[r + 1][c],
+        ]
+        const gx = quadrilatere.reduce((somme, p) => somme + p[0], 0) / 4
+        const gy = quadrilatere.reduce((somme, p) => somme + p[1], 0) / 4
+        /* Le retrait est une distance, pas une part : le chenal garde à peu
+           près la même largeur le long d'une grande arête comme d'une
+           petite. Les coins reculent deux fois plus que les milieux
+           d'arêtes : c'est ce qui arrondit l'angle sans creuser le flanc,
+           et donc ce qui fait des galets emboîtés plutôt que des oeufs. */
+        const retrait = cote * (0.055 + 0.03 * rnd())
+        const recule = (p: readonly [number, number], part: number): [number, number] => {
+          const dx = gx - p[0]
+          const dy = gy - p[1]
+          const d = Math.hypot(dx, dy) || 1
+          return [p[0] + (dx / d) * retrait * part, p[1] + (dy / d) * retrait * part]
+        }
+        const galet: [number, number][] = []
+        for (let k = 0; k < 4; k += 1) {
+          const suivant = quadrilatere[(k + 1) % 4]
+          galet.push(recule(quadrilatere[k], 1.9))
+          galet.push(recule([
+            (quadrilatere[k][0] + suivant[0]) / 2, (quadrilatere[k][1] + suivant[1]) / 2,
+          ], 1))
+        }
+        ctx.fillStyle = col(rnd() < 0.22 ? 3 : 0)
+        ctx.beginPath()
+        ctx.moveTo((galet[7][0] + galet[0][0]) / 2, (galet[7][1] + galet[0][1]) / 2)
+        for (let k = 0; k < 8; k += 1) {
+          const suivant = galet[(k + 1) % 8]
+          ctx.quadraticCurveTo(galet[k][0], galet[k][1],
+            (galet[k][0] + suivant[0]) / 2, (galet[k][1] + suivant[1]) / 2)
+        }
+        ctx.closePath()
+        ctx.fill()
+        /* Le reflet plus sombre reste sous le réseau : son rayon et son
+           écart sont bornés pour qu'il ne morde jamais dans un chenal. */
+        ctx.fillStyle = col(1)
+        blob(ctx, gx + (rnd() - 0.5) * cote * 0.12, gy + (rnd() - 0.5) * cote * 0.12,
+          cote * (0.15 + 0.09 * rnd()), 7, rnd, 0.55)
+      }
+    }
+    /* Quelques gouttes posées dans les chenaux, aux carrefours du réseau. */
+    ctx.fillStyle = col(2)
+    for (let r = 1; r < rangees; r += 1) {
+      for (let c = 1; c < colonnes; c += 1) {
+        if (rnd() >= 0.16) continue
+        ctx.beginPath()
+        ctx.arc(noeuds[r][c][0], noeuds[r][c][1], cote * (0.03 + 0.02 * rnd()), 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    return
+  }
+
+  if (id === 'strates') {
+    /* Des couches verticales qui se recouvrent de gauche à droite, chacune
+       bordée par sa propre houle : les frontières se croisent parfois, et
+       une couche passe alors devant sa voisine, ce qui est exactement ce qui
+       sépare des strates d'un dégradé. Les teintes suivent la rampe de la
+       palette, dans un sens ou dans l'autre ; la première couche laisse par
+       endroits un filet de fond sur sa rive, au gré de sa houle. */
+    const n = [4, 7, 10][densite]
+    const pas = Math.max(0.75, H / 2400)
+    const inverse = rnd() < 0.5
+    for (let i = 0; i < n; i += 1) {
+      const bord = houle(rnd)
+      const base = W * (0.05 + (0.92 * i) / n)
+      const amplitude = W * (0.05 + 0.1 * rnd())
+      const cycles = 1.2 + 1.3 * rnd()
+      const frontiere = (y: number) => base + amplitude * bord((y / H) * cycles)
+      ctx.fillStyle = palier(C, (inverse ? n - 1 - i : i) / (n - 1))
+      ctx.beginPath()
+      ctx.moveTo(W, 0)
+      ctx.lineTo(W, H)
+      ctx.lineTo(frontiere(H), H)
+      for (let y = H - pas; y > 0; y -= pas) ctx.lineTo(frontiere(y), y)
+      ctx.lineTo(frontiere(0), 0)
+      ctx.closePath()
+      ctx.fill()
+    }
+    return
+  }
+
   /* --- paysages ---------------------------------------------------------------
      Trois familles qui ont un haut et un bas. C'est ce qui les sépare des
      abstraits, et c'est aussi ce qui les rend commodes en fond d'écran : la
@@ -1274,6 +1559,89 @@ export function formes(
       ctx.fill()
       ctx.restore()
     }
+    return
+  }
+
+  if (id === 'corolle') {
+    /* Une seule grande fleur, à la manière des papiers découpés : les
+       pétales sont les panneaux du fond, et ce qu'on lit comme des nervures
+       est le fond qui affleure entre eux. Les frontières sont tirées une
+       fois pour toutes, avec leur courbure : les deux panneaux qui bordent
+       un même chenal doivent le courber du même geste, sans quoi le chenal
+       s'étrangle ou bâille. C'est le partage des sommets du vitrail, en
+       polaire. */
+    const n = [7, 10, 14][densite]
+    const cx = W * (0.3 + 0.4 * rnd())
+    const cy = H * (0.22 + 0.2 * rnd())
+    const R = Math.hypot(W, H) * 1.35
+    const coeur = unite * (0.13 + 0.05 * rnd())
+    const chenal = unite * (0.015 + 0.007 * rnd())
+    const naissance = coeur + chenal * 2.4
+    const depart = rnd() * Math.PI * 2
+    const courbure = unite * 0.62
+    const frontieres = Array.from({ length: n }, (_, j) => ({
+      angle: depart + ((j + (rnd() - 0.5) * 0.44) / n) * Math.PI * 2,
+      flexion: (rnd() - 0.5) * unite * 0.3,
+    }))
+    for (let j = 0; j < n; j += 1) {
+      const ici = frontieres[j]
+      const la = frontieres[(j + 1) % n]
+      const u0: [number, number] = [Math.cos(ici.angle), Math.sin(ici.angle)]
+      const u1: [number, number] = [Math.cos(la.angle), Math.sin(la.angle)]
+      const n0: [number, number] = [-u0[1], u0[0]]
+      const n1: [number, number] = [-u1[1], u1[0]]
+      ctx.fillStyle = col(1)
+      ctx.beginPath()
+      ctx.moveTo(cx + u0[0] * naissance + n0[0] * chenal, cy + u0[1] * naissance + n0[1] * chenal)
+      ctx.quadraticCurveTo(
+        cx + u0[0] * courbure + n0[0] * (chenal + ici.flexion),
+        cy + u0[1] * courbure + n0[1] * (chenal + ici.flexion),
+        cx + u0[0] * R + n0[0] * chenal, cy + u0[1] * R + n0[1] * chenal,
+      )
+      ctx.lineTo(cx + u1[0] * R - n1[0] * chenal, cy + u1[1] * R - n1[1] * chenal)
+      ctx.quadraticCurveTo(
+        cx + u1[0] * courbure - n1[0] * (chenal - la.flexion),
+        cy + u1[1] * courbure - n1[1] * (chenal - la.flexion),
+        cx + u1[0] * naissance - n1[0] * chenal, cy + u1[1] * naissance - n1[1] * chenal,
+      )
+      ctx.closePath()
+      ctx.fill()
+      /* L'ombre du pétale : posée sur la bissectrice, bornée par la largeur
+         du panneau à cette distance pour ne pas mordre dans un chenal. */
+      const milieu = (ici.angle + la.angle
+        + (la.angle < ici.angle ? Math.PI * 2 : 0)) / 2
+      const ouverture = (la.angle + (la.angle < ici.angle ? Math.PI * 2 : 0) - ici.angle) / 2
+      const distance = naissance + unite * (0.2 + 0.42 * rnd())
+      const place = distance * Math.sin(ouverture) - chenal * 2
+      const taille = Math.min(place * 0.66, unite * (0.09 + 0.07 * rnd()))
+      if (taille > unite * 0.035) {
+        ctx.fillStyle = col(2)
+        blob(ctx, cx + Math.cos(milieu) * distance, cy + Math.sin(milieu) * distance,
+          taille, 7, rnd, 0.5)
+      }
+    }
+    /* La tige, puis le cœur par-dessus : elle en sort, elle n'y entre pas. */
+    const demiTige = unite * 0.024
+    const flexionTige = (rnd() - 0.5) * unite * 0.34
+    const derive = (rnd() - 0.5) * unite * 0.22
+    ctx.fillStyle = col(0)
+    ctx.beginPath()
+    ctx.moveTo(cx - demiTige, cy)
+    ctx.quadraticCurveTo(cx + flexionTige - demiTige, (cy + H) / 2, cx + derive - demiTige, H)
+    ctx.lineTo(cx + derive + demiTige, H)
+    ctx.quadraticCurveTo(cx + flexionTige + demiTige, (cy + H) / 2, cx + demiTige, cy)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = col(3)
+    ctx.beginPath()
+    ctx.arc(cx, cy, coeur, 0, Math.PI * 2)
+    ctx.fill()
+    const penchant = rnd() * Math.PI * 2
+    ctx.fillStyle = col(2)
+    ctx.beginPath()
+    ctx.arc(cx + Math.cos(penchant) * coeur * 0.32, cy + Math.sin(penchant) * coeur * 0.32,
+      coeur * 0.42, 0, Math.PI * 2)
+    ctx.fill()
     return
   }
 
