@@ -9,6 +9,22 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : la Ville, un quatrième paysage
+
+- **Trente-huit familles au lieu de trente-sept.** Ville rejoint Sommets,
+  Horizon et Nuages : une skyline en ombres chinoises, des plans de bâtiments
+  qui se recouvrent du fond vers l'avant, du plus pâle et lointain au plus
+  proche. Chaque plan est une seule silhouette crénelée, si bien que deux tours
+  voisines partagent leur mur et que la ville se lit comme une surface, pas
+  comme une rangée de barres. Seul le plan de devant s'allume, une bande de
+  fenêtres posée en haut des tours.
+- **Un paysage, donc un haut et un bas.** Les façades du plan de devant
+  restent des aplats pleins sous la grille d'icônes, là où la sonde de
+  lisibilité a besoin d'un aplat plutôt que d'un motif ; les fenêtres se
+  tiennent au-dessus, dans le ciel des tours. Rien de neuf dans le moteur : la
+  famille est un aplat fermé de plus, exportable en SVG le jour même, et elle
+  varie avec sa graine.
+
 ### Changé : la carte « Image enregistrée » sait partir
 
 - **Elle se retire d'elle-même après douze secondes**, le double du temps de

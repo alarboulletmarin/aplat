@@ -5,8 +5,8 @@ import { useEffect, useState, type RefObject } from 'react'
 /**
  * Vrai quand l'élément approche du champ de vision.
  *
- * Sert aux trente-sept vignettes de famille : sur un téléphone il y en a six
- * ou sept à l'écran, pas trente-sept, et chacune est un rendu complet du
+ * Sert aux trente-huit vignettes de famille : sur un téléphone il y en a six
+ * ou sept à l'écran, pas trente-huit, et chacune est un rendu complet du
  * moteur.
  * Sans navigateur qui sache observer, on répond « oui », car mieux vaut
  * dessiner pour rien qu'afficher des cases vides.

@@ -197,7 +197,7 @@
    en page de la maquette, tenue jusqu'au téléphone.
 
    La part n'est pas la moitié. À 390 px, deux colonnes égales laissent 166 px
-   au panneau, soit une seule vignette de famille par rangée et trente-sept
+   au panneau, soit une seule vignette de famille par rangée et trente-huit
    rangées à parcourir. Trente-huit pour cent donnent un aperçu encore
    jugeable et deux vignettes de front ; c'est le partage qui rend les deux
    colonnes utiles plutôt que seulement fidèles.
@@ -926,7 +926,7 @@
 }
 
 /* --- Les trois onglets de familles ---------------------------------------------
-   Trente-sept vignettes en grille plate, dans une colonne étroite, mettaient
+   Trente-huit vignettes en grille plate, dans une colonne étroite, mettaient
    mille pixels entre la première et la dernière : on ne pouvait pas comparer
    deux motifs éloignés. Trois onglets ramènent chaque liste à ce qu'un écran
    montre.
@@ -1242,7 +1242,7 @@
    Entre 360 et 760 px, le panneau ne fait plus que deux cents pixels. Les
    valeurs de la maquette ont été dessinées pour une colonne de cinq cents :
    les tenir telles quelles ramène les grilles à une vignette par rangée, ce
-   qui n'est plus une grille mais une liste de trente-sept lignes.
+   qui n'est plus une grille mais une liste de trente-huit lignes.
 
    Ce bloc est en fin de feuille, après les règles qu'il corrige : une requête
    de média n'ajoute pas de spécificité, c'est l'ordre qui tranche.

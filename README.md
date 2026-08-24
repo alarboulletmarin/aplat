@@ -293,14 +293,14 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Trente-sept familles, trois groupes.**
+**Trente-huit familles, trois groupes.**
 
 - **Abstraits** (vingt-trois) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
   pas ; et quatre déformées, où un champ lisse plie une forme répétée, ce qui
   se reconnaît à une règle qu'on voit se tordre.
-- **Paysages** (trois) : Sommets, Horizon, Nuages. Elles ont un haut et un bas,
+- **Paysages** (quatre) : Sommets, Horizon, Nuages, Ville. Elles ont un haut et un bas,
   et c'est ce qui les sépare des abstraits. C'est aussi ce qui les rend
   commodes en fond d'écran : la grille d'icônes tombe dans leur partie basse,
   et la sonde de lisibilité y trouve un aplat plutôt qu'un motif.
@@ -364,7 +364,7 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **1 221 combinaisons** (37 familles × 11 palettes × 3 densités) en
+Mesuré sur les **1 254 combinaisons** (38 familles × 11 palettes × 3 densités) en
 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
@@ -439,7 +439,7 @@ appareil modeste refuse.
 L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
 dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
 que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
-champ de vision, pas toutes d'un coup : six ou sept sur trente-sept au premier
+champ de vision, pas toutes d'un coup : six ou sept sur trente-huit au premier
 affichage d'un téléphone.
 
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
@@ -487,7 +487,7 @@ thèmes et les deux langues :
   familles une vraie barre d'onglets, et l'historique une barre d'outils : un
   arrêt de tabulation par groupe, flèches et Début/Fin. Les flèches des onglets
   déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait trois
-  rendus complets de trente-sept vignettes pour atteindre le troisième ;
+  rendus complets de trente-huit vignettes pour atteindre le troisième ;
 - le rideau clair/sombre est un `input[type=range]`, pas un geste maison : les
   flèches, Origine et Fin y marchent sans une ligne de script, et son nom
   accessible dit la position. `touch-action: pan-y` laisse le geste vertical au
@@ -587,9 +587,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 221 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 254 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 37 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 38 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

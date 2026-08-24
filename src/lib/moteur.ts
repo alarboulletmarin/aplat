@@ -38,6 +38,7 @@ export type IdFamille =
   | 'sommets'
   | 'horizon'
   | 'nuages'
+  | 'ville'
   /* figures */
   | 'fleurs'
   | 'tournesol'
@@ -150,7 +151,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les trente-sept familles, dans l'ordre de la liste : abstraits, paysages,
+ * Les trente-huit familles, dans l'ordre de la liste : abstraits, paysages,
  * figures. L'ordre est celui de la maquette, et il compte : on descend du
  * plus géométrique au plus figuratif, et le premier de chaque groupe en donne
  * le ton.
@@ -182,6 +183,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
+  { id: 'ville', groupe: 'pay', fr: 'Ville', en: 'Skyline' },
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
@@ -1438,6 +1440,73 @@ export function formes(
         ctx.beginPath()
         ctx.arc(lx, cy + R * 0.22 - lr * 0.52, lr, 0, Math.PI * 2)
         ctx.fill()
+      }
+    }
+    return
+  }
+
+  if (id === 'ville') {
+    /* Une ville en ombres chinoises : des plans de bâtiments qui se recouvrent
+       du fond vers l'avant, chacun d'une teinte de la palette, du plus pâle et
+       lointain au plus proche. Comme les autres paysages, le motif a un haut et
+       un bas, le ciel puis les toits, et la grille d'icones tombe dans la ligne
+       des facades, la zone la plus chargee. Chaque plan est une seule
+       silhouette crenelee : les toits se suivent sans jour entre eux, deux
+       tours voisines partagent leur mur mitoyen, et c'est ce qui la fait lire
+       comme une surface plutot que comme une rangee de barres. Les facades
+       restent des aplats pleins ; seul le plan de devant s'allume, une bande de
+       fenetres posee en haut des tours, la ou elle n'entame pas le calme du bas
+       sous les icones. */
+    const plans = [2, 3, 4][densite]
+    for (let p = 0; p < plans; p += 1) {
+      const base = H * (0.3 + (0.56 * p) / plans)
+      const avant = p === plans - 1
+      const tours = 3 + p + Math.floor(rnd() * 3)
+      const toits: number[] = []
+      ctx.fillStyle = col(p)
+      ctx.beginPath()
+      ctx.moveTo(0, H)
+      for (let k = 0; k < tours; k += 1) {
+        const x0 = (W * k) / tours
+        const x1 = (W * (k + 1)) / tours
+        /* La hauteur est tiree par tour et se rapporte a la hauteur de l'image :
+           une tour garde son elancement quel que soit le format du fichier. */
+        const toit = base - H * (0.05 + 0.34 * rnd())
+        toits.push(toit)
+        ctx.lineTo(x0, toit)
+        ctx.lineTo(x1, toit)
+      }
+      ctx.lineTo(W, H)
+      ctx.closePath()
+      ctx.fill()
+      if (!avant) continue
+      /* Les fenetres du plan de devant : une grille de petits carres dans le
+         haut de chaque facade, un carre sur trois eteint pour que la ville ne
+         dorme pas d'un seul bloc. Elles ne descendent pas dans le bas de la
+         tour, laisse en aplat plein sous la grille d'icones. Leur pas se
+         rapporte a la largeur de la tour, donc leur nombre ne depend pas de la
+         resolution. */
+      ctx.fillStyle = col(p + 2)
+      const largeur = W / tours
+      const marge = largeur * 0.2
+      for (let k = 0; k < tours; k += 1) {
+        const gauche = largeur * k
+        const cote = largeur * (0.1 + 0.04 * rnd())
+        const pas = cote * 2
+        const colonnes = Math.max(1, Math.floor((largeur - marge * 2 + (pas - cote)) / pas))
+        const bande = Math.min((H - toits[k]) * 0.5, unite * 0.42)
+        const rangees = Math.max(1, Math.floor((bande - marge) / pas))
+        const reste = largeur - marge * 2 - (colonnes * pas - (pas - cote))
+        for (let r = 0; r < rangees; r += 1) {
+          for (let c = 0; c < colonnes; c += 1) {
+            if (rnd() < 0.34) continue
+            ctx.fillRect(
+              gauche + marge + reste / 2 + c * pas,
+              toits[k] + marge + r * pas,
+              cote, cote,
+            )
+          }
+        }
       }
     }
     return

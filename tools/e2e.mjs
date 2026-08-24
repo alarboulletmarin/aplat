@@ -246,8 +246,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 37,
-    'onglets : les trois couvrent les trente-sept familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 38,
+    'onglets : les trois couvrent les trente-huit familles', onglets.comptes.join(' + '));
 
   await page.$eval('#onglet-fig', e => e.click());
   await page.waitForTimeout(300);
