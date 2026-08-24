@@ -1090,6 +1090,21 @@
   flex-direction: column;
   gap: 10px;
 }
+/* Pendant la saisie au doigt, la barre cesse de coller. Sur téléphone, le
+   clavier virtuel remonte le bas de la fenêtre, et la barre collante venait se
+   poser juste au-dessus de lui, en plein sur le champ en train d'être rempli.
+   Redevenue statique, elle garde exactement sa place dans le flux, donc la
+   page ne saute pas d'un pixel : elle cesse seulement de flotter, et part
+   derrière le clavier avec le reste du document.
+
+   Le champ du lien de partage est écarté : il est en lecture seule et n'ouvre
+   pas de clavier. Un navigateur qui ignore `:has()` ignore toute la règle et
+   garde la barre collante, c'est le comportement d'avant. */
+@media (pointer: coarse) {
+  body:has(input[type='text']:not([readonly]):focus) .barre {
+    position: static;
+  }
+}
 .barre-live {
   display: contents;
 }
