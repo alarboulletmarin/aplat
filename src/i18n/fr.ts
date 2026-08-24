@@ -164,8 +164,11 @@ export const fr = {
     rideauClair: 'Clair',
     rideauSombre: 'Sombre',
     rideauValeur: 'assombri sur {n} % de la largeur',
-    assombriNote:
-      'Aperçu assombri, comme un thème sombre le ferait, à peu près. Le fichier téléchargé, lui, ne change pas.',
+    /* Le mot « à peu près » n'est pas une précaution oratoire : aucune
+       plateforme ne publie la force de son assombrissement, et le produit ne
+       prétend pas mesurer ce qu'il estime. */
+    rideauDetail:
+      'À droite du trait, le fond tel qu’un thème sombre l’assombrirait, à peu près : {contraste}:1. Le fichier téléchargé, lui, ne change pas.',
     detail: '{contraste}:1\u00a0; {libelles}\u00a0; {voile}. {conseil}',
   },
   reglages: {

@@ -75,8 +75,11 @@ qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
 plein, disque à moitié, triangle.
 
 Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
-la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Les
-libellés clairs y gagnent, les sombres y perdent, et le rapport annoncé suit.
+la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Il
+s'ouvre au milieu, les deux conditions sont donc là d'emblée, sous les mêmes
+libellés ; le fichier est à gauche du trait. Le verdict annonce les deux
+rapports côte à côte, celui du fichier et celui du fond assombri, plutôt que
+d'en basculer un au passage du trait.
 Il remplace une bascule qui montrait l'un *puis* l'autre : une limite qui passe
 sous les mêmes libellés se juge d'un regard, deux états successifs demandent de
 se souvenir du premier. C'est un `input[type=range]` et non un geste maison, si

@@ -923,11 +923,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await sctx3.close();
   }
 
-  /* --- 21. le rideau clair/sombre change le verdict, jamais le fichier
+  /* --- 21. le rideau clair/sombre montre les deux, et ne touche pas au fichier
      Un thème sombre assombrit le fond d'écran : les libellés clairs y gagnent.
-     Le rideau doit le montrer sur la moitié qu'il découvre et le verdict le
-     dire, mais le PNG téléchargé porte le voile calculé pour le fond tel quel,
-     et ne bouge pas d'un octet. */
+     Le rideau s'ouvre au milieu, les deux conditions sont donc là d'emblée,
+     sous les mêmes libellés ; le verdict annonce les deux rapports côte à côte
+     plutôt que d'en basculer un ; et le PNG téléchargé, qui porte le voile
+     calculé pour le fond tel quel, ne bouge pas d'un octet. */
   {
     const dctx = await browser.newContext({
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
@@ -962,24 +963,35 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       };
     });
 
-    const clair = await lire();
+    const depart = await lire();
     await glisser(40);
     await dp.waitForTimeout(400);
-    const sombre = await lire();
+    const tire = await lire();
 
-    const rapport = (texte) => parseFloat((texte.match(/(\d+[.,]\d+):1/) || [0, '0'])[1].replace(',', '.'));
-    t(clair.position === '100' && sombre.position === '40',
-      'rideau : la glissière dit sa position', `${clair.position} -> ${sombre.position}`);
-    t(clair.decale === 100, 'rideau : au repos, l\'aplat est entièrement hors cadre',
-      String(clair.decale) + ' %');
-    t(sombre.decale === 40, 'rideau : il se décale exactement à la position du trait',
-      String(sombre.decale) + ' %');
-    t(rapport(sombre.detail) > rapport(clair.detail),
-      'rideau : le rapport annoncé monte pour des libellés clairs',
-      `${rapport(clair.detail)}:1 -> ${rapport(sombre.detail)}:1`);
-    t(/ne change pas/.test(sombre.detail) && !/ne change pas/.test(clair.detail),
-      'rideau : le détail dit que le fichier ne change pas', sombre.detail.slice(-60));
-    t(clair.empreinte === sombre.empreinte,
+    /* Les rapports du détail, dans l'ordre où ils sont écrits. Le premier est
+       celui du fichier, le dernier celui du fond assombri ; entre les deux, le
+       conseil cite le seuil AA, qu'il ne faut pas confondre avec une mesure. */
+    const rapports = (texte) => [...texte.matchAll(/(\d+[.,]\d+):1/g)]
+      .map((m) => parseFloat(m[1].replace(',', '.')));
+    const dernier = (liste) => liste[liste.length - 1];
+    t(depart.position === '50' && tire.position === '40',
+      'rideau : il s\'ouvre au milieu, et la glissière dit sa position',
+      `${depart.position} -> ${tire.position}`);
+    t(depart.decale === 50, 'rideau : au repos, l\'aplat couvre la moitié droite',
+      String(depart.decale) + ' %');
+    t(tire.decale === 40, 'rideau : il se décale exactement à la position du trait',
+      String(tire.decale) + ' %');
+    const deux = rapports(depart.detail);
+    t(deux.length >= 2, 'rideau : le verdict annonce les deux rapports à la fois',
+      deux.join(' puis '));
+    t(dernier(deux) > deux[0], 'rideau : le fond assombri fait gagner des libellés clairs',
+      `${deux[0]}:1 dans le fichier, ${dernier(deux)}:1 assombri`);
+    t(rapports(tire.detail).join() === deux.join(),
+      'rideau : les deux rapports ne dépendent pas de la position du trait',
+      rapports(tire.detail).join(' puis '));
+    t(/ne change pas/.test(depart.detail),
+      'rideau : le détail dit que le fichier ne change pas', depart.detail.slice(-60));
+    t(depart.empreinte === tire.empreinte,
       'rideau : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
 
     /* Le geste ne doit rien coûter d'autre que de la composition : les jetons

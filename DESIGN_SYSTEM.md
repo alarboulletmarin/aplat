@@ -583,10 +583,24 @@ du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
 **insuffisante** en dessous.
 
 Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
-la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Le
-verdict se recalcule pour cette condition. Il remplace une bascule qui montrait
-l'un *puis* l'autre : une limite qui passe sous les mêmes libellés se juge d'un
-regard, deux états successifs demandent de se souvenir du premier.
+la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Il
+remplace une bascule qui montrait l'un *puis* l'autre : une limite qui passe
+sous les mêmes libellés se juge d'un regard, deux états successifs demandent de
+se souvenir du premier.
+
+**Il s'ouvre au milieu**, et c'est la correction qui compte. Tout à droite,
+l'aperçu montrait le fichier entier et rien d'autre : il fallait avoir l'idée de
+tirer le trait pour découvrir qu'il y avait deux états, et toute position autre
+que l'extrême droite montrait du sombre sans montrer de clair à côté. Un
+comparateur qui s'ouvre fermé ne compare rien. Au milieu, les deux conditions
+sont là d'emblée, sous les mêmes libellés, et le fichier reste entier : il est à
+gauche du trait, et le verdict le nomme.
+
+**Le verdict annonce les deux rapports à la fois**, celui du fichier et celui du
+fond assombri, plutôt que d'en basculer un au passage du trait. Deux chiffres
+posés côte à côte se lisent mieux qu'un seul qui change de sens sans prévenir,
+et le niveau annoncé reste celui du fichier, qui est ce qu'on télécharge. Le
+rideau ne touche donc plus à l'état du tout : glisser ne coûte aucun rendu.
 
 C'est un `input[type=range]`, pas un geste maison : les flèches, Origine et Fin
 y marchent sans une ligne de script, et le nom accessible dit la position. Le

@@ -35,24 +35,26 @@ const CONSEILS = {
  * Il suit deux choses que l'aperçu ne dit pas de lui-même. Le voile, quand on
  * l'a retiré du fichier : le rapport est alors celui du motif nu, et le détail
  * le nomme autrement qu'un voile nul mesuré, parce que ce n'est pas la même
- * chose. Et le rideau clair/sombre : dès qu'il découvre du fond assombri, le
- * rapport devient celui de cette condition.
+ * chose. Et le fond assombri d'un thème sombre, annoncé à côté du rapport du
+ * fichier plutôt qu'à sa place : c'est ce que le rideau montre de part et
+ * d'autre de son trait, et deux chiffres posés côte à côte se lisent mieux
+ * qu'un seul qui bascule au passage de la limite.
  */
 export function Verdict({
   mesure,
+  sombre = null,
   textes,
   langue,
   replie = false,
-  assombri = false,
   voileRetire = false,
 }: {
   mesure: Mesure | null
+  /** La même mesure sur fond assombri, quand le rideau est là pour la montrer. */
+  sombre?: Mesure | null
   textes: Textes
   langue: Langue
   /** La scène est repliée : le verdict tient sur une ligne, dépliable. */
   replie?: boolean
-  /** Le rideau découvre du fond assombri : le rapport porte sur cette condition. */
-  assombri?: boolean
   /** Le voile a été retiré du fichier, à la main. */
   voileRetire?: boolean
 }) {
@@ -85,7 +87,11 @@ export function Verdict({
     libelles,
     voile,
     conseil: T[CONSEILS[rang]],
-  })}${assombri ? ` ${T.assombriNote}` : ''}`
+  })}${
+    sombre
+      ? ` ${remplir(T.rideauDetail, { contraste: decimal(sombre.contraste, langue) })}`
+      : ''
+  }`
   const forme = (
     <span className="verdict-i" aria-hidden="true">
       <span className={`verdict-${rang}`} />

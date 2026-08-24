@@ -330,7 +330,7 @@
   inset: 0;
   display: block;
   pointer-events: none;
-  transform: translateX(var(--rideau, 100%));
+  transform: translateX(var(--rideau, 50%));
   will-change: transform;
 }
 
@@ -859,7 +859,7 @@
 .rideau-suivi {
   position: absolute;
   inset: 0;
-  transform: translateX(var(--rideau, 100%));
+  transform: translateX(var(--rideau, 50%));
   will-change: transform;
 }
 .rideau-trait {

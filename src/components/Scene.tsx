@@ -44,6 +44,21 @@ import { Verdict } from './Verdict'
 /** Le rayon de la poignée du rideau, égal à celui de `.rideau-poignee`. */
 const RAYON_POIGNEE = 15
 
+/**
+ * Où le rideau se tient au départ : au milieu.
+ *
+ * Il a commencé tout à droite, l'aperçu entier montrant le fichier tel quel, et
+ * c'était la mauvaise réponse à la bonne question. Un comparateur qui s'ouvre
+ * fermé ne compare rien : il fallait avoir l'idée de tirer le trait pour
+ * découvrir qu'il y avait deux états, et toute position autre que l'extrême
+ * droite montrait du sombre sans montrer de clair à côté.
+ *
+ * Au milieu, les deux conditions sont là d'emblée, sous les mêmes libellés, et
+ * c'est exactement ce qu'on est venu juger. Le fichier, lui, reste entier : il
+ * est à gauche du trait, et le verdict le nomme.
+ */
+const RIDEAU_DEPART = 50
+
 export function Scene({
   cadre,
   motif,
@@ -81,7 +96,7 @@ export function Scene({
      n'y touche pas.
 
      Une aide à la lecture, pas un réglage : il ne part ni dans l'URL ni dans le
-     fichier, et repart à cent au rechargement. C'est le même geste que la
+     fichier, et repart au milieu au rechargement. C'est le même geste que la
      bascule qu'il remplace, mais continu : un thème sombre ne se juge pas à
      « avant » et « après » posés l'un après l'autre, il se juge en voyant la
      limite passer sur le motif, sous les mêmes libellés.
@@ -93,7 +108,7 @@ export function Scene({
      `change` que le clavier émet aussi à chaque flèche. Ce qui doit être en
      direct l'est, c'est-à-dire l'image ; ce qui peut attendre la fin du geste
      l'attend, c'est-à-dire le chiffre du verdict. */
-  const [separation, setSeparation] = useState(100)
+  const [separation, setSeparation] = useState(RIDEAU_DEPART)
   const glissiere = useRef<HTMLInputElement>(null)
   const cadreRideau = useRef<HTMLDivElement>(null)
   const aplat = useRef<HTMLSpanElement>(null)
@@ -217,43 +232,34 @@ export function Scene({
      `onChange` étant `input`, d'où l'écoute directe ; c'est aussi ce qui permet
      à la glissière de rester non contrôlée pendant le geste.
 
-     Entre les deux, l'état est tout de même posé, mais sept fois par seconde et
-     non soixante. Le chiffre du verdict suit donc le geste d'assez près pour
-     paraître vivant, sans qu'un rendu complet vienne s'intercaler entre deux
-     images. Cent quarante millisecondes : au-delà on voit le chiffre traîner,
-     en deçà on repaie le rendu sans que l'oeil y gagne. */
+     Rien n'est posé entre les deux : le verdict ne dépend plus de la position du
+     rideau, puisqu'il annonce les deux rapports en même temps. Glisser ne coûte
+     donc aucun rendu, pas même différé. */
   useEffect(() => {
     const noeud = glissiere.current
     if (!noeud) return
-    let differe: ReturnType<typeof setTimeout> | undefined
-    const poserEtat = () => {
-      differe = undefined
-      setSeparation(Number(noeud.value))
-    }
-    const suivre = () => {
-      poser(Number(noeud.value))
-      if (differe === undefined) differe = setTimeout(poserEtat, 140)
-    }
-    const relever = () => {
-      if (differe !== undefined) clearTimeout(differe)
-      poserEtat()
-    }
+    const suivre = () => poser(Number(noeud.value))
+    const relever = () => setSeparation(Number(noeud.value))
     noeud.addEventListener('input', suivre)
     noeud.addEventListener('change', relever)
     return () => {
-      if (differe !== undefined) clearTimeout(differe)
       noeud.removeEventListener('input', suivre)
       noeud.removeEventListener('change', relever)
     }
   }, [poser, replie, vide, calculEnCours])
 
-  /* Le verdict porte sur le fichier tel qu'il sera, et sur la condition qu'on
-     regarde. Deux corrections, dans cet ordre : le voile retiré change le
-     contraste du fichier lui-même, l'assombrissement ne change que ce qu'on en
-     voit. Les inverser reviendrait à assombrir une image qui n'existe pas. */
-  const assombri = separation < 100
+  /* Le verdict porte sur le fichier tel qu'il sera, et il annonce à côté ce
+     qu'un thème sombre en ferait. Les deux ensemble, et non l'un ou l'autre
+     selon la position du rideau : c'est justement ce que le rideau montre, et
+     un chiffre qui bascule au passage du trait se lit deux fois moins bien que
+     deux chiffres posés côte à côte.
+
+     Le voile retiré, lui, change le contraste du fichier lui-même, et il
+     s'applique donc avant : assombrir une image qu'on n'exporte pas n'aurait
+     aucun sens. */
+  const rideauVisible = !vide && !calculEnCours && !replie && Boolean(geometrie)
   const brute = vide || !mesure ? null : voile ? mesure : sansVoile(mesure)
-  const verdict = brute && assombri ? assombrir(brute) : brute
+  const sombre = brute && rideauVisible ? assombrir(brute) : null
 
   /* La maquette ne dépend que du type d'appareil, de la langue et de la
      géométrie : c'est ce qui remet son ajustement à zéro, rien d'autre. */
@@ -340,7 +346,7 @@ export function Scene({
               cadre y aurait pris le geste de défilement. Elle disparaît avec
               le repli, faute de place et faute d'objet : replié, on parcourt
               les motifs ; déplié, on les juge. */}
-          {!vide && !calculEnCours && !replie && geometrie && (
+          {rideauVisible && (
             <div className="rideau" id="rideau" ref={cadreRideau}>
               <span className="rideau-suivi" aria-hidden="true">
                 <span className="rideau-trait" />
@@ -386,11 +392,11 @@ export function Scene({
       </p>
 
       <Verdict
-        mesure={verdict}
+        mesure={brute}
+        sombre={sombre}
         textes={textes}
         langue={langue}
         replie={verdictReplie}
-        assombri={assombri}
         voileRetire={!voile}
       />
     </section>

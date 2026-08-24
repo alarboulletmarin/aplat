@@ -34,6 +34,14 @@ d'écran derrière mes icônes ?**
   « Assombri », qui montrait l'un *puis* l'autre : une limite qui passe sous les
   mêmes libellés se juge d'un regard, deux états successifs demandent de se
   souvenir du premier.
+- **Il s'ouvre au milieu.** Tout à droite, l'aperçu montrait le fichier entier
+  et rien d'autre : il fallait avoir l'idée de tirer le trait pour découvrir
+  qu'il y avait deux états, et toute autre position montrait du sombre sans
+  montrer de clair à côté. Un comparateur qui s'ouvre fermé ne compare rien.
+- **Le verdict annonce les deux rapports à la fois**, celui du fichier et celui
+  du fond assombri, au lieu d'en basculer un au passage du trait. Le niveau
+  annoncé reste celui du fichier, qui est ce qu'on télécharge. Le rideau ne
+  touche plus à l'état du tout : glisser ne coûte aucun rendu.
 - C'est un `input[type=range]`, pas un geste maison : les flèches, Origine et
   Fin y marchent sans une ligne de script. Le curseur fait deux pixels de large,
   sans quoi la valeur d'un `range`, qui se calcule sur la course du curseur,

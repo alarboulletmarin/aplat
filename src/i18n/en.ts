@@ -114,8 +114,8 @@ export const en: Textes = {
     rideauClair: 'Light',
     rideauSombre: 'Dark',
     rideauValeur: 'dimmed across {n}% of the width',
-    assombriNote:
-      'Preview dimmed, roughly as a dark theme would. The downloaded file itself does not change.',
+    rideauDetail:
+      'Right of the line, the background as a dark theme would dim it, roughly: {contraste}:1. The downloaded file itself does not change.',
     detail: '{contraste}:1, {libelles}, {voile}. {conseil}',
   },
   reglages: {
