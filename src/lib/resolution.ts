@@ -18,6 +18,24 @@ export interface Resolution {
   hauteur: number
 }
 
+/**
+ * Les trois formats de référence, écrits une seule fois.
+ *
+ * Ils servent aux préréglages de la carte Résolution et à l'export en une fois
+ * des trois appareils. Deux listes auraient fini par diverger, et l'export
+ * multi-appareils aurait livré un format que le panneau ne propose pas.
+ *
+ * Ce ne sont pas des tailles moyennes mais des tailles réelles et courantes :
+ * un téléphone récent, une tablette de dix pouces, un écran de bureau. Le motif
+ * n'est jamais agrandi, il est recalculé à ces pixels-là.
+ */
+export const TELEPHONE: Resolution = { largeur: 1179, hauteur: 2556 }
+export const TABLETTE: Resolution = { largeur: 2048, hauteur: 2732 }
+export const ORDINATEUR: Resolution = { largeur: 2560, hauteur: 1440 }
+
+/** Dans l'ordre où l'export les livre : la poche, puis le sac, puis le bureau. */
+export const TROIS_APPAREILS: readonly Resolution[] = [TELEPHONE, TABLETTE, ORDINATEUR]
+
 /** Une résolution invalide vaut zéro : l'interface passe alors en état vide. */
 export function depuisSaisie(largeurSaisie: string, hauteurSaisie: string): Resolution {
   const l = Number.parseInt(largeurSaisie, 10)

@@ -17,7 +17,16 @@
 .btn-oublier,
 .btn-surprise,
 .btn-graine,
-.btn-export {
+.btn-export,
+.onglet,
+.btn-formats,
+.btn-voile,
+.feuille-b,
+.editeur-nom input,
+.editeur-teinte input[type='text'],
+.editeur-nuancier,
+.editeur-moins,
+.soutien {
   scroll-margin-top: calc(var(--bar, 0px) + var(--scene-h, 0px) + 12px);
   scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
 }
@@ -262,6 +271,94 @@
   padding: 2.5px;
   background: var(--encre);
 }
+/* L'épingle se voit à une coche posée sur le coin haut droit de la vignette,
+   pas à une teinte : en niveaux de gris, la marque tient. Elle est doublée
+   dans le nom accessible du bouton, jamais laissée à la seule forme. */
+.historique-b {
+  position: relative;
+}
+.historique-b[data-epingle='1'] {
+  border-color: var(--encre);
+  border-width: 2.5px;
+  padding: 3px;
+}
+.historique-p {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--accent-encre);
+}
+.historique-p i {
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 2.5px;
+  height: 9px;
+  margin-left: -1.25px;
+  border-radius: 999px 999px 0 0;
+  background: var(--accent-encre);
+}
+.historique-p b {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 3.5px;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--accent-encre);
+}
+/* Deux actions de tête de carte, sur une rangée qui se replie plutôt que de
+   pousser le titre hors de sa colonne. */
+.carte-titre-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.btn-epingler {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-epingler[aria-pressed='true'] {
+  border-color: var(--encre);
+  border-width: 2px;
+  background: var(--encre);
+  color: var(--papier);
+}
+.btn-epingler[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+/* Une épingle : une tête ronde et une tige, dessinées comme le reste du
+   vocabulaire, en aplats. */
+.ico-epingle {
+  position: relative;
+  flex: 0 0 auto;
+  width: 13px;
+  height: 14px;
+}
+.ico-epingle i {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 2px;
+  height: 7px;
+  margin-left: -1px;
+  background: currentColor;
+}
+.ico-epingle b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+  border-radius: 999px 999px 3px 3px;
+  background: currentColor;
+}
 .btn-oublier {
   flex: 0 0 auto;
   min-height: 44px;
@@ -272,14 +369,25 @@
   border: 1.5px solid var(--filet-franc);
   background: transparent;
   color: var(--encre);
+  font-family: var(--texte);
   font-weight: 700;
   font-size: 13.5px;
 }
+/* Supprimer une palette est la seule action irréversible du panneau. Elle
+   porte le trait d'alerte, jamais un aplat rouge : une couleur d'aplat sur un
+   bouton secondaire le ferait passer pour l'appel primaire. */
+.btn-oublier-alerte {
+  border-color: var(--alerte);
+}
 
-/* --- Surprends-moi ---------------------------------------------------------
-   Une action secondaire, dans la carte qu'elle change. Pas dans la barre : la
-   barre n'a qu'un appel primaire, et à 320 px un troisième bouton mangeait
-   « Télécharger ». */
+/* --- Action de carte -------------------------------------------------------
+   Un bouton secondaire posé dans la carte qu'il change : « Composer une
+   palette », dans la carte Palette. Il porte un pictogramme parce qu'il ouvre
+   quelque chose plutôt que de basculer un état.
+
+   « Surprends-moi » a porté cette forme avant de rejoindre la barre : il tire
+   une famille, une palette et une graine, donc il répond à la même question
+   que « Variante », et les deux sont désormais côte à côte. */
 .btn-surprise {
   flex: 0 0 auto;
   min-height: 44px;
@@ -307,6 +415,264 @@
     50% 0%, 60% 40%, 100% 50%, 60% 60%,
     50% 100%, 40% 60%, 0% 50%, 40% 40%
   );
+}
+
+/* --- Palettes composées --------------------------------------------------------
+   Les palettes qu'on écrit soi-même sont des palettes : même carte, même
+   titre, même puce. Ce qui les distingue tient en deux boutons sous la grille,
+   qui ne portent que sur celle qui est choisie. Les mettre dans chaque puce
+   ferait trois cibles par palette, et un groupe de boutons radio n'a pas à
+   contenir autre chose que des boutons radio. */
+.palette-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.palette-actions .btn-oublier,
+.palette-actions .btn-surprise {
+  margin-bottom: 0;
+}
+.palette-recue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 18px 18px 6px 6px;
+}
+.palette-note {
+  flex: 1 1 180px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.palette-recue .btn-oublier {
+  margin-bottom: 0;
+}
+
+/* Trois pastilles en escalier : le pictogramme de la composition. Le
+   vocabulaire de la page est fait de formes pleines découpées, pas d'emoji ni
+   d'un jeu d'icônes importé. */
+.ico-teintes {
+  position: relative;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 13px;
+}
+.ico-teintes i {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  border-radius: 3px 3px 1px 1px;
+  background: currentColor;
+}
+.ico-teintes i:nth-child(1) {
+  left: 0;
+  height: 7px;
+}
+.ico-teintes i:nth-child(2) {
+  left: 5px;
+  height: 13px;
+}
+.ico-teintes i:nth-child(3) {
+  left: 10px;
+  height: 10px;
+}
+
+/* --- L'éditeur de palette ------------------------------------------------------
+   Dans le panneau, à sa place, et non dans une fenêtre modale : le produit n'en
+   a aucune, et surtout la valeur de l'outil est de voir le rendu pendant qu'on
+   règle. La vignette est donc à côté du nom, et elle se redessine à chaque
+   teinte recevable. */
+.editeur {
+  margin-top: 13px;
+  padding: 13px;
+  border: 2px solid var(--encre);
+  border-radius: 20px 20px 6px 6px;
+  background: var(--surface-2);
+}
+.editeur-tete {
+  display: flex;
+  align-items: flex-end;
+  gap: 11px;
+}
+.editeur-nom {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--encre-douce);
+}
+.editeur-nom input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: var(--champ);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 15px;
+  font-weight: 400;
+}
+.editeur-apercu {
+  flex: 0 0 auto;
+  width: 52px;
+}
+.editeur-apercu canvas {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: block;
+  border-radius: 10px 10px 3px 3px;
+  border: 1.5px solid var(--filet-franc);
+  background: var(--surface);
+}
+.editeur-teintes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(148px, 100%), 1fr));
+  gap: 9px;
+  margin-top: 11px;
+}
+.editeur-teinte {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.editeur-teinte label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--encre-douce);
+}
+.editeur-teinte input[type='text'] {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: var(--champ);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+.editeur-teinte input[aria-invalid='true'] {
+  border-color: var(--alerte);
+  border-width: 2.5px;
+}
+/* Le nuancier du système, ramené à un aplat carré aux coins du produit. Deux
+   champs pour une couleur, et c'est voulu : le nuancier sert quand on cherche,
+   les six chiffres quand on sait. */
+.editeur-nuancier {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 3px;
+  cursor: pointer;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: var(--champ);
+}
+.editeur-nuancier::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.editeur-nuancier::-webkit-color-swatch {
+  border: 0;
+  border-radius: 10px 10px 2px 2px;
+}
+.editeur-nuancier::-moz-color-swatch {
+  border: 0;
+  border-radius: 10px 10px 2px 2px;
+}
+.editeur-moins {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: transparent;
+  color: var(--encre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.editeur-moins i {
+  width: 13px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.editeur-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.editeur-actions .btn-oublier,
+.editeur-actions .btn-graine-compact {
+  margin-bottom: 0;
+}
+.editeur .res-aide {
+  margin: 9px 0 11px;
+}
+
+/* --- Le lien de soutien --------------------------------------------------------
+   Une porte, pas une caisse : dans le pied, à côté de la licence et de la
+   source, et rien dans le produit ne le rappelle. Le bouton officiel de Ko-fi
+   est une image servie par leur CDN ; elle n'entre pas ici, puisque la page ne
+   fait aucune requête vers un tiers. La tasse est donc dessinée, comme tous les
+   autres pictogrammes. */
+.soutien {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 16px 16px 5px 5px;
+  border: 1.5px solid var(--filet-franc);
+  color: var(--encre);
+  font-weight: 700;
+  text-decoration: none;
+}
+.soutien:hover {
+  border-color: var(--encre);
+}
+.ico-tasse {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 14px;
+}
+.ico-tasse i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 14px;
+  border-radius: 2px 2px 6px 6px;
+  background: currentColor;
+}
+.ico-tasse b {
+  position: absolute;
+  right: 0;
+  top: 3px;
+  width: 7px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
 }
 
 /* --- Résolution ------------------------------------------------------------ */
@@ -500,11 +866,12 @@
 /* --- Boutons d'action --------------------------------------------------------- */
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: stretch;
 }
-/* Le bouton secondaire cède la place au primaire : avec des facteurs de
-   rétrécissement voisins les deux libellés étaient coupés, y compris
+/* Les deux secondaires cèdent la place au primaire : avec des facteurs de
+   rétrécissement voisins les libellés étaient coupés, y compris
    « Télécharger » dès 320 px. */
 .btn-graine {
   flex: 0 100 auto;
@@ -551,6 +918,143 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* --- Trois boutons sur une rangée ---------------------------------------------
+   « Surprends-moi » a rejoint « Variante » et « Télécharger » : les deux
+   tirages au sort répondent à la même question, et les séparer revenait à
+   cacher la moitié du geste. La place se trouve sans toucher au primaire.
+
+   Sous 420 px, les deux secondaires perdent leur mot et gardent leur
+   pictogramme. Le mot n'est pas retiré du document mais rendu invisible : il
+   reste le nom accessible du bouton, ce qu'un `aria-label` posé par-dessus un
+   libellé visible aurait cassé aux largeurs supérieures. */
+.btn-compact {
+  gap: 8px;
+  padding: 0 14px;
+}
+.btn-graine-compact {
+  min-height: 44px;
+  margin-bottom: 14px;
+  padding: 0 15px;
+  border-radius: 16px 16px 5px 5px;
+  font-size: 13.5px;
+}
+.btn-graine-compact[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+/* Six cents pixels : c'est la largeur en dessous de laquelle les deux libellés
+   secondaires, mis bout à bout avec le primaire et son dépli, ne tiennent plus
+   sur une rangée. Ce n'est pas un seuil rond choisi à vue, c'est celui que la
+   somme des cinq cibles impose. */
+@media (max-width: 599px) {
+  .actions {
+    gap: 7px;
+  }
+  .btn-compact {
+    flex: 0 0 auto;
+    min-width: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+  .btn-compact .btn-t {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+/* Sous 360 px, quatre cibles et un libellé qui ne s'élide jamais ne tiennent
+   plus sur une rangée. C'est le pictogramme du primaire qui cède, et lui seul :
+   « Télécharger » garde son mot entier, sa hauteur et sa place. Le seuil est
+   celui de `.colonnes` dans `ecrans.css`, la dernière largeur où la page est
+   encore sur une colonne. */
+@media (max-width: 359px) {
+  .actions {
+    gap: 6px;
+  }
+  .btn-compact {
+    min-width: 44px;
+  }
+  .btn-paire {
+    gap: 4px;
+  }
+  .btn-export {
+    padding: 0 12px;
+  }
+  .btn-export .ico-descendre {
+    display: none;
+  }
+  .btn-formats {
+    width: 44px;
+  }
+}
+
+/* Le primaire et son dépli forment une paire : deux boutons, un seul appel.
+   Le dépli n'a pas d'aplat, il n'appelle à rien ; il ouvre. */
+.btn-paire {
+  flex: 1 0 auto;
+  min-width: 0;
+  display: flex;
+  gap: 5px;
+}
+.btn-paire .btn-export {
+  flex: 1 1 auto;
+}
+.btn-formats {
+  flex: 0 0 auto;
+  width: 48px;
+  min-height: 56px;
+  cursor: pointer;
+  border-radius: 24px 24px 7px 7px;
+  border: 2px solid var(--encre);
+  background: transparent;
+  color: var(--encre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ico-chevron {
+  width: 11px;
+  height: 8px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transition: transform 180ms ease;
+}
+.btn-formats[aria-expanded='true'] {
+  border-color: var(--encre);
+  background: var(--encre);
+  color: var(--papier);
+}
+.btn-formats[aria-expanded='true'] .ico-chevron {
+  transform: rotate(180deg);
+}
+
+/* L'interrupteur du voile : un mot, à côté de la phrase qu'il change. */
+.btn-voile {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 12px;
+  cursor: pointer;
+  border-radius: 14px 14px 4px 4px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+.btn-voile[aria-pressed='true'] {
+  border-color: var(--encre);
+  border-width: 2px;
+  background: var(--encre);
+  color: var(--papier);
 }
 
 /* --- Pictogrammes, dessinés dans la direction artistique ---------------------- */

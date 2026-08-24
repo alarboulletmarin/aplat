@@ -23,16 +23,30 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Rang | Quoi | Où |
 |---|---|---|
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
+| Primaire | ce que le fichier contient de plus que le motif : le voile, et de quoi l'ôter | une ligne sous le bouton |
+| Secondaire | **Surprends-moi** et **Variante**, les deux tirages au sort | la même rangée, à gauche du primaire |
 | Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
+| Caché | les autres formats : PNG 2x, WebP, SVG, presse-papiers, les trois appareils | un dépli attaché au primaire |
 | Caché | lien de partage | en bas du bloc, sous un filet |
-| Caché | langue, thème, version, licence, source | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
+| Caché | langue, thème, version, licence, source, soutien | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
-Un seul appel primaire. **Télécharger** ne partage sa place avec rien : le
-bouton secondaire s'efface entièrement quand la largeur manque plutôt que de le
-faire rétrécir. C'est aussi pourquoi « Surprends-moi », qui tire une famille,
-une palette et une graine, est dans la carte Famille et non dans la barre : à
-320 px, un troisième bouton mangeait l'appel primaire. Le secondaire de la
-barre, « Variante », ne change que la graine, et son libellé le dit en un mot.
+Un seul appel primaire. **Télécharger** ne partage sa place avec rien : les deux
+secondaires perdent leur mot avant que lui ne perde un pixel, et son libellé ne
+s'élide ni ne se coupe jamais.
+
+Les deux tirages au sort sont côte à côte parce qu'ils répondent à la même
+question et qu'on ne sait pas laquelle on veut avant de voir : « Variante » ne
+change que la graine, « Surprends-moi » tire aussi une famille et une palette.
+Les séparer, l'un dans la barre et l'autre à mille pixels plus bas dans le
+panneau, revenait à cacher la moitié du geste. La place se trouve sans toucher
+au primaire : sous 420 px les deux gardent leur pictogramme et rendent leur mot,
+qui reste dans leur nom accessible ; sous 360 px, c'est le pictogramme du
+primaire qui cède, et lui seul.
+
+Les autres sorties sont derrière un dépli attaché au primaire, et non à côté de
+lui. Un PNG doublé, un WebP, un SVG, le presse-papiers et les trois appareils
+sont cinq façons de finir la même tâche : elles n'ont pas à disputer sa place à
+celle qui la finit dans neuf cas sur dix.
 
 ---
 
@@ -156,6 +170,8 @@ suivent la taille de l'objet.
 | vignette d'une puce de famille | 13 / 4 px |
 | vignette d'historique | 14 / 4 px, canevas 10 / 3 px |
 | échantillon de palette | 7 px, les quatre coins : c'est un aplat, pas un objet |
+| onglet de groupe, dépli des formats, interrupteur du voile | 16 / 5 px |
+| éditeur de palette, feuille des formats | 20 / 6 px |
 | appareil de la maquette | 13 % du petit côté (téléphone), 5,5 % (tablette), 2,4 % (ordinateur) |
 | marque | 23 % de son côté |
 
@@ -166,9 +182,15 @@ erreur.
 ### Le vocabulaire décoratif
 
 Blobs, vagues, marguerites, étoiles à pointes, arches. **Ils habillent et
-repèrent, ils ne portent jamais d'information seule** : l'arche du groupe
-« Abstraits » et l'étoile du groupe « Figures » accompagnent un mot, elles ne le
-remplacent pas.
+repèrent, ils ne portent jamais d'information seule** : l'arche d'un titre de
+section et la goutte d'un sous-titre accompagnent un mot, elles ne le remplacent
+pas. Il en va de même de l'épingle sur une vignette d'historique, doublée du mot
+« Épinglé » dans le nom du bouton.
+
+Tous sont **dessinés en aplats**, jamais importés : la tasse du lien de soutien
+comme l'étincelle du tirage au sort. Le bouton officiel de Ko-fi est une image
+servie par leur CDN ; elle n'entre pas ici, puisque la page ne fait aucune
+requête vers un tiers et que `tools/shot.mjs` le vérifie.
 
 **L'arche mordue** est le dessin de la marque, et le seul qui se répète à trois
 échelles : trente pixels dans l'en-tête de l'application comme dans l'enseigne
@@ -286,22 +308,74 @@ phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les trois groupes de familles
+### Les trois groupes de familles, en trois onglets
 
-La liste des familles est longue, et une liste longue se range. Trois groupes,
-et chacun a sa marque : l'arche pour les **abstraits**, la ligne de crête pour
-les **paysages**, la goutte à pointe pour les **figures**. Trois silhouettes
-distinctes, pas trois couleurs : en niveaux de gris elles tiennent toujours.
+La liste des familles est longue, et une liste longue se range. Trois groupes :
+les **abstraits**, les **paysages**, les **figures**.
 
 Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
 silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
 des trames et des damiers, et le critère de séparation s'énonce en une phrase :
 un paysage a un haut et un bas.
 
-Les trois groupes se suivent d'un seul tenant dans la liste, dans cet ordre. Un
+Les trois grilles se suivaient, et c'était le défaut : trente-deux vignettes à
+plat, dans une colonne étroite, mettent mille pixels entre « Vagues » et
+« Poissons ». Le coût n'est pas le défilement, c'est qu'on ne peut pas comparer
+deux motifs éloignés. Les trois groupes sont donc devenus **trois onglets**, ce
+qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
+l'autre à un appui.
+
+Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
+trois onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
+« ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
+décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
+remplace la vue d'ensemble perdue.
+
+Ils sont **empilés quand la colonne est étroite**, sur une rangée dès qu'elle
+peut porter trois mots. La bascule se règle sur la largeur du panneau et non sur
+celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont rien
+à voir : sur un téléphone de 390 px, le panneau tient dans une colonne de
+207 px, où trois onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
+est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
+ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
+
+L'onglet ouvert est **toujours celui de la famille en cours**. C'est là qu'est
+la mémoire du dernier onglet, et elle vaut mieux qu'un réglage enregistré :
+elle est dans l'adresse, avec le reste, donc elle survit à un rechargement comme
+à un lien partagé sans rien écrire sur l'appareil. Les flèches parcourent les
+onglets sans les ouvrir, sans quoi le clavier traverserait trois rendus complets
+pour atteindre le troisième.
+
+Les trois groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
 test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
 grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
 sauterait de place à l'écran sans que rien ne le signale.
+
+### Les palettes qu'on écrit soi-même
+
+Onze palettes suffisent à faire un fond d'écran, elles ne suffisent pas à faire
+*le sien*. On en compose donc, de trois à six couleurs, fond compris, douze au
+plus.
+
+Ce sont des palettes, pas un autre réglage : même carte, même titre, même puce,
+sous un sous-titre. Ce qui les distingue tient en deux boutons sous la grille,
+qui ne portent que sur celle qui est choisie. Les mettre dans chaque puce ferait
+trois cibles par palette, à vingt pixels de côté, et un groupe de boutons radio
+n'a pas à contenir autre chose que des boutons radio.
+
+L'éditeur est dans le panneau, à sa place, et non dans une fenêtre modale : le
+produit n'en a aucune, et surtout la valeur de l'outil est de voir le rendu
+pendant qu'on règle. Un carré de couleur ne dit rien de ce que la palette
+donnera sur un motif ; la vignette, à côté du nom, le montre, et elle se
+redessine à chaque teinte recevable. Deux champs par couleur, et c'est voulu :
+le nuancier du système sert quand on cherche, les six chiffres quand on sait,
+et « ma palette de marque » commence par un code, pas par un dégradé à faire
+glisser.
+
+Supprimer est la seule action irréversible du panneau. Elle porte le trait
+d'alerte, jamais un aplat rouge : une couleur d'aplat sur un bouton secondaire
+le ferait passer pour l'appel primaire.
 
 ### La page d'accueil
 
@@ -322,15 +396,36 @@ Trois règles la tiennent, et ce sont celles du produit :
   libellé y est mot pour mot celui du héros : ce n'est pas une autre offre. Le
   bouton secondaire, lui, ne va nulle part, il descend d'une section.
 - **Aucune animation qui ne dise rien.** Pas de carrousel, pas de motif qui
-  tourne tout seul, pas d'apparition au défilement. La seule chose qui bouge
-  est une vignette de la galerie quand on la touche, et elle dit ce que
-  « Variante » dit dans l'application : une autre graine, le même motif.
+  tourne tout seul, pas d'apparition au défilement. Ce qui bouge ne bouge que
+  sur demande.
 - **Aucune capture d'écran.** Chaque image de la page sort du moteur, au
   chargement, dans le navigateur qui la lit : la maquette de téléphone, les
   douze motifs, la maquette de bureau, et la comparaison du voile. La maquette
   vient du même fichier que celle de l'application, et les couleurs de ses
   libellés de la même sonde de lisibilité. Rien ici ne peut donc promettre un
   rendu que l'application ne donnerait pas.
+
+**Chaque écran est un bouton.** Le toucher tire un autre motif, et une ligne
+sous les appels le dit plutôt que de le laisser deviner. C'est la démonstration
+la plus courte du produit, puisque c'est exactement ce que fait
+« Surprends-moi » dans l'outil. Les deux maquettes tirent une famille, une
+palette et une graine ; la galerie et la démonstration du voile ne tirent qu'une
+graine, l'une pour que ses douze couples restent ceux de la composition, l'autre
+pour que la comparaison reste faite là où le voile travaille le plus. Le bouton
+est une couche posée sur l'appareil et non son enveloppe : l'envelopper
+changerait sa géométrie, dont dépendent le module de la maquette et le rapport
+d'aspect du canevas.
+
+Le motif de départ, lui, ne se joue pas aux dés : la page se peint deux fois de
+suite à l'identique. La variation est offerte, jamais imposée.
+
+**Quinze rendus sur une page, ça se paie.** On ne peint que ce qui approche du
+champ de vision, on peint quand le fil principal est libre, et on descend à un
+pixel par point dès que l'appareil demande à économiser (`Save-Data`, ou le
+mouvement réduit, qui vient souvent des mêmes réglages). Sans la deuxième
+précaution, les toiles d'une même section deviennent visibles ensemble et se
+peignent l'une derrière l'autre dans la même image, ce qui refait exactement le
+pic que la première cherchait à éviter.
 
 Les quatre chiffres du bandeau sont lus dans le moteur, jamais recopiés : une
 famille ajoutée les corrige d'elle-même.
@@ -380,6 +475,26 @@ restaurent rien : ce sont dix actions distinctes, pas dix options d'un même
 réglage. Le motif en cours s'y reconnaît au trait épaissi et à l'aplat, comme
 une puce choisie.
 
+**L'épingle** y porte sur le motif en cours, depuis un seul bouton en tête de
+carte, et non sur chaque vignette. Deux raisons, et la première suffit : une
+épingle par vignette ferait vingt cibles dans une carte qui en compte dix, à
+vingt pixels de côté, là où le produit n'en accepte aucune sous quarante-quatre.
+La seconde est que restaurer un motif est déjà un appui : épingler le troisième
+de la liste en coûte deux, et on l'a vu en grand entre les deux. Une entrée
+épinglée porte une coche sur son coin, et le mot « Épinglé » dans son nom
+accessible : jamais la forme seule.
+
+### Les onglets
+
+`role="tablist"`, un seul arrêt de tabulation, les flèches déplacent le focus
+**sans ouvrir**. C'est la différence avec les puces de choix, et elle est
+mesurable : ouvrir au passage remplacerait trente-deux vignettes à chaque
+touche, et le clavier traverserait trois rendus complets pour atteindre le
+troisième onglet.
+
+L'onglet ouvert porte l'aplat inversé des puces, et son compte de familles passe
+à la couleur du papier avec lui.
+
 ### Les champs
 
 Trait `--filet-franc` à 1,5 px, fond `--champ`, chiffres en `tabular-nums`.
@@ -392,7 +507,19 @@ teinte seule ne suffit jamais.
   `--accent-encre` (et non `--encre`, qui est la crème en thème sombre et
   disparaîtrait sur le lime). 56 px de haut.
 - **Secondaire** : transparent, trait `--encre` à 2 px. 56 px, mais
-  `flex: 0 100 auto` : il cède toute sa place au primaire.
+  `flex: 0 100 auto` : il cède toute sa place au primaire. Sous 420 px les deux
+  secondaires de la barre rendent leur mot et gardent leur pictogramme. Le mot
+  n'est pas retiré du document mais rendu invisible : il reste le nom accessible
+  du bouton, ce qu'un `aria-label` posé par-dessus un libellé visible aurait
+  cassé aux largeurs supérieures.
+- **Le dépli** du primaire : même hauteur, même rayon, mais pas d'aplat. Il
+  n'appelle à rien, il ouvre. Enfoncé, il prend l'aplat inversé et son chevron
+  se retourne.
+- **La feuille des formats** s'ouvre **au-dessus** de la rangée : la barre est
+  collée en bas de l'écran, et une liste qui pousserait vers le bas sortirait de
+  la fenêtre. Chaque sortie y porte son nom et une ligne qui dit à quoi elle
+  sert ; une sortie indisponible garde sa ligne et y met la raison, plutôt que
+  de disparaître sans explication.
 
 ### Les notes
 
@@ -426,15 +553,46 @@ Trois bandes, et rien entre les deux : **bonne** au-dessus de 4,5:1, le seuil AA
 du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
 **insuffisante** en dessous.
 
-Au bout de la même rangée, une bascule **Assombri** simule le fond d'écran tel
-qu'un thème sombre l'assombrit, et le verdict se recalcule pour cette condition.
-Elle ne touche pas au fichier : le voile y est déjà brûlé, calculé pour le fond
-tel quel, et c'est le système qui assombrit à l'affichage. Le détail le dit en
-toutes lettres, et l'interface annonce l'assombrissement comme approché, faute
-qu'aucune plateforme n'en publie la force. Le mot affiché est le nom de la bande, pris tel
-quel dans le dictionnaire : un titre ne peut plus rassurer là où le corps
-nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme la borne
-qui la définit.
+Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
+la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Le
+verdict se recalcule pour cette condition. Il remplace une bascule qui montrait
+l'un *puis* l'autre : une limite qui passe sous les mêmes libellés se juge d'un
+regard, deux états successifs demandent de se souvenir du premier.
+
+C'est un `input[type=range]`, pas un geste maison : les flèches, Origine et Fin
+y marchent sans une ligne de script, et le nom accessible dit la position. Le
+curseur fait deux pixels de large, parce que la valeur d'un `range` se calcule
+sur la course du curseur et qu'un curseur épais décalerait le trait de sa moitié
+au bord ; ce qu'on voit et ce qu'on saisit sont donc au même endroit. La bande
+saisissable ne fait que quarante-quatre pixels de haut, au milieu de l'appareil :
+plein cadre, elle prendrait le geste de défilement sur téléphone. Le trait est
+une lame crème cernée d'un filet sombre, faute de quoi il disparaîtrait sur la
+moitié des palettes.
+
+La poignée est bornée à quinze pixels des bords, le trait ne l'est pas : au
+repos, le rideau est à cent et le trait tombe sur le bord même, où une poignée
+centrée serait coupée en deux et cesserait de se voir. Le trait dit la limite,
+la poignée dit qu'on peut la prendre, et l'écart entre les deux ne dépasse
+jamais la largeur d'un doigt, contre les bords seulement. Elle porte deux
+pointes opposées plutôt que deux mots : « Clair » et « Sombre » posés sur
+l'aperçu couvriraient justement ce qu'on est venu regarder, et le nom accessible
+de la glissière les dit déjà.
+
+Le rideau ne touche pas au fichier : le voile y est déjà brûlé, calculé pour le
+fond tel quel, et c'est le système qui assombrit à l'affichage. Le détail le dit
+en toutes lettres, et l'interface annonce l'assombrissement comme approché,
+faute qu'aucune plateforme n'en publie la force. Le mot affiché est le nom de la
+bande, pris tel quel dans le dictionnaire : un titre ne peut plus rassurer là où
+le corps nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme
+la borne qui la définit.
+
+**Le voile, lui, est dans le fichier**, et une ligne sous le bouton le dit. Elle
+est là parce que rien d'autre ne pouvait le dire : le voile est déjà peint dans
+l'aperçu, et personne ne compare une image à une image qu'il n'a pas vue.
+L'interrupteur de cette ligne le retire, du fichier comme de l'aperçu, l'écrit
+dans l'adresse et dans le nom du fichier, et le verdict se recalcule pour
+l'image nue en la nommant autrement qu'un voile nul mesuré : l'un est ce que la
+sonde a trouvé, l'autre est une décision.
 
 ---
 
@@ -522,6 +680,16 @@ ne se coupe jamais.
 - Gamification : ni badge, ni série, ni barre de progression culpabilisante.
 - Un historique sans fin. Dix entrées, un bouton pour tout effacer, et pas de
   « voir plus » : on revient sur ses pas, on ne remonte pas une archive.
+  L'épingle ne l'allonge pas et ne peut pas le remplir : six au plus, et les
+  quatre places qui restent suffisent à voir passer les motifs. Une liste qu'on
+  épingle en entier cesserait d'être un historique.
+- Une caisse. Le lien de soutien est une porte : il vit dans le pied de page, à
+  côté de la licence et de la source, et rien dans le produit ne le rappelle. Ni
+  bandeau, ni relance après un téléchargement, ni compteur. Aplat est gratuit,
+  sans compte et sans pub, et le restera.
+- Un format offert qui échoue au clic. Une sortie que le navigateur ou le motif
+  ne permet pas garde sa ligne dans la feuille et y met la raison, avant qu'on
+  appuie.
 - Onboarding en modales, tour guidé, pop-up de bienvenue.
 - Plus d'un appel primaire par écran.
 - Emoji.

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { useState } from 'react'
 import type { Langue } from '../../lib/moteur'
 import type { Resolution } from '../../lib/resolution'
 import { nombre } from '../../lib/format'
 import type { Textes } from '../../i18n'
 import { Appareil } from './Appareil'
 import { Frise } from './Frise'
-import { BUREAU, FORMATS, ORDINATEUR } from './choix'
+import { BUREAU, FORMATS, ORDINATEUR, tirerMotif } from './choix'
 
 /** « 2 560 × 1 440 px », dans les chiffres de la langue. */
 function format(resolution: Resolution, langue: Langue): string {
@@ -35,6 +36,8 @@ export function Ecrans({
   /** L'écran de la personne qui lit, tel que l'application le détecterait. */
   detecte: Resolution
 }) {
+  const [motif, setMotif] = useState(BUREAU)
+
   return (
     <section className="ecrans" aria-labelledby="h-ecrans">
       <div className="section-tete">
@@ -46,12 +49,14 @@ export function Ecrans({
       <Frise decalage={4} />
 
       <Appareil
-        motif={BUREAU}
+        motif={motif}
         resolution={ORDINATEUR}
         bureau
         langue={langue}
         textes={textes}
         className="appareil-bureau"
+        etiquette={textes.accueil.ecrans.changer}
+        onChanger={() => setMotif((precedent) => tirerMotif(precedent))}
       />
 
       <ul className="formats">

@@ -15,6 +15,8 @@ import {
   ecrireAffichage, ecrireUrl, langueParDefaut, lireAffichage, lireUrl,
   REGLAGES_PAR_DEFAUT,
 } from './url'
+import { enregistrerPalettes } from './moteur'
+import { composer, versPalette } from './palettes'
 import { depuisSaisie } from './resolution'
 
 const DETECTE = { largeur: 1179, hauteur: 2556 }
@@ -136,5 +138,66 @@ describe('les réglages d’affichage, communs aux deux pages', () => {
     const complet = lireUrl(recherche, DETECTE)
     const affichage = lireAffichage(recherche)
     expect(affichage).toEqual({ langue: complet.langue, theme: complet.theme })
+  })
+})
+
+/**
+ * Le voile est un réglage depuis qu'un interrupteur le commande : il change le
+ * fichier, donc il est dans l'adresse. Son absence vaut « oui », parce que
+ * c'est ce que le produit fait depuis toujours et que les liens écrits avant
+ * lui doivent continuer d'ouvrir la même image.
+ */
+describe('voile de lisibilité', () => {
+  it('vaut oui par défaut, et ne s’écrit que retiré', () => {
+    expect(lireUrl('', DETECTE).voile).toBe(true)
+    const avec = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(avec).not.toContain('v=')
+    const sans = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, voile: false }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(sans).toContain('v=0')
+    expect(lireUrl(sans, DETECTE).voile).toBe(false)
+  })
+
+  it('ne se retire que sur « 0 », jamais sur une valeur abîmée', () => {
+    /* Une adresse cassée ne doit pas rendre une image plus claire que celle
+       qu'on croit avoir choisie. */
+    for (const brut of ['v=', 'v=1', 'v=non', 'v=00', 'v=false']) {
+      expect(lireUrl(`?${brut}`, DETECTE).voile, brut).toBe(true)
+    }
+  })
+})
+
+/**
+ * Une palette composée n'existe que sur l'appareil qui l'a composée. Le lien
+ * porte donc ses teintes, sans quoi il ouvrirait un autre motif chez la
+ * personne qui le reçoit.
+ */
+describe('palette composée dans l’adresse', () => {
+  const MIENNE = composer('Ma marque', ['#101010', '#DFF478', '#FF6648'])!
+
+  it('écrit les teintes à côté du nom, et se relit', () => {
+    enregistrerPalettes([versPalette(MIENNE)])
+    const reglages = {
+      ...REGLAGES_PAR_DEFAUT,
+      palette: MIENNE.id as never,
+      largeurSaisie: String(DETECTE.largeur),
+      hauteurSaisie: String(DETECTE.hauteur),
+    }
+    const requete = ecrireUrl(reglages, DETECTE, DETECTE)
+    expect(requete).toContain(`p=${MIENNE.id}`)
+    expect(requete).toContain('k=101010-DFF478-FF6648')
+    expect(lireUrl(requete, DETECTE)).toEqual(reglages)
+    enregistrerPalettes([])
+  })
+
+  it('retombe sur la palette par défaut quand l’appareil ne la connaît pas', () => {
+    enregistrerPalettes([])
+    const lu = lireUrl(`?p=${MIENNE.id}&k=101010-DFF478-FF6648`, DETECTE)
+    expect(lu.palette).toBe(REGLAGES_PAR_DEFAUT.palette)
+  })
+
+  it('n’écrit aucune teinte pour les palettes livrées', () => {
+    expect(ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)).not.toContain('k=')
   })
 })

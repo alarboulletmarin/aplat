@@ -33,11 +33,23 @@ const CAS = [
      barre, le verdict replié et les cibles de 44 px y sont tous au minimum, il
      n'y a rien à reprendre ailleurs.
 
-     Ce sont des planchers mesurés : ils tiennent la régression, pas l'ambition. */
+     Ce sont des planchers mesurés : ils tiennent la régression, pas l'ambition.
+
+     Deux d'entre eux ont baissé le jour où la barre a gagné sa ligne du voile,
+     celle qui dit si le fichier le porte et qui permet de l'ôter. Cinquante-
+     quatre pixels de plus dans la barre, c'est un point de moins à 640 px et
+     trois à 568 px. Tout ce qui pouvait être repris ailleurs l'a été, et c'est
+     écrit là où ça se lit : le rembourrage et l'interligne de la barre sur
+     téléphone (`composants.css`, `ecrans.css`), ceux de la scène sous 360 px,
+     et la part de la fenêtre laissée à la vignette repliée, descendue de 22 à
+     18 % dans `hauteurVignette`. Le reste est le prix d'une information que
+     l'écran ne donnait pas : quelqu'un qui téléchargeait sans avoir lu la
+     présentation recevait une image plus sombre que celle qu'il croyait avoir
+     choisie. */
   { nom: 'phone 390x844', vp: { width: 390, height: 844 }, dsf: 3, mobile: true, replie: false, libre: 75 },
   { nom: 'phone 430x932', vp: { width: 430, height: 932 }, dsf: 3, mobile: true, replie: false, libre: 78 },
-  { nom: 'phone 360x640', vp: { width: 360, height: 640 }, dsf: 3, mobile: true, replie: false, libre: 70 },
-  { nom: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true, replie: true, libre: 35 },
+  { nom: 'phone 360x640', vp: { width: 360, height: 640 }, dsf: 3, mobile: true, replie: false, libre: 68 },
+  { nom: 'phone 320x568', vp: { width: 320, height: 568 }, dsf: 2, mobile: true, replie: true, libre: 31 },
   { nom: 'phone paysage 844x390', vp: { width: 844, height: 390 }, dsf: 3, mobile: true, replie: false, libre: 55 },
   { nom: 'tablet 834x1112', vp: { width: 834, height: 1112 }, dsf: 2, mobile: true, replie: false, libre: 55 },
   { nom: 'desktop 1280x900', vp: { width: 1280, height: 900 }, dsf: 2, mobile: false, replie: false, libre: 55 },

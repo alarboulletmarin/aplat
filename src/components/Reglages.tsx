@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { useRef, type KeyboardEvent } from 'react'
 import {
-  FAMILLES, ORDRE_PALETTES, PALETTES,
-  type Densite, type IdFamille, type IdPalette, type Langue,
+  FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
+  type Densite, type Groupe, type IdFamille, type IdPalette, type Langue,
 } from '../lib/moteur'
-import type { Textes } from '../i18n'
+import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
+import { remplir, type Textes } from '../i18n'
 import { Arche } from './Arche'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
 import { Vignette } from './Vignette'
+import { EditeurPalette } from './EditeurPalette'
 
 /**
  * Trois réglages, pas un de plus : famille, palette, densité. La résolution
@@ -15,117 +18,255 @@ import { Vignette } from './Vignette'
  * modifiable si besoin.
  */
 
+/** Les trois groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
+const GROUPES = [
+  { id: 'abs', cle: 'groupeAbstraits' },
+  { id: 'pay', cle: 'groupePaysages' },
+  { id: 'fig', cle: 'groupeFigures' },
+] as const satisfies readonly { id: Groupe; cle: keyof Textes['reglages'] }[]
+
+/**
+ * Les trente-deux familles, en trois onglets.
+ *
+ * La grille plate posait un problème qu'aucun défilement ne résout : « Vagues »
+ * et « Poissons » sont à mille pixels l'un de l'autre dans une colonne étroite,
+ * et on ne peut donc pas les comparer. Trois onglets ramènent chaque liste à ce
+ * qu'un écran montre, et le geste pour passer de l'une à l'autre coûte un appui
+ * au lieu d'un défilement.
+ *
+ * Rien n'est caché pour autant : les trois onglets sont visibles ensemble, ils
+ * portent le nombre de familles qu'ils contiennent, et l'onglet ouvert est
+ * toujours celui de la famille en cours. C'est là que se trouve la mémoire du
+ * dernier onglet, et elle est meilleure qu'un réglage enregistré : elle est
+ * dans l'adresse, avec le reste, donc elle survit à un rechargement comme à un
+ * lien partagé sans rien écrire sur l'appareil.
+ */
 export function ChoixFamille({
   valeur,
   palette,
   densite,
   graine,
+  groupe,
   langue,
   textes,
   revision,
   onChoisir,
-  onSurprise,
+  onGroupe,
 }: {
   valeur: IdFamille
   palette: IdPalette
   densite: Densite
   graine: number
+  groupe: Groupe
   langue: Langue
   textes: Textes
   revision: number
   onChoisir: (famille: IdFamille) => void
-  /** Tire une famille, une palette et une graine d'un coup. */
-  onSurprise: () => void
+  onGroupe: (groupe: Groupe) => void
 }) {
-  const abstraits = FAMILLES.filter((f) => f.groupe === 'abs')
-  const paysages = FAMILLES.filter((f) => f.groupe === 'pay')
-  const figures = FAMILLES.filter((f) => f.groupe === 'fig')
+  const onglets = useRef<HTMLDivElement>(null)
+  const liste = FAMILLES.filter((f) => f.groupe === groupe)
+  const contient = liste.some((f) => f.id === valeur)
 
-  const grille = (liste: typeof FAMILLES, titre: string, identifiant: string) => {
-    const contient = liste.some((f) => f.id === valeur)
-    return (
-      <GroupeRadio id={identifiant} etiquettes={`h-famille ${titre}`} className="grille-familles">
-        {liste.map((f, indice) => (
-          <OptionRadio
-            key={f.id}
-            choisi={f.id === valeur}
-            porteEntree={!contient && indice === 0}
-            onChoisir={() => onChoisir(f.id)}
-            className="opt opt-famille"
-            data-famille={f.id}
-          >
-            <Vignette
-              famille={f.id}
-              palette={palette}
-              densite={densite}
-              graine={graine}
-              revision={revision}
-            />
-            <span className="opt-famille-l">
-              <span className="opt-carre" aria-hidden="true" />
-              <span>{f[langue]}</span>
-            </span>
-          </OptionRadio>
-        ))}
-      </GroupeRadio>
-    )
+  /* Les flèches parcourent les onglets sans les ouvrir : ouvrir au passage
+     remplacerait trente-deux vignettes à chaque touche, et le clavier
+     traverserait trois rendus complets pour atteindre le troisième onglet. */
+  const surTouche = (evenement: KeyboardEvent<HTMLDivElement>) => {
+    const deplacements = ['ArrowRight', 'ArrowLeft', 'Home', 'End']
+    if (!deplacements.includes(evenement.key)) return
+    const cadre = onglets.current
+    if (!cadre) return
+    const boutons = Array.from(cadre.querySelectorAll<HTMLButtonElement>('.onglet'))
+    const courant = boutons.indexOf(document.activeElement as HTMLButtonElement)
+    if (courant < 0) return
+    evenement.preventDefault()
+    const suivant =
+      evenement.key === 'Home'
+        ? 0
+        : evenement.key === 'End'
+          ? boutons.length - 1
+          : evenement.key === 'ArrowRight'
+            ? (courant + 1) % boutons.length
+            : (courant - 1 + boutons.length) % boutons.length
+    boutons[suivant].focus()
   }
 
   return (
     <div className="carte">
-      {/* « Surprends-moi » est ici et non dans la barre d'action : il change le
-          fichier téléchargé, sa place est donc dans le panneau, et c'est
-          au-dessus des trente-deux familles qu'on a envie d'en tirer une au
-          hasard. La barre garde un seul appel primaire. */}
       <div className="carte-titre">
         <h2 className="carte-h" id="h-famille">
           <Arche />
           <span>{textes.reglages.famille}</span>
         </h2>
-        <button
-          type="button"
-          id="btn-surprise"
-          className="btn-surprise"
-          title={textes.reglages.surpriseTitre}
-          onClick={onSurprise}
-        >
-          <span className="ico-etincelle" aria-hidden="true" />
-          <span>{textes.reglages.surprise}</span>
-        </button>
       </div>
-      <h3 className="groupe" id="h-abstraits">
-        <span className="groupe-arche" aria-hidden="true">
-          <i />
-          <b />
-        </span>
-        <span>{textes.reglages.groupeAbstraits}</span>
-      </h3>
-      {grille(abstraits, 'h-abstraits', 'liste-abstraits')}
-      <h3 className="groupe groupe-2" id="h-paysages">
-        <span className="groupe-sommet" aria-hidden="true" />
-        <span>{textes.reglages.groupePaysages}</span>
-      </h3>
-      {grille(paysages, 'h-paysages', 'liste-paysages')}
-      <h3 className="groupe groupe-2" id="h-figures">
-        <span className="groupe-etoile" aria-hidden="true" />
-        <span>{textes.reglages.groupeFigures}</span>
-      </h3>
-      {grille(figures, 'h-figures', 'liste-figures')}
+
+      <div
+        className="onglets"
+        id="onglets-familles"
+        ref={onglets}
+        role="tablist"
+        aria-label={textes.reglages.onglets}
+        onKeyDown={surTouche}
+      >
+        {GROUPES.map((entree) => {
+          const compte = FAMILLES.filter((f) => f.groupe === entree.id).length
+          const actif = entree.id === groupe
+          return (
+            <button
+              key={entree.id}
+              type="button"
+              role="tab"
+              id={`onglet-${entree.id}`}
+              className="onglet"
+              data-groupe={entree.id}
+              aria-selected={actif}
+              aria-controls="panneau-familles"
+              tabIndex={actif ? 0 : -1}
+              onClick={() => onGroupe(entree.id)}
+            >
+              <span>{textes.reglages[entree.cle]}</span>
+              <span className="onglet-n" aria-hidden="true">
+                {compte}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        className="onglet-corps"
+        id="panneau-familles"
+        role="tabpanel"
+        aria-labelledby={`onglet-${groupe}`}
+      >
+        <GroupeRadio
+          id="liste-familles"
+          etiquettes={`h-famille onglet-${groupe}`}
+          className="grille-familles"
+        >
+          {liste.map((f, indice) => (
+            <OptionRadio
+              key={f.id}
+              choisi={f.id === valeur}
+              porteEntree={!contient && indice === 0}
+              onChoisir={() => onChoisir(f.id)}
+              className="opt opt-famille"
+              data-famille={f.id}
+            >
+              <Vignette
+                famille={f.id}
+                palette={palette}
+                densite={densite}
+                graine={graine}
+                revision={revision}
+              />
+              <span className="opt-famille-l">
+                <span className="opt-carre" aria-hidden="true" />
+                <span>{f[langue]}</span>
+              </span>
+            </OptionRadio>
+          ))}
+        </GroupeRadio>
+      </div>
     </div>
   )
 }
 
+/** L'échantillon d'une palette : le fond, puis trois teintes au plus. */
+function Echantillon({ id }: { id: IdPalette }) {
+  const p = resoudrePalette(id)
+  const suite = teintes(p).slice(0, 4)
+  return (
+    <span className="opt-palette-s" aria-hidden="true">
+      {suite.map((teinte, i) => (
+        <i key={`${id}-${i}`} style={{ background: teinte }} />
+      ))}
+    </span>
+  )
+}
+
+/**
+ * Les onze palettes livrées, puis celles qu'on a composées.
+ *
+ * Les composées sont des palettes, pas un autre réglage : elles vivent dans la
+ * même carte, sous le même titre, et se choisissent avec la même puce. Ce qui
+ * les distingue tient en deux boutons, sous la grille, qui ne portent que sur
+ * celle qui est choisie. Les mettre dans chaque puce ferait trois cibles par
+ * palette, et un groupe de boutons radio n'a pas à contenir autre chose que
+ * des boutons radio.
+ */
 export function ChoixPalette({
   valeur,
   langue,
   textes,
+  persos,
+  recue,
+  brouillon,
+  edition,
+  famille,
+  densite,
+  graine,
+  revision,
   onChoisir,
+  onEditer,
+  onBrouillon,
+  onEnregistrer,
+  onSupprimer,
+  onAnnuler,
 }: {
   valeur: IdPalette
   langue: Langue
   textes: Textes
+  /** Les palettes composées, gardées sur l'appareil. */
+  persos: PalettePerso[]
+  /** Celle qu'un lien vient d'apporter, tant qu'elle n'est pas enregistrée. */
+  recue: PalettePerso | null
+  /** La palette en cours de composition, déjà dessinable. */
+  brouillon: PalettePerso | null
+  /** La palette qu'on modifie, ou 'nouvelle', ou null quand l'éditeur est clos. */
+  edition: PalettePerso | 'nouvelle' | null
+  /* Les trois réglages du motif en cours : la vignette de l'éditeur les
+     emprunte, pour que la palette composée se juge sur ce qu'on regarde. */
+  famille: IdFamille
+  densite: Densite
+  graine: number
+  revision: number
   onChoisir: (palette: IdPalette) => void
+  onEditer: (cible: PalettePerso | 'nouvelle' | null) => void
+  onBrouillon: (palette: PalettePerso | null) => void
+  onEnregistrer: (palette: PalettePerso) => void
+  onSupprimer: (id: string) => void
+  onAnnuler: () => void
 }) {
+  const T = textes.palettes
+  const choisie = persos.find((p) => p.id === valeur) ?? null
+  const recueChoisie = recue && recue.id === valeur && !persos.some((p) => p.id === recue.id)
+  const pleine = persos.length >= MAX_PALETTES
+  /* Deux grilles, donc deux groupes radio, donc deux portes d'entrée au
+     clavier. Celle qui ne contient pas la sélection n'a aucune option cochée :
+     sans `porteEntree` sur sa première puce, toutes ses options seraient à
+     `tabIndex -1` et le groupe deviendrait injoignable au clavier. */
+  const livreeChoisie = ORDRE_PALETTES.includes(valeur)
+
+  const puce = (id: IdPalette, nom: string, porteEntree = false) => (
+    <OptionRadio
+      key={id}
+      choisi={id === valeur}
+      porteEntree={porteEntree}
+      onChoisir={() => onChoisir(id)}
+      className="opt opt-palette"
+      data-palette={id}
+    >
+      {/* L'échantillon montre la palette ; le nom la dit. Ni l'un ni
+          l'autre n'est seul à porter l'information. */}
+      <Echantillon id={id} />
+      <span className="opt-palette-l">
+        <span className="opt-carre" aria-hidden="true" />
+        <span>{nom}</span>
+      </span>
+    </OptionRadio>
+  )
+
   return (
     <div className="carte">
       <h2 className="carte-h" id="h-palette">
@@ -133,31 +274,109 @@ export function ChoixPalette({
         <span>{textes.reglages.palette}</span>
       </h2>
       <GroupeRadio id="liste-palettes" etiquettes="h-palette" className="grille-palettes">
-        {ORDRE_PALETTES.map((id) => {
-          const p = PALETTES[id]
-          return (
-            <OptionRadio
-              key={id}
-              choisi={id === valeur}
-              onChoisir={() => onChoisir(id)}
-              className="opt opt-palette"
-              data-palette={id}
-            >
-              {/* L'échantillon montre la palette ; le nom la dit. Ni l'un ni
-                  l'autre n'est seul à porter l'information. */}
-              <span className="opt-palette-s" aria-hidden="true">
-                {[p.fond, p.couleurs[0], p.couleurs[1], p.couleurs[2]].map((teinte, i) => (
-                  <i key={`${id}-${i}`} style={{ background: teinte }} />
-                ))}
-              </span>
-              <span className="opt-palette-l">
-                <span className="opt-carre" aria-hidden="true" />
-                <span>{p[langue]}</span>
-              </span>
-            </OptionRadio>
-          )
-        })}
+        {ORDRE_PALETTES.map((id, indice) =>
+          puce(id, PALETTES[id][langue], !livreeChoisie && indice === 0),
+        )}
       </GroupeRadio>
+
+      <h3 className="groupe groupe-2" id="h-palettes-perso">
+        <span className="groupe-carre" aria-hidden="true" />
+        <span>{T.miennes}</span>
+      </h3>
+
+      {persos.length === 0 && !recue ? (
+        <p className="historique-vide">{T.vide}</p>
+      ) : (
+        <GroupeRadio
+          id="liste-palettes-perso"
+          etiquettes="h-palettes-perso"
+          className="grille-palettes"
+        >
+          {persos.map((p, indice) =>
+            puce(p.id as IdPalette, p.nom, livreeChoisie && indice === 0),
+          )}
+          {recue && !persos.some((p) => p.id === recue.id)
+            ? puce(
+                recue.id as IdPalette,
+                resoudrePalette(recue.id as IdPalette)[langue],
+                livreeChoisie && persos.length === 0,
+              )
+            : null}
+        </GroupeRadio>
+      )}
+
+      {recueChoisie && (
+        <div className="palette-recue">
+          <p className="palette-note">{T.recue}</p>
+          <button
+            type="button"
+            id="btn-garder-palette"
+            className="btn-oublier"
+            onClick={() => recue && onEnregistrer({ ...recue, nom: T.nomDefaut })}
+          >
+            {T.garder}
+          </button>
+        </div>
+      )}
+
+      {choisie && !edition && (
+        <div className="palette-actions">
+          <button
+            type="button"
+            id="btn-modifier-palette"
+            className="btn-oublier"
+            onClick={() => onEditer(choisie)}
+          >
+            {remplir(T.modifier, { nom: choisie.nom })}
+          </button>
+          <button
+            type="button"
+            id="btn-supprimer-palette"
+            className="btn-oublier btn-oublier-alerte"
+            onClick={() => onSupprimer(choisie.id)}
+          >
+            {remplir(T.supprimer, { nom: choisie.nom })}
+          </button>
+        </div>
+      )}
+
+      {edition ? (
+        <EditeurPalette
+          /* La clé remet l'éditeur à zéro quand on passe d'une palette à une
+             autre, ou d'une modification à une composition neuve : sans elle,
+             les champs garderaient les couleurs de la précédente. */
+          key={edition === 'nouvelle' ? 'nouvelle' : edition.id}
+          depart={edition === 'nouvelle' ? null : edition}
+          brouillon={brouillon}
+          famille={famille}
+          densite={densite}
+          graine={graine}
+          revision={revision}
+          textes={textes}
+          onBrouillon={onBrouillon}
+          onEnregistrer={onEnregistrer}
+          onAnnuler={onAnnuler}
+        />
+      ) : (
+        <div className="palette-actions">
+          <button
+            type="button"
+            id="btn-composer-palette"
+            className="btn-surprise"
+            disabled={pleine}
+            onClick={() => onEditer('nouvelle')}
+          >
+            <span className="ico-teintes" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>{T.composer}</span>
+          </button>
+        </div>
+      )}
+
+      <p className="historique-n">{pleine ? T.pleine : T.note}</p>
     </div>
   )
 }

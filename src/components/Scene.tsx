@@ -2,7 +2,7 @@
 
 import { useRef, useState, type CSSProperties } from 'react'
 import {
-  ASSOMBRISSEMENT, assombrir, famille, palette,
+  ASSOMBRISSEMENT, assombrir, famille, palette, sansVoile,
   type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
 import {
@@ -44,6 +44,7 @@ export function Scene({
   resolution,
   type,
   mesure,
+  voile,
   langue,
   textes,
   calculEnCours,
@@ -55,6 +56,8 @@ export function Scene({
   resolution: Resolution
   type: TypeAppareil
   mesure: Mesure | null
+  /** Le voile de lisibilité est-il peint dans le fichier, donc dans l'aperçu. */
+  voile: boolean
   langue: Langue
   textes: Textes
   calculEnCours: boolean
@@ -66,9 +69,17 @@ export function Scene({
   const tailleBoite = useTaille(boite)
   const fenetre = useTailleFenetre()
   const instant = useHorloge(langue)
-  /* Une aide à la lecture, pas un réglage : elle ne part ni dans l'URL ni dans
-     le fichier, et repart à zéro au rechargement. */
-  const [assombri, setAssombri] = useState(false)
+
+  /* Le rideau clair/sombre : la position du trait, en pourcentage de la
+     largeur, comptée depuis la gauche. Cent, donc rien d'assombri, tant qu'on
+     n'y touche pas.
+     
+     Une aide à la lecture, pas un réglage : il ne part ni dans l'URL ni dans le
+     fichier, et repart à cent au rechargement. C'est le même geste que la
+     bascule qu'il remplace, mais continu : un thème sombre ne se juge pas à
+     « avant » et « après » posés l'un après l'autre, il se juge en voyant la
+     limite passer sur le motif, sous les mêmes libellés. */
+  const [separation, setSeparation] = useState(100)
 
   const vide = !resolution.largeur || !resolution.hauteur
 
@@ -136,6 +147,14 @@ export function Scene({
           graine: String(motif.graine),
         })
 
+  /* Le verdict porte sur le fichier tel qu'il sera, et sur la condition qu'on
+     regarde. Deux corrections, dans cet ordre : le voile retiré change le
+     contraste du fichier lui-même, l'assombrissement ne change que ce qu'on en
+     voit. Les inverser reviendrait à assombrir une image qui n'existe pas. */
+  const assombri = separation < 100
+  const brute = vide || !mesure ? null : voile ? mesure : sansVoile(mesure)
+  const verdict = brute && assombri ? assombrir(brute) : brute
+
   /* La maquette ne dépend que du type d'appareil, de la langue et de la
      géométrie : c'est ce qui remet son ajustement à zéro, rien d'autre. */
   const signature = [type, langue, geometrie?.largeur, geometrie?.hauteur, instant.quantieme].join('|')
@@ -157,6 +176,7 @@ export function Scene({
             <Apercu
               motif={motif}
               resolution={resolution}
+              voile={voile}
               largeur={Math.max(0, (geometrie?.largeur ?? 0) - 8)}
               hauteur={Math.max(0, (geometrie?.hauteur ?? 0) - 8)}
               description={description}
@@ -166,12 +186,18 @@ export function Scene({
 
           {/* L'assombrissement est peint par-dessus le motif et sous la
               maquette : ce sont bien les libellés sur un fond assombri qu'on
-              juge. Le fichier téléchargé, lui, ne le porte pas. */}
+              juge. Le fichier téléchargé, lui, ne le porte pas.
+              Il est découpé à la position du rideau, si bien que la même
+              graine se voit en clair et en sombre d'un seul regard, sous les
+              mêmes libellés. */}
           {!vide && assombri && (
             <span
               className="apercu-assombri"
               aria-hidden="true"
-              style={{ background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})` }}
+              style={{
+                background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})`,
+                clipPath: `inset(0 0 0 ${separation}%)`,
+              }}
             />
           )}
 
@@ -204,6 +230,57 @@ export function Scene({
               </span>
             </div>
           )}
+
+          {/* La glissière ne couvre qu'une bande de quarante-quatre pixels au
+              milieu de l'appareil, et non toute sa surface : sur téléphone
+              l'aperçu est collé en haut de l'écran, et une glissière plein
+              cadre y aurait pris le geste de défilement. Elle disparaît avec
+              le repli, faute de place et faute d'objet : replié, on parcourt
+              les motifs ; déplié, on les juge. */}
+          {!vide && !calculEnCours && !replie && geometrie && (
+            <div className="rideau" id="rideau">
+              <span
+                className="rideau-trait"
+                style={{ left: `${separation}%` }}
+                aria-hidden="true"
+              />
+              {/* La poignée est bornée à quinze pixels des bords, le trait ne
+                  l'est pas : au repos, le rideau est à cent et le trait tombe
+                  sur le bord même, où une poignée centrée serait coupée en deux
+                  et ne se verrait plus. Le trait dit la limite, la poignée dit
+                  qu'on peut la prendre ; l'écart des deux ne dépasse jamais la
+                  largeur d'un doigt, et seulement contre les bords. */}
+              <span
+                className="rideau-poignee"
+                style={{ left: `clamp(15px, ${separation}%, calc(100% - 15px))` }}
+                aria-hidden="true"
+              >
+                <i />
+                <i />
+              </span>
+              <input
+                type="range"
+                id="rideau-glissiere"
+                className="rideau-glissiere"
+                min={0}
+                max={100}
+                step={1}
+                value={separation}
+                aria-label={textes.lisibilite.rideau}
+                aria-valuetext={
+                  separation >= 100
+                    ? textes.lisibilite.rideauClair
+                    : separation <= 0
+                      ? textes.lisibilite.rideauSombre
+                      : remplir(textes.lisibilite.rideauValeur, {
+                          n: String(100 - separation),
+                        })
+                }
+                title={textes.lisibilite.rideauTitre}
+                onChange={(evenement) => setSeparation(Number(evenement.target.value))}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -212,13 +289,12 @@ export function Scene({
       </p>
 
       <Verdict
-        mesure={vide || !mesure ? null : assombri ? assombrir(mesure) : mesure}
+        mesure={verdict}
         textes={textes}
         langue={langue}
         replie={verdictReplie}
-        bascule={!replie}
         assombri={assombri}
-        onAssombrir={() => setAssombri((precedent) => !precedent)}
+        voileRetire={!voile}
       />
     </section>
   )

@@ -68,18 +68,30 @@ export interface Palette {
   fr: string
   en: string
   fond: string
-  couleurs: readonly [string, string, string, string]
+  /**
+   * Deux à cinq teintes posées sur le fond. Les onze palettes livrées en
+   * comptent quatre ; une palette personnalisée en compte ce que la personne a
+   * choisi, et `formes()` les prend par un modulo, ce qui n'a jamais demandé
+   * un nombre fixe.
+   */
+  couleurs: readonly string[]
 }
+
+/**
+ * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
+ * liste. Les paysages se sont détachés des abstraits quand ils ont été trois :
+ * une silhouette de montagne, un couchant et des nuages ne se cherchent pas au
+ * milieu des trames et des damiers.
+ *
+ * Ils sont devenus trois onglets dans le panneau, et le type est donc nommé :
+ * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
+ * passer un groupe qui n'existe pas.
+ */
+export type Groupe = 'abs' | 'pay' | 'fig'
 
 export interface Famille {
   id: IdFamille
-  /**
-   * `abs` abstraits, `pay` paysages, `fig` figures : les trois groupes de la
-   * liste. Les paysages se sont détachés des abstraits quand ils ont été
-   * trois : une silhouette de montagne, un couchant et des nuages ne se
-   * cherchent pas au milieu des trames et des damiers.
-   */
-  groupe: 'abs' | 'pay' | 'fig'
+  groupe: Groupe
   fr: string
   en: string
 }
@@ -93,6 +105,13 @@ export interface Mesure {
   libelles: 'clair' | 'sombre'
   voile: number
   contraste: number
+  /**
+   * La luminance moyenne relevée sous la grille d'icônes, avant voile. Elle est
+   * gardée parce que le voile est devenu facultatif : sans elle, on ne saurait
+   * pas dire ce que vaut le contraste d'un fichier exporté sans voile, et le
+   * verdict annoncerait un chiffre qui n'est pas celui de l'image.
+   */
+  luminance: number
 }
 
 /* ---------- données ------------------------------------------------------- */
@@ -162,6 +181,64 @@ export const RAYONS: readonly string[] = [
   '50%', '3px', '50% 50% 50% 0', '3px 11px 3px 11px', '50% 0 50% 0', '2px',
 ]
 
+/* ---------- palettes personnalisées ---------------------------------------- */
+
+/**
+ * Le registre des palettes que la personne a composées.
+ *
+ * Le moteur ne lit ni n'écrit rien : `lib/palettes.ts` tient le stockage et
+ * l'adresse, et vient poser ici ce qui doit pouvoir être dessiné. Sans ce
+ * registre, `palette()` retomberait sur Lime & crème et l'aperçu montrerait
+ * autre chose que ce qui est choisi.
+ *
+ * Les identifiants personnalisés sont dérivés des couleurs elles-mêmes (voir
+ * `empreintePalette`). Deux conséquences, et ce sont les deux raisons du
+ * choix : modifier une palette lui donne un autre identifiant, donc la mémoire
+ * de `mesurer()` ne peut pas rendre une mesure périmée ; et un lien qui porte
+ * l'identifiant et les couleurs se vérifie tout seul, l'un devant redonner
+ * l'autre.
+ */
+const PERSOS = new Map<string, Palette>()
+
+/** Le préfixe qui distingue une palette composée d'une palette livrée. */
+export const PREFIXE_PERSO = 'x'
+
+/** L'empreinte d'un jeu de couleurs, telle qu'elle nomme la palette. */
+export function empreintePalette(fond: string, couleurs: readonly string[]): string {
+  return PREFIXE_PERSO + empreinte36([fond, ...couleurs].join('-').toUpperCase())
+}
+
+/** FNV-1a complet, en base 36 : court à lire, assez large pour ne pas cogner. */
+function empreinte36(texte: string): string {
+  let h = 2166136261
+  for (let i = 0; i < texte.length; i += 1) {
+    h = Math.imul(h ^ texte.charCodeAt(i), 16777619) >>> 0
+  }
+  return h.toString(36)
+}
+
+/**
+ * Remplace le registre par la liste donnée. Remplace, et n'ajoute pas : une
+ * palette supprimée doit cesser d'être dessinable au même instant, sans quoi
+ * elle survivrait dans l'aperçu après avoir disparu de la liste.
+ */
+export function enregistrerPalettes(liste: readonly (Palette & { id: string })[]): void {
+  PERSOS.clear()
+  for (const entree of liste) {
+    if (!entree.id.startsWith(PREFIXE_PERSO)) continue
+    PERSOS.set(entree.id, {
+      fr: entree.fr,
+      en: entree.en,
+      fond: entree.fond,
+      couleurs: [...entree.couleurs],
+    })
+  }
+}
+
+export function estPaletteCustom(valeur: unknown): boolean {
+  return typeof valeur === 'string' && PERSOS.has(valeur)
+}
+
 /* ---------- listes blanches ------------------------------------------------ */
 
 /**
@@ -173,8 +250,15 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
+/**
+ * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
+ *
+ * Le registre fait donc partie de la liste blanche : une adresse qui nomme une
+ * palette composée que cet appareil ne connaît pas retombe sur la valeur par
+ * défaut, exactement comme une adresse qui nomme n'importe quoi d'autre.
+ */
 export function estPalette(valeur: unknown): valeur is IdPalette {
-  return ORDRE_PALETTES.includes(valeur as IdPalette)
+  return ORDRE_PALETTES.includes(valeur as IdPalette) || estPaletteCustom(valeur)
 }
 
 export function estDensite(valeur: unknown): valeur is Densite {
@@ -182,7 +266,9 @@ export function estDensite(valeur: unknown): valeur is Densite {
 }
 
 export function palette(id: IdPalette): Palette {
-  return estPalette(id) ? PALETTES[id] : PALETTES.lime
+  const perso = PERSOS.get(id as string)
+  if (perso) return perso
+  return ORDRE_PALETTES.includes(id) ? PALETTES[id] : PALETTES.lime
 }
 
 export function famille(id: IdFamille): Famille | undefined {
@@ -236,7 +322,48 @@ export function luminance(r: number, v: number, b: number): number {
 
 type Ctx = CanvasRenderingContext2D
 
-function blob(ctx: Ctx, cx: number, cy: number, r: number, n: number, rnd: Alea, secousse = 0.6) {
+/**
+ * Le sous-ensemble du contexte 2D que le tracé emprunte.
+ *
+ * Il est nommé parce qu'il est devenu un contrat : `lib/svg.ts` en écrit une
+ * seconde implémentation, qui note les formes au lieu de les peindre, et c'est
+ * ce qui permet d'exporter le même motif en vectoriel sans jamais recopier une
+ * famille. Une famille ajoutée est donc exportable en SVG le jour même, et une
+ * primitive ajoutée ici casse la compilation là-bas plutôt qu'à l'exécution.
+ *
+ * Ce qui n'y est pas est exactement ce qu'un SVG ne sait pas rendre : le grain,
+ * qui passe par un motif d'image, et la sonde, qui relit des pixels.
+ */
+export interface Pinceau {
+  fillStyle: string | CanvasGradient | CanvasPattern
+  globalAlpha: number
+  globalCompositeOperation: GlobalCompositeOperation
+  save(): void
+  restore(): void
+  translate(x: number, y: number): void
+  rotate(angle: number): void
+  scale(x: number, y: number): void
+  setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
+  beginPath(): void
+  closePath(): void
+  moveTo(x: number, y: number): void
+  lineTo(x: number, y: number): void
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void
+  arc(
+    x: number, y: number, rayon: number,
+    depart: number, fin: number, antihoraire?: boolean,
+  ): void
+  arcTo(x1: number, y1: number, x2: number, y2: number, rayon: number): void
+  ellipse(
+    x: number, y: number, rx: number, ry: number, rotation: number,
+    depart: number, fin: number, antihoraire?: boolean,
+  ): void
+  roundRect?(x: number, y: number, largeur: number, hauteur: number, rayon: number): void
+  fill(regle?: CanvasFillRule): void
+  fillRect(x: number, y: number, largeur: number, hauteur: number): void
+}
+
+function blob(ctx: Pinceau, cx: number, cy: number, r: number, n: number, rnd: Alea, secousse = 0.6) {
   const points: [number, number][] = []
   for (let i = 0; i < n; i += 1) {
     const angle = (i / n) * Math.PI * 2
@@ -260,7 +387,7 @@ function blob(ctx: Ctx, cx: number, cy: number, r: number, n: number, rnd: Alea,
   ctx.fill()
 }
 
-function arche(ctx: Ctx, cx: number, base: number, largeur: number, hauteur: number) {
+function arche(ctx: Pinceau, cx: number, base: number, largeur: number, hauteur: number) {
   const r = largeur / 2
   const h = Math.max(hauteur, r * 1.02)
   ctx.beginPath()
@@ -273,7 +400,7 @@ function arche(ctx: Ctx, cx: number, base: number, largeur: number, hauteur: num
 }
 
 function marguerite(
-  ctx: Ctx, cx: number, cy: number, R: number, n: number, rotation: number,
+  ctx: Pinceau, cx: number, cy: number, R: number, n: number, rotation: number,
   petale: string, coeur: string,
 ) {
   ctx.fillStyle = petale
@@ -289,7 +416,7 @@ function marguerite(
   ctx.fill()
 }
 
-function gelule(ctx: Ctx, x: number, y: number, largeur: number, hauteur: number) {
+function gelule(ctx: Pinceau, x: number, y: number, largeur: number, hauteur: number) {
   const r = Math.min(largeur, hauteur) / 2
   ctx.beginPath()
   if (ctx.roundRect) {
@@ -309,7 +436,7 @@ function gelule(ctx: Ctx, x: number, y: number, largeur: number, hauteur: number
   ctx.fill()
 }
 
-function etoile(ctx: Ctx, cx: number, cy: number, R: number, pointes: number, creux: number, rotation: number) {
+function etoile(ctx: Pinceau, cx: number, cy: number, R: number, pointes: number, creux: number, rotation: number) {
   ctx.beginPath()
   for (let i = 0; i < pointes * 2; i += 1) {
     const a = rotation + (i * Math.PI) / pointes
@@ -323,7 +450,7 @@ function etoile(ctx: Ctx, cx: number, cy: number, R: number, pointes: number, cr
   ctx.fill()
 }
 
-function feuille(ctx: Ctx, x: number, y: number, longueur: number, largeur: number, angle: number) {
+function feuille(ctx: Pinceau, x: number, y: number, longueur: number, largeur: number, angle: number) {
   ctx.save()
   ctx.translate(x, y)
   ctx.rotate(angle)
@@ -336,7 +463,7 @@ function feuille(ctx: Ctx, x: number, y: number, longueur: number, largeur: numb
   ctx.restore()
 }
 
-function croissant(ctx: Ctx, cx: number, cy: number, R: number, angle: number, entaille: number) {
+function croissant(ctx: Pinceau, cx: number, cy: number, R: number, angle: number, entaille: number) {
   ctx.beginPath()
   ctx.arc(cx, cy, R, 0, Math.PI * 2)
   ctx.moveTo(cx + Math.cos(angle) * R * entaille + R * 0.9, cy + Math.sin(angle) * R * entaille)
@@ -345,7 +472,7 @@ function croissant(ctx: Ctx, cx: number, cy: number, R: number, angle: number, e
 }
 
 function tournesol(
-  ctx: Ctx, cx: number, cy: number, R: number, rnd: Alea,
+  ctx: Pinceau, cx: number, cy: number, R: number, rnd: Alea,
   petale: string, petale2: string, coeur: string, graines: string, unite: number,
 ) {
   const n = 13 + Math.floor(rnd() * 6)
@@ -387,7 +514,7 @@ function tournesol(
  * indépendant de la résolution.
  */
 export function formes(
-  ctx: Ctx, W: number, H: number, id: IdFamille,
+  ctx: Pinceau, W: number, H: number, id: IdFamille,
   C: readonly string[], densite: Densite, rnd: Alea, unite: number,
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
@@ -1318,7 +1445,7 @@ export function mesurer(
     : L * (1 - voile) + 0.95 * voile
   const contraste = libelles === 'clair' ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068
 
-  const mesure: Mesure = { libelles, voile, contraste }
+  const mesure: Mesure = { libelles, voile, contraste, luminance: L }
   memoire.set(cle, mesure)
   if (memoire.size > MEMOIRE_MAX) {
     const premiere = memoire.keys().next()
@@ -1355,7 +1482,7 @@ export function alphaDuVoile(u: number, force: number): number {
   return Math.min(0.62, force * facteur)
 }
 
-export function peindreVoile(ctx: Ctx, W: number, H: number, mesure: Mesure): void {
+export function peindreVoile(ctx: Pinceau, W: number, H: number, mesure: Mesure): void {
   const force = mesure.voile
   if (!(force > 0.004)) return
   const rgb = mesure.libelles === 'clair' ? '11,18,33' : '250,247,236'
@@ -1404,13 +1531,15 @@ export function dessiner(
 /**
  * Le même rendu, voile de lisibilité en moins.
  *
- * Il ne sert qu'à une chose : montrer côte à côte, sur la page d'accueil, ce
- * que le voile change sous une grille d'icônes. Il passe par le même `rendre`
- * que le rendu complet plutôt que de refaire l'ordre des couches ailleurs :
- * une copie de cet ordre finirait par diverger, et la démonstration montrerait
- * alors autre chose que ce que le produit fait.
+ * Il sert à deux choses. Sur la page d'accueil, montrer côte à côte ce que le
+ * voile change sous une grille d'icônes. Et dans l'application, dessiner
+ * l'aperçu comme le fichier quand le voile a été retiré : le voile est un
+ * réglage depuis qu'un interrupteur le commande sous le bouton Télécharger, et
+ * l'aperçu doit rester le fichier dans les deux positions.
  *
- * Aucun export ne l'emprunte : le fichier téléchargé porte toujours son voile.
+ * Il passe par le même `rendre` que le rendu complet plutôt que de refaire
+ * l'ordre des couches ailleurs : une copie de cet ordre finirait par diverger,
+ * et la démonstration montrerait alors autre chose que ce que le produit fait.
  */
 export function dessinerSansVoile(
   ctx: Ctx, W: number, H: number, motif: Motif,
@@ -1466,6 +1595,24 @@ export function niveau(mesure: Mesure): Niveau {
   if (mesure.contraste >= SEUIL_AA) return 'bonne'
   if (mesure.contraste >= SEUIL_UI) return 'juste'
   return 'insuffisante'
+}
+
+/**
+ * La même mesure, telle qu'elle se lirait si le voile n'était pas peint.
+ *
+ * Le voile est devenu facultatif : quelqu'un qui le retire reçoit une image
+ * plus claire que celle que la sonde a jugée, et le verdict doit alors porter
+ * sur ce fichier-là. Le calcul repart de la luminance relevée avant voile,
+ * qui est justement ce que `mesurer()` garde pour ça.
+ */
+export function sansVoile(mesure: Mesure): Mesure {
+  if (!(mesure.voile > 0)) return mesure
+  const L = mesure.luminance
+  return {
+    ...mesure,
+    voile: 0,
+    contraste: mesure.libelles === 'clair' ? 1.05 / (L + 0.05) : (L + 0.05) / 0.068,
+  }
 }
 
 /**

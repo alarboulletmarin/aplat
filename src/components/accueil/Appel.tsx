@@ -2,6 +2,7 @@
 
 import { etiquetteVersion, lienSource } from '../../lib/build'
 import type { Textes } from '../../i18n'
+import { Soutien } from '../Soutien'
 
 /**
  * Le bas de la page : l'appel, puis le pied.
@@ -44,6 +45,7 @@ export function Appel({ textes, lien }: { textes: Textes; lien: string }) {
             {textes.pied.source}
           </a>
           <span>{textes.pied.licence}</span>
+          <Soutien textes={textes} />
         </span>
         <span>{A.pied.mention}</span>
       </footer>

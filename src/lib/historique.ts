@@ -34,12 +34,26 @@ export const CLE = 'aplat:motifs'
 /** Dix, et la liste est bornée : un historique n'est pas un flux. */
 export const MAX = 10
 
+/**
+ * Six épingles au plus.
+ *
+ * L'épingle répond à la seule chose que dix entrées ne savent pas faire :
+ * garder celle qu'on a aimée pendant qu'on en regarde dix autres. Elle est
+ * bornée à six sur dix pour que la liste reste ce qu'elle est, une mémoire
+ * courte : au-delà, ce ne serait plus un historique mais une collection, et
+ * c'est exactement ce que le produit refuse. Quatre places restent toujours
+ * libres pour les motifs qui passent.
+ */
+export const MAX_EPINGLES = 6
+
 /** Les clés sont celles de l'URL, courtes et déjà éprouvées. */
 export interface Entree {
   m: IdFamille
   p: IdPalette
   d: Densite
   s: number
+  /** 1 quand l'entrée est épinglée. Absent sinon : la liste reste minuscule. */
+  f?: 1
 }
 
 export function versEntree(motif: Motif): Entree {
@@ -60,12 +74,43 @@ export function estEntree(valeur: unknown): valeur is Entree {
     typeof e.s === 'number' &&
     Number.isInteger(e.s) &&
     e.s > 0 &&
-    e.s <= GRAINE_MAX
+    e.s <= GRAINE_MAX &&
+    (e.f === undefined || e.f === 1)
   )
 }
 
+/** L'égalité porte sur le motif, jamais sur l'épingle : c'est la même image. */
 export function identique(a: Entree, b: Entree): boolean {
   return a.m === b.m && a.p === b.p && a.d === b.d && a.s === b.s
+}
+
+/** Les épinglées d'abord, dans leur ordre, puis les autres dans le leur. */
+function ranger(liste: readonly Entree[]): Entree[] {
+  return [...liste.filter((entree) => entree.f), ...liste.filter((entree) => !entree.f)]
+}
+
+export function epingles(liste: readonly Entree[]): number {
+  return liste.filter((entree) => entree.f).length
+}
+
+/**
+ * Épingle ou désépingle une entrée, et remet la liste dans son ordre.
+ *
+ * Rend la liste reçue telle quelle quand l'épingle est refusée, c'est-à-dire
+ * quand les six sont prises : l'appelant y lit qu'il n'a rien à écrire, et
+ * l'interface a déjà désactivé le bouton.
+ */
+export function basculer(liste: readonly Entree[], entree: Entree): readonly Entree[] {
+  const cible = liste.find((autre) => identique(autre, entree))
+  if (!cible) return liste
+  if (!cible.f && epingles(liste) >= MAX_EPINGLES) return liste
+  return ranger(
+    liste.map((autre) => {
+      if (!identique(autre, entree)) return autre
+      if (!autre.f) return { ...autre, f: 1 as const }
+      return { m: autre.m, p: autre.p, d: autre.d, s: autre.s }
+    }),
+  )
 }
 
 /**
@@ -82,23 +127,41 @@ export function analyser(brut: string | null): Entree[] {
   }
   if (!Array.isArray(valeur)) return []
   const propres: Entree[] = []
+  let gardees = 0
   for (const entree of valeur) {
     if (!estEntree(entree)) continue
     if (propres.some((autre) => identique(autre, entree))) continue
-    propres.push({ m: entree.m, p: entree.p, d: entree.d, s: entree.s })
+    /* Un stockage se modifie à la main : au-delà de six épingles, les
+       suivantes redeviennent des entrées ordinaires plutôt que de faire
+       déborder la liste des motifs qui passent. */
+    const epingle = entree.f === 1 && gardees < MAX_EPINGLES
+    if (epingle) gardees += 1
+    propres.push({
+      m: entree.m, p: entree.p, d: entree.d, s: entree.s,
+      ...(epingle ? { f: 1 as const } : {}),
+    })
     if (propres.length === MAX) break
   }
-  return propres
+  return ranger(propres)
 }
 
 /**
- * L'entrée passe en tête, sans doublon, et la queue tombe au-delà de dix.
- * Rend la liste reçue, telle quelle, quand elle est déjà en tête : l'appelant
- * y lit qu'il n'a rien à écrire.
+ * L'entrée passe en tête des non épinglées, sans doublon, et la queue tombe
+ * au-delà de dix. Rend la liste reçue, telle quelle, quand il n'y a rien à
+ * changer : l'appelant y lit qu'il n'a rien à écrire.
+ *
+ * En tête des non épinglées, et non en tête de tout : les épingles tiennent le
+ * haut de la liste, et un motif traversé ne doit pas les pousser plus bas à
+ * chaque fois. Une entrée déjà épinglée ne bouge pas non plus, elle est déjà
+ * gardée.
  */
 export function ajouter(liste: readonly Entree[], entree: Entree): readonly Entree[] {
-  if (liste.length > 0 && identique(liste[0], entree)) return liste
-  return [entree, ...liste.filter((autre) => !identique(autre, entree))].slice(0, MAX)
+  const connue = liste.find((autre) => identique(autre, entree))
+  if (connue?.f) return liste
+  const gardees = liste.filter((autre) => autre.f)
+  if (liste[gardees.length] && identique(liste[gardees.length], entree)) return liste
+  const libres = liste.filter((autre) => !autre.f && !identique(autre, entree))
+  return [...gardees, entree, ...libres].slice(0, MAX)
 }
 
 export function lire(): Entree[] {
