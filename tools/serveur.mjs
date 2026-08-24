@@ -32,7 +32,11 @@ function demarrer(args, attente = 30000) {
 
     const lire = (morceau) => {
       sortie += morceau;
-      const trouve = sortie.match(/https?:\/\/(?:localhost|127\.0\.0\.1):(\d+)/);
+      /* Vite colore son adresse quand il se sait dans la CI, et les codes ANSI
+       * tombent en plein milieu de l'URL (`:` puis gras puis le port). On
+       * cherche donc dans la sortie dépouillée de ses couleurs. */
+      const propre = sortie.replace(/\x1b\[[0-9;]*m/g, '');
+      const trouve = propre.match(/https?:\/\/(?:localhost|127\.0\.0\.1):(\d+)/);
       if (trouve && !fini) {
         fini = true;
         clearTimeout(minuterie);
