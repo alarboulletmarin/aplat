@@ -2,7 +2,7 @@
  *
  * Sur téléphone en portrait, la scène collante, le verdict et la barre
  * d'action prenaient les deux tiers de l'écran ; il ne restait presque rien
- * pour choisir parmi trente-deux familles et onze palettes. Dès que la page
+ * pour choisir parmi trente-sept familles et onze palettes. Dès que la page
  * défile, l'aperçu se replie en vignette et le verdict passe sur une ligne.
  *
  * Trois choses à vérifier, et une seule façon honnête de le faire : défiler

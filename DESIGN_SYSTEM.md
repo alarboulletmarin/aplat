@@ -231,7 +231,7 @@ rangée n'est plus une grille.
 
 Le partage n'est pas la moitié. Sous 760 px, la colonne de l'aperçu prend 38 %
 et le panneau 62 %. À parts égales, un téléphone de 390 px laisse 166 px au
-panneau, soit une seule vignette par rangée et trente-deux rangées à parcourir ;
+panneau, soit une seule vignette par rangée et trente-sept rangées à parcourir ;
 à 38 %, l'aperçu reste jugeable et les vignettes tiennent deux de front. Au-delà
 de 760 px on revient au partage de la maquette, à parts égales.
 
@@ -281,7 +281,7 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi trente-deux familles et onze palettes : dès
+restait presque rien pour choisir parmi trente-sept familles et onze palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
 du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
@@ -571,7 +571,7 @@ Chaque écran a cinq états, tous dessinés.
 | **Vide** | hachure diagonale à la place de la maquette, « Indique une résolution », bouton désactivé |
 | **Chargement** | trois points au centre, bouton en « Rendu en cours » et `aria-busy` |
 | **Erreur** | carte à trait d'alerte et triangle, **la cause exacte**, bouton Réessayer |
-| **Succès** | carte lime : dimensions, format, poids réel, et le geste pour finir |
+| **Succès** | carte lime : dimensions, format, poids réel, le geste pour finir, un bouton Fermer ; elle se retire seule après douze secondes, ou d'un glissement vers le bas |
 | **Données trop longues** | libellés de carte sur deux lignes, jamais élidés ; ellipse sur les icônes de la maquette ; `overflow-wrap` sur les valeurs ; rangées retirées de la maquette |
 
 Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas de

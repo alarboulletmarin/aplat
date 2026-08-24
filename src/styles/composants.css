@@ -14,6 +14,7 @@
 .res-champs input,
 .partage-b,
 .note-reessayer,
+.note-fermer,
 .btn-oublier,
 .btn-surprise,
 .btn-graine,
@@ -844,6 +845,13 @@
 .note-faite {
   background: var(--accent);
   color: var(--accent-encre);
+  /* La carte se retire d'un glissement vers le bas. Le navigateur ne doit
+     donc pas prendre le geste vertical pour lui : elle est transitoire, ce
+     n'est jamais par elle qu'on fait défiler la page. */
+  touch-action: none;
+}
+.note-faite .note-txt {
+  flex: 1 1 auto;
 }
 .note-erreur {
   background: var(--surface);
@@ -890,6 +898,22 @@
   border: 2px solid var(--filet-franc);
   background: transparent;
   color: var(--encre);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+/* Le même bouton que Réessayer, aux couleurs de la carte lime : le trait et
+   l'encre viennent de `--accent-encre`, jamais des filets du thème, qui ne
+   contrastent pas sur l'accent. */
+.note-fermer {
+  flex: 0 0 auto;
+  align-self: center;
+  min-height: 44px;
+  padding: 0 14px;
+  cursor: pointer;
+  border-radius: 16px 16px 5px 5px;
+  border: 2px solid var(--accent-encre);
+  background: transparent;
+  color: var(--accent-encre);
   font-weight: 700;
   font-size: 13.5px;
 }
