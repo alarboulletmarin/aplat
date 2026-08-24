@@ -457,6 +457,35 @@ positions n'est plus une bascule.
 
 ## 7. Les composants
 
+### Une bascule ne se dérobe pas
+
+Une bascule montre ce qu'un appui donnera, jamais l'état où l'on est : son
+libellé change donc à chaque appui, et sa largeur avec lui. Le bouton se
+dérobait alors sous le doigt qui venait de l'atteindre, ce qui est le contraire
+de ce qu'on attend d'un interrupteur.
+
+Trois règles, et elles valent pour toutes les bascules du produit.
+
+**Les deux mots occupent la même cellule.** Le bouton fait la largeur du plus
+long, dans n'importe quelle langue ; celui qui ne sert pas garde sa place sans
+se montrer, et `visibility` le retire aussi de l'arbre d'accessibilité.
+
+**Le trait ne s'épaissit pas.** Les puces de choix, elles, le peuvent : leur
+rembourrage compense au pixel près. Un trait d'un pixel et demi ne s'y prête
+pas, les navigateurs l'arrondissant différemment selon la densité de l'écran.
+L'aplat inversé dit l'état à lui seul, en couleur comme en niveaux de gris.
+
+**Le bord tenu est celui qui ne bouge pas.** Le texte voisin prend toute la
+place qui reste, et la bascule est le dernier élément de sa rangée : un libellé
+qui raccourcit à côté d'elle, ou un bouton qui apparaît, la poussent alors sans
+la déplacer. Une rangée qui passe sous son titre dans une colonne étroite garde
+ce bord par une marge automatique, faute de quoi il redeviendrait celui de
+gauche.
+
+Une vérification le tient fermé pour les deux bascules concernées, l'interrupteur
+du voile et l'épingle : leur boîte est relevée avant et après l'appui, au dixième
+de pixel.
+
 ### La puce de choix
 
 Les cinq groupes de réglage sont à choix unique et exclusif : ce sont des

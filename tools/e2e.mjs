@@ -1041,6 +1041,17 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       detail: document.getElementById('verdict-detail').textContent
     }));
 
+    /* Un bouton qui change de taille ou de place à l'instant où on l'appuie se
+       dérobe sous le doigt. Ici deux choses changeaient : le libellé, plus long
+       dans un sens que dans l'autre, et la phrase à côté, plus courte une fois
+       le voile retiré. Les deux mots occupent maintenant la même cellule, et la
+       phrase prend toute la place qui reste. */
+    const boite = () => vp.evaluate(() => {
+      const b = document.getElementById('btn-voile').getBoundingClientRect();
+      return [+b.x.toFixed(1), +b.y.toFixed(1), +b.width.toFixed(1)];
+    });
+    const boiteAvant = await boite();
+
     const avec = await dire();
     t(/inclus dans le fichier/.test(avec.ligne),
       'voile : une ligne sous le bouton dit qu\'il est dans le fichier', avec.ligne.slice(0, 60));
@@ -1058,6 +1069,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const sans = await dire();
     t(/retiré du fichier/.test(sans.ligne), 'voile : la ligne suit l\'interrupteur', sans.ligne.slice(0, 60));
     t(sans.presse === 'true', 'voile : l\'interrupteur dit son état');
+    const boiteApres = await boite();
+    t(JSON.stringify(boiteAvant) === JSON.stringify(boiteApres),
+      'voile : l\'interrupteur ne bouge pas d\'un pixel quand on l\'appuie',
+      JSON.stringify(boiteAvant) + ' -> ' + JSON.stringify(boiteApres));
     t(/v=0/.test(sans.url), 'voile : le retrait part dans l\'adresse, il change le fichier');
     t(sans.empreinte !== avec.empreinte, 'voile : l\'aperçu est redessiné, il reste le fichier');
     t(/voile retiré/.test(sans.detail), 'voile : le verdict le nomme autrement qu\'un voile nul mesuré',
@@ -1360,6 +1375,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     /* Épingler n'attend pas les deux secondes et demie du passage : c'est un
        geste, et un bouton qui répondrait « pas encore » serait le pire des
        deux mondes. */
+    const boiteEpingle = () => ep.evaluate(() => {
+      const b = document.getElementById('btn-epingler').getBoundingClientRect();
+      return [+b.x.toFixed(1), +b.width.toFixed(1)];
+    });
+    const epingleAvant = await boiteEpingle();
     await ep.$eval('#btn-epingler', e => e.click());
     await ep.waitForTimeout(400);
     const gardee = await etat();
@@ -1368,6 +1388,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(/"f":1/.test(gardee.stockage || ''), 'épingle : elle est gardée sur l\'appareil');
     t(/Épinglé/.test(gardee.premier), 'épingle : elle s\'entend dans le nom du bouton, pas seulement à la forme',
       gardee.premier);
+    /* Deux pièges ici, et le premier appui les réunit : le mot raccourcit
+       (« Épingler » puis « Épinglé »), et « Effacer » apparaît à côté puisque
+       la liste cesse d'être vide. Le bouton reste pourtant où il est. */
+    const epingleApres = await boiteEpingle();
+    t(JSON.stringify(epingleAvant) === JSON.stringify(epingleApres),
+      'épingle : le bouton ne bouge pas d\'un pixel quand on l\'appuie',
+      JSON.stringify(epingleAvant) + ' -> ' + JSON.stringify(epingleApres));
 
     /* Dix motifs traversés ensuite : l'épinglée doit rester, et rester en
        tête, pendant que les autres passent. */

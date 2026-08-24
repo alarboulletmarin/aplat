@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
+import { useLayoutEffect, useState, type RefObject } from 'react'
 
 /**
  * Combien d'éléments tiennent dans le cadre.
@@ -22,7 +22,14 @@ export function useAjustement(
   signature: string,
 ): number {
   const [nombre, setNombre] = useState(total)
-  const derniere = useRef(signature)
+  /* La signature est dans l'état et non dans une référence, et c'est ce qui
+     rend la boucle autonome. En référence, la remise à plein ne provoquait
+     aucun rendu quand le compte était déjà plein : la passe de mesure qui suit
+     n'arrivait jamais d'elle-même, et la maquette ne devait sa convergence
+     qu'aux rendus que le parent lui donnait par ailleurs. Le jour où les deux
+     maquettes ont été mémoïsées, ces rendus ont disparu, et la grille est
+     restée trop haute de trois pixels sur un téléphone de 360 px. */
+  const [vue, setVue] = useState(signature)
 
   /* Effet sans liste de dépendances, et qui écrit dans l'état : c'est la
      technique voulue, pas un oubli. Mesurer puis retirer une rangée ne peut se
@@ -34,8 +41,8 @@ export function useAjustement(
   /* eslint-disable react-hooks/set-state-in-effect */
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useLayoutEffect(() => {
-    if (derniere.current !== signature) {
-      derniere.current = signature
+    if (vue !== signature) {
+      setVue(signature)
       setNombre(total)
       return
     }

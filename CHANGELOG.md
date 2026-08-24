@@ -137,6 +137,32 @@ d'écran derrière mes icônes ?**
   peignaient l'une derrière l'autre dans la même image, ce qui refaisait
   exactement le pic que le rendu différé cherchait à éviter.
 
+### Corrigé : une bascule ne se dérobe plus sous le doigt
+
+- **L'interrupteur du voile et l'épingle changeaient de place quand on les
+  appuyait.** Trois causes réunies : le libellé change à chaque appui et sa
+  largeur avec lui, la phrase voisine raccourcit, et « Effacer » apparaît à côté
+  de l'épingle dès que la liste cesse d'être vide.
+- Les deux mots occupent maintenant la même cellule, le bouton fait la largeur
+  du plus long dans les deux langues, le texte voisin prend toute la place qui
+  reste, et la bascule est le dernier élément de sa rangée. Le trait ne
+  s'épaissit plus non plus à l'état enfoncé : la compensation par le rembourrage
+  ne tient pas sur un trait d'un pixel et demi, que les navigateurs arrondissent
+  selon la densité de l'écran. L'aplat inversé suffit, et les onglets de
+  familles suivent la même règle.
+- Une vérification relève la boîte des deux bascules avant et après l'appui, au
+  dixième de pixel.
+
+### Corrigé : la maquette d'écran retrouve sa hauteur toute seule
+
+- La mémoïsation des maquettes a mis au jour un défaut plus ancien :
+  `useAjustement` gardait sa signature dans une référence, si bien que la remise
+  à plein ne provoquait aucun rendu quand le compte était déjà plein. La passe
+  de mesure qui suit n'arrivait jamais d'elle-même, et la boucle ne devait sa
+  convergence qu'aux rendus que le parent lui donnait par ailleurs. La grille
+  dépassait de trois pixels sur un téléphone de 360 px. La signature est
+  maintenant dans l'état, et la boucle se suffit à elle-même.
+
 ### Ajouté : un lien de soutien, dans le pied
 
 - **Une tasse dessinée, pas une image de CDN.** Le bouton officiel de Ko-fi est

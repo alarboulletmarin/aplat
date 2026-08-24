@@ -1135,9 +1135,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Même règle que l'interrupteur du voile : l'aplat inversé suffit, et un trait
+   qui s'épaissit déplacerait les deux autres onglets d'un pixel à chaque
+   changement, la rangée étant à largeurs partagées. */
 .onglet[aria-selected='true'] {
   border-color: var(--encre);
-  border-width: 2px;
   background: var(--encre);
   color: var(--papier);
 }
@@ -1304,7 +1306,11 @@
   font-size: 12.5px;
   color: var(--encre-douce);
 }
+/* La phrase prend toute la place qui reste : c'est ce qui ancre l'interrupteur
+   au bord de la barre plutôt qu'à la fin du texte, dont la longueur change
+   quand on l'appuie. */
 .barre-voile > span {
+  flex: 1 1 auto;
   min-width: 0;
 }
 

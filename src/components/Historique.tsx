@@ -117,7 +117,18 @@ export function Historique({
           <Arche />
           <span>{T.titre}</span>
         </h2>
+        {/* « Effacer » vient avant l'épingle dans le document, et la rangée
+            est calée à droite : l'épingle est donc le dernier élément, et son
+            bord ne bouge pas. C'est ce qui compte ici, car « Effacer »
+            n'apparaît qu'une fois la liste non vide, c'est-à-dire souvent à
+            l'instant même où l'on épingle le premier motif : sans cet ordre,
+            le bouton s'échappait de quatre-vingts pixels sous le doigt. */}
         <div className="carte-titre-actions">
+          {liste.length > 0 && (
+            <button type="button" id="btn-oublier" className="btn-oublier" onClick={onOublier}>
+              {T.effacer}
+            </button>
+          )}
           <button
             type="button"
             id="btn-epingler"
@@ -134,13 +145,19 @@ export function Historique({
               <i />
               <b />
             </span>
-            <span aria-hidden="true">{courantEpingle ? T.epingle : T.epinglerCourt}</span>
+            {/* Les deux mots occupent la même cellule : le bouton fait la
+                largeur du plus long, et il ne rétrécit pas sous le doigt qui
+                vient de l'appuyer. Le nom accessible, lui, vient de
+                `aria-label`, qui nomme le motif en entier. */}
+            <span className="btn-double" aria-hidden="true">
+              <span className="btn-double-l" data-actif={courantEpingle ? 'oui' : 'non'}>
+                {T.epingle}
+              </span>
+              <span className="btn-double-l" data-actif={courantEpingle ? 'non' : 'oui'}>
+                {T.epinglerCourt}
+              </span>
+            </span>
           </button>
-          {liste.length > 0 && (
-            <button type="button" id="btn-oublier" className="btn-oublier" onClick={onOublier}>
-              {T.effacer}
-            </button>
-          )}
         </div>
       </div>
 

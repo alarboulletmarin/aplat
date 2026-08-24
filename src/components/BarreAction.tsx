@@ -298,7 +298,14 @@ export function BarreAction({
 
       {/* La ligne du voile. Elle n'est pas une note de bas de page : c'est la
           seule chose de l'écran qui dise ce que le fichier contient de plus
-          que le motif choisi. */}
+          que le motif choisi.
+
+          Les deux libellés du bouton sont posés l'un sur l'autre, et celui qui
+          ne sert pas garde sa place sans se montrer : sa largeur est donc celle
+          du plus long des deux, dans n'importe quelle langue, et le bouton ne
+          se déplace pas sous le doigt qui vient de l'appuyer. La phrase, elle,
+          prend toute la place qui reste, ce qui ancre le bouton au bord plutôt
+          qu'à la fin du texte, dont la longueur change aussi. */}
       <p className="barre-voile" id="barre-voile">
         <span>{voile ? T.voileInclus : T.voileAbsent}</span>
         <button
@@ -309,7 +316,14 @@ export function BarreAction({
           title={T.voileTitre}
           onClick={onVoile}
         >
-          {voile ? T.voileRetirer : T.voileRemettre}
+          <span className="btn-double">
+            <span className="btn-double-l" data-actif={voile ? 'oui' : 'non'}>
+              {T.voileRetirer}
+            </span>
+            <span className="btn-double-l" data-actif={voile ? 'non' : 'oui'}>
+              {T.voileRemettre}
+            </span>
+          </span>
         </button>
       </p>
     </div>

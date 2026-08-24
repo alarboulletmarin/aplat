@@ -313,9 +313,19 @@
 }
 /* Deux actions de tête de carte, sur une rangée qui se replie plutôt que de
    pousser le titre hors de sa colonne. */
+/* Calée à droite, et l'épingle en dernier : un bouton qui apparaît à côté
+   d'elle la pousse alors vers la gauche sans la déplacer, puisque c'est son
+   bord droit qui est tenu par la rangée.
+
+   La marge automatique compte : dans une colonne étroite, la rangée passe sous
+   le titre et s'y retrouve seule, où l'alignement du parent ne dit plus rien.
+   Sans elle, le bord tenu redeviendrait celui de gauche, et l'épingle
+   repartirait de quatre-vingts pixels. */
 .carte-titre-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
   gap: 7px;
 }
 .btn-epingler {
@@ -325,7 +335,6 @@
 }
 .btn-epingler[aria-pressed='true'] {
   border-color: var(--encre);
-  border-width: 2px;
   background: var(--encre);
   color: var(--papier);
 }
@@ -1050,11 +1059,36 @@
   font-weight: 700;
   font-size: 12.5px;
 }
+/* Le trait ne s'épaissit pas ici, contrairement aux puces de choix : un bouton
+   qui grandit à l'instant où on l'appuie se dérobe sous le doigt, et la
+   compensation par le rembourrage ne tient pas, les traits d'un pixel et demi
+   étant arrondis différemment selon la densité de l'écran. L'aplat inversé dit
+   l'état à lui seul, en couleur comme en niveaux de gris, et le libellé change
+   avec lui. */
 .btn-voile[aria-pressed='true'] {
   border-color: var(--encre);
-  border-width: 2px;
   background: var(--encre);
   color: var(--papier);
+}
+/* --- Un bouton qui dit deux mots ------------------------------------------------
+   Une bascule montre ce qu'un appui donnera, jamais l'état où l'on est : son
+   libellé change donc à chaque appui, et sa largeur avec lui. Le bouton se
+   dérobait alors sous le doigt qui venait de l'atteindre.
+
+   Les deux mots occupent la même cellule : le bouton fait la largeur du plus
+   long, dans n'importe quelle langue, et ne bouge plus. `visibility` plutôt
+   qu'un rendu conditionnel, parce qu'elle retire aussi de l'arbre
+   d'accessibilité le mot qui ne sert pas, tout en lui gardant sa place. */
+.btn-double {
+  display: grid;
+  place-items: center;
+}
+.btn-double-l {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+.btn-double-l[data-actif='non'] {
+  visibility: hidden;
 }
 
 /* --- Pictogrammes, dessinés dans la direction artistique ---------------------- */
