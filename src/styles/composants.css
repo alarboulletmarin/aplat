@@ -13,16 +13,9 @@
 .opt,
 .res-champs input,
 .partage-b,
-.note-reessayer,
-.note-fermer,
 .btn-oublier,
 .btn-surprise,
-.btn-graine,
-.btn-export,
 .onglet,
-.btn-formats,
-.btn-voile,
-.feuille-b,
 .editeur-nom input,
 .editeur-teinte input[type='text'],
 .editeur-nuancier,
@@ -30,6 +23,16 @@
 .soutien {
   scroll-margin-top: calc(var(--bar, 0px) + var(--scene-h, 0px) + 12px);
   scroll-margin-bottom: calc(var(--barre-h, 0px) + 12px);
+}
+/* Les commandes de la barre d'action vivent DANS la couche collante du bas :
+   la réserve ci-dessus ne les concerne pas, et la marge négative annule
+   exactement le `scroll-padding-bottom` posé sur `html`, que les navigateurs
+   récents appliquent aussi au défilement déclenché par le focus. Sans elle,
+   chaque appui au doigt sur « Surprends-moi » donnait le focus au bouton, le
+   navigateur tentait de le dégager d'une barre dont il fait partie, la barre
+   restait collée, et la page descendait d'un cran par appui, jusqu'en bas. */
+.barre :is(button, a, input, select) {
+  scroll-margin-bottom: calc(-1 * (var(--barre-h, 0px) + 12px));
 }
 
 /* --- L'arche des titres ------------------------------------------------------
