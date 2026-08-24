@@ -439,6 +439,17 @@ Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
 d'entrée de gamme (`tools/perf.mjs`) : moins de 3 ms par action, quelle qu'elle
 soit.
 
+Le rideau clair/sombre est le seul geste continu du produit, et il a demandé
+trois corrections, toutes mesurées au même bridage. Les maquettes d'écran sont
+mémoïsées : `useAjustement` mesure sa boîte après chaque rendu, dans un effet
+sans liste de dépendances, ce qui forçait un recalcul de mise en page sur ses
+cent vingt nœuds à chaque pixel glissé. Les boîtes du rideau se déplacent par
+`transform` et non par `left` ni `clip-path`. Et ses deux jetons de position
+sont posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil, qui
+les aurait transmis à toute la maquette. Résultat, par image : cinq millisecondes
+de recalcul de style et une image sur quatre perdue avant, moins de deux
+millisecondes et aucune tâche longue après, à la même cadence qu'au repos.
+
 Après 400 changements de réglage enchaînés (`tools/soak.mjs`) : même nombre de
 nœuds, même nombre de canevas, même nombre d'écouteurs.
 

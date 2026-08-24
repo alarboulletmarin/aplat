@@ -569,6 +569,18 @@ plein cadre, elle prendrait le geste de défilement sur téléphone. Le trait es
 une lame crème cernée d'un filet sombre, faute de quoi il disparaîtrait sur la
 moitié des palettes.
 
+Il doit être fluide, sinon il ne sert à rien : on juge une limite qui passe, et
+une limite qui saute ne se juge pas. Trois choses le tiennent à soixante images
+par seconde, et toutes trois ont été mesurées plutôt que supposées. Les boîtes
+se déplacent par `transform`, jamais par `left` ni `clip-path`, qui recalculaient
+la mise en page et repeignaient à chaque pixel. Les deux jetons de position sont
+posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil, dont le
+sous-arbre est la maquette entière : un jeton personnalisé s'y propageait à cent
+vingt nœuds, pour cinq millisecondes de recalcul de style par image. Et l'état
+React ne suit pas le geste image par image : l'image est posée dans le DOM à
+chaque `input`, l'état sept fois par seconde, ce qui suffit à ce que le chiffre
+du verdict paraisse vivant.
+
 La poignée est bornée à quinze pixels des bords, le trait ne l'est pas : au
 repos, le rideau est à cent et le trait tombe sur le bord même, où une poignée
 centrée serait coupée en deux et cesserait de se voir. Le trait dit la limite,

@@ -936,22 +936,28 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await dp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=ciel&d=2&s=4242&r=1179x2556', { waitUntil: 'networkidle' });
     await dp.waitForTimeout(400);
 
-    /* Un `input` contrôlé par React n'écoute pas une valeur posée à la main :
-       il faut passer par le mutateur natif, que son suivi de valeur ne voit
-       pas, puis émettre l'événement. */
+    /* Le geste, tel qu'il se produit : `input` pendant la glissade, `change` au
+       relâchement. La valeur passe par le mutateur natif, sans quoi le suivi de
+       valeur du navigateur ne verrait pas le changement. */
     const glisser = (valeur) => dp.evaluate((v) => {
       const el = document.getElementById('rideau-glissiere');
       const mutateur = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
       mutateur.call(el, String(v));
       el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
     }, valeur);
 
+    /* L'aplat est posé une fois pour toutes et translaté hors cadre au repos :
+       c'est sa transformation qui dit la position, pas sa présence. Elle est
+       lue en pixels par le navigateur, et comparée à la largeur de l'aperçu. */
     const lire = () => dp.evaluate(() => {
       const aplat = document.querySelector('.apercu-assombri');
+      const boite = aplat ? aplat.getBoundingClientRect().width : 0;
+      const matrice = aplat ? new DOMMatrixReadOnly(getComputedStyle(aplat).transform) : null;
       return {
         detail: document.getElementById('verdict-detail').textContent,
         position: document.getElementById('rideau-glissiere').value,
-        aplat: aplat ? getComputedStyle(aplat).clipPath : null,
+        decale: matrice && boite ? Math.round((matrice.m41 / boite) * 100) : null,
         empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96)
       };
     });
@@ -964,8 +970,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const rapport = (texte) => parseFloat((texte.match(/(\d+[.,]\d+):1/) || [0, '0'])[1].replace(',', '.'));
     t(clair.position === '100' && sombre.position === '40',
       'rideau : la glissière dit sa position', `${clair.position} -> ${sombre.position}`);
-    t(!clair.aplat && !!sombre.aplat, 'rideau : l\'aplat n\'est peint qu\'une fois le rideau tiré');
-    t(/40%/.test(sombre.aplat || ''), 'rideau : l\'aplat est découpé à la position du trait', sombre.aplat);
+    t(clair.decale === 100, 'rideau : au repos, l\'aplat est entièrement hors cadre',
+      String(clair.decale) + ' %');
+    t(sombre.decale === 40, 'rideau : il se décale exactement à la position du trait',
+      String(sombre.decale) + ' %');
     t(rapport(sombre.detail) > rapport(clair.detail),
       'rideau : le rapport annoncé monte pour des libellés clairs',
       `${rapport(clair.detail)}:1 -> ${rapport(sombre.detail)}:1`);
@@ -973,6 +981,23 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'rideau : le détail dit que le fichier ne change pas', sombre.detail.slice(-60));
     t(clair.empreinte === sombre.empreinte,
       'rideau : le canevas de l\'aperçu n\'est pas redessiné, l\'aplat est par-dessus');
+
+    /* Le geste ne doit rien coûter d'autre que de la composition : les jetons
+       du rideau sont posés sur l'aplat et sur le cadre du rideau, jamais sur
+       l'appareil, dont le sous-arbre est la maquette entière. Posés là, ils
+       coûtaient cinq millisecondes de recalcul de style par image sur un
+       processeur d'entrée de gamme, et une image sur quatre tombait. */
+    const jetons = await dp.evaluate(() => {
+      const lu = (n) => n.style.getPropertyValue('--rideau');
+      return {
+        appareil: lu(document.getElementById('appareil')),
+        aplat: lu(document.querySelector('.apercu-assombri')),
+        rideau: lu(document.getElementById('rideau'))
+      };
+    });
+    t(jetons.appareil === '' && jetons.aplat !== '' && jetons.rideau !== '',
+      'rideau : ses jetons ne touchent pas au sous-arbre de la maquette',
+      JSON.stringify(jetons));
 
     /* Et le fichier, pour de vrai. */
     const [dl2] = await Promise.all([

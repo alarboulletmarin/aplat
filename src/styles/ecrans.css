@@ -319,12 +319,19 @@
 }
 /* L'aplat qui simule le fond assombri d'un thème sombre. Son opacité vient de
    `ASSOMBRISSEMENT`, en style en ligne : une seule valeur, dans le moteur, qui
-   sert à la fois à peindre et à recalculer le rapport de contraste. */
+   sert à la fois à peindre et à recalculer le rapport de contraste.
+
+   Il fait la largeur de l'aperçu et se décale de la position du rideau : ce qui
+   dépasse est coupé par l'appareil, et ce qui reste est la moitié assombrie. Au
+   repos il est entièrement dehors. Une transformation plutôt qu'un `clip-path`,
+   qui repeignait la surface entière à chaque pixel glissé. */
 .apercu-assombri {
   position: absolute;
   inset: 0;
   display: block;
   pointer-events: none;
+  transform: translateX(var(--rideau, 100%));
+  will-change: transform;
 }
 
 /* maquette téléphone / tablette */
@@ -842,14 +849,25 @@
   pointer-events: none;
   z-index: 2;
 }
-/* Deux tons, parce qu'un trait d'une seule couleur disparaît sur la moitié des
+/* Le suiveur fait la largeur de l'aperçu et se décale de la position du
+   rideau : un `translateX` en pourcentage compte la largeur de la boîte
+   elle-même, donc celle de l'aperçu, et il se compose sans recalculer la mise
+   en page. Le trait est posé à son bord gauche, une fois pour toutes.
+
+   Deux tons, parce qu'un trait d'une seule couleur disparaît sur la moitié des
    palettes : une lame crème cernée d'un filet sombre tient sur les deux. */
+.rideau-suivi {
+  position: absolute;
+  inset: 0;
+  transform: translateX(var(--rideau, 100%));
+  will-change: transform;
+}
 .rideau-trait {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: -1.5px;
   width: 3px;
-  margin-left: -1.5px;
   background: #f7f3e6;
   box-shadow: 0 0 0 1px rgba(11, 18, 33, 0.5);
 }
@@ -860,12 +878,18 @@
 .rideau-poignee {
   position: absolute;
   top: 50%;
+  left: -15px;
   width: 30px;
   height: 30px;
-  margin: -15px 0 0 -15px;
+  margin-top: -15px;
   border-radius: 50%;
   background: #f7f3e6;
   box-shadow: 0 0 0 1px rgba(11, 18, 33, 0.5);
+  /* En pixels et non en pourcentage : un pourcentage compterait les trente
+     pixels de la poignée, pas la largeur de l'aperçu. C'est aussi ce qui permet
+     de la borner contre les bords sans borner le trait. */
+  transform: translateX(var(--poignee, -60px));
+  will-change: transform;
 }
 .rideau-poignee i {
   position: absolute;

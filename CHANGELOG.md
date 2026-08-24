@@ -42,6 +42,17 @@ d'écran derrière mes icônes ?**
   défilement sur téléphone.
 - Le fichier ne change toujours pas d'un octet, et la vérification le compare
   pour de bon.
+- **Il est fluide, et ça n'allait pas de soi.** Une limite qui saute ne se juge
+  pas. Trois corrections, mesurées au processeur bridé six fois : les maquettes
+  d'écran sont mémoïsées, parce que `useAjustement` force un recalcul de mise en
+  page sur ses cent vingt nœuds à chaque rendu ; les boîtes se déplacent par
+  `transform` et non par `left` ni `clip-path` ; et les deux jetons de position
+  sont posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil,
+  qui les aurait transmis à toute la maquette. Cinq millisecondes de recalcul de
+  style par image et une image sur quatre perdue avant, moins de deux
+  millisecondes et aucune tâche longue après. L'état React, lui, suit le geste
+  sept fois par seconde et non soixante : l'image est en direct, le chiffre du
+  verdict aussi, sans rendu intercalé entre deux images.
 
 ### Ajouté : les palettes qu'on écrit soi-même
 

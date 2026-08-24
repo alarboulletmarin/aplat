@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef, useState, type CSSProperties } from 'react'
+import {
+  useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties,
+} from 'react'
 import {
   ASSOMBRISSEMENT, assombrir, famille, palette, sansVoile,
   type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
 import {
-  geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
+  BORDURE_APPAREIL, geometrieAppareil, hauteurScene, hauteurVignette,
+  jetonsLibelle, paysageCourt,
 } from '../lib/geometrie'
 import type { Resolution, TypeAppareil } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
@@ -38,6 +41,9 @@ import { Verdict } from './Verdict'
  * n'est pas redessiné, que la maquette ne se réajuste pas, et que la
  * transition ne coûte qu'une composition.
  */
+/** Le rayon de la poignée du rideau, égal à celui de `.rideau-poignee`. */
+const RAYON_POIGNEE = 15
+
 export function Scene({
   cadre,
   motif,
@@ -73,13 +79,29 @@ export function Scene({
   /* Le rideau clair/sombre : la position du trait, en pourcentage de la
      largeur, comptée depuis la gauche. Cent, donc rien d'assombri, tant qu'on
      n'y touche pas.
-     
+
      Une aide à la lecture, pas un réglage : il ne part ni dans l'URL ni dans le
      fichier, et repart à cent au rechargement. C'est le même geste que la
      bascule qu'il remplace, mais continu : un thème sombre ne se juge pas à
      « avant » et « après » posés l'un après l'autre, il se juge en voyant la
-     limite passer sur le motif, sous les mêmes libellés. */
+     limite passer sur le motif, sous les mêmes libellés.
+
+     L'état ne suit pas la glissade image par image, et c'est délibéré. Pendant
+     qu'on glisse, seuls deux jetons CSS sont écrits sur l'appareil : rien ne
+     re-rend, rien ne se recalcule, et le navigateur n'a qu'à recomposer deux
+     couches déjà peintes. L'état est posé au relâchement, sur l'événement
+     `change` que le clavier émet aussi à chaque flèche. Ce qui doit être en
+     direct l'est, c'est-à-dire l'image ; ce qui peut attendre la fin du geste
+     l'attend, c'est-à-dire le chiffre du verdict. */
   const [separation, setSeparation] = useState(100)
+  const glissiere = useRef<HTMLInputElement>(null)
+  const cadreRideau = useRef<HTMLDivElement>(null)
+  const aplat = useRef<HTMLSpanElement>(null)
+  /* La largeur utile de l'aperçu, tenue à jour hors du geste. La lire dans le
+     DOM pendant la glissade forcerait un recalcul de mise en page par image,
+     ce qui est exactement ce qu'on cherche à éviter ; elle est de toute façon
+     déjà calculée par la géométrie. */
+  const largeurRideau = useRef(0)
 
   const vide = !resolution.largeur || !resolution.hauteur
 
@@ -121,6 +143,8 @@ export function Scene({
       ? Math.min(hauteurBoite, geometrie.hauteur)
       : hauteurBoite
 
+  const largeurUtile = Math.max(1, (geometrie?.largeur ?? 0) - 2 * BORDURE_APPAREIL)
+
   const style: CSSProperties = geometrie
     ? ({
         width: `${geometrie.largeur}px`,
@@ -146,6 +170,82 @@ export function Scene({
           densite: nomDensite,
           graine: String(motif.graine),
         })
+
+  /**
+   * Pose la position du rideau dans le DOM, sans passer par l'état.
+   *
+   * Deux jetons, posés sur les deux seules boîtes qui les lisent : l'aplat
+   * assombri, qui n'a pas d'enfant, et le cadre du rideau, qui en a trois. Les
+   * poser sur l'appareil, qui les aurait transmis aux deux, coûtait cinq
+   * millisecondes de recalcul de style par image sur un processeur bridé six
+   * fois : un jeton personnalisé se propage à tout le sous-arbre, et ce
+   * sous-arbre est la maquette entière, cent vingt nœuds. Mesuré, pas supposé.
+   *
+   * Le premier jeton est un pourcentage : il translate deux boîtes de la
+   * largeur de l'aperçu, donc un `translateX` en pourcentage les pose
+   * exactement à la limite. Le second est en pixels, parce que la poignée fait
+   * trente pixels et qu'un pourcentage y compterait sa propre largeur ; c'est
+   * aussi là qu'elle est bornée pour rester entière contre les bords.
+   */
+  const poser = useCallback((valeur: number) => {
+    const largeur = Math.max(1, largeurRideau.current)
+    const x = (valeur / 100) * largeur
+    const bornee =
+      Math.min(Math.max(x, RAYON_POIGNEE), Math.max(RAYON_POIGNEE, largeur - RAYON_POIGNEE))
+    for (const noeud of [aplat.current, cadreRideau.current]) {
+      if (!noeud) continue
+      noeud.style.setProperty('--rideau', `${valeur}%`)
+      noeud.style.setProperty('--poignee', `${bornee.toFixed(1)}px`)
+    }
+  }, [])
+
+  /* Le seul chemin par lequel React pose le rideau : au montage, au
+     relâchement, et quand la largeur de l'aperçu change. Jamais en style en
+     ligne, sans quoi un rendu venu d'ailleurs (l'heure de la maquette, par
+     exemple) le ramènerait à la position d'avant le geste en cours. Avant la
+     peinture, pour que la poignée n'apparaisse pas d'abord au mauvais endroit. */
+  useLayoutEffect(() => {
+    largeurRideau.current = largeurUtile
+    poser(Number(glissiere.current?.value ?? separation))
+  }, [largeurUtile, separation, poser, replie, vide, calculEnCours])
+
+  /* Les deux écoutes sont natives, et posées à la main.
+     
+     `input` d'abord : il pose l'image, et rien d'autre. `change` ensuite, pour
+     l'état : au doigt comme à la souris il arrive au relâchement, une fois, et
+     au clavier à chaque flèche. React ne donne pas cet événement, son
+     `onChange` étant `input`, d'où l'écoute directe ; c'est aussi ce qui permet
+     à la glissière de rester non contrôlée pendant le geste.
+
+     Entre les deux, l'état est tout de même posé, mais sept fois par seconde et
+     non soixante. Le chiffre du verdict suit donc le geste d'assez près pour
+     paraître vivant, sans qu'un rendu complet vienne s'intercaler entre deux
+     images. Cent quarante millisecondes : au-delà on voit le chiffre traîner,
+     en deçà on repaie le rendu sans que l'oeil y gagne. */
+  useEffect(() => {
+    const noeud = glissiere.current
+    if (!noeud) return
+    let differe: ReturnType<typeof setTimeout> | undefined
+    const poserEtat = () => {
+      differe = undefined
+      setSeparation(Number(noeud.value))
+    }
+    const suivre = () => {
+      poser(Number(noeud.value))
+      if (differe === undefined) differe = setTimeout(poserEtat, 140)
+    }
+    const relever = () => {
+      if (differe !== undefined) clearTimeout(differe)
+      poserEtat()
+    }
+    noeud.addEventListener('input', suivre)
+    noeud.addEventListener('change', relever)
+    return () => {
+      if (differe !== undefined) clearTimeout(differe)
+      noeud.removeEventListener('input', suivre)
+      noeud.removeEventListener('change', relever)
+    }
+  }, [poser, replie, vide, calculEnCours])
 
   /* Le verdict porte sur le fichier tel qu'il sera, et sur la condition qu'on
      regarde. Deux corrections, dans cet ordre : le voile retiré change le
@@ -187,17 +287,20 @@ export function Scene({
           {/* L'assombrissement est peint par-dessus le motif et sous la
               maquette : ce sont bien les libellés sur un fond assombri qu'on
               juge. Le fichier téléchargé, lui, ne le porte pas.
-              Il est découpé à la position du rideau, si bien que la même
-              graine se voit en clair et en sombre d'un seul regard, sous les
-              mêmes libellés. */}
-          {!vide && assombri && (
+
+              Il fait la largeur de l'aperçu et se décale vers la droite de la
+              position du rideau : ce qui dépasse est coupé par l'appareil, et
+              ce qui reste est exactement la moitié assombrie. La même graine se
+              voit donc en clair et en sombre d'un seul regard, sous les mêmes
+              libellés. Posé une fois pour toutes, même au repos où il est
+              entièrement dehors : le promouvoir en pleine glissade coûterait
+              une image. */}
+          {!vide && (
             <span
               className="apercu-assombri"
+              ref={aplat}
               aria-hidden="true"
-              style={{
-                background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})`,
-                clipPath: `inset(0 0 0 ${separation}%)`,
-              }}
+              style={{ background: `rgba(0, 0, 0, ${ASSOMBRISSEMENT})` }}
             />
           )}
 
@@ -238,34 +341,29 @@ export function Scene({
               le repli, faute de place et faute d'objet : replié, on parcourt
               les motifs ; déplié, on les juge. */}
           {!vide && !calculEnCours && !replie && geometrie && (
-            <div className="rideau" id="rideau">
-              <span
-                className="rideau-trait"
-                style={{ left: `${separation}%` }}
-                aria-hidden="true"
-              />
+            <div className="rideau" id="rideau" ref={cadreRideau}>
+              <span className="rideau-suivi" aria-hidden="true">
+                <span className="rideau-trait" />
+              </span>
               {/* La poignée est bornée à quinze pixels des bords, le trait ne
                   l'est pas : au repos, le rideau est à cent et le trait tombe
                   sur le bord même, où une poignée centrée serait coupée en deux
                   et ne se verrait plus. Le trait dit la limite, la poignée dit
                   qu'on peut la prendre ; l'écart des deux ne dépasse jamais la
                   largeur d'un doigt, et seulement contre les bords. */}
-              <span
-                className="rideau-poignee"
-                style={{ left: `clamp(15px, ${separation}%, calc(100% - 15px))` }}
-                aria-hidden="true"
-              >
+              <span className="rideau-poignee" aria-hidden="true">
                 <i />
                 <i />
               </span>
               <input
+                ref={glissiere}
                 type="range"
                 id="rideau-glissiere"
                 className="rideau-glissiere"
                 min={0}
                 max={100}
                 step={1}
-                value={separation}
+                defaultValue={separation}
                 aria-label={textes.lisibilite.rideau}
                 aria-valuetext={
                   separation >= 100
@@ -277,7 +375,6 @@ export function Scene({
                         })
                 }
                 title={textes.lisibilite.rideauTitre}
-                onChange={(evenement) => setSeparation(Number(evenement.target.value))}
               />
             </div>
           )}
