@@ -134,6 +134,9 @@ src/main.tsx                  point d'entrée, et le choix des deux pages
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
+src/lib/trace.ts              les outils des gestes : rubans, bruit, teintes
+src/lib/{niveaux,fractures,reserves,chimie,reseaux,pavages,trames,grammaires}.ts
+                              les gestes ajoutés : un module par mécanique de dessin
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
 src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
@@ -310,14 +313,25 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Quarante-six familles, quatre groupes.**
+**Soixante-trois familles, cinq groupes.**
 
-- **Abstraits** (vingt-trois) : les douze libres, qui sèment des formes sur un
+- **Abstraits** (vingt-huit) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
-  pas ; et quatre déformées, où un champ lisse plie une forme répétée, ce qui
-  se reconnaît à une règle qu'on voit se tordre.
-- **Paysages** (six) : Sommets, Horizon, Nuages, Dunes, Falaises, Archipel.
+  pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
+  se reconnaît à une règle qu'on voit se tordre ; et cinq venues des nouveaux
+  gestes : Kintsugi et Banquise brisent la surface en pièces (Voronoï par
+  découpe de demi-plans, les jointures affleurent), Claustra et Papel picado
+  percent un aplat en réserve, Penrose pave sans période, par déflation.
+- **Matières** (six) : bois, peau, tissu, interférence, ce que la main
+  reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
+  Madrépore se cultivent, une réaction-diffusion de Gray-Scott gelée à un
+  instant choisi ; Drapé déforme des bandes par un champ ; Boro coud des
+  pièces d'indigo au point sashiko ; Moiré peint la figure d'interférence de
+  deux trames, calculée point par point, jamais par transparence.
+- **Paysages** (huit) : Sommets, Horizon, Nuages, Dunes, Falaises, Archipel,
+  et deux venues de la ligne de niveau : Relief, des massifs vus du ciel en
+  paliers, et Marée, l'estran que l'eau découvre en se retirant.
   Elles ont un haut et un bas, et c'est ce qui les sépare des abstraits. C'est
   aussi ce qui les rend commodes en fond d'écran : la grille d'icônes tombe
   dans leur partie basse, et la sonde de lisibilité y trouve un aplat plutôt
@@ -329,7 +343,10 @@ et le fichier exporté sont le même dessin, à deux échelles.
   tons seulement sortent de la palette, le plus clair en papier, le plus
   sombre en encre. La densité y règle la finesse de la trame, pas le
   peuplement.
-- **Figures** (onze) : des objets posés sur un fond, reconnaissables un par un.
+- **Figures** (quinze) : des objets posés sur un fond, reconnaissables un par
+  un. S'y ajoutent une Empreinte digitale géante en rubans interrompus, un
+  Herbier poussé par récursion, un plan de Métro fictif et des
+  Constellations reliées à la règle.
 
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
 Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
@@ -389,23 +406,26 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **1 518 combinaisons** (46 familles × 11 palettes × 3 densités) en
-1179 × 2556, soit 3,0 Mpx :
+Mesuré sur les **2 079 combinaisons** (63 familles × 11 palettes × 3 densités)
+en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
-| médiane | 0,94 Mo | **0,45 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,86 Mo** |
-| maximum | 2,33 Mo | **1,35 Mo** |
+| médiane | 0,94 Mo | **0,48 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,87 Mo** |
+| maximum | 2,33 Mo | **1,61 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
-la seconde série, à celle des cinq familles déformées, puis à celle des trois
-paysages et deux lieux. Le maximum est passé de 0,98 à 1,04 Mo avec Azulejos
-en densité dense, dont le carrelage remplit la page de courbes, puis à
-1,35 Mo avec Mirage en dense, dont chaque rayure pliée traverse la page de
-haut en bas : c'est le prix honnête d'un motif qui couvre tout plutôt que de
-semer des formes sur un aplat. Les cinq familles nouvelles n'y paraissent
-pas : aucune n'entre dans les plus lourdes.
+la seconde série, à celle des cinq familles déformées, à celle des trois
+paysages et deux lieux, puis à celle des dix-sept familles qui ont ouvert les
+Matières. Le maximum est passé de 0,98 à 1,04 Mo avec Azulejos en densité
+dense, dont le carrelage remplit la page de courbes ; à 1,35 Mo avec Mirage
+en dense, dont chaque rayure pliée traverse la page de haut en bas ; puis à
+1,61 Mo avec Penrose en dense : un pavage qui ne se répète jamais est aussi
+celui qui se compresse le moins, et il a déjà rendu une génération de
+losanges, autant pour rester lisible en aplats francs que pour son poids.
+C'est le prix honnête d'un motif qui couvre tout plutôt que de semer des
+formes sur un aplat.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -508,10 +528,10 @@ thèmes et les deux langues :
   défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
   (WCAG 2.2, 2.4.11) ;
-- les groupes de réglages sont de vrais groupes radio, les quatre groupes de
+- les groupes de réglages sont de vrais groupes radio, les cinq groupes de
   familles une vraie barre d'onglets, et l'historique une barre d'outils : un
   arrêt de tabulation par groupe, flèches et Début/Fin. Les flèches des onglets
-  déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait quatre
+  déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait cinq
   rendus complets de quarante et une vignettes pour atteindre le quatrième ;
 - les deux boutons secondaires de la barre rendent leur mot sous 600 px mais le
   gardent dans leur nom accessible : un `aria-label` posé par-dessus un libellé
@@ -608,9 +628,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 518 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 079 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 46 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 63 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

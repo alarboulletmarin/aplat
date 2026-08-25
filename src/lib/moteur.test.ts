@@ -89,11 +89,11 @@ describe('données', () => {
   })
 
   /* Le panneau construit ses grilles en filtrant `FAMILLES` sur le groupe :
-     une famille dont le groupe ne serait aucun des quatre disparaîtrait de
+     une famille dont le groupe ne serait aucun des cinq disparaîtrait de
      l'interface sans erreur, et personne ne s'en apercevrait avant de la
-     chercher. Les quatre grilles doivent couvrir la liste entière. */
-  it('range chaque famille dans l’un des quatre groupes, et aucun n’est vide', () => {
-    const groupes = ['abs', 'pay', 'lieu', 'fig'] as const
+     chercher. Les cinq grilles doivent couvrir la liste entière. */
+  it('range chaque famille dans l’un des cinq groupes, et aucun n’est vide', () => {
+    const groupes = ['abs', 'mat', 'pay', 'lieu', 'fig'] as const
     const comptes = groupes.map((g) => FAMILLES.filter((f) => f.groupe === g).length)
     expect(comptes.reduce((somme, n) => somme + n, 0)).toBe(FAMILLES.length)
     for (const [indice, compte] of comptes.entries()) {
@@ -101,13 +101,13 @@ describe('données', () => {
     }
   })
 
-  /* Les quatre grilles se suivent dans le panneau, dans cet ordre. Une famille
+  /* Les cinq grilles se suivent dans le panneau, dans cet ordre. Une famille
      rangée hors de son bloc sauterait de place à l'écran sans que rien ne le
      signale : le parcours clavier d'un groupe passerait par une vignette
      affichée dans un autre. */
-  it('garde les quatre groupes d’un seul tenant, abstraits, paysages, lieux puis figures', () => {
+  it('garde les cinq groupes d’un seul tenant, abstraits, matières, paysages, lieux puis figures', () => {
     const ordre = FAMILLES.map((f) => f.groupe)
-    const rang = ['abs', 'pay', 'lieu', 'fig']
+    const rang = ['abs', 'mat', 'pay', 'lieu', 'fig']
     expect(ordre).toEqual([...ordre].sort(
       (a, b) => rang.indexOf(a) - rang.indexOf(b),
     ))

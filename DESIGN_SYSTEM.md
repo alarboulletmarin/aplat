@@ -311,15 +311,23 @@ l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les quatre groupes de familles, en quatre onglets
+### Les cinq groupes de familles, en cinq onglets
 
-La liste des familles est longue, et une liste longue se range. Quatre
-groupes : les **abstraits**, les **paysages**, les **lieux**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Cinq
+groupes : les **abstraits**, les **matières**, les **paysages**, les
+**lieux**, les **figures**.
 
 Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
 silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
 des trames et des damiers, et le critère de séparation s'énonce en une phrase :
 un paysage a un haut et un bas.
+
+Les matières sont nées du même mouvement, quand les nouveaux gestes du moteur
+ont apporté du bois, de la peau, du tissu et des interférences : un motif de
+matière n'est pas abstrait, c'est quelque chose qu'on touche, et le critère
+tient lui aussi en une phrase : la main le reconnaît avant l'oeil. Elles se
+placent entre les abstraits et les paysages, sur le chemin qui descend du
+plus géométrique au plus figuratif.
 
 Les trois grilles se suivaient, et c'était le défaut : trente-deux vignettes à
 plat, dans une colonne étroite, mettent mille pixels entre « Vagues » et
@@ -329,7 +337,7 @@ qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-quatre onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+cinq onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
@@ -339,7 +347,7 @@ Ils sont **empilés quand la colonne est étroite**, sur une rangée dès qu'ell
 peut porter trois mots. La bascule se règle sur la largeur du panneau et non sur
 celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont rien
 à voir : sur un téléphone de 390 px, le panneau tient dans une colonne de
-207 px, où quatre onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
+207 px, où cinq onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
 est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
 ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
 
@@ -350,7 +358,7 @@ elle est dans l'adresse, avec le reste, donc elle survit à un rechargement comm
 onglets sans les ouvrir, sans quoi le clavier traverserait un rendu complet de
 grille par onglet pour atteindre le dernier.
 
-Les quatre groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
+Les cinq groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
 test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
 grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
 sauterait de place à l'écran sans que rien ne le signale.

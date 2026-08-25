@@ -35,6 +35,7 @@
  * comme le garde-fou l'a toujours prévu.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
+import { bruiteur, hacher, lisse, luminanceHex } from './trace'
 
 export const IDS_LIEUX = ['acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins'] as const
 
@@ -67,55 +68,14 @@ type Champ = (u: number, t: number) => number
 /** Une scène : ses tirages sont faits, il ne reste qu'à évaluer. */
 type Scene = (rnd: Alea, rapport: number) => Champ
 
-/* ---------- bruit déterministe ---------------------------------------------- */
-
-/** Un réel de [0, 1[ tiré de deux entiers et d'une graine, toujours le même. */
-function hacher(x: number, y: number, graine: number): number {
-  let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(graine, 2246822519)) | 0
-  h = Math.imul(h ^ (h >>> 13), 1274126177)
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296
-}
-
-const lisse = (t: number) => t * t * (3 - 2 * t)
-
-/**
- * Un bruit de valeur : la grille entière reçoit des hauteurs tirées de la
- * graine, et le point s'interpole entre ses quatre coins. Fonction pure des
- * coordonnées, donc la même à toute résolution : c'est lui qui remplace les
- * tirages que la boucle des cellules s'interdit.
- */
-function bruiteur(graine: number): (x: number, y: number) => number {
-  return (x, y) => {
-    const ix = Math.floor(x)
-    const iy = Math.floor(y)
-    const fx = lisse(x - ix)
-    const fy = lisse(y - iy)
-    const a = hacher(ix, iy, graine)
-    const b = hacher(ix + 1, iy, graine)
-    const c = hacher(ix, iy + 1, graine)
-    const d = hacher(ix + 1, iy + 1, graine)
-    return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy
-  }
-}
+/* Le bruit de valeur et la luminance viennent de `trace.ts` : ce sont les
+   outils que tous les gestes se partagent, et ils y sont commentés. Ce module
+   les avait d'abord recopiés pour ne pas faire de cycle avec le moteur ;
+   `trace.ts` n'importe que des types du moteur, le cycle n'existe plus. */
 
 const borner = (v: number) => Math.max(0, Math.min(1, v))
 
 /* ---------- les deux tons ---------------------------------------------------- */
-
-/**
- * La luminance WCAG d'une teinte hexadécimale. Réécrite ici plutôt qu'importée
- * du moteur : le moteur importe ce module, et un aller-retour de valeurs entre
- * les deux ferait un cycle qu'aucun des deux n'a besoin de payer.
- */
-function luminanceHex(teinte: string): number {
-  const m = /^#([0-9a-f]{6})$/i.exec(teinte.trim())
-  if (!m) return 0.5
-  const canal = (i: number) => {
-    const c = Number.parseInt(m[1].slice(i * 2, i * 2 + 2), 16) / 255
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  }
-  return 0.2126 * canal(0) + 0.7152 * canal(1) + 0.0722 * canal(2)
-}
 
 /**
  * Le papier et l'encre : la teinte la plus claire et la plus sombre de la

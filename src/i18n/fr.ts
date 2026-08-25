@@ -168,6 +168,9 @@ export const fr = {
     /* Les groupes sont devenus des onglets. Le mot du groupe ne change pas
        pour autant : c'est le même classement, montré autrement. */
     groupeAbstraits: 'Abstraits',
+    /* Bois, peau, tissu, interférence : ce que la main reconnaît avant
+       l'oeil. Entre l'abstrait et le paysage, comme dans la liste. */
+    groupeMatieres: 'Matières',
     groupePaysages: 'Paysages',
     /* Les gravures tramées : des endroits, pas des motifs. Le mot est court et
        dit exactement ça. */

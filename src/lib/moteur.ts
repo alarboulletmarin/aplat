@@ -9,7 +9,15 @@
  * ce qu'on voit derrière les icônes est exactement le fichier téléchargé.
  */
 
+import { estChimie, peindreChimie, type IdChimie } from './chimie'
+import { estFracture, peindreFracture, type IdFracture } from './fractures'
+import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estLieu, peindreLieu, type IdLieu } from './lieux'
+import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
+import { estPavage, peindrePavage, type IdPavage } from './pavages'
+import { estReseau, peindreReseau, type IdReseau } from './reseaux'
+import { estReserve, peindreReserve, type IdReserve } from './reserves'
+import { estTrame, peindreTrame, type IdTrame } from './trames'
 
 export type IdFamille =
   /* abstraits */
@@ -36,6 +44,15 @@ export type IdFamille =
   | 'terrasses'
   | 'bassin'
   | 'strates'
+  /* abstraits venus des nouveaux gestes : la fracture, la réserve, le
+     pavage savant */
+  | IdFracture
+  | IdReserve
+  | IdPavage
+  /* matières : la ligne de niveau y met les cernes, la chimie, la grille
+     déformée et l'interférence y mettent tout le reste */
+  | IdChimie
+  | IdTrame
   /* paysages */
   | 'sommets'
   | 'horizon'
@@ -43,6 +60,8 @@ export type IdFamille =
   | 'dunes'
   | 'falaises'
   | 'archipel'
+  /* la ligne de niveau : reliefs, cernes, estran, empreinte (lib/niveaux.ts) */
+  | IdNiveau
   /* lieux : les gravures tramées de lib/lieux.ts */
   | IdLieu
   /* figures */
@@ -57,6 +76,9 @@ export type IdFamille =
   | 'palmes'
   | 'vases'
   | 'poissons'
+  /* figures venues des nouveaux gestes : le réseau, la grammaire */
+  | IdReseau
+  | IdGrammaire
 
 export type IdPalette =
   | 'lime'
@@ -114,7 +136,7 @@ export interface Palette {
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'pay' | 'lieu' | 'fig'
+export type Groupe = 'abs' | 'mat' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -172,10 +194,11 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quarante-six familles, dans l'ordre de la liste : abstraits,
- * paysages, lieux, figures. L'ordre est celui de la maquette, et il compte :
- * on descend du plus géométrique au plus figuratif, et le premier de chaque
- * groupe en donne le ton.
+ * Les soixante-trois familles, dans l'ordre de la liste : abstraits,
+ * matières, paysages, lieux, figures. L'ordre est celui de la maquette, et il
+ * compte : on descend du plus géométrique au plus figuratif, et le premier de
+ * chaque groupe en donne le ton. Les matières sont entre les deux mondes :
+ * bois, peau, tissu, interférence, ce que la main reconnaît avant l'oeil.
  */
 export const FAMILLES: readonly Famille[] = [
   { id: 'vagues', groupe: 'abs', fr: 'Vagues', en: 'Waves' },
@@ -201,12 +224,25 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'terrasses', groupe: 'abs', fr: 'Terrasses', en: 'Terraces' },
   { id: 'bassin', groupe: 'abs', fr: 'Bassin', en: 'Pool' },
   { id: 'strates', groupe: 'abs', fr: 'Strates', en: 'Strata' },
+  { id: 'kintsugi', groupe: 'abs', fr: 'Kintsugi', en: 'Kintsugi' },
+  { id: 'banquise', groupe: 'abs', fr: 'Banquise', en: 'Ice floes' },
+  { id: 'claustra', groupe: 'abs', fr: 'Claustra', en: 'Breeze block' },
+  { id: 'papel', groupe: 'abs', fr: 'Papel picado', en: 'Papel picado' },
+  { id: 'penrose', groupe: 'abs', fr: 'Penrose', en: 'Penrose' },
+  { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
+  { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
+  { id: 'madrepore', groupe: 'mat', fr: 'Madrépore', en: 'Brain coral' },
+  { id: 'drape', groupe: 'mat', fr: 'Drapé', en: 'Drape' },
+  { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
+  { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
   { id: 'dunes', groupe: 'pay', fr: 'Dunes', en: 'Dunes' },
   { id: 'falaises', groupe: 'pay', fr: 'Falaises', en: 'Cliffs' },
   { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
+  { id: 'relief', groupe: 'pay', fr: 'Relief', en: 'Contours' },
+  { id: 'maree', groupe: 'pay', fr: 'Marée', en: 'Tideline' },
   { id: 'acropole', groupe: 'lieu', fr: 'Acropole', en: 'Acropolis' },
   { id: 'phare', groupe: 'lieu', fr: 'Phare', en: 'Lighthouse' },
   { id: 'pyramides', groupe: 'lieu', fr: 'Pyramides', en: 'Pyramids' },
@@ -224,6 +260,10 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'palmes', groupe: 'fig', fr: 'Palmes', en: 'Palms' },
   { id: 'vases', groupe: 'fig', fr: 'Vases', en: 'Vases' },
   { id: 'poissons', groupe: 'fig', fr: 'Poissons', en: 'Fish' },
+  { id: 'empreinte', groupe: 'fig', fr: 'Empreinte', en: 'Fingerprint' },
+  { id: 'herbier', groupe: 'fig', fr: 'Herbier', en: 'Herbarium' },
+  { id: 'metro', groupe: 'fig', fr: 'Métro', en: 'Transit map' },
+  { id: 'constellations', groupe: 'fig', fr: 'Constellations', en: 'Constellations' },
 ]
 
 /** Les arrondis des fausses icônes de la maquette : jamais deux fois le même. */
@@ -634,6 +674,45 @@ export function formes(
      tout le monde ; seul le dessin change de nature. */
   if (estLieu(id)) {
     peindreLieu(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+
+  /* Les gestes suivants ont chacun leur module, sur le modèle des lieux :
+     même pinceau, même graine, même palette, un dessin d'une autre nature.
+     La ligne de niveau révèle des paliers, la fracture brise la surface, la
+     réserve perce un aplat, la chimie cultive une réaction, le réseau trace
+     une carte, le pavage subdivise sans période, la trame déforme ou fait
+     interférer des grilles, la grammaire fait pousser des plantes. */
+  if (estNiveau(id)) {
+    peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estFracture(id)) {
+    peindreFracture(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estReserve(id)) {
+    peindreReserve(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estChimie(id)) {
+    peindreChimie(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estReseau(id)) {
+    peindreReseau(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estPavage(id)) {
+    peindrePavage(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estTrame(id)) {
+    peindreTrame(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estGrammaire(id)) {
+    peindreGrammaire(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 
