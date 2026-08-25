@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { Textes } from '../i18n'
+import { Frise } from './accueil/Frise'
 
 /**
  * L'en-tête : DESIGN_SYSTEM.md, section 2 (le parti visuel) et section 6
@@ -56,16 +57,9 @@ export function Entete({
             {resolution}
           </p>
         </div>
-        {/* Six barres et leur seuil : la silhouette d'un motif du générateur,
-            réduite à treize pixels de haut. */}
-        <div className="entete-filet" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
+        {/* La même frise d'arches que la présentation : la marque ne change
+            pas de silhouette quand on passe d'un document à l'autre. */}
+        <Frise decalage={3} />
       </header>
       <div className="entete-pied">
         <p className="accroche">{textes.entete.accroche}</p>

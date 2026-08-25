@@ -125,50 +125,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Le filet sous le titre n'est plus un trait mais six barres posées dessus :
-   un aplat de la palette par barre, la signature du générateur en miniature.
-   Il habille et repère, il ne porte aucune information. */
-.entete-filet {
-  display: flex;
-  align-items: flex-end;
-  gap: 5px;
-  height: 13px;
-  border-bottom: 3px solid var(--encre);
-}
-.entete-filet i {
-  display: block;
-  border-radius: 999px 999px 0 0;
-}
-.entete-filet i:nth-child(1) {
-  flex: 2 1 0;
-  height: 100%;
-  background: var(--lime);
-}
-.entete-filet i:nth-child(2) {
-  flex: 1 1 0;
-  height: 60%;
-  background: var(--ciel);
-}
-.entete-filet i:nth-child(3) {
-  flex: 3 1 0;
-  height: 86%;
-  background: var(--violet);
-}
-.entete-filet i:nth-child(4) {
-  flex: 1 1 0;
-  height: 46%;
-  background: var(--corail);
-}
-.entete-filet i:nth-child(5) {
-  flex: 2 1 0;
-  height: 100%;
-  background: var(--encre);
-}
-.entete-filet i:nth-child(6) {
-  flex: 1 1 0;
-  height: 68%;
-  background: var(--ciel);
-}
 /* L'accroche et la mention sortent de l'en-tête collant : elles se lisent une
    fois, au départ, et n'ont rien à faire dans la bande épinglée. La marge
    négative reprend onze des vingt-deux pixels de l'espacement de `.page`. */

@@ -3,10 +3,10 @@
 /**
  * La frise d'arches : DESIGN_SYSTEM.md, section 5 (le vocabulaire décoratif).
  *
- * Le filet à six barres de l'en-tête de l'application, déroulé sur la largeur
- * de la page. C'est la silhouette d'un motif du générateur, arrêtée sur un
- * seuil, et c'est ce qui sépare ici les sections : la page d'accueil n'a ni
- * trait de séparation ni cadre, elle a des arches.
+ * La silhouette d'un motif du générateur, arrêtée sur un seuil. Elle sépare
+ * les sections de la présentation et souligne l'en-tête de l'application :
+ * ni l'une ni l'autre n'a de trait de séparation ou de cadre, elles ont des
+ * arches, les mêmes partout.
  *
  * Cinq hauteurs et sept couleurs, deux cycles premiers entre eux : le motif ne
  * se répète qu'au bout de trente-cinq arches, donc jamais dans une frise. Le

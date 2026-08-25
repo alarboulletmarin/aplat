@@ -150,10 +150,10 @@
 }
 
 /* --- La frise d'arches -----------------------------------------------------
-   Le filet à barres de l'en-tête de l'application, déroulé. Il sépare les
-   sections : la page n'a pas d'autre trait horizontal que celui-ci et les
-   seuils des cartes. Les dernières arches sont rognées sur un écran étroit,
-   ce que la frise assume : c'est un bord de motif, pas une liste. */
+   Elle sépare les sections de la présentation et souligne l'en-tête de
+   l'application : pas d'autre trait horizontal que celui-ci et les seuils des
+   cartes. Les dernières arches sont rognées sur un écran étroit, ce que la
+   frise assume : c'est un bord de motif, pas une liste. */
 .frise {
   display: flex;
   align-items: flex-end;

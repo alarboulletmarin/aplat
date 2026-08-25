@@ -56,7 +56,7 @@ Papier découpé, façon Matisse : des aplats francs, aucune ombre portée, un g
 très léger, des coins largement arrondis.
 
 Une **page imprimée**, pas une pile de cartes. La marque, le titre en pleine
-chasse et un filet de six barres tiennent l'en-tête ; les réglages sont dans un
+chasse et la frise d'arches tiennent l'en-tête ; les réglages sont dans un
 seul bloc cerné d'un trait franc et découpé par des filets ; les titres sont des
 titres, pas de petites capitales interlettrées.
 
@@ -175,7 +175,7 @@ suivent la taille de l'objet.
 | appareil de la maquette | 13 % du petit côté (téléphone), 5,5 % (tablette), 2,4 % (ordinateur) |
 | marque | 23 % de son côté |
 
-Filets : 3 px sous les barres de l'en-tête, 2 px pour le contour du bloc et ses
+Filets : 3 px sous les arches de la frise, 2 px pour le contour du bloc et ses
 séparations, 1,5 px pour le trait d'une puce au repos, 2,5 px pour signaler une
 erreur.
 
@@ -212,9 +212,11 @@ laissant qu'un pixel au-dessus du lien, et l'en-tête étant collé à `top: 0`,
 l'anneau de focus y passe dedans (`outline-offset: -3px`) : entier, plutôt que
 coupé par le bord de l'écran.
 
-Les six barres sous le titre sont la silhouette d'un motif du générateur, réduite
-à treize pixels : un aplat de la palette par barre, arrondies en arche, posées
-sur un seuil d'encre de trois pixels.
+La frise d'arches sous le titre est la silhouette d'un motif du générateur :
+un aplat par arche, cinq hauteurs et sept couleurs en cycles premiers entre
+eux, posées sur un seuil d'encre de trois pixels. C'est la même frise qui
+sépare les sections de la présentation : la marque garde sa silhouette d'un
+document à l'autre.
 
 Les pictogrammes sont dessinés dans la direction artistique, en CSS, à partir de
 formes pleines et de `clip-path` : ni Material, ni Lucide, **jamais d'emoji**.
