@@ -2,12 +2,13 @@
 
 import {
   estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
-  type Densite, type IdFamille, type IdPaletteQuelconque, type Langue,
+  type Densite, type IdFamille, type IdPaletteQuelconque, type Langue, type Motif,
 } from './moteur'
 import { GRAINE_MAX } from './tirage'
 import { type Affichage, type Theme } from './affichage'
 import { encoderTeintes } from './palettes'
 import { RES_MAX, RES_MIN, type Resolution } from './resolution'
+import { CHEMIN_APP } from './route'
 
 /**
  * L'URL porte le motif affiché, et rien que lui.
@@ -162,4 +163,29 @@ export function ecrireUrl(
     !(resolution.largeur === detecte.largeur && resolution.hauteur === detecte.hauteur)
   if (surMesure) q.set('r', `${resolution.largeur}x${resolution.hauteur}`)
   return q.toString()
+}
+
+/**
+ * L'adresse qui ouvre un motif dans l'application.
+ *
+ * La page du mécanisme construit un motif d'étape en étape et le rend à la fin
+ * sous forme de lien. Il passe par `ecrireUrl` plutôt que d'assembler ses
+ * quatre paramètres à la main : la grammaire de l'adresse n'est écrite qu'ici,
+ * et un lien composé ailleurs cesserait d'être lu correctement le jour où elle
+ * bouge.
+ *
+ * Il est ici et non dans `route.ts` pour une raison de poids, au sens propre :
+ * `route.ts` est lu par `main.tsx` avant le moindre rendu, et il n'importe
+ * rien. Lui donner ce lien y ferait entrer le moteur entier, c'est-à-dire
+ * annuler la coupe en trois morceaux que les imports paresseux obtiennent.
+ *
+ * Aucune résolution des deux côtés : `ecrireUrl` n'écrit `r` que pour une
+ * saisie manuelle, et la page n'en propose aucune. Son absence veut dire « la
+ * résolution de l'appareil qui ouvre le lien », ce que la page vient
+ * précisément d'expliquer.
+ */
+export function lienAppDuMotif(motif: Motif): string {
+  const reglages: Reglages = { ...REGLAGES_PAR_DEFAUT, ...motif }
+  const aucune: Resolution = { largeur: 0, hauteur: 0 }
+  return `${CHEMIN_APP}?${ecrireUrl(reglages, aucune, aucune)}`
 }

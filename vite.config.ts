@@ -132,8 +132,9 @@ export default defineConfig({
         // `txt` couvre THIRD-PARTY.txt et les licences OFL des polices, qui
         // doivent rester lisibles hors ligne comme le reste.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,txt,woff2}'],
-        // Le même document sert les deux adresses : `/app` n'est pas un
-        // fichier, c'est le chemin que `route.ts` lit au démarrage.
+        // Le même document sert les trois adresses : `/app` et `/moteur` ne
+        // sont pas des fichiers, ce sont les chemins que `route.ts` lit au
+        // démarrage.
         navigateFallback: 'index.html',
         // Les `.txt` sont des documents, pas des routes : le pied de page
         // ouvre THIRD-PARTY.txt dans un onglet. Le précache les sert déjà,
