@@ -11,9 +11,15 @@ const VALS = [
   'javascript:x=1', 'data:text/html,x', '../../etc/passwd',
   '%3Cscript%3E', 'a'.repeat(500), '99999999999999999999',
   '1179x2556x9999', 'x', 'xx', '1179x', 'x2556', '-5x-5', '0x0', '16x16',
-  '8001x8001', '  1179 x 2556  ', '1_179x2_556', '١١٧٩x٢٥٥٦'
+  '8001x8001', '  1179 x 2556  ', '1_179x2_556', '١١٧٩x٢٥٥٦',
+  /* des habits de palette composée, tous mal taillés */
+  '000000', 'GGGGGG-000000', '112233-445566', 'ffffff-ffffff-ffffff-ffffff-ffffff-ffffff-ffffff',
+  '-112233-445566-778899', '112233--445566-778899'
 ];
-const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't'];
+/* `v`, `n` et `k` sont de la fête : `k` est la seule clé qui injecte des
+   couleurs dans le rendu, l'oublier ici revenait à fuzzer tout sauf
+   l'entrée la plus riche. */
+const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't', 'v', 'n', 'k'];
 
 (async () => {
   const { srv, port } = await ouvrir(); PORT = port;
