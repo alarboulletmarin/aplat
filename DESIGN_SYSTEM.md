@@ -394,9 +394,10 @@ le ferait passer pour l'appel primaire.
 
 ### La page d'accueil
 
-Elle est sur `/`, l'application sur `/app`. Ce n'est pas une deuxième section
-ajoutée à l'écran unique : c'est un autre document, avec sa mise en page, sa
-feuille de style et son propre point d'entrée. L'application n'en sait rien.
+Elle est sur `/`, l'application sur `/app`, le mécanisme sur `/moteur`. Ce n'est
+pas une deuxième section ajoutée à l'écran unique : c'est un autre document,
+avec sa mise en page, sa feuille de style et son propre point d'entrée.
+L'application n'en sait rien.
 
 Le vocabulaire est celui de l'application, à une échelle près : les mêmes
 arches, les mêmes seuils épais, la même display condensée contre la même
@@ -444,6 +445,44 @@ pic que la première cherchait à éviter.
 
 Les quatre chiffres du bandeau sont lus dans le moteur, jamais recopiés : une
 famille ajoutée les corrige d'elle-même.
+
+### La page du mécanisme
+
+Elle est sur `/moteur`, et c'est le troisième document. Elle emprunte le
+gabarit de l'accueil plutôt que de le recopier : sa racine porte
+`.accueil moteur`, donc la gouttière, l'enseigne, la frise, les têtes de
+section, l'appel et le pied viennent d'`accueil.css`. Sa propre feuille ne
+déclare que les étapes, leurs commandes et les quatre blocs qui leur sont
+propres, et elle part avec le morceau différé de la page.
+
+Les trois règles de l'accueil valent ici sans changement : un seul appel
+primaire, aucune animation qui ne dise rien, aucune capture d'écran. Il s'en
+ajoute une quatrième, qui est la raison d'être de la page.
+
+**Un seul motif traverse les six étapes.** C'est ce qui la distingue d'une
+documentation illustrée : ce qu'on choisit à la première se retrouve à la
+dernière, et la page se termine en offrant le lien qui l'ouvre dans
+l'application. La règle de mise en page qui en découle : ce qui décrit le motif
+monte à la racine du document, ce qui décrit la façon de le regarder reste dans
+l'étape qui le regarde.
+
+**Les six étapes sont dans le document, les unes sous les autres.** Pas de
+défilé à une étape visible à la fois : ce serait un carrousel sous un autre nom,
+et ça cacherait à la lecture ce que la page est censée expliquer. Le rang d'une
+étape est `aria-hidden` et le titre le double toujours, comme partout ailleurs
+où un signe repère sans porter d'information seule.
+
+**Les dix fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
+que chaque écran est un bouton qui tire un autre motif ; ici, l'objet manipulé
+est le motif en cours de construction, et une fiche n'en tire pas un autre :
+elle fait adopter sa mécanique. Son exemple, lui, ne bouge jamais, sans quoi les
+dix fiches cesseraient d'être comparables entre elles.
+
+**La treizième tuile de la galerie n'est pas une quatorzième image.** Elle est
+la porte vers ce document, elle ne porte pas de canevas, et elle ne ressemble
+pas aux douze autres : une vignette identique aux autres mais qui navigue au
+lieu de relancer une graine serait un bouton dont l'aspect ment sur ce qu'il
+fait.
 
 ### La bascule
 
@@ -743,6 +782,8 @@ ne se coupe jamais.
 - Plus d'un appel primaire par écran.
 - Emoji.
 - Bibliothèque de composants ou de style.
-- Une deuxième section dans l'application. La page d'accueil est un autre
-  document, sur une autre adresse ; l'écran unique reste unique.
+- Une deuxième section dans l'application. La présentation et le mécanisme sont
+  d'autres documents, sur d'autres adresses ; l'écran unique reste unique. La
+  ligne vise les sections, pas les documents : trois adresses ne font pas trois
+  onglets, elles font trois pages qu'un lien sépare.
 - Tiret cadratin, tiret demi-cadratin, point médian (section 11).

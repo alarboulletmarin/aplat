@@ -110,6 +110,16 @@ function taillePNG(fichier) {
   await page.waitForTimeout(3000);
   t(telechargements.length === 1, 'hors ligne : le téléchargement fonctionne', telechargements.join(', ') || 'aucun');
 
+  /* Les trois adresses sont le même document : le repli de navigation les
+     sert toutes hors ligne, et une installation dont la présentation ou
+     l'explication tomberait en 404 serait à moitié installée. */
+  const pageMoteur = await ctx.newPage();
+  await pageMoteur.goto(base + '/moteur?l=fr', { waitUntil: 'load' });
+  await pageMoteur.waitForTimeout(1200);
+  t(await pageMoteur.locator('.moteur').count() === 1,
+    'hors ligne : la page du mécanisme se charge aussi');
+  await pageMoteur.close();
+
   await ctx.setOffline(false);
   t(erreurs.length === 0, 'aucune erreur JavaScript', erreurs.slice(0, 3).join(' | '));
 

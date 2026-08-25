@@ -77,6 +77,11 @@ export const fr = {
       note: 'Des rendus vrais, calculés à l’instant, dans cette page. Touche une image pour relancer sa graine.',
       relancer: '{famille}, palette {palette}. Relancer la graine.',
       ouvrir: 'Ouvrir ce motif dans l’app',
+      /* La treizième tuile. Elle ne porte pas de motif et ne relance rien :
+         c'est un lien, et la question qu'elle prend au vol est celle qui vient
+         après douze images, jamais avant. */
+      moteurTitre: 'Comment c’est fait',
+      moteurNote: 'Le mécanisme, en six étapes.',
     },
     ecrans: {
       titre: 'De la poche au bureau',
@@ -103,6 +108,175 @@ export const fr = {
     },
     pied: {
       mention: 'Calculé dans le navigateur, aucune donnée collectée',
+    },
+  },
+  /* La page du mécanisme, sur « /moteur ». Elle a son propre titre et sa
+     propre description : elle explique le produit, l'accueil le présente et
+     l'application le fait tourner, et les trois ne se cherchent pas dans les
+     mêmes mots.
+
+     Ce qui n'est pas ici, et pour cause : l'enseigne et les bascules, qui
+     lisent « accueil.enseigne » et « accueil.bascule », parce que c'est le
+     même composant ; les mots des réglages (famille, palette, densité,
+     version), qui sont ceux de « reglages » ; et les noms des familles, des
+     palettes et des niveaux de lisibilité, qui sont lus dans le moteur. Une
+     famille ajoutée n'a donc rien à corriger ici. */
+  moteur: {
+    document: {
+      titre: 'Comment Aplat dessine',
+      description:
+        'Quatre réglages, dix mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
+    },
+    heros: {
+      surtitre: 'Le mécanisme',
+      titre: 'Comment ça marche',
+      accroche:
+        'Aplat ne pioche pas dans une réserve d’images\u00a0: il en calcule une, chez toi, à partir de quatre nombres. Voici comment, en six étapes.',
+      /* Dit une fois, en haut, ce que la page entière fait. Sans cette phrase,
+         il faut avoir l'idée de toucher une commande pour découvrir que les
+         six étapes travaillent toutes sur le même motif. */
+      interaction:
+        'Les six étapes construisent le même motif, et chacune se manipule. Celui que tu auras fait t’attend en bas de page.',
+      mention: 'Aucune capture d’écran\u00a0: tout ce qui s’affiche ici sort du moteur, à l’instant.',
+    },
+    /* Les titres et les notes des six étapes. Les clés portent le rang plutôt
+       qu'un mot, parce que c'est le rang qui est écrit à l'écran, en gros
+       chiffres, et que déplacer une étape doit se voir dans les deux. */
+    etapes: {
+      unTitre: 'Quatre réglages, et rien d’autre',
+      unNote:
+        'Une famille, une palette, une densité, une graine. Aplat ne sait rien d’autre de ton image, et ça lui suffit.',
+      deuxTitre: 'La graine est une adresse',
+      deuxNote:
+        'Les mêmes quatre réglages rendent toujours la même image, à n’importe quelle taille. Le hasard n’entre qu’une fois, au tirage de la graine.',
+      troisTitre: 'Dix façons de poser la couleur',
+      troisNote:
+        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît dix, et toutes les familles en sortent.',
+      quatreTitre: 'Quatre couches, dans cet ordre',
+      quatreNote:
+        'L’image se peint par-dessus elle-même, et l’ordre n’est pas un détail\u00a0: le voile est dosé pour ce qu’il couvre, le grain passe après lui.',
+      cinqTitre: 'Une sonde mesure ce que tu vas télécharger',
+      cinqNote:
+        'Avant de peindre, le moteur mesure la luminance sous la grille d’icônes, choisit la couleur de libellé qui passe, puis dose le voile.',
+      sixTitre: 'L’aperçu est le fichier',
+      sixNote:
+        'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
+    },
+    /* Étape 01. Les cinq groupes plutôt que les soixante-trois familles : une
+       liste complète referait le panneau de l'application dans un autre
+       document, et « une autre famille » donne accès au reste sans ça. */
+    reglages: {
+      groupe: 'Groupe de familles',
+      autre: 'Une autre famille',
+      autreTitre: 'Tirer une autre famille dans le groupe {groupe}',
+      legende: '{famille}, palette {palette}',
+      compte: '{familles} familles, {palettes} palettes, {densites} densités, {graines} graines.',
+    },
+    /* Étape 02. Les cinq graines voisines disent mieux que n'importe quelle
+       phrase que la graine est une adresse et non une humeur : deux nombres
+       qui se suivent donnent deux images étrangères l'une à l'autre. */
+    graine: {
+      valeur: 'Graine {graine}, sur {max} possibles',
+      dessin: 'Graine de dessin {n}, mêlée de la famille, de la densité et de la graine.',
+      voisine: 'Prendre la graine {graine}',
+      relancer: 'Une autre graine',
+      voisines: 'Les graines voisines',
+      sourdes:
+        'Quatre familles ignorent leur graine\u00a0: ce sont des pavages entièrement réguliers, sans un seul tirage.',
+    },
+    /* Étape 03. Les dix fiches. Les familles de chacune ne sont pas écrites
+       ici : elles sont lues dans les listes que les modules publient. */
+    mecaniques: {
+      familles: 'Familles\u00a0: {liste}',
+      etAutres: '{liste} et {n} autres',
+      adopter: 'Voir cette mécanique sur mon motif',
+      courante: 'C’est la mécanique de ton motif',
+      semerNom: 'Les aplats',
+      semerNote:
+        'Des formes semées ou rangées sur un fond plein, posées les unes par-dessus les autres. C’est le geste d’origine, et il peint encore la moitié des familles.',
+      niveauxNom: 'La ligne de niveau',
+      niveauxNote:
+        'Un relief est découpé en paliers, et chaque palier devient un aplat fermé. La forme naît des niveaux, jamais d’un trait.',
+      fracturesNom: 'La fracture',
+      fracturesNote:
+        'Des germes se partagent la surface, chaque pièce découpée par des demi-plans. Les jointures ne sont pas dessinées, elles affleurent.',
+      reservesNom: 'La réserve',
+      reservesNote:
+        'Le motif est ce qu’on retire\u00a0: le panneau d’abord, les percements ensuite, à la couleur de ce qui se voit au travers.',
+      chimieNom: 'La réaction',
+      chimieNote:
+        'Deux substances se nourrissent et se consomment sur une grille, et la culture est gelée à un instant choisi. La densité y règle le temps, pas le nombre.',
+      pavagesNom: 'Le pavage apériodique',
+      pavagesNote:
+        'Dix triangles d’or en soleil, puis des subdivisions successives\u00a0: la surface se couvre entièrement sans jamais se répéter.',
+      lieuxNom: 'La gravure tramée',
+      lieuxNote:
+        'Une scène décrite par un champ de densité d’encre, qu’une trame de demi-teintes à hachures croisées transforme en points. Deux tons seulement.',
+      tramesNom: 'La trame déformée',
+      tramesNote:
+        'Une trame régulière pliée par un champ lisse, ou deux trames superposées dont l’interférence est calculée point par point, jamais par transparence.',
+      reseauxNom: 'Le réseau',
+      reseauxNote:
+        'Des noeuds et des arêtes, tracés aux conventions du plan\u00a0: des lignes qui tournent à angle fixe, des stations en points, des correspondances cerclées.',
+      grammairesNom: 'La grammaire',
+      grammairesNote:
+        'Une règle appliquée à son propre résultat, jusqu’à une profondeur bornée. Un axe porte des folioles qui portent des folioles.',
+    },
+    /* Étape 04. Les noms des couches viennent d'ici, mais leur ordre vient du
+       moteur (`COUCHES`) : une couche ajoutée là-bas manque ici, et la
+       compilation le dit. */
+    couches: {
+      arreter: 'Arrêter le dessin après {couche}',
+      fondNom: 'Le fond',
+      fondNote: 'La couleur de fond de la palette, d’un bord à l’autre.',
+      formesNom: 'Les formes',
+      formesNote:
+        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les dix gestes qui la peignent sont juste au-dessus.',
+      ombreNom: 'L’ombre',
+      ombreNote:
+        'La version sombre\u00a0: un aplat noir dosé pour amener n’importe quel motif à la même obscurité.',
+      voileNom: 'Le voile',
+      voileNote:
+        'L’image poussée vers la couleur des libellés, juste ce qu’il faut, et un peu plus fort en bas. Ici, {voile}\u00a0%.',
+      grainNom: 'Le grain',
+      grainNote:
+        'Un mouchetis de trois niveaux, qui casse les marches du voile et allège le fichier.',
+      /* L'ombre n'apparaît que dans la version sombre, et l'escalier ne la
+         montre pas : la démonstration porte sur l'image claire, celle que le
+         produit livre par défaut. La ligne le dit plutôt que de laisser croire
+         à un oubli. */
+      note:
+        'La version sombre en insère une cinquième, l’ombre, entre les formes et le voile.',
+    },
+    /* Étape 05. Les chiffres sont ceux de la sonde, les mêmes que le verdict
+       de l'application affiche : le mot du niveau est lu dans `lisibilite`. */
+    sonde: {
+      sans: 'sans voile',
+      avec: 'voile automatique',
+      luminance: 'Luminance mesurée sous les icônes\u00a0: {n}',
+      force: 'Voile {n}\u00a0%',
+      verdict: 'Lisibilité {niveau}, {contraste}:1',
+      seuil: 'Seuil AA\u00a0: 4,5:1',
+      note:
+        'La mesure porte sur les dimensions du fichier, jamais sur celles de l’aperçu\u00a0: un fond d’écran 4K ne réclame pas de relire cent mégaoctets de pixels.',
+    },
+    /* Étape 06. Les mots des formats sont ceux de « resolution », pour que la
+       page ne puisse pas nommer une taille que l'application ne propose pas. */
+    cadres: {
+      taille: '{largeur}\u00a0×\u00a0{hauteur}\u00a0px',
+      pixels: '{n}\u00a0Mpx',
+      choisir: 'Voir ce motif en {format}',
+      sorties:
+        'Le même dessin sort en PNG, en PNG deux fois plus grand, en WebP, en SVG, ou en trois fichiers d’un coup, un par appareil.',
+      vectoriel:
+        'Le vectoriel ne recopie pas une ligne du moteur\u00a0: les formes ne connaissent qu’un pinceau, et il en existe un second, qui note les tracés au lieu de les peindre.',
+    },
+    appel: {
+      titre: 'Ton motif t’attend',
+      corps: 'Le lien porte les quatre réglages, et rien d’autre.',
+      primaire: 'Ouvrir ce motif dans l’app',
+      adresse: 'Son adresse',
+      reglages: '{famille}, {palette}, densité {densite}, graine {graine}',
     },
   },
   entete: {
@@ -358,6 +532,11 @@ export const fr = {
     fermer: 'Plus tard',
   },
   pied: {
+    /* Le lien vers la page du mécanisme. Il est ici, au premier niveau, parce
+       que trois endroits l'affichent : le pied de la présentation, le pied de
+       l'application et la dernière tuile de la galerie. Un mot, un seul, pour
+       que les trois portes portent le même nom. */
+    moteur: 'Comment ça marche',
     source: 'Code source',
     licence: 'AGPL-3.0',
     tiers: 'Licences tierces',

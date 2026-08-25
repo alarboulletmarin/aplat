@@ -11,9 +11,9 @@ import './styles/composants.css'
 import './styles/ecrans.css'
 import './styles/accueil.css'
 
-/* En différé : une seule des deux pages est montée, et l'import paresseux
-   coupe le paquet en deux, si bien qu'ouvrir la présentation ne télécharge pas
-   l'application, ni l'inverse.
+/* En différé : une seule des trois pages est montée, et l'import paresseux
+   coupe le paquet en trois, si bien qu'ouvrir la présentation ne télécharge
+   ni l'application ni l'explication, et réciproquement.
 
    La règle ci-dessous veille au rafraîchissement à chaud des fichiers de
    composants ; ce fichier est l'entrée, il ne se rafraîchit qu'en entier. */
@@ -21,6 +21,9 @@ import './styles/accueil.css'
 const App = lazy(() => import('./App').then((m) => ({ default: m.App })))
 const Accueil = lazy(() =>
   import('./components/accueil/Accueil').then((m) => ({ default: m.Accueil })),
+)
+const Moteur = lazy(() =>
+  import('./components/moteur/Moteur').then((m) => ({ default: m.Moteur })),
 )
 /* eslint-enable react-refresh/only-export-components */
 
@@ -38,16 +41,17 @@ if (!racine) {
   throw new Error('Élément racine introuvable.')
 }
 
-/* Une seule page est montée, jamais les deux : elles ne partagent ni état ni
-   mise en page, et un aller-retour entre elles est un chargement de document.
-   C'est ce qui garde l'application telle qu'elle était, un écran unique. */
+/* Une seule page est montée, jamais deux : elles ne partagent ni état ni mise
+   en page, et un aller-retour entre elles est un chargement de document. C'est
+   ce qui garde l'application telle qu'elle était, un écran unique. */
 if (!ailleurs) {
+  const page = route(window.location.pathname)
   createRoot(racine).render(
     <StrictMode>
       {/* Rien pendant le chargement du morceau : la page porte déjà son fond
           par le script d'index.html, un squelette ne ferait que clignoter. */}
       <Suspense fallback={null}>
-        {route(window.location.pathname) === 'app' ? <App /> : <Accueil />}
+        {page === 'app' ? <App /> : page === 'moteur' ? <Moteur /> : <Accueil />}
       </Suspense>
     </StrictMode>,
   )

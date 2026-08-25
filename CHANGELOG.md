@@ -9,6 +9,28 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : une page qui explique comment ça marche
+
+- **Une troisième adresse, `/moteur`.** `/` présente, `/app` fait tourner,
+  `/moteur` explique comment il tourne. Six étapes numérotées, dans l'ordre où
+  le produit travaille : les quatre réglages, la graine, les dix gestes de
+  dessin, les couches, la sonde de lisibilité, la résolution.
+- **Un seul motif traverse les six étapes.** Ce qu'on choisit à la première se
+  retrouve à la dernière, et la page se termine en offrant le lien qui l'ouvre
+  dans l'application, avec l'adresse écrite en clair au-dessus du bouton. La
+  démonstration finit là où le produit commence.
+- **Tout s'y manipule, et rien n'y est une capture d'écran.** Les palettes, les
+  graines voisines, l'escalier des couches, l'interrupteur du voile et les
+  formats sont de vrais réglages, et chaque image sort du moteur, au
+  chargement, dans le navigateur qui la lit.
+- **Dix fiches disent d'où viennent les soixante-trois familles** : les aplats,
+  la ligne de niveau, la fracture, la réserve, la réaction, le pavage
+  apériodique, la gravure tramée, la trame déformée, le réseau, la grammaire.
+  Toucher une fiche fait adopter sa mécanique par le motif de la page.
+- **Trois portes y mènent, aucune n'est un appel** : le pied de la
+  présentation, le pied de l'application, et une treizième tuile au bout de la
+  galerie, qui prend au vol la question qui vient après douze images.
+
 ### Ajouté : dix-sept familles, et un cinquième groupe, les Matières
 
 - **Les Matières entrent au catalogue.** Un cinquième onglet, entre les

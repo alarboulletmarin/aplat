@@ -130,7 +130,7 @@ index.html                    le document, et le thème résolu avant la peintur
 vite.config.ts                build, PWA, politique de sécurité
 eslint.config.js              les règles des hooks React, que tsc ne voit pas
 vercel.json                   les en-têtes de cache qui décident des mises à jour
-src/main.tsx                  point d'entrée, et le choix des deux pages
+src/main.tsx                  point d'entrée, et le choix des trois pages
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
@@ -139,13 +139,14 @@ src/lib/{niveaux,fractures,reserves,chimie,reseaux,pavages,trames,grammaires}.ts
                               les gestes ajoutés : un module par mécanique de dessin
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
-src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
+src/lib/route.ts              « / », « /app » ou « /moteur », et les liens d'avant
 src/lib/{affichage,historique,resolution,url,export,geometrie,format,tirage,build}.ts
 src/components/               l'interface, un fichier par pièce
 src/components/accueil/       la page d'accueil, un fichier par section
+src/components/moteur/        la page du mécanisme, un fichier par étape
 src/hooks/                    horloge, tailles, focus, ajustement, économie
 src/i18n/{fr,en,index}.ts     les libellés, à parité stricte
-src/styles/                   tokens, reset, base, composants, écrans, accueil
+src/styles/                   tokens, reset, base, composants, écrans, accueil, moteur
 public/polices/*.woff2        Anton et Archivo, auto-hébergées
 scripts/                      icônes de la PWA, notices de licence
 design/Aplat.dc.html          la maquette de référence de l'application
@@ -154,9 +155,10 @@ tools/*.mjs                   vérifications headless (hors livraison)
 .github/workflows/ci.yml      la CI : `verify` et `check`, en parallèle
 ```
 
-## Deux adresses
+## Trois adresses
 
-`/` présente le projet. `/app` le fait tourner.
+`/` présente le projet. `/app` le fait tourner. `/moteur` explique comment il
+tourne.
 
 La page d'accueil n'est pas une deuxième section de l'application : c'est un
 autre document, et l'application reste l'écran unique décrit plus haut. Elle ne
@@ -216,6 +218,51 @@ sont reconduits vers `/app` avec leur requête intacte, avant le moindre rendu :
 la promesse « copier le lien suffit à retrouver exactement la même image » ne
 s'annule pas parce que le produit s'est doté d'une porte d'entrée. Une adresse
 nue, ou qui ne porte que la langue et le thème, reste sur l'accueil.
+
+### La page du mécanisme
+
+`/moteur` répond à la question que l'accueil laisse ouverte : « comment c'est
+fait ». Elle déroule le mécanisme en six étapes numérotées, dans l'ordre où le
+produit travaille : les quatre réglages, la graine, les dix gestes de dessin,
+les couches, la sonde de lisibilité, la résolution.
+
+Elle suit les mêmes règles que l'accueil, et pour les mêmes raisons : aucune
+capture d'écran, chaque image sort du moteur au chargement ; aucune animation
+qui ne dise ni une origine, ni un état, ni une continuité ; un seul appel
+primaire, tout en bas.
+
+**Ce qui la distingue d'une documentation illustrée, c'est qu'un seul motif
+traverse les six étapes.** Ce qu'on choisit à la première se retrouve à la
+dernière, et la page se termine en offrant le lien qui l'ouvre dans
+l'application, avec l'adresse écrite en clair au-dessus du bouton. La
+démonstration finit donc là où le produit commence.
+
+D'où la règle de répartition de l'état, qui tient en une phrase : ce qui décrit
+le motif monte à la racine de la page, ce qui décrit la façon de le regarder (la
+couche montrée, l'interrupteur du voile, le cadre visé) reste dans l'étape qui
+le regarde. Sans elle, toucher le voile repeindrait les cinq autres étapes.
+
+Les dix fiches de gestes font exception au fil, et c'est voulu : chacune garde
+son exemple, famille et palette figées, sinon elles démontreraient la palette du
+moment au lieu de démontrer une mécanique. Le fil tient dans l'autre sens,
+toucher une fiche fait adopter sa mécanique par le motif de la page.
+
+Aucune liste de familles n'y est recopiée : chaque fiche prend celle que son
+module publie déjà (`IDS_NIVEAUX`, `IDS_FRACTURES`, etc.), et la première, celle
+des gestes d'origine, est ce qui reste une fois les neuf autres retirées de
+`FAMILLES`. Une famille ajoutée au moteur se range d'elle-même dans la bonne
+fiche.
+
+La page ne lit pas les paramètres de motif de son adresse, et `/moteur?m=vagues`
+ne rebondit donc pas vers l'application : un lien qui porte un motif désigne
+l'outil, celui-ci désigne l'explication. Elle part toujours du même motif
+choisi, ce qui la rend reproductible.
+
+Trois portes y mènent, aucune n'est un appel : le pied de la présentation, le
+pied de l'application, et une treizième tuile au bout de la galerie. Celle-ci ne
+porte pas de canevas et ne ressemble pas aux douze autres, à dessein : une
+vignette identique aux autres mais qui navigue au lieu de relancer une graine
+serait un bouton dont l'aspect ment sur ce qu'il fait.
 
 Le manifeste installe l'application sur `/app`, dans une portée qui reste la
 racine : une application installée s'ouvre sur l'outil, pas sur sa
@@ -372,6 +419,14 @@ premières familles : même voile, même verdict.
 moyenne de la zone des icônes, choisit la couleur de libellé la plus sûre
 (claire ou sombre), puis pousse le fond vers elle juste ce qu'il faut. Le
 rapport obtenu est affiché ; le voile n'est appliqué que s'il sert.
+
+**Les couches, écrites une fois.** Le fond, les formes, l'ombre de la version
+sombre, le voile, le grain, dans cet ordre et à un seul endroit. `dessiner()`
+prend un `arret` qui s'arrête à une couche au lieu de les poser toutes : c'est
+tout ce que la page du mécanisme demandait au moteur pour montrer l'image se
+construire. Le faire là plutôt que chez elle est ce qui garde l'ordre écrit une
+fois, et ce qui fait qu'une couche ajoutée entre d'elle-même dans la
+démonstration, à son rang.
 
 La mesure se fait sur une sonde de surface fixe, jamais sur l'image finale :
 l'aperçu et l'export donnent exactement les mêmes chiffres, et un fond d'écran
@@ -616,9 +671,10 @@ npm run check    # build, puis les contrôles dans Chromium
 | Outil | Ce qu'il vérifie |
 |---|---|
 | `tools/typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
-| `tools/accueil.mjs` | la page d'accueil : les deux adresses, les liens partagés d'avant, les deux bascules, les toiles qui se peignent toutes, les cibles et la hiérarchie des titres |
+| `tools/accueil.mjs` | la page d'accueil : les trois adresses, les liens partagés d'avant, les deux bascules, les toiles qui se peignent toutes, les cibles et la hiérarchie des titres |
+| `tools/moteur.mjs` | la page du mécanisme : la troisième adresse et son lien qui ne rebondit pas, les dix-neuf toiles, le fil du motif d'une étape à l'autre, l'escalier des couches comparé au rendu entier, les cibles et les libellés allongés de 30 % |
 | `tools/e2e.mjs` | environ deux cents contrôles : URL et sa robustesse, déterminisme, les quatre pavages réguliers qui ignorent leur graine et eux seuls, quatre états, téléchargement réel de cinq sorties, course à l'export, échec de copie, politique réseau, contenu du cache, langue et thème retenus sur l'appareil, clavier, focus non masqué, mouvement réduit, onglets de familles, version sombre téléchargée telle qu'affichée, voile retiré, palette composée et son lien, épingle |
-| `tools/pwa.mjs` | 18 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé (page, motif, vignettes, polices et téléchargement réel) |
+| `tools/pwa.mjs` | 19 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé (page, motif, vignettes, polices, téléchargement réel et la page du mécanisme) |
 | `tools/a11y.mjs` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.mjs` | atteignabilité et taille des cibles, de 320 à 1920 px |
 | `tools/repli.mjs` | le repli au défilement, et la part de la fenêtre laissée aux grilles |

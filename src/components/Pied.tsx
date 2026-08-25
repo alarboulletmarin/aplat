@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { etiquetteVersion, lienLicence, lienSource } from '../lib/build'
+import { lienMoteur } from '../lib/route'
 import type { Langue } from '../lib/moteur'
 import type { Theme } from '../lib/url'
 import type { Textes } from '../i18n'
@@ -94,6 +95,10 @@ export function Pied({
 
       <div className="pied-meta">
         <span className="pied-version">{etiquetteVersion()}</span>
+        {/* Interne, donc sans nouvel onglet : c'est le même produit, une porte
+            et non une sortie. Pour qui vient de télécharger et se demande ce
+            qui s'est passé. */}
+        <a href={lienMoteur()}>{textes.pied.moteur}</a>
         <a href={lienSource()} rel="noopener noreferrer" target="_blank">
           {textes.pied.source}
         </a>

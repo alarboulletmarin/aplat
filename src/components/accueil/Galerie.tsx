@@ -21,8 +21,24 @@ import { GALERIE, TELEPHONE } from './choix'
  * Le format visé reste celui d'un téléphone alors que la vignette est petite :
  * la sonde de lisibilité mesure ce qui serait exporté, donc le voile montré
  * est celui du fichier, à l'échelle près.
+ *
+ * La treizième tuile n'est pas une quatorzième image, c'est une porte. Elle
+ * prend au vol la question qui vient après douze motifs, « comment c'est
+ * fait », et mène à la page du mécanisme. Elle ne porte pas de canevas et ne
+ * ressemble pas aux douze autres, à dessein : une vignette identique aux
+ * autres mais qui navigue au lieu de relancer une graine serait un bouton dont
+ * l'aspect ment sur ce qu'il fait.
  */
-export function Galerie({ langue, textes }: { langue: Langue; textes: Textes }) {
+export function Galerie({
+  langue,
+  textes,
+  moteur,
+}: {
+  langue: Langue
+  textes: Textes
+  /** Le lien vers la page du mécanisme, au bout de la grille. */
+  moteur: string
+}) {
   /* Les graines de départ viennent du choix arrêté ; seules celles qu'on
      relance vivent ici. */
   const [graines, setGraines] = useState<Record<number, number>>({})
@@ -68,6 +84,16 @@ export function Galerie({ langue, textes }: { langue: Langue; textes: Textes }) 
             </li>
           )
         })}
+
+        <li className="tuile-porte-cadre">
+          <a className="tuile-porte" href={moteur}>
+            <span className="tuile-porte-arche" aria-hidden="true" />
+            <span className="tuile-pied">
+              <span className="tuile-nom">{textes.accueil.galerie.moteurTitre}</span>
+              <span className="tuile-palette">{textes.accueil.galerie.moteurNote}</span>
+            </span>
+          </a>
+        </li>
       </ul>
     </section>
   )

@@ -2239,6 +2239,18 @@ export interface Motif {
 }
 
 /**
+ * Les couches de l'image, dans l'ordre où `rendre()` les pose.
+ *
+ * La liste est publiée parce que la page « /moteur » montre l'image se
+ * construire, couche par couche, et qu'une liste recopiée là-bas se serait
+ * tue le jour où une couche s'ajoute ici. Elle est lue, jamais écrite deux
+ * fois.
+ */
+export const COUCHES = ['fond', 'formes', 'ombre', 'voile', 'grain'] as const
+
+export type Couche = (typeof COUCHES)[number]
+
+/**
  * Ce qui distingue deux fichiers d'un même motif.
  *
  * Ni l'un ni l'autre ne touche à la famille, à la palette, à la densité ou à
@@ -2259,6 +2271,16 @@ export interface OptionsRendu {
    */
   mesureW?: number
   mesureH?: number
+  /**
+   * La dernière couche peinte. Toutes par défaut, comme depuis toujours.
+   *
+   * Elle n'existe que pour la démonstration de « /moteur », qui montre
+   * l'image se construire et ne peut le faire qu'en s'arrêtant en chemin.
+   * Le faire ici plutôt que chez elle est ce qui garde l'ordre des couches
+   * écrit une seule fois : une couche ajoutée au moteur entre d'elle-même
+   * dans la démonstration, et à son rang.
+   */
+  arret?: Couche
 }
 
 /**
@@ -2273,12 +2295,15 @@ export interface OptionsRendu {
 export function dessiner(
   ctx: Ctx, W: number, H: number, motif: Motif, options: OptionsRendu = {},
 ): Mesure {
-  const { voile = true, sombre = false, mesureW = 0, mesureH = 0 } = options
+  const { voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain' } = options
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
     mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre,
   )
-  rendre(ctx, W, H, motif, mesure, voile)
+  rendre(ctx, W, H, motif, mesure, voile, arret)
+  /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
+     chemin : elle ne dépend pas des couches peintes, et un arrêt qui la
+     changerait ferait mentir le verdict affiché à côté de la démonstration. */
   return mesure
 }
 
@@ -2292,11 +2317,21 @@ export function dessiner(
    même ordre, et c'est ce qui fait qu'ils ne se disputent pas.
 
    Le grain passe en dernier parce qu'il doit aussi casser les bandes du voile,
-   et non seulement celles des aplats. */
+   et non seulement celles des aplats.
+
+   `arret` s'arrête à une couche au lieu de les poser toutes. C'est la seule
+   chose que la démonstration de « /moteur » demandait au moteur, et c'est ici
+   qu'elle est écrite, à l'endroit où l'ordre est déjà : une couche ajoutée
+   plus tard prend sa place dans la démonstration sans que personne y pense. */
 function rendre(
   ctx: Ctx, W: number, H: number, motif: Motif, mesure: Mesure, voile: boolean,
+  arret: Couche,
 ): void {
   const P = palette(motif.palette)
+  /* Le rang de la dernière couche demandée. Les quatre conditions ci-dessous
+     le comparent au leur, ce qui laisse l'ordre lisible d'un seul coup d'oeil
+     plutôt qu'en quatre sorties anticipées. */
+  const rang = COUCHES.indexOf(arret)
 
   ctx.save()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -2305,12 +2340,14 @@ function rendre(
   ctx.fillStyle = P.fond
   ctx.fillRect(0, 0, W, H)
 
-  formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
-    alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
+  if (rang >= 1) {
+    formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
+      alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
+  }
 
-  peindreOmbre(ctx, W, H, mesure)
-  if (voile) peindreVoile(ctx, W, H, mesure)
-  peindreGrain(ctx, W, H)
+  if (rang >= 2) peindreOmbre(ctx, W, H, mesure)
+  if (rang >= 3 && voile) peindreVoile(ctx, W, H, mesure)
+  if (rang >= 4) peindreGrain(ctx, W, H)
   ctx.restore()
 }
 

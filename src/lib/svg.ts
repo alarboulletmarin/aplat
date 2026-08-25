@@ -438,7 +438,12 @@ export function svgDuMotif(
 
      Les deux couches passent par les mêmes fonctions que le canevas, si bien
      que le SVG est le même fichier dans un autre format, et non une
-     approximation vectorielle de l'autre. */
+     approximation vectorielle de l'autre.
+
+     L'arrêt sur couche de `dessiner()` n'a pas d'équivalent ici, et ce n'est
+     pas un oubli à compléter par symétrie : le SVG est un fichier qu'on
+     emporte, jamais une démonstration, et une sortie tronquée à mi-pile
+     n'aurait aucun usage. */
   if (voile || sombre) {
     const mesure: Mesure = mesurer(
       motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
