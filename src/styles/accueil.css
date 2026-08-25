@@ -167,6 +167,29 @@
   flex: 0 0 22px;
   border-radius: 11px 11px 0 0;
 }
+/* L'onde de la frise : l'arche touchée plonge, rebondit, et ses voisines la
+   suivent avec un retard et un creux qui s'amortissent (les deux variables
+   sont posées par le composant). La courbe dépasse un peu le repos avant de
+   s'y poser, c'est le rebond ; ce qui dépasse du haut est rogné par la
+   frise, ce qu'elle assume déjà pour ses dernières arches. */
+@media (prefers-reduced-motion: no-preference) {
+  .frise-onde i {
+    transform-origin: bottom;
+    animation: frise-onde 640ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: var(--onde-delai, 0ms);
+  }
+  @keyframes frise-onde {
+    0% {
+      transform: scaleY(1);
+    }
+    38% {
+      transform: scaleY(var(--onde-creux, 1));
+    }
+    100% {
+      transform: scaleY(1);
+    }
+  }
+}
 
 /* --- Titres de section ----------------------------------------------------- */
 .surtitre {
