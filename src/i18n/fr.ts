@@ -24,7 +24,7 @@ export const fr = {
      produit, et c'est la voix de l'outil qui compte. */
   accueil: {
     document: {
-      titre: 'Aplat : fonds d’écran génératifs',
+      titre: 'Aplat\u00a0: fonds d’écran génératifs',
       description:
         'Un motif, une palette, une densité. Aplat calcule ton fond d’écran dans ton navigateur et te le rend à la résolution exacte de ton écran. Sans compte, sans réseau.',
     },
@@ -52,7 +52,7 @@ export const fr = {
         'Un motif, une palette, une densité. Calculé dans ton navigateur, téléchargé en pleine résolution.',
       primaire: 'Générer mon fond d’écran',
       secondaire: 'Voir des exemples',
-      mention: 'Sans compte, sans envoi, sans stockage. PNG jusqu’à 40 Mpx.',
+      mention: 'Sans compte, sans envoi, sans stockage. PNG jusqu’à 40\u00a0Mpx.',
       /* Sous la maquette : ce qu'on regarde, en toutes lettres. La maquette
          change de motif toute seule, et une image qui tourne sans être nommée
          passe pour une décoration. */
@@ -122,7 +122,7 @@ export const fr = {
     titre: 'Aperçu du fond d’écran',
     alternative:
       'Motif {famille}, palette {palette}, densité {densite}, graine {graine}. Aperçu derrière une grille d’icônes factices.',
-    note: 'Maquette d’écran : heure, widget et icônes sont fictifs, ils servent à juger la lisibilité.',
+    note: 'Maquette d’écran\u00a0: heure, widget et icônes sont fictifs, ils servent à juger la lisibilité.',
     /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
        ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne
        peut pas le deviner du réglage. */
@@ -143,11 +143,11 @@ export const fr = {
     insuffisante: 'insuffisante',
     libellesClairs: 'libellés clairs',
     libellesSombres: 'libellés sombres',
-    conseilBonne: 'Au-dessus du seuil AA de 4,5:1 : les libellés restent nets sur toute la grille.',
+    conseilBonne: 'Au-dessus du seuil AA de 4,5:1\u00a0: les libellés restent nets sur toute la grille.',
     conseilJuste:
-      'Sous le seuil AA de 4,5:1, au-dessus de 3:1 : une palette plus sombre ou une densité plus calme regagne la marge.',
-    conseilInsuffisante: 'Sous 3:1 : essaie la palette Nuit, ou une densité plus calme.',
-    voile: 'voile de lisibilité {n} %',
+      'Sous le seuil AA de 4,5:1, au-dessus de 3:1\u00a0: une palette plus sombre ou une densité plus calme regagne la marge.',
+    conseilInsuffisante: 'Sous 3:1\u00a0: essaie la palette Nuit, ou une densité plus calme.',
+    voile: 'voile de lisibilité {n}\u00a0%',
     sansVoile: 'sans voile',
     /* Assemblés ici et non dans le composant : la ponctuation d'un titre ou
        d'une énumération appartient à la langue. Le point-virgule sépare les
@@ -186,7 +186,7 @@ export const fr = {
     version: 'Version',
     versionClaire: 'Claire',
     versionSombre: 'Sombre',
-    versionNote: 'La version sombre est assombrie dans le fichier : c’est elle qu’on télécharge.',
+    versionNote: 'La version sombre est assombrie dans le fichier\u00a0: c’est elle qu’on télécharge.',
     versionTitreClaire: 'Le motif tel que la palette le donne',
     versionTitreSombre: 'Le même motif, assombri dans le fichier téléchargé',
   },
@@ -215,7 +215,7 @@ export const fr = {
        ne remplit pas le stockage de qui l'ouvre. */
     recue: 'Palette reçue par le lien. Enregistre-la pour la garder sur cet appareil.',
     garder: 'Enregistrer la palette reçue',
-    note: 'Gardées sur cet appareil, dans le navigateur : un nom et des couleurs, rien d’autre.',
+    note: 'Gardées sur cet appareil, dans le navigateur\u00a0: un nom et des couleurs, rien d’autre.',
   },
   resolution: {
     titre: 'Résolution de l’image',
@@ -223,8 +223,8 @@ export const fr = {
     aucune: 'Aucune résolution',
     largeur: 'Largeur (px)',
     hauteur: 'Hauteur (px)',
-    bornes: 'De 16 à 8000 px.',
-    horsBornes: 'Entre 16 et 8000 px : cette valeur ne peut pas être produite.',
+    bornes: 'De 16 à 8000\u00a0px.',
+    horsBornes: 'Entre 16 et 8000\u00a0px\u00a0: cette valeur ne peut pas être produite.',
     detectee: 'détecté sur cet appareil',
     saisie: 'saisi à la main',
     telephone: 'Téléphone',
@@ -245,7 +245,7 @@ export const fr = {
     vide: 'Les motifs que tu regardes s’ajoutent ici, dix au plus.',
     effacer: 'Effacer',
     note:
-      'Gardés sur cet appareil, dans le navigateur : quatre réglages par motif, ni image ni identifiant. Les épinglés restent quand les autres passent.',
+      'Gardés sur cet appareil, dans le navigateur\u00a0: quatre réglages par motif, ni image ni identifiant. Les épinglés restent quand les autres passent.',
     motif: '{famille}, {palette}, graine {graine}',
     /* L'épingle est un second bouton par vignette, donc un second libellé.
        Il nomme le motif comme le premier : sans le nom, dix épingles se
@@ -254,7 +254,7 @@ export const fr = {
     desepingler: 'Retirer l’épingle de {motif}',
     epingle: 'Épinglé',
     epinglerCourt: 'Épingler',
-    pleines: 'Six épingles au plus : la liste reste une mémoire courte.',
+    pleines: 'Six épingles au plus\u00a0: la liste reste une mémoire courte.',
   },
   partage: {
     titre: 'Partage',
@@ -268,7 +268,7 @@ export const fr = {
        l'historique garde bien quelque chose, à savoir dix fois quatre
        réglages. Une promesse plus large que le produit ne vaut rien. */
     confidentialite:
-      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur : quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Les palettes que tu composes y sont gardées de la même façon, un nom et des couleurs, supprimables une à une. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
+      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur\u00a0: quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Les palettes que tu composes y sont gardées de la même façon, un nom et des couleurs, supprimables une à une. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   preferences: {
     langue: 'Langue',
@@ -295,10 +295,10 @@ export const fr = {
     ko: 'Ko',
     mo: 'Mo',
     astuce:
-      'Sur téléphone : appui long sur l’image téléchargée, puis « Ajouter aux photos ».',
+      'Sur téléphone\u00a0: appui long sur l’image téléchargée, puis « Ajouter aux photos ».',
     fermer: 'Fermer',
     erreurTitre: 'Le rendu a échoué',
-    erreurTrop: '{mpx} Mpx dépassent ce que le navigateur peut produire. Reste sous 40 Mpx.',
+    erreurTrop: '{mpx}\u00a0Mpx dépassent ce que le navigateur peut produire. Reste sous 40\u00a0Mpx.',
     erreurGenerale: 'Impossible de créer le fichier. Réessaie.',
     erreurCapacite:
       'Cet appareil n’a pas pu produire une image de cette taille. Essaie une résolution plus petite.',
@@ -334,7 +334,7 @@ export const fr = {
     formatWebpNote: 'La même image, deux à trois fois plus légère, pour l’envoyer.',
     formatSvg: 'SVG',
     formatSvgNote: 'Le motif en vectoriel, à reprendre ailleurs. Sans le grain, qu’un SVG ne porte pas.',
-    formatSvgDense: 'Indisponible : ce motif compte trop de formes.',
+    formatSvgDense: 'Indisponible\u00a0: ce motif compte trop de formes.',
     formatCopie: 'Copier l’image',
     formatCopieNote: 'Un PNG dans le presse-papiers, à coller dans une conversation.',
     copiee: 'Image copiée',
@@ -363,7 +363,7 @@ export const fr = {
        seule trace qui existe malgré elle : les journaux du serveur qui livre
        les fichiers. */
     donnees:
-      'Aucun compte, aucune mesure d’audience : tout est calculé dans ton navigateur et n’en sort pas.',
+      'Aucun compte, aucune mesure d’audience\u00a0: tout est calculé dans ton navigateur et n’en sort pas.',
     hebergement:
       'Hébergé par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis, dont les serveurs tiennent les journaux techniques habituels, adresses IP comprises.',
   },

@@ -63,10 +63,10 @@ export const en: Textes = {
         'The link carries your settings. You get exactly the same image back, or you send it to someone.',
       troisTitre: 'Your icon labels stay legible',
       troisCorps:
-        'Aplat measures the contrast under the icon grid and lays down a scrim, just enough.',
-      sansVoile: 'no scrim',
-      avecVoile: 'automatic scrim',
-      changer: 'Change the pattern in the scrim demonstration',
+        'Aplat measures the contrast under the icon grid and lays down a veil, just enough.',
+      sansVoile: 'no veil',
+      avecVoile: 'automatic veil',
+      changer: 'Change the pattern in the veil demonstration',
     },
     appel: {
       titre: 'Take a seed',

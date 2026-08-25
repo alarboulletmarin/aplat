@@ -952,7 +952,7 @@
    avant de l'ouvrir, et c'est ce qui remplace la vue d'ensemble perdue. */
 .onglet-n {
   flex: 0 0 auto;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--encre-douce);
   font-variant-numeric: tabular-nums;
@@ -960,6 +960,13 @@
 .onglet[aria-selected='true'] .onglet-n {
   color: var(--papier);
   opacity: 0.72;
+}
+/* Même raison que le bloc « Contraste forcé » de composants.css : l'aplat
+   inversé disparaît en contraste forcé, ce contour transparent y devient
+   visible et continue de dire l'onglet ouvert. */
+.onglet[aria-selected='true']:not(:focus-visible) {
+  outline: 2px solid transparent;
+  outline-offset: -4px;
 }
 
 .grille-familles {
@@ -1197,7 +1204,7 @@
    et l'absence de collecte se dit plutôt qu'elle ne se suppose. Deux phrases
    en petit, pas une page : une page laisserait croire qu'il y a plus à dire. */
 .pied-mentions {
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.5;
   max-width: 68ch;
 }
@@ -1267,7 +1274,7 @@
     gap: 14px;
   }
   /* L'en-tête se resserre sans changer de dessin : le rembourrage cède, les
-     formes gardent leurs proportions. Le titre à trente-trois pixels tient
+     formes gardent leurs proportions. Le titre à vingt-cinq pixels tient
      déjà dans une fenêtre couchée, contrairement à celui qu'il remplace. */
   .entete-haut {
     gap: 9px;
@@ -1303,6 +1310,11 @@
     min-height: 44px;
     border-radius: 18px 18px 5px 5px;
   }
+  /* Sans lui, la réduction ne rendait rien : la rangée est à hauteurs
+     partagées, et le dépli des formats, resté à 56 px, la tenait ouverte. */
+  .btn-formats {
+    min-height: 44px;
+  }
   .btn-graine {
     min-width: 44px;
     padding: 0 13px;
@@ -1310,7 +1322,7 @@
   }
   .btn-export {
     padding: 0 14px;
-    font-size: 15.5px;
+    font-size: 15px;
   }
   .note {
     padding: 9px 13px;
