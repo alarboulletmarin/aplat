@@ -25,7 +25,7 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
 | Primaire | ce que le fichier contient de plus que le motif : le voile, et de quoi l'ôter | une ligne sous le bouton |
 | Secondaire | **Surprends-moi** et **Variante**, les deux tirages au sort | la même rangée, à gauche du primaire |
-| Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
+| Secondaire | famille, palette, densité, version claire ou sombre, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
 | Caché | les autres formats : PNG 2x, WebP, SVG, presse-papiers, les trois appareils | un dépli attaché au primaire |
 | Caché | lien de partage | en bas du bloc, sous un filet |
 | Caché | langue, thème, version, licence, licences tierces, source, soutien, mentions légales | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
@@ -233,7 +233,7 @@ rangée n'est plus une grille.
 
 Le partage n'est pas la moitié. Sous 760 px, la colonne de l'aperçu prend 38 %
 et le panneau 62 %. À parts égales, un téléphone de 390 px laisse 166 px au
-panneau, soit une seule vignette par rangée et trente-sept rangées à parcourir ;
+panneau, soit une seule vignette par rangée et des dizaines de rangées à parcourir ;
 à 38 %, l'aperçu reste jugeable et les vignettes tiennent deux de front. Au-delà
 de 760 px on revient au partage de la maquette, à parts égales.
 
@@ -283,7 +283,7 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi trente-sept familles et onze palettes : dès
+restait presque rien pour choisir parmi quarante et une familles et onze palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
 du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
@@ -303,17 +303,17 @@ déplier : avec un seul, le repli raccourcit le document, la position retombe
 sous le seuil, et l'aperçu clignote.
 
 **Deux natures de réglage, deux endroits.** Le panneau ne contient que ce qui
-agit sur le fichier téléchargé : famille, palette, densité, résolution. La
-langue et le thème sont dans le pied de page, à côté de la version et du lien
-vers la source, parce qu'ils ne changent que l'affichage. La règle tient en une
-phrase, et se vérifie d'un coup d'œil.
+agit sur le fichier téléchargé : famille, palette, densité, version claire ou
+sombre, résolution. La langue et le thème sont dans le pied de page, à côté du
+numéro de version et du lien vers la source, parce qu'ils ne changent que
+l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les trois groupes de familles, en trois onglets
+### Les quatre groupes de familles, en quatre onglets
 
-La liste des familles est longue, et une liste longue se range. Trois groupes :
-les **abstraits**, les **paysages**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Quatre
+groupes : les **abstraits**, les **paysages**, les **lieux**, les **figures**.
 
 Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
 silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
@@ -323,12 +323,12 @@ un paysage a un haut et un bas.
 Les trois grilles se suivaient, et c'était le défaut : trente-deux vignettes à
 plat, dans une colonne étroite, mettent mille pixels entre « Vagues » et
 « Poissons ». Le coût n'est pas le défilement, c'est qu'on ne peut pas comparer
-deux motifs éloignés. Les trois groupes sont donc devenus **trois onglets**, ce
+deux motifs éloignés. Les groupes sont donc devenus des **onglets**, ce
 qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-trois onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+quatre onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
@@ -338,7 +338,7 @@ Ils sont **empilés quand la colonne est étroite**, sur une rangée dès qu'ell
 peut porter trois mots. La bascule se règle sur la largeur du panneau et non sur
 celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont rien
 à voir : sur un téléphone de 390 px, le panneau tient dans une colonne de
-207 px, où trois onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
+207 px, où quatre onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
 est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
 ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
 
@@ -346,10 +346,10 @@ L'onglet ouvert est **toujours celui de la famille en cours**. C'est là qu'est
 la mémoire du dernier onglet, et elle vaut mieux qu'un réglage enregistré :
 elle est dans l'adresse, avec le reste, donc elle survit à un rechargement comme
 à un lien partagé sans rien écrire sur l'appareil. Les flèches parcourent les
-onglets sans les ouvrir, sans quoi le clavier traverserait trois rendus complets
-pour atteindre le troisième.
+onglets sans les ouvrir, sans quoi le clavier traverserait un rendu complet de
+grille par onglet pour atteindre le dernier.
 
-Les trois groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
+Les quatre groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
 test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
 grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
 sauterait de place à l'écran sans que rien ne le signale.
@@ -519,9 +519,9 @@ accessible : jamais la forme seule.
 
 `role="tablist"`, un seul arrêt de tabulation, les flèches déplacent le focus
 **sans ouvrir**. C'est la différence avec les puces de choix, et elle est
-mesurable : ouvrir au passage remplacerait trente-deux vignettes à chaque
-touche, et le clavier traverserait trois rendus complets pour atteindre le
-troisième onglet.
+mesurable : ouvrir au passage remplacerait toute une grille de vignettes à
+chaque touche, et le clavier traverserait un rendu complet par onglet pour
+atteindre le dernier.
 
 L'onglet ouvert porte l'aplat inversé des puces, et son compte de familles passe
 à la couleur du papier avec lui.
@@ -584,80 +584,40 @@ Trois bandes, et rien entre les deux : **bonne** au-dessus de 4,5:1, le seuil AA
 du petit texte qu'est un libellé d'icône ; **juste** entre 3:1 et 4,5:1 ;
 **insuffisante** en dessous.
 
-Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
-la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Il
-remplace une bascule qui montrait l'un *puis* l'autre : une limite qui passe
-sous les mêmes libellés se juge d'un regard, deux états successifs demandent de
-se souvenir du premier.
+Une **version claire ou sombre** du fichier se choisit dans le panneau, après
+la densité : deux puces, dont la pastille dessine ce qu'elle fait, et une note
+sous le groupe dit que la version sombre est assombrie dans le fichier même.
+Ce n'est pas le thème de l'application : le thème habille l'interface, la
+version décide de l'image. La version sombre est le même motif avec un aplat
+noir brûlé dedans, amené à une obscurité cible plutôt que voilé d'une opacité
+fixe, si bien que toutes les palettes en sortent également sombres ; le choix
+s'écrit dans l'adresse (`n=1`) et dans le nom du fichier, comme tout réglage.
 
-**Il s'ouvre au milieu**, et c'est la correction qui compte. Tout à droite,
-l'aperçu montrait le fichier entier et rien d'autre : il fallait avoir l'idée de
-tirer le trait pour découvrir qu'il y avait deux états, et toute position autre
-que l'extrême droite montrait du sombre sans montrer de clair à côté. Un
-comparateur qui s'ouvre fermé ne compare rien. Au milieu, les deux conditions
-sont là d'emblée, sous les mêmes libellés, et le fichier reste entier : il est à
-gauche du trait, et le verdict le nomme.
+L'aperçu la montre telle qu'elle partira, et le verdict la mesure : une seule
+sonde, un seul chiffre, celui de l'image affichée, qui est celle qu'on
+télécharge. Il en a porté deux un temps, celui du fichier et celui d'un fond
+qu'un thème sombre aurait assombri ; ce second chiffre était l'aveu qu'on
+jugeait une image qu'on ne livrait pas, et il n'y a plus rien à simuler à
+côté. Le mot affiché est le nom de la bande, pris tel quel dans le
+dictionnaire : un titre ne peut plus rassurer là où le corps nuance. Chaque
+bande a sa forme, et le conseil qui l'accompagne nomme la borne qui la
+définit.
 
-**Il ne se ferme jamais**, et c'est la règle qui compte le plus. Poussé à fond,
-il remplissait l'aperçu de sombre : il n'y avait plus rien d'autre à l'écran que
-cette image, on téléchargeait le fichier clair qu'on n'avait pas sous les yeux,
-et l'aperçu cessait d'être le fichier. Le mot « simulation » dans le détail du
-verdict ne rattrapait rien, parce qu'on ne lit pas une note quand l'image occupe
-tout le champ. Une bande du fichier reste donc toujours visible, un cinquième de
-la largeur : le rideau ne peut plus être pris pour un aperçu, il ne peut que
-comparer, et c'est exactement ce qu'il est. L'autre extrémité, elle, va au bout
-sans rien promettre de faux, le fichier entier étant le fichier.
+Elle a d'abord été un **rideau clair/sombre** qu'on tirait sur l'aperçu, pour
+comparer les deux conditions d'un même regard. L'idée était bonne et le
+résultat mauvais : le rideau ne montrait qu'une simulation, qu'aucun
+téléchargement ne rendait, si bien que l'aperçu et le fichier disaient deux
+choses différentes, et l'aperçu avait toujours tort. Une image qu'on ne peut
+pas télécharger n'avait rien à faire dans le cadre.
 
-C'est le cas général d'une règle qui vaut partout : **rien ne doit pouvoir
-occuper l'aperçu en entier sans être le fichier**. Une aide à la lecture qui
-remplit le cadre cesse d'être une aide et devient un mensonge.
+Il laisse une règle, qui vaut partout : **rien ne doit pouvoir occuper
+l'aperçu en entier sans être le fichier**. Une aide à la lecture qui remplit
+le cadre cesse d'être une aide et devient un mensonge. La version sombre la
+respecte par construction : ce qu'elle met plein cadre est exactement ce que
+le téléchargement rend, et une vérification le compare pour de bon.
 
-**Le verdict annonce les deux rapports à la fois**, celui du fichier et celui du
-fond assombri, plutôt que d'en basculer un au passage du trait. Deux chiffres
-posés côte à côte se lisent mieux qu'un seul qui change de sens sans prévenir,
-et le niveau annoncé reste celui du fichier, qui est ce qu'on télécharge. Le
-rideau ne touche donc plus à l'état du tout : glisser ne coûte aucun rendu.
-
-C'est un `input[type=range]`, pas un geste maison : les flèches, Origine et Fin
-y marchent sans une ligne de script, et le nom accessible dit la position. Le
-curseur fait deux pixels de large, parce que la valeur d'un `range` se calcule
-sur la course du curseur et qu'un curseur épais décalerait le trait de sa moitié
-au bord ; ce qu'on voit et ce qu'on saisit sont donc au même endroit. La bande
-saisissable ne fait que quarante-quatre pixels de haut, au milieu de l'appareil :
-plein cadre, elle prendrait le geste de défilement sur téléphone. Le trait est
-une lame crème cernée d'un filet sombre, faute de quoi il disparaîtrait sur la
-moitié des palettes.
-
-Il doit être fluide, sinon il ne sert à rien : on juge une limite qui passe, et
-une limite qui saute ne se juge pas. Trois choses le tiennent à soixante images
-par seconde, et toutes trois ont été mesurées plutôt que supposées. Les boîtes
-se déplacent par `transform`, jamais par `left` ni `clip-path`, qui recalculaient
-la mise en page et repeignaient à chaque pixel. Les deux jetons de position sont
-posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil, dont le
-sous-arbre est la maquette entière : un jeton personnalisé s'y propageait à cent
-vingt nœuds, pour cinq millisecondes de recalcul de style par image. Et l'état
-React ne suit pas le geste image par image : l'image est posée dans le DOM à
-chaque `input`, l'état sept fois par seconde, ce qui suffit à ce que le chiffre
-du verdict paraisse vivant.
-
-La poignée est bornée à quinze pixels des bords, le trait ne l'est pas : au
-repos, le rideau est à cent et le trait tombe sur le bord même, où une poignée
-centrée serait coupée en deux et cesserait de se voir. Le trait dit la limite,
-la poignée dit qu'on peut la prendre, et l'écart entre les deux ne dépasse
-jamais la largeur d'un doigt, contre les bords seulement. Elle porte deux
-pointes opposées plutôt que deux mots : « Clair » et « Sombre » posés sur
-l'aperçu couvriraient justement ce qu'on est venu regarder, et le nom accessible
-de la glissière les dit déjà.
-
-Le rideau ne touche pas au fichier : le voile y est déjà brûlé, calculé pour le
-fond tel quel, et c'est le système qui assombrit à l'affichage. Le détail le dit
-en toutes lettres, et l'interface annonce l'assombrissement comme approché,
-faute qu'aucune plateforme n'en publie la force. Le mot affiché est le nom de la
-bande, pris tel quel dans le dictionnaire : un titre ne peut plus rassurer là où
-le corps nuance. Chaque bande a sa forme, et le conseil qui l'accompagne nomme
-la borne qui la définit.
-
-**Le voile, lui, est dans le fichier**, et une ligne sous le bouton le dit. Elle
+**Le voile de lisibilité est dans le fichier lui aussi**, et une ligne sous le
+bouton le dit. Elle
 est là parce que rien d'autre ne pouvait le dire : le voile est déjà peint dans
 l'aperçu, et personne ne compare une image à une image qu'il n'a pas vue.
 L'interrupteur de cette ligne le retire, du fichier comme de l'aperçu, l'écrit

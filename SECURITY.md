@@ -9,7 +9,7 @@ Aplat n'a **ni serveur, ni compte, ni API, ni base**. Rien n'est transmis, rien 
 - les paramètres d'URL, seul point d'entrée de données extérieures à l'application ;
 - l'hébergement statique, s'il est mal configuré.
 
-**Aplat ne stocke aucune donnée.** Ni IndexedDB, ni `localStorage`, ni cookie : fermer l'onglet ne laisse rien derrière. L'état qui survit à un rechargement est celui que l'URL porte, et il est visible dans la barre d'adresse.
+**Aplat ne fait rien sortir de l'appareil.** Le `localStorage` porte quatre clés au plus : `aplat:motifs` (les dix derniers motifs regardés, six épingles au plus), `aplat:palettes` (les palettes composées à la main, douze au plus), `aplat:langue` et `aplat:theme` (les choix d'affichage, « système » s'écrivant par l'absence de clé). Rien de tout cela ne voyage, et tout se gouverne depuis l'interface : l'historique s'efface d'un bouton, chaque palette se supprime une à une, et un contrôle échoue si une cinquième clé apparaît. Ni IndexedDB, ni `sessionStorage`, ni cookie ; le seul autre stockage est le cache du Service Worker. L'état du motif affiché, lui, est celui que l'URL porte, visible dans la barre d'adresse.
 
 ## Signaler une faille
 
@@ -22,10 +22,10 @@ C'est un projet personnel : la réponse est de bonne foi, pas contractuelle. Com
 ## Ce qui n'est pas une faille
 
 - **Une URL forgée qui donne un motif inattendu.** Les paramètres sont lus un par un, et une valeur inconnue, hors bornes ou absurde retombe sur la valeur par défaut plutôt que d'arrêter la page. `tools/fuzz-url.mjs` passe une série d'URL hostiles pour vérifier qu'aucune ne provoque d'erreur, d'injection, ni de page vide. Si vous en trouvez une qui y échappe, c'est un bug intéressant, signalez-le.
-- **Le lien de partage révèle vos réglages.** C'est ce qu'il est fait pour faire : famille, palette, densité, graine, langue, thème. Il ne porte ni identifiant, ni horodatage, ni la résolution détectée de votre appareil ; celle-ci est une mesure du matériel, pas un réglage, et elle ne part pas dans le lien.
+- **Le lien de partage révèle vos réglages.** C'est ce qu'il est fait pour faire : famille, palette, densité, graine, et, quand ils s'écartent du défaut, le voile retiré, la version sombre, les teintes d'une palette composée et la résolution saisie à la main. Il ne porte ni identifiant, ni horodatage, ni la langue ni le thème, qui restent sur l'appareil, ni la résolution détectée ; celle-ci est une mesure du matériel, pas un réglage, et elle ne part pas dans le lien.
 - **Le PNG téléchargé n'est pas protégé.** C'est un fichier image dans votre dossier de téléchargements, comme n'importe quel autre. Aplat ne le voit plus une fois qu'il est écrit.
 - **Le Service Worker sert une version antérieure après une mise à jour.** C'est le fonctionnement normal d'un cache hors ligne : la nouvelle version est récupérée en arrière-plan et prend la main au chargement suivant.
-- **Effacer les données du site depuis le navigateur.** Il n'y a rien à perdre : cela vide le cache de l'application, qui se remplira au prochain chargement avec une connexion.
+- **Effacer les données du site depuis le navigateur.** Cela vide le cache de l'application, qui se remplira au prochain chargement avec une connexion, et les quatre clés du stockage local : l'historique, les palettes composées et les choix d'affichage repartent à leurs défauts, et rien de plus n'est perdu.
 
 ## Pour qui héberge Aplat
 

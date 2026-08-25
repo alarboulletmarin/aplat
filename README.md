@@ -6,9 +6,10 @@ Des fonds d'écran génératifs, exportés à la résolution exacte de l'apparei
 Tout est calculé dans le navigateur.
 
 Gratuit, sans compte, sans pub, sans traceur, sans serveur. Aucune donnée ne
-sort de l'appareil : ce qui est partageable tient dans l'URL, et les deux seules
+sort de l'appareil : ce qui est partageable tient dans l'URL, et les seules
 choses écrites sur l'appareil sont la liste des dix derniers motifs regardés et
-les palettes qu'on a composées, effaçables d'un bouton et une à une.
+les palettes qu'on a composées, effaçables d'un bouton et une à une, puis la
+langue et le thème, qui ne s'écrivent que le jour où on les choisit.
 Installable, et pleinement utilisable hors ligne.
 
 ---
@@ -30,8 +31,8 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 - *Secondaire* : dans la même barre, les deux raccourcis de hasard, côte à côte
   parce qu'on ne sait pas lequel on veut avant de voir. « Variante » ne change
   que la graine, « Surprends-moi » tire aussi une famille et une palette. Puis
-  les trois réglages (famille, palette, densité) et la résolution, déjà
-  détectée, repliée tant qu'on n'y touche pas.
+  les quatre réglages (famille, palette, densité, version claire ou sombre) et
+  la résolution, déjà détectée, repliée tant qu'on n'y touche pas.
 - *Caché* : les autres formats, derrière un dépli attaché au bouton
   Télécharger ; le lien de partage, en bas du bloc ; puis, dans le pied de page,
   la langue, le thème, la version, la source et le lien de soutien. Pour qui
@@ -47,7 +48,7 @@ ordinateur, les deux sont côte à côte. Pas d'onglet, pas de barre de navigati
 pas d'étape.
 
 Le panneau de réglages ne contient que ce qui agit sur le fichier téléchargé :
-famille, palette, densité, résolution. La langue et le thème sont dans le pied
+famille, palette, densité, version, résolution. La langue et le thème sont dans le pied
 de page, à côté de la version et du lien vers la source, parce qu'ils ne
 changent que l'affichage.
 
@@ -74,21 +75,20 @@ qualificatif suit trois bandes, et rien entre les deux : **bonne** au-dessus de
 3:1 et 4,5:1 ; **insuffisante** en dessous. Chaque bande a sa forme, disque
 plein, disque à moitié, triangle.
 
-Un **rideau clair/sombre** traverse l'aperçu : un trait qu'on fait glisser, et
-la moitié qu'il découvre se voit comme un thème sombre l'assombrirait. Il
-s'ouvre au milieu, les deux conditions sont donc là d'emblée, sous les mêmes
-libellés ; le fichier est à gauche du trait, et une bande en reste toujours
-visible, un cinquième de la largeur, parce qu'un rideau qui se ferme
-entièrement cesse d'être une comparaison pour devenir un aperçu faux. Le
-verdict annonce les deux rapports côte à côte, celui du fichier et celui du
-fond assombri, plutôt que d'en basculer un au passage du trait.
-Il remplace une bascule qui montrait l'un *puis* l'autre : une limite qui passe
-sous les mêmes libellés se juge d'un regard, deux états successifs demandent de
-se souvenir du premier. C'est un `input[type=range]` et non un geste maison, si
-bien que les flèches, Origine et Fin y marchent sans une ligne de script ; il ne
-couvre qu'une bande de quarante-quatre pixels au milieu de l'appareil, sans quoi
-il prendrait le geste de défilement sur téléphone. Le fichier téléchargé, lui,
-ne change pas d'un octet, ce qu'une vérification compare pour de bon.
+Une **version claire ou sombre** se choisit dans le panneau, après la densité :
+deux puces, dont la pastille dessine ce qu'elle fait. La version sombre n'est
+pas un habillage : c'est le même motif avec un aplat noir brûlé dans le
+fichier, amené à une obscurité cible plutôt que voilé d'une opacité fixe, si
+bien que toutes les palettes en sortent également sombres. L'aperçu la montre,
+le verdict la mesure comme n'importe quelle image, et le téléchargement rend
+exactement ce qu'on regarde, ce qu'une vérification compare pour de bon ; le
+choix s'écrit dans l'adresse (`n=1`) et dans le nom du fichier.
+Elle a d'abord été un rideau qu'on tirait sur l'aperçu, pour comparer les deux
+d'un même regard. L'idée était bonne et le résultat mauvais : le rideau ne
+montrait qu'une simulation, qu'aucun téléchargement ne rendait, si bien que
+l'aperçu et le fichier disaient deux choses différentes, et l'aperçu avait
+toujours tort. Une image qu'on ne peut pas télécharger n'avait rien à faire
+dans le cadre.
 
 Deux colonnes dès 360 px, téléphone compris : l'aperçu épinglé à gauche, les
 réglages qui défilent à droite. L'aperçu n'est plus devant ce qu'on choisit mais
@@ -137,7 +137,7 @@ src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de g
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
 src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
-src/lib/{resolution,url,export,geometrie,format,build}.ts
+src/lib/{affichage,historique,resolution,url,export,geometrie,format,tirage,build}.ts
 src/components/               l'interface, un fichier par pièce
 src/components/accueil/       la page d'accueil, un fichier par section
 src/hooks/                    horloge, tailles, focus, ajustement, économie
@@ -177,7 +177,7 @@ Le motif de départ, lui, ne se joue pas aux dés : la page se peint deux fois d
 suite à l'identique, ce qu'une planche de recette peut vérifier et ce qu'une
 composition dessinée réclame. La variation est offerte, jamais imposée.
 
-**Quinze rendus du moteur sur une page, ça se paie.** Trois précautions, et
+**Seize rendus du moteur sur une page, ça se paie.** Trois précautions, et
 elles ne sont pas décoratives. On ne peint que ce qui approche du champ de
 vision (`IntersectionObserver`), on peint quand le fil principal est libre
 (`requestIdleCallback`, avec un délai de garde pour qu'aucune toile ne reste
@@ -191,18 +191,20 @@ la même image, ce qui refait exactement le pic que la première cherchait à
 Elle garde les règles de l'application, parce que c'est le même produit : un
 seul appel primaire, répété en bas de page mais jamais dédoublé ; aucune
 animation qui ne dise ni une origine, ni un état, ni une continuité ; et rien
-d'écrit sur l'appareil, l'état tenant dans l'adresse. Cet état se réduit à la
-langue et au thème, qui sont aussi ses deux boutons, dans l'enseigne épinglée :
+d'écrit sur l'appareil tant qu'on ne choisit rien. Ses deux seuls choix sont la
+langue et le thème, qui sont aussi ses deux boutons, dans l'enseigne épinglée :
 quelqu'un qui arrive sur une page dans une langue qu'il ne lit pas doit trouver
-la bascule avant le premier paragraphe. Le lien vers l'application les emporte,
-personne ne choisit sa langue deux fois.
+la bascule avant le premier paragraphe. Le choix fait là est retenu sur
+l'appareil, et le stockage étant commun aux deux pages, le lien vers
+l'application n'a rien à emporter : personne ne choisit sa langue deux fois.
 
 La marque, en haut, fait le chemin dans l'autre sens. Elle est un lien vers
 `/` depuis les deux documents : depuis l'application, c'est sa seule sortie, et
 elle est là où tout le monde cherche une sortie ; depuis la présentation, elle
 ramène en haut de page plutôt que d'ouvrir l'outil, ce que la porte nommée fait
-déjà, à droite. La langue et le thème traversent ce lien comme ils traversent
-l'autre : revenir ne coûte pas le choix qu'on vient de faire. Aucun paramètre de
+déjà, à droite. La langue et le thème n'ont pas plus besoin de traverser ce
+lien que l'autre : retenus sur l'appareil, ils attendent au retour, et revenir
+ne coûte pas le choix qu'on vient de faire. Aucun paramètre de
 motif n'y entre, sinon la reconduction ci-dessous renverrait le retour vers
 `/app` avant qu'il n'ait lieu.
 
@@ -220,17 +222,19 @@ de se dédoubler.
 
 ## L'URL porte l'état
 
-`?m=vagues&p=lime&d=1&s=7314&l=fr&r=1179x2556`
+`?m=vagues&p=lime&d=1&s=7314&r=1179x2556`
 
-`m` famille, `p` palette, `d` densité (de 0 à 2), `s` graine, `l` langue,
+`m` famille, `p` palette, `d` densité (de 0 à 2), `s` graine,
 `r` résolution (seulement si elle a été saisie à la main),
-`t` thème (seulement s'il n'est pas « système »),
 `v=0` (seulement si le voile de lisibilité a été retiré du fichier),
+`n=1` (seulement si c'est la version sombre du motif qui est exportée),
 `k` les teintes d'une palette composée à la main (seulement si le motif en
 porte une).
 
-`v` a une valeur par défaut qui ne s'écrit pas, et c'est « oui » : les liens
-partagés avant qu'il n'existe continuent d'ouvrir exactement la même image.
+`v` et `n` ont une valeur par défaut qui ne s'écrit pas, et c'est ce que le
+produit a toujours livré, le voile dans le fichier et l'image claire : les
+liens partagés avant qu'ils n'existent continuent d'ouvrir exactement la même
+image.
 
 `k` mérite une phrase. Une palette composée à la main n'existe que sur
 l'appareil qui l'a composée ; sans ses teintes, le lien ouvrirait un autre motif
@@ -239,9 +243,12 @@ teintes, si bien que les deux se vérifient l'un l'autre : une adresse dont
 l'empreinte ne correspond pas aux couleurs est refusée, et une palette reçue ne
 peut donc pas se faire passer pour une palette déjà enregistrée.
 
-`l` et `t` valent pour les deux pages : la présentation n'a pas de motif à
-relire, mais elle a une langue et un thème, et `?l=en&t=sombre` dit la même
-chose des deux côtés.
+`l` et `t` ne sont plus des paramètres : l'adresse ne porte que l'image. La
+langue et le thème habillent l'interface sans rien changer au fichier, et un
+lien qui les emportait imposait au destinataire l'affichage de l'expéditeur ;
+ils vivent désormais sur l'appareil. Les liens déjà partagés tiennent parole :
+`?l=` et `?t=` sont encore lus, gagnent pour ce chargement-là, puis l'adresse
+est nettoyée, sans écraser le choix retenu sur l'appareil.
 
 Rien d'autre n'est transmis. Copier le lien suffit à retrouver exactement la
 même image, sur n'importe quel appareil. Une URL forgée ne peut produire qu'un
@@ -255,7 +262,7 @@ Aucun compte, aucun réseau à l'exécution, aucune mesure d'audience. Ni cookie
 ni `sessionStorage`, ni base indexée. Les réglages du motif affiché vivent dans
 la barre d'adresse.
 
-**Deux clés de `localStorage`**, et pas une de plus.
+**Quatre clés de `localStorage`**, et pas une de plus.
 
 `aplat:motifs` : les dix derniers motifs regardés, quatre réglages chacun, plus
 une épingle facultative sur six d'entre eux au plus. Ni image (le rendu est
@@ -272,8 +279,17 @@ trois à six couleurs chacune. Rien n'y est écrit tant qu'on n'a pas enregistr�
 pas même la palette qu'un lien vient d'apporter, et chacune se supprime seule.
 La clé n'existe pas tant qu'aucune palette n'a été composée.
 
-Ce que ces deux clés contiennent exactement est vérifié à chaque
-`npm run check`, champ par champ, et une troisième clé y ferait échouer le
+`aplat:langue` et `aplat:theme` : la langue et le thème choisis, un mot chacun.
+Ils habillent l'interface sans rien changer au fichier, et un lien qui les
+emportait imposait au destinataire l'affichage de l'expéditeur : ils vivent
+donc ici plutôt que dans l'adresse. Rien ne s'écrit tant qu'on ne choisit
+rien, les défauts restant la langue du navigateur et le thème du système, et
+revenir à « Système » efface la clé plutôt que d'y écrire l'absence de choix.
+Le choix vaut pour les deux pages, et c'est lui qui permet aux liens de rester
+nus.
+
+Ce que ces quatre clés contiennent exactement est vérifié à chaque
+`npm run check`, champ par champ, et une cinquième clé y ferait échouer le
 contrôle.
 
 L'application étant installable, un cache existe, celui du Service Worker. Il
@@ -371,7 +387,7 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **1 221 combinaisons** (37 familles × 11 palettes × 3 densités) en
+Mesuré sur les **1 353 combinaisons** (41 familles × 11 palettes × 3 densités) en
 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
@@ -454,16 +470,13 @@ Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone
 d'entrée de gamme (`tools/perf.mjs`) : moins de 3 ms par action, quelle qu'elle
 soit.
 
-Le rideau clair/sombre est le seul geste continu du produit, et il a demandé
-trois corrections, toutes mesurées au même bridage. Les maquettes d'écran sont
-mémoïsées : `useAjustement` mesure sa boîte après chaque rendu, dans un effet
-sans liste de dépendances, ce qui forçait un recalcul de mise en page sur ses
-cent vingt nœuds à chaque pixel glissé. Les boîtes du rideau se déplacent par
-`transform` et non par `left` ni `clip-path`. Et ses deux jetons de position
-sont posés sur les deux seules boîtes qui les lisent, jamais sur l'appareil, qui
-les aurait transmis à toute la maquette. Résultat, par image : cinq millisecondes
-de recalcul de style et une image sur quatre perdue avant, moins de deux
-millisecondes et aucune tâche longue après, à la même cadence qu'au repos.
+Le produit n'a plus de geste continu : le rideau clair/sombre, qui l'était,
+est parti avec sa raison d'être, et la version sombre qui le remplace repasse
+par le chemin de tous les réglages, un rendu du canevas par changement. Les
+maquettes d'écran, elles, restent mémoïsées : `useAjustement` mesure sa boîte
+après chaque rendu, dans un effet sans liste de dépendances, et ce recalcul de
+mise en page sur une centaine de nœuds ne doit se payer qu'aux rendus qui
+changent vraiment la scène.
 
 Après 400 changements de réglage enchaînés (`tools/soak.mjs`) : même nombre de
 nœuds, même nombre de canevas, même nombre d'écouteurs.
@@ -475,7 +488,7 @@ leur pile de fonds réelle avant d'appliquer la formule WCAG, dans les deux
 thèmes et les deux langues :
 
 - texte courant ≥ 4,5:1, texte large, bordures d'éléments d'interface et formes
-  porteuses de sens ≥ 3:1 (91 textes et 54 bordures examinés dans chacune des
+  porteuses de sens ≥ 3:1 (101 textes et 61 bordures examinés dans chacune des
   six combinaisons de thème et de langue, carte d'erreur comprise) ;
 - test en niveaux de gris : la sélection est un aplat inversé, la densité un
   nombre de points allumés, la lisibilité trois formes distinctes (disque,
@@ -491,15 +504,11 @@ thèmes et les deux langues :
   défilement déclenché par le focus ni `scrollIntoView` n'appliquent
   `scroll-padding` aujourd'hui, la correction est donc faite sur `focusin`
   (WCAG 2.2, 2.4.11) ;
-- les groupes de réglages sont de vrais groupes radio, les trois groupes de
+- les groupes de réglages sont de vrais groupes radio, les quatre groupes de
   familles une vraie barre d'onglets, et l'historique une barre d'outils : un
   arrêt de tabulation par groupe, flèches et Début/Fin. Les flèches des onglets
-  déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait trois
-  rendus complets de trente-sept vignettes pour atteindre le troisième ;
-- le rideau clair/sombre est un `input[type=range]`, pas un geste maison : les
-  flèches, Origine et Fin y marchent sans une ligne de script, et son nom
-  accessible dit la position. `touch-action: pan-y` laisse le geste vertical au
-  défilement ;
+  déplacent le focus **sans ouvrir**, sans quoi le clavier traverserait quatre
+  rendus complets de quarante et une vignettes pour atteindre le quatrième ;
 - les deux boutons secondaires de la barre rendent leur mot sous 600 px mais le
   gardent dans leur nom accessible : un `aria-label` posé par-dessus un libellé
   visible aurait cassé « le libellé dans le nom » aux largeurs supérieures ;
@@ -584,7 +593,7 @@ npm run check    # build, puis les contrôles dans Chromium
 |---|---|
 | `tools/typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
 | `tools/accueil.mjs` | la page d'accueil : les deux adresses, les liens partagés d'avant, les deux bascules, les toiles qui se peignent toutes, les cibles et la hiérarchie des titres |
-| `tools/e2e.mjs` | 177 contrôles : URL et sa robustesse, déterminisme, les quatre pavages réguliers qui ignorent leur graine et eux seuls, quatre états, téléchargement réel de cinq sorties, course à l'export, échec de copie, politique réseau, contenu du cache, clavier, focus non masqué, mouvement réduit, onglets de familles, rideau clair/sombre, voile retiré, palette composée et son lien, épingle |
+| `tools/e2e.mjs` | environ deux cents contrôles : URL et sa robustesse, déterminisme, les quatre pavages réguliers qui ignorent leur graine et eux seuls, quatre états, téléchargement réel de cinq sorties, course à l'export, échec de copie, politique réseau, contenu du cache, langue et thème retenus sur l'appareil, clavier, focus non masqué, mouvement réduit, onglets de familles, version sombre téléchargée telle qu'affichée, voile retiré, palette composée et son lien, épingle |
 | `tools/pwa.mjs` | 18 contrôles : manifeste, icônes à la taille annoncée, Service Worker activé, puis réseau coupé (page, motif, vignettes, polices et téléchargement réel) |
 | `tools/a11y.mjs` | contrastes réels sur le DOM, deux thèmes, deux langues |
 | `tools/reach.mjs` | atteignabilité et taille des cibles, de 320 à 1920 px |
@@ -595,9 +604,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 221 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 353 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 37 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 41 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

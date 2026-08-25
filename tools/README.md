@@ -20,7 +20,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | Fichier | Rôle |
 |---|---|
 | `typographie.mjs` | ni tiret cadratin, ni tiret demi-cadratin, ni point médian dans les sources |
-| `e2e.mjs` | 124 contrôles dans un vrai navigateur : lecture et écriture de l'URL, déterminisme du rendu, **les quatre pavages réguliers qui ignorent leur graine, et eux seuls**, les quatre états, téléchargement réel avec lecture de l'en-tête PNG, course à l'export, échec de copie, contenu du cache **et de l'historique local**, clavier, focus non masqué, mouvement réduit, aperçu assombri comparé octet pour octet |
+| `e2e.mjs` | environ deux cents contrôles dans un vrai navigateur : lecture et écriture de l'URL, déterminisme du rendu, **les quatre pavages réguliers qui ignorent leur graine, et eux seuls**, les quatre états, téléchargement réel avec lecture de l'en-tête PNG, course à l'export, échec de copie, contenu du cache **et des quatre clés du stockage local**, clavier, focus non masqué, mouvement réduit, la version sombre téléchargée telle qu'affichée |
 | `accueil.mjs` | la page d'accueil, sur « / » : les deux adresses et la reconduite des liens partagés du temps où l'application vivait à la racine, les deux bascules (adresse écrite, document retourné, nom accessible qui dit ce qu'un appui donnera), les quinze toiles qui finissent toutes par se peindre, une vignette touchée qui redessine, les cibles de 44 px et la hiérarchie des titres |
 | `pwa.mjs` | manifeste, icônes à la taille annoncée, Service Worker activé. Puis réseau coupé : page, motif, vignettes, polices et téléchargement réel |
 | `fuzz-url.mjs` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours, et le compte de puces ne bouge pas (relevé sur une adresse saine, jamais écrit en dur) |
@@ -31,6 +31,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | `band-test.mjs` | hauteur des marches du voile sur 32 cas |
 | `dither-check.mjs` | amplitude du grain du `#101A2E` au `#FFFFFF` |
 | `shot.mjs` | captures et absence de requête sortante |
+| `perf.mjs` | coût de chaque action du geste à la peinture, processeur bridé six fois : médiane et max par scénario, budgets qui font échouer |
 | `soak.mjs` | 400 actions enchaînées, historique plein : dérive du tas, des nœuds, des canevas et des écouteurs |
 
 ## La recette des quatre cadrages
@@ -62,12 +63,11 @@ demie, en plein balayage.
 |---|---|
 | `export-audit.mjs` | poids et durée des PNG : `quick`, `phone-full` (toutes les combinaisons en 1179 × 2556) ou tout |
 | `weight-lab.mjs` | contribution de chaque couche au poids du fichier |
-| `perf.mjs` | coût de chaque action, processeur bridé six fois |
 | `states.mjs` | captures des cinq états, atteints par les gestes d'un utilisateur |
 | `greyscale.mjs` | test en niveaux de gris |
 | `wide.mjs` | lequel déborde à 320 px, et de combien : ce qu'on ouvre quand `overflow.mjs` vient de dire non |
 | `cadrages.mjs` | neuf cadrages dans la fenêtre : ce qui tient au-dessus de la ligne de flottaison, et ce que recouvrent les deux barres collantes |
-| `planche.mjs` | planche-contact des 32 familles à la résolution d'un téléphone |
+| `planche.mjs` | planche-contact de toutes les familles à la résolution d'un téléphone |
 | `fidelity.mjs` | chaque déclaration et chaque jeton de la maquette se retrouvent-ils dans le portage |
 | `banc.mjs`, `serveur.mjs`, `pw.mjs` | l'infrastructure : moteur injectable, serveur d'aperçu, Chromium |
 
