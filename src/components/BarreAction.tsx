@@ -363,12 +363,18 @@ export function BarreAction({
           <ul className="feuille-liste">
             {sorties.map((sortie) => (
               <li key={sortie.id}>
+                {/* `aria-disabled` et non `disabled` : la ligne indisponible
+                    garde sa raison affichée, et un focus qui ne peut pas s'y
+                    poser ne peut pas la lire. Même raisonnement que le bouton
+                    primaire pendant le rendu. `disabled` ne reste que pour
+                    l'état vide, où toute la feuille est sans objet. */}
                 <button
                   type="button"
                   id={sortie.id}
                   className="feuille-b"
-                  disabled={Boolean(sortie.indisponible) || vide}
-                  onClick={sortie.action}
+                  disabled={vide}
+                  aria-disabled={sortie.indisponible ? true : undefined}
+                  onClick={sortie.indisponible ? undefined : sortie.action}
                 >
                   <span className="feuille-t">{sortie.titre}</span>
                   <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>

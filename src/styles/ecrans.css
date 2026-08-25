@@ -1108,7 +1108,8 @@
 .feuille-b:hover {
   background: var(--surface-2);
 }
-.feuille-b[disabled] {
+.feuille-b[disabled],
+.feuille-b[aria-disabled='true'] {
   opacity: 0.55;
   cursor: default;
 }
