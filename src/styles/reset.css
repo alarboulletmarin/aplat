@@ -17,6 +17,17 @@ html {
   scroll-padding-bottom: calc(var(--barre-h, 0px) + 12px);
 }
 
+/* L'ancrage du défilement est débranché : la liste des familles change de
+   hauteur quand l'onglet suit un tirage venu d'ailleurs (« Surprends-moi »,
+   une vignette d'historique, un lien reçu), et le navigateur compensait en
+   déplaçant la page, jusqu'à la coller au pied après quelques appuis en
+   rafale. L'exclusion se pose élément par élément, jamais en cascade : la
+   règle est donc universelle, elle ne coûte rien sur une propriété qui ne
+   s'hérite pas. */
+* {
+  overflow-anchor: none;
+}
+
 body {
   margin: 0;
 }
