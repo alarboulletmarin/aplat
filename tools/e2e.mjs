@@ -169,6 +169,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   // --- 9. téléchargement réel
   await page.fill('#res-largeur', '1179');
   await page.fill('#res-hauteur', '2556');
+  /* Un vrai doigt quitte le champ en allant taper Télécharger ; le `tap`
+     logique de ce banc, lui, ne déplace jamais le focus. Or la barre cesse
+     de coller pendant la saisie (voir ecrans.css, `pointer: coarse`) : sans
+     ce blur, elle resterait décollée, la carte de succès naîtrait sous le
+     bord de l'écran, et le glissement de 10 bis toucherait le vide. */
+  await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
   await page.waitForTimeout(300);
   const [dl] = await Promise.all([
     page.waitForEvent('download', { timeout: 30000 }),
