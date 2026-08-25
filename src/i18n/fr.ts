@@ -351,11 +351,21 @@ export const fr = {
   pied: {
     source: 'Code source',
     licence: 'AGPL-3.0',
+    tiers: 'Licences tierces',
     /* Aplat est gratuit, sans compte et sans pub, et le restera. Le lien de
        soutien est donc une porte, pas une caisse : il est dans le pied, à côté
        de la licence, et rien dans l'application ne le rappelle. */
     soutien: 'Offrir un café',
     soutienTitre: 'Soutenir Aplat sur Ko-fi. Le lien ouvre un autre site.',
+    /* Les mentions légales, en deux phrases. La LCEN laisse un éditeur non
+       professionnel taire son nom, à une condition : nommer l'hébergeur et son
+       adresse. L'autre phrase dit ce que l'application ne collecte pas, et la
+       seule trace qui existe malgré elle : les journaux du serveur qui livre
+       les fichiers. */
+    donnees:
+      'Aucun compte, aucune mesure d’audience : tout est calculé dans ton navigateur et n’en sort pas.',
+    hebergement:
+      'Hébergé par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis, dont les serveurs tiennent les journaux techniques habituels, adresses IP comprises.',
   },
   maquette: {
     recherche: 'Rechercher',

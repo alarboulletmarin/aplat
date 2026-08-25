@@ -124,6 +124,13 @@ export default defineConfig({
         // Le même document sert les deux adresses : `/app` n'est pas un
         // fichier, c'est le chemin que `route.ts` lit au démarrage.
         navigateFallback: 'index.html',
+        // Les `.txt` sont des documents, pas des routes : le pied de page
+        // ouvre THIRD-PARTY.txt dans un onglet. Le précache les sert déjà,
+        // mais il ne les sert que tant que `txt` reste dans `globPatterns` ;
+        // sans cette liste, retirer l'extension là-haut ferait répondre
+        // l'application à la place des licences, sans qu'aucun test ne le
+        // dise.
+        navigateFallbackDenylist: [/\.txt$/],
         cleanupOutdatedCaches: true,
       },
       devOptions: {

@@ -9,6 +9,11 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : le pied de page dit le droit en entier
+
+- **Deux liens de plus à côté de la version.** « AGPL-3.0 » mène au texte de la licence, au commit exact du build, et « Licences tierces » ouvre le fichier `THIRD-PARTY.txt` que chaque build régénère. Le fichier était servi depuis le début ; rien dans la page ne le désignait, et une licence qu'il faut deviner n'est pas mise à disposition.
+- **Deux phrases de mentions légales** ferment le pied : ce que l'application ne collecte pas (aucun compte, aucune mesure d'audience), puis l'hébergeur et son adresse, la seule chose que la loi française demande à un éditeur non professionnel. Le pied de la page d'accueil porte les mêmes liens et la même ligne d'hébergeur.
+
 ### Ajouté : les lieux, un second geste du moteur
 
 - **Quatre familles et un quatrième groupe.** Acropole, Phare, Pyramides,

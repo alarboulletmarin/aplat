@@ -1237,6 +1237,14 @@
 .pied-version {
   font-variant-numeric: tabular-nums;
 }
+/* Les mentions légales : la LCEN demande le nom et l'adresse de l'hébergeur,
+   et l'absence de collecte se dit plutôt qu'elle ne se suppose. Deux phrases
+   en petit, pas une page : une page laisserait croire qu'il y a plus à dire. */
+.pied-mentions {
+  font-size: 11.5px;
+  line-height: 1.5;
+  max-width: 68ch;
+}
 
 /* --- Le panneau dans une colonne étroite -------------------------------------
    Entre 360 et 760 px, le panneau ne fait plus que deux cents pixels. Les

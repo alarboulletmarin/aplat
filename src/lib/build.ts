@@ -38,6 +38,16 @@ export function lienSource({ commit = COMMIT }: { commit?: string } = {}): strin
   return commit ? `${DEPOT}/tree/${commit}` : DEPOT
 }
 
+/**
+ * Le texte de la licence obéit à la même règle que la source : celui qui
+ * s'applique à ce build est celui de son commit, pas celui de la branche
+ * principale, qui peut avoir changé depuis. Sans commit, le dépôt reste le
+ * meilleur lien vivant, comme pour `lienSource`.
+ */
+export function lienLicence({ commit = COMMIT }: { commit?: string } = {}): string {
+  return commit ? `${DEPOT}/blob/${commit}/LICENSE` : DEPOT
+}
+
 export function etiquetteVersion(
   { version = VERSION, commit = COMMIT }: { version?: string; commit?: string } = {},
 ): string {

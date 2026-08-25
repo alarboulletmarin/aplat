@@ -28,7 +28,7 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Secondaire | famille, palette, densité, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
 | Caché | les autres formats : PNG 2x, WebP, SVG, presse-papiers, les trois appareils | un dépli attaché au primaire |
 | Caché | lien de partage | en bas du bloc, sous un filet |
-| Caché | langue, thème, version, licence, source, soutien | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
+| Caché | langue, thème, version, licence, licences tierces, source, soutien, mentions légales | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
 Un seul appel primaire. **Télécharger** ne partage sa place avec rien : les deux
 secondaires perdent leur mot avant que lui ne perde un pixel, et son libellé ne

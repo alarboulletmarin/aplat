@@ -11,7 +11,7 @@
  * qu'on ne verra jamais en développement.
  */
 import { describe, expect, it } from 'vitest'
-import { COMMIT, etiquetteVersion, lienSource, VERSION } from './build'
+import { COMMIT, etiquetteVersion, lienLicence, lienSource, VERSION } from './build'
 
 describe('étiquette de version', () => {
   it('pose le commit entre parenthèses, en précision de la version', () => {
@@ -52,6 +52,26 @@ describe('lien vers la source', () => {
   it('branche sa valeur par défaut sur le commit du build', () => {
     expect(lienSource()).toBe(
       COMMIT ? `https://github.com/alarboulletmarin/aplat/tree/${COMMIT}` : 'https://github.com/alarboulletmarin/aplat',
+    )
+  })
+})
+
+describe('lien vers la licence', () => {
+  it('pointe le fichier LICENSE du commit exact', () => {
+    expect(lienLicence({ commit: 'a637777' })).toBe(
+      'https://github.com/alarboulletmarin/aplat/blob/a637777/LICENSE',
+    )
+  })
+
+  it('retombe sur le dépôt quand le commit manque', () => {
+    /* Même raison que pour la source : un `/blob/` sans commit mènerait à une
+       page d'erreur, le dépôt montre le LICENSE dès sa page d'accueil. */
+    expect(lienLicence({ commit: '' })).toBe('https://github.com/alarboulletmarin/aplat')
+  })
+
+  it('branche sa valeur par défaut sur le commit du build', () => {
+    expect(lienLicence()).toBe(
+      COMMIT ? `https://github.com/alarboulletmarin/aplat/blob/${COMMIT}/LICENSE` : 'https://github.com/alarboulletmarin/aplat',
     )
   })
 })

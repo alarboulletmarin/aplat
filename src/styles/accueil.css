@@ -649,6 +649,14 @@
   align-items: center;
   min-height: 44px;
 }
+/* La ligne de l'hébergeur, sur sa propre rangée : la LCEN demande son nom et
+   son adresse, et l'accueil dit déjà le reste (sans compte, aucune donnée
+   collectée) dans ses deux mentions. */
+.accueil-pied-mentions {
+  flex-basis: 100%;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
 
 /* --- Étroit -----------------------------------------------------------------
    Sous 640 px, la maquette cesse d'être à côté du texte pour passer dessous,

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { etiquetteVersion, lienSource } from '../../lib/build'
+import { etiquetteVersion, lienLicence, lienSource } from '../../lib/build'
 import type { Textes } from '../../i18n'
 import { Soutien } from '../Soutien'
 
@@ -14,7 +14,10 @@ import { Soutien } from '../Soutien'
  *
  * Le lien vers la source n'est pas de la décoration : l'AGPL demande que
  * quiconque utilise le logiciel puisse obtenir la source correspondante, et un
- * lien vers la branche principale ne la désigne pas. Le commit, si.
+ * lien vers la branche principale ne la désigne pas. Le commit, si. La licence
+ * et les notices tierces suivent la même règle que dans le pied de
+ * l'application, et la ligne de l'hébergeur aussi : la LCEN vaut pour les deux
+ * documents, et l'accueil est celui que les moteurs de recherche servent.
  */
 export function Appel({ textes, lien }: { textes: Textes; lien: string }) {
   const A = textes.accueil
@@ -44,10 +47,16 @@ export function Appel({ textes, lien }: { textes: Textes; lien: string }) {
           <a href={lienSource()} rel="noopener noreferrer" target="_blank">
             {textes.pied.source}
           </a>
-          <span>{textes.pied.licence}</span>
+          <a href={lienLicence()} rel="noopener noreferrer" target="_blank">
+            {textes.pied.licence}
+          </a>
+          <a href="/THIRD-PARTY.txt" rel="noopener noreferrer" target="_blank">
+            {textes.pied.tiers}
+          </a>
           <Soutien textes={textes} />
         </span>
         <span>{A.pied.mention}</span>
+        <span className="accueil-pied-mentions">{textes.pied.hebergement}</span>
       </footer>
     </>
   )

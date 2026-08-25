@@ -618,7 +618,9 @@ Anton et Archivo sont sous SIL Open Font License 1.1
 Les licences des composants tiers embarqués dans le build sont rassemblées à
 chaque `npm run build` dans `public/THIRD-PARTY.txt`, polices comprises : c'est
 l'OFL qui est la raison première de ce fichier, et un lecteur qui cherche ce que
-ce build embarque n'a ainsi qu'un seul endroit à ouvrir.
+ce build embarque n'a ainsi qu'un seul endroit à ouvrir. Le pied de page désigne les deux textes : « AGPL-3.0 » ouvre le LICENSE du commit du build, « Licences tierces » ouvre `THIRD-PARTY.txt` tel qu'il est servi.
+
+Le pied porte aussi les mentions légales : ce que l'application ne collecte pas, puis le nom et l'adresse de l'hébergeur, la seule chose que la LCEN demande à un éditeur non professionnel.
 
 ## Documentation
 

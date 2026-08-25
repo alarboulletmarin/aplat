@@ -256,8 +256,13 @@ export const en: Textes = {
   pied: {
     source: 'Source code',
     licence: 'AGPL-3.0',
+    tiers: 'Third-party licenses',
     soutien: 'Buy me a coffee',
     soutienTitre: 'Support Aplat on Ko-fi. The link opens another site.',
+    donnees:
+      'No account, no analytics: everything is computed in your browser and never leaves it.',
+    hebergement:
+      'Hosted by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, whose servers keep the usual technical logs, IP addresses included.',
   },
   maquette: {
     recherche: 'Search',

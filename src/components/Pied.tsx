@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { etiquetteVersion, lienSource } from '../lib/build'
+import { etiquetteVersion, lienLicence, lienSource } from '../lib/build'
 import type { Langue } from '../lib/moteur'
 import type { Theme } from '../lib/url'
 import type { Textes } from '../i18n'
@@ -18,7 +18,15 @@ import { Soutien } from './Soutien'
  *
  * Le lien vers la source n'est pas de la décoration : l'AGPL demande que
  * quiconque utilise le logiciel puisse obtenir la source *correspondante*. Un
- * lien vers la branche principale ne la désigne pas ; le commit, si.
+ * lien vers la branche principale ne la désigne pas ; le commit, si. La
+ * licence et les notices tierces suivent la même règle : le texte AGPL est
+ * celui du commit du build, et THIRD-PARTY.txt est le fichier que ce build
+ * sert. L'OFL veut ses licences faciles à consulter ; un fichier servi mais
+ * jamais désigné ne l'est pas.
+ *
+ * Les deux phrases du bas sont les mentions légales, et rien de plus : ce que
+ * l'application ne collecte pas, puis l'hébergeur et son adresse, la seule
+ * chose que la LCEN exige d'un éditeur non professionnel.
  */
 export function Pied({
   langue,
@@ -89,9 +97,18 @@ export function Pied({
         <a href={lienSource()} rel="noopener noreferrer" target="_blank">
           {textes.pied.source}
         </a>
-        <span>{textes.pied.licence}</span>
+        <a href={lienLicence()} rel="noopener noreferrer" target="_blank">
+          {textes.pied.licence}
+        </a>
+        <a href="/THIRD-PARTY.txt" rel="noopener noreferrer" target="_blank">
+          {textes.pied.tiers}
+        </a>
         <Soutien textes={textes} />
       </div>
+
+      <p className="pied-mentions">
+        {textes.pied.donnees} {textes.pied.hebergement}
+      </p>
     </footer>
   )
 }
