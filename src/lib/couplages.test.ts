@@ -11,17 +11,15 @@
  * Ce qu'ils ne couvrent pas : les sommes composées comme `ENTETE_PAYSAGE`,
  * bâties sur plusieurs règles à la fois. Elles restent tenues par
  * `tools/reach.mjs`, qui mesure le résultat dans un vrai navigateur.
+ *
+ * Les sources arrivent par `?raw` : c'est Vite qui lit les fichiers, et le
+ * projet `src` n'a pas à connaître Node pour ça.
  */
-import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { BORDURE_APPAREIL, PAYSAGE_COURT } from './geometrie'
-
-const ecrans = readFileSync(new URL('../styles/ecrans.css', import.meta.url), 'utf8')
-const scene = readFileSync(new URL('../components/Scene.tsx', import.meta.url), 'utf8')
-const collantes = readFileSync(
-  new URL('../hooks/useHauteursCollantes.ts', import.meta.url),
-  'utf8',
-)
+import ecrans from '../styles/ecrans.css?raw'
+import scene from '../components/Scene.tsx?raw'
+import collantes from '../hooks/useHauteursCollantes.ts?raw'
 
 describe('les nombres recopiés du CSS', () => {
   it('la bordure de l’appareil est celle de `.appareil`', () => {
