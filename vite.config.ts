@@ -104,6 +104,17 @@ export default defineConfig({
         background_color: '#F2EDDD',
         theme_color: '#F2EDDD',
         categories: ['graphics', 'personalization', 'utilities'],
+        // Le raccourci de l'icône installée : un appui long, et l'application
+        // s'ouvre sur un tirage déjà fait. `?alea` est lu une fois au
+        // montage, puis l'adresse redevient concrète d'elle-même : le lien
+        // qu'on partage ensuite porte le motif tiré, jamais le hasard.
+        shortcuts: [
+          {
+            name: 'Surprends-moi',
+            url: '/app?alea',
+            icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }],
+          },
+        ],
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },

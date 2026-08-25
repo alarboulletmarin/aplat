@@ -109,13 +109,34 @@ export function App() {
      peinture. L'appel est idempotent et ne dépend que de l'état. */
   enregistrerPalettes(inventaire.map(versPalette))
 
-  const [reglages, setReglages] = useState<Reglages>(() =>
-    lireUrl(
+  const [reglages, setReglages] = useState<Reglages>(() => {
+    const initiaux = lireUrl(
       window.location.search,
       detecte,
       lireAffichage(window.location.search, navigator.language),
-    ),
-  )
+    )
+    /* Le raccourci du manifeste : `/app?alea` entre sur un tirage déjà fait.
+       Le hasard se joue ici, avant le premier rendu : aucune image peinte
+       puis remplacée, et l'effet d'URL rend aussitôt l'adresse concrète, si
+       bien que le hasard ne survit pas dans le lien qu'on partagerait. */
+    try {
+      if (new URLSearchParams(window.location.search).has('alea')) {
+        const palettes: IdPaletteQuelconque[] = [
+          ...ORDRE_PALETTES,
+          ...persos.map((p) => p.id),
+        ]
+        return {
+          ...initiaux,
+          famille: tirer(FAMILLES.map((f) => f.id), initiaux.famille),
+          palette: tirer(palettes, initiaux.palette),
+          graine: tirerGraine(),
+        }
+      }
+    } catch {
+      /* adresse illisible : les défauts suffisent */
+    }
+    return initiaux
+  })
   const [ephemere, setEphemere] = useState<Ephemere>(EPHEMERE_INITIAL)
 
   /* Le verrou de réentrance ne peut pas vivre dans la phase d'affichage :
