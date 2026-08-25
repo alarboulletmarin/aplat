@@ -26,8 +26,12 @@ export function MiseAJour({ textes }: { textes: Textes }) {
 
   if (!aBesoin || ecarte) return null
 
+  /* Pas de `role="status"` ici : la note monte dans `.barre-live`, région déjà
+     en place et vide au chargement, qui annonce ce qui s'y ajoute. Une région
+     live insérée déjà remplie n'est pas annoncée de façon fiable, et deux
+     régions imbriquées feraient dire la phrase deux fois. */
   return (
-    <div className="note note-maj" role="status">
+    <div className="note note-maj">
       <span className="note-maj-i" aria-hidden="true">
         <i />
         <b />

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef, type KeyboardEvent } from 'react'
+import { useEffect, useRef, type KeyboardEvent } from 'react'
 import {
-  FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
-  type Densite, type Groupe, type IdFamille, type IdPalette, type Langue,
+  estPaletteLivree, FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
+  type Densite, type Groupe, type IdFamille, type IdPaletteQuelconque, type Langue,
 } from '../lib/moteur'
 import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
 import { remplir, type Textes } from '../i18n'
@@ -55,7 +55,7 @@ export function ChoixFamille({
   onGroupe,
 }: {
   valeur: IdFamille
-  palette: IdPalette
+  palette: IdPaletteQuelconque
   densite: Densite
   graine: number
   groupe: Groupe
@@ -126,9 +126,9 @@ export function ChoixFamille({
               onClick={() => onGroupe(entree.id)}
             >
               <span>{textes.reglages[entree.cle]}</span>
-              <span className="onglet-n" aria-hidden="true">
-                {compte}
-              </span>
+              {/* Le nombre entre dans le nom accessible de l'onglet : il est
+                  sous les yeux, il doit être à l'oreille aussi. */}
+              <span className="onglet-n">{compte}</span>
             </button>
           )
         })}
@@ -174,7 +174,7 @@ export function ChoixFamille({
 }
 
 /** L'échantillon d'une palette : le fond, puis trois teintes au plus. */
-function Echantillon({ id }: { id: IdPalette }) {
+function Echantillon({ id }: { id: IdPaletteQuelconque }) {
   const p = resoudrePalette(id)
   const suite = teintes(p).slice(0, 4)
   return (
@@ -215,7 +215,7 @@ export function ChoixPalette({
   onSupprimer,
   onAnnuler,
 }: {
-  valeur: IdPalette
+  valeur: IdPaletteQuelconque
   langue: Langue
   textes: Textes
   /** Les palettes composées, gardées sur l'appareil. */
@@ -232,7 +232,7 @@ export function ChoixPalette({
   densite: Densite
   graine: number
   revision: number
-  onChoisir: (palette: IdPalette) => void
+  onChoisir: (palette: IdPaletteQuelconque) => void
   onEditer: (cible: PalettePerso | 'nouvelle' | null) => void
   onBrouillon: (palette: PalettePerso | null) => void
   onEnregistrer: (palette: PalettePerso) => void
@@ -247,9 +247,32 @@ export function ChoixPalette({
      clavier. Celle qui ne contient pas la sélection n'a aucune option cochée :
      sans `porteEntree` sur sa première puce, toutes ses options seraient à
      `tabIndex -1` et le groupe deviendrait injoignable au clavier. */
-  const livreeChoisie = ORDRE_PALETTES.includes(valeur)
+  const livreeChoisie = estPaletteLivree(valeur)
 
-  const puce = (id: IdPalette, nom: string, porteEntree = false) => (
+  /* L'éditeur focalise son premier champ à l'ouverture ; voici le geste
+     symétrique. Sa fermeture, comme la suppression de la palette choisie,
+     démonte le bouton qui portait le focus, et le navigateur le rend au
+     document : le parcours clavier repartirait du haut de la page. Même
+     retour que dans Partage : le focus revient au bouton qui a ouvert
+     l'éditeur, ou au premier bouton d'action encore debout quand il a
+     disparu, ce qui arrive après une suppression. */
+  const declencheur = useRef<string | null>(null)
+  const editionPrecedente = useRef(edition)
+  const choisiePrecedente = useRef(choisie)
+  useEffect(() => {
+    const fermait = editionPrecedente.current !== null && edition === null
+    const perdait = choisiePrecedente.current !== null && choisie === null && edition === null
+    editionPrecedente.current = edition
+    choisiePrecedente.current = choisie
+    if ((!fermait && !perdait) || document.activeElement !== document.body) return
+    const cible = [declencheur.current, 'btn-modifier-palette', 'btn-composer-palette']
+      .map((id) => (id ? document.getElementById(id) : null))
+      .find((bouton) => bouton instanceof HTMLButtonElement && !bouton.disabled)
+    declencheur.current = null
+    cible?.focus()
+  }, [edition, choisie])
+
+  const puce = (id: IdPaletteQuelconque, nom: string, porteEntree = false) => (
     <OptionRadio
       key={id}
       choisi={id === valeur}
@@ -294,12 +317,12 @@ export function ChoixPalette({
           className="grille-palettes"
         >
           {persos.map((p, indice) =>
-            puce(p.id as IdPalette, p.nom, livreeChoisie && indice === 0),
+            puce(p.id, p.nom, livreeChoisie && indice === 0),
           )}
           {recue && !persos.some((p) => p.id === recue.id)
             ? puce(
-                recue.id as IdPalette,
-                resoudrePalette(recue.id as IdPalette)[langue],
+                recue.id,
+                resoudrePalette(recue.id)[langue],
                 livreeChoisie && persos.length === 0,
               )
             : null}
@@ -326,7 +349,10 @@ export function ChoixPalette({
             type="button"
             id="btn-modifier-palette"
             className="btn-oublier"
-            onClick={() => onEditer(choisie)}
+            onClick={() => {
+              declencheur.current = 'btn-modifier-palette'
+              onEditer(choisie)
+            }}
           >
             {remplir(T.modifier, { nom: choisie.nom })}
           </button>
@@ -365,7 +391,10 @@ export function ChoixPalette({
             id="btn-composer-palette"
             className="btn-surprise"
             disabled={pleine}
-            onClick={() => onEditer('nouvelle')}
+            onClick={() => {
+              declencheur.current = 'btn-composer-palette'
+              onEditer('nouvelle')
+            }}
           >
             <span className="ico-teintes" aria-hidden="true">
               <i />

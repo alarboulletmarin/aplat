@@ -105,6 +105,16 @@ export function BarreAction({
   const T = textes.barre
   const calcul = phase === 'calcul'
 
+  /* Échap referme le dépli et rend le focus à son déclencheur : la feuille
+     n'est pas un piège à focus, mais sans ce chemin de sortie le clavier
+     devait retraverser les cinq sorties pour revenir à la rangée. */
+  const boutonFormats = useRef<HTMLButtonElement>(null)
+  const surEchap = (evenement: React.KeyboardEvent<HTMLDivElement>) => {
+    if (evenement.key !== 'Escape' || !formats) return
+    onFormats()
+    boutonFormats.current?.focus()
+  }
+
   /* Le glissement qui retire la note de succès. Un seul doigt, vers le bas,
      le sens dans lequel une carte posée en bas de l'écran peut partir. Le
      bouton Fermer et la minuterie font le même travail sans geste : le
@@ -207,9 +217,12 @@ export function BarreAction({
   ]
 
   return (
-    <div className="barre" ref={cadre}>
-      {children}
+    <div className="barre" ref={cadre} onKeyDown={surEchap}>
       <div className="barre-live" aria-live="polite">
+        {/* La proposition de mise à jour monte dans la région live, déjà en
+            place et vide au chargement : une région insérée déjà remplie
+            n'est pas annoncée de façon fiable. */}
+        {children}
         {phase === 'faite' && !vide && fichier && (
           <div
             className="note note-faite"
@@ -270,31 +283,14 @@ export function BarreAction({
             )}
           </div>
         )}
-      </div>
 
-      {/* Le dépli est au-dessus de la rangée et non dessous : la barre est
-          collée en bas de l'écran, et une liste qui pousserait vers le bas
-          sortirait de la fenêtre. */}
-      {formats && (
-        <div className="feuille" id="feuille-formats">
-          <ul className="feuille-liste">
-            {sorties.map((sortie) => (
-              <li key={sortie.id}>
-                <button
-                  type="button"
-                  id={sortie.id}
-                  className="feuille-b"
-                  disabled={Boolean(sortie.indisponible) || vide}
-                  onClick={sortie.action}
-                >
-                  <span className="feuille-t">{sortie.titre}</span>
-                  <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Deux états qui ne changeaient qu'un libellé hors région live : le
+            début du rendu et la copie de l'image. Chacun monte ici dans son
+            propre nœud, invisible à l'œil, pour être dit sans effacer une
+            note déjà en train de l'être. */}
+        {calcul && <p className="vh">{T.rendu}</p>}
+        {copiee && <p className="vh">{T.copiee}</p>}
+      </div>
 
       <div className="actions">
         <button
@@ -344,6 +340,7 @@ export function BarreAction({
           <button
             type="button"
             id="btn-formats"
+            ref={boutonFormats}
             className="btn-formats"
             aria-expanded={formats}
             aria-controls="feuille-formats"
@@ -355,6 +352,32 @@ export function BarreAction({
           </button>
         </div>
       </div>
+
+      {/* Le dépli suit son déclencheur dans le document, pour que Tab y entre
+          juste après lui. Il se montre pourtant au-dessus de la rangée : la
+          barre est collée en bas de l'écran, et une liste qui pousserait vers
+          le bas sortirait de la fenêtre. C'est `order`, dans composants.css,
+          qui fait cet écart entre l'ordre lu et l'ordre vu. */}
+      {formats && (
+        <div className="feuille" id="feuille-formats">
+          <ul className="feuille-liste">
+            {sorties.map((sortie) => (
+              <li key={sortie.id}>
+                <button
+                  type="button"
+                  id={sortie.id}
+                  className="feuille-b"
+                  disabled={Boolean(sortie.indisponible) || vide}
+                  onClick={sortie.action}
+                >
+                  <span className="feuille-t">{sortie.titre}</span>
+                  <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* La ligne du fichier. Elle n'est pas une note de bas de page : c'est la
           seule chose de l'écran qui dise ce que le fichier contient de plus
@@ -377,11 +400,17 @@ export function BarreAction({
           {sombre ? `${T.versionSombre} ` : ''}
           {voile ? (voilePeint ? T.voileInclus : T.voileNul) : T.voileAbsent}
         </span>
+        {/* Pas d'aria-pressed ici : le libellé décrit l'action à venir
+            (« Retirer » ou « Remettre »), et un état pressé par-dessus disait
+            l'inverse du mot lu. L'épingle d'Historique garde le sien parce
+            qu'il suit son état, pressé quand c'est épinglé. L'attribut de
+            donnée ne porte que le costume : l'état, c'est la phrase à côté
+            qui le dit. */}
         <button
           type="button"
           id="btn-voile"
           className="btn-voile"
-          aria-pressed={!voile}
+          data-voile={voile ? 'oui' : 'non'}
           title={T.voileTitre}
           onClick={onVoile}
         >

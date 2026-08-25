@@ -66,6 +66,10 @@ export function Partage({
         {echecCopie
           ? textes.partage.echec
           : `${textes.partage.note} ${textes.partage.graine}\u00a0${graine}`}
+        {/* Le succ\u00e8s s'ajoute \u00e0 la r\u00e9gion live dans un n\u0153ud invisible : le
+            libell\u00e9 du bouton change d\u00e9j\u00e0 sous les yeux, mais un changement de
+            libell\u00e9 hors r\u00e9gion live reste muet au lecteur d'\u00e9cran. */}
+        {copie && <span className="vh">{textes.partage.copie}</span>}
       </p>
 
       {echecCopie && (

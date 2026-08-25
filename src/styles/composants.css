@@ -243,7 +243,7 @@
   min-height: 46px;
   border-radius: 16px 16px 5px 5px;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 12.5px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -928,6 +928,16 @@
   gap: 10px;
   align-items: stretch;
 }
+/* Le dépli des formats suit son déclencheur dans le document, pour que Tab y
+   entre juste après lui ; `order` le repose au-dessus de la rangée, où il
+   s'ouvre puisque la barre colle au bas de l'écran. Les notes gardent la
+   première place, comme avant. */
+.barre .note {
+  order: -2;
+}
+.barre .feuille {
+  order: -1;
+}
 /* Les deux secondaires cèdent la place au primaire : avec des facteurs de
    rétrécissement voisins les libellés étaient coupés, y compris
    « Télécharger » dès 320 px. */
@@ -1100,7 +1110,7 @@
   min-height: 44px;
   padding: 0 12px;
   cursor: pointer;
-  border-radius: 14px 14px 4px 4px;
+  border-radius: 16px 16px 5px 5px;
   border: 1.5px solid var(--filet-franc);
   background: transparent;
   color: var(--encre);
@@ -1113,8 +1123,9 @@
    compensation par le rembourrage ne tient pas, les traits d'un pixel et demi
    étant arrondis différemment selon la densité de l'écran. L'aplat inversé dit
    l'état à lui seul, en couleur comme en niveaux de gris, et le libellé change
-   avec lui. */
-.btn-voile[aria-pressed='true'] {
+   avec lui. L'état vit dans `data-voile`, pas dans `aria-pressed` : le libellé
+   du bouton décrit l'action, et un état pressé par-dessus disait l'inverse. */
+.btn-voile[data-voile='non'] {
   border-color: var(--encre);
   background: var(--encre);
   color: var(--papier);
@@ -1241,4 +1252,17 @@
 }
 .note-maj-oui {
   border-color: var(--encre);
+}
+
+/* --- Contraste forcé ------------------------------------------------------------
+   En contraste forcé (Windows), les aplats de fond disparaissent et l'état choisi
+   avec eux : ce contour transparent, invisible en temps normal et sans effet sur
+   la mise en page, y devient visible et continue de dire la sélection. En retrait
+   du bord pour ne pas se fondre dans la bordure, et écarté au focus pour ne pas
+   recouvrir l'anneau de `:focus-visible`, de spécificité moindre. */
+.opt[aria-checked='true']:not(:focus-visible),
+.btn-epingler[aria-pressed='true']:not(:focus-visible),
+.btn-voile[data-voile='non']:not(:focus-visible) {
+  outline: 2px solid transparent;
+  outline-offset: -4px;
 }
