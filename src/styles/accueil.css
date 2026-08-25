@@ -503,10 +503,25 @@
   border: 2px solid var(--encre);
   border-radius: 999px 999px 4px 4px;
 }
+/* Le pied de la porte empile ses deux lignes au lieu de les mettre côte à
+   côte. Les douze vignettes y logent un nom de famille et un nom de palette,
+   deux mots courts qui tiennent sur une ligne et ne se coupent pas ; ici, la
+   seconde ligne est une phrase, et la rangée la poussait hors du cadre en
+   emportant la première avec elle. */
 .tuile-porte .tuile-pied {
   position: static;
   width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
   border-top: 2px solid var(--encre);
+}
+.tuile-porte .tuile-nom,
+.tuile-porte .tuile-palette {
+  max-width: 100%;
+  overflow: visible;
+  white-space: normal;
 }
 
 /* --- Les formats ------------------------------------------------------------
