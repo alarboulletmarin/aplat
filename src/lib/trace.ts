@@ -227,3 +227,94 @@ export function peindreChampSeuille(
     }
   }
 }
+
+/**
+ * Le contour d'un polygone, ajouté au chemin courant sans l'ouvrir.
+ *
+ * C'est lui qui permet d'évider un signe : le contour et son trou entrent dans
+ * le même chemin, que la règle paire et impaire remplit en anneau. Le pinceau
+ * ne sait pas détourer, et c'est la seule façon qu'a une forme creuse de
+ * laisser voir ce qui est derrière elle plutôt qu'une teinte devinée.
+ */
+export function tracerPolygone(ctx: Pinceau, points: readonly Point[]): void {
+  if (points.length < 2) return
+  ctx.moveTo(points[0][0], points[0][1])
+  for (let i = 1; i < points.length; i += 1) ctx.lineTo(points[i][0], points[i][1])
+  ctx.closePath()
+}
+
+/**
+ * Le contour d'un cercle, ajouté au chemin courant sans l'ouvrir. Le crayon
+ * est posé sur le départ de l'arc avant de le suivre : sans ce `moveTo`, l'arc
+ * traînerait derrière lui un segment venu de la forme précédente.
+ */
+export function tracerCercle(ctx: Pinceau, cx: number, cy: number, rayon: number): void {
+  ctx.moveTo(cx + rayon, cy)
+  ctx.arc(cx, cy, rayon, 0, Math.PI * 2)
+  ctx.closePath()
+}
+
+/**
+ * Un polygone fermé, sommet par sommet : le chemin, pas le remplissage.
+ *
+ * Le chemin est ouvert avant tout examen du nombre de sommets. C'est
+ * volontaire : une découpe peut ne rien laisser, et un `fill()` qui suivrait
+ * sans `beginPath()` repeindrait la forme d'avant au lieu de ne rien peindre.
+ */
+export function polygone(ctx: Pinceau, points: readonly Point[]): void {
+  ctx.beginPath()
+  tracerPolygone(ctx, points)
+}
+
+/**
+ * Un polygone convexe coupé par un demi-plan : ce qui reste du côté où
+ * `nx x + ny y <= d`. C'est la découpe de Sutherland et Hodgman, la même que
+ * la fracture pratique sur ses cellules ; elle est ici parce que le pinceau ne
+ * sait pas détourer, et qu'une bande de hachures doit donc arriver déjà
+ * taillée à la forme qui la porte.
+ */
+export function couperDemiPlan(
+  points: readonly Point[], nx: number, ny: number, d: number,
+): Point[] {
+  const garde: Point[] = []
+  for (let i = 0; i < points.length; i += 1) {
+    const a = points[i]
+    const b = points[(i + 1) % points.length]
+    const da = a[0] * nx + a[1] * ny - d
+    const db = b[0] * nx + b[1] * ny - d
+    if (da <= 0) garde.push(a)
+    if ((da <= 0) !== (db <= 0)) {
+      const t = da / (da - db)
+      garde.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])
+    }
+  }
+  return garde
+}
+
+/**
+ * Les hachures : des bandes parallèles taillées dans un polygone convexe.
+ *
+ * Le pinceau ne connaît que le remplissage, jamais le trait ni le détourage :
+ * chaque bande est donc calculée comme une surface, découpée deux fois contre
+ * la forme qui la porte. Le pas et la phase se mesurent sur la normale, si
+ * bien qu'une case et sa voisine hachurées du même angle continuent la même
+ * série au lieu de se décaler d'une demi-bande.
+ */
+export function hachurer(
+  ctx: Pinceau, contour: readonly Point[], angle: number, pas: number, part = 0.5,
+): void {
+  if (contour.length < 3 || !(pas > 0)) return
+  const nx = Math.cos(angle)
+  const ny = Math.sin(angle)
+  const projections = contour.map((p) => p[0] * nx + p[1] * ny)
+  const debut = Math.floor(Math.min(...projections) / pas) * pas
+  const fin = Math.max(...projections)
+  for (let d = debut; d < fin; d += pas) {
+    const bande = couperDemiPlan(
+      couperDemiPlan(contour, nx, ny, d + pas * part), -nx, -ny, -d,
+    )
+    if (bande.length < 3) continue
+    polygone(ctx, bande)
+    ctx.fill()
+  }
+}

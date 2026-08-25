@@ -136,7 +136,7 @@ src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
 src/lib/trace.ts              les outils des gestes : rubans, bruit, teintes
 src/lib/{niveaux,fractures,reserves,chimie,reseaux,pavages,trames,grammaires}.ts
-                              les gestes ajoutés : un module par mécanique de dessin
+src/lib/{carreaux,coulees}.ts les gestes ajoutés : un module par mécanique de dessin
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
 src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
@@ -313,16 +313,17 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-trois familles, cinq groupes.**
+**Soixante-huit familles, cinq groupes.**
 
-- **Abstraits** (vingt-huit) : les douze libres, qui sèment des formes sur un
+- **Abstraits** (trente-trois) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
   pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
-  se reconnaît à une règle qu'on voit se tordre ; et cinq venues des nouveaux
-  gestes : Kintsugi et Banquise brisent la surface en pièces (Voronoï par
-  découpe de demi-plans, les jointures affleurent), Claustra et Papel picado
-  percent un aplat en réserve, Penrose pave sans période, par déflation.
+  se reconnaît à une règle qu'on voit se tordre ; cinq venues des gestes de la
+  seconde série : Kintsugi et Banquise brisent la surface en pièces (Voronoï
+  par découpe de demi-plans, les jointures affleurent), Claustra et Papel
+  picado percent un aplat en réserve, Penrose pave sans période, par
+  déflation ; et cinq venues du carreau et de la coulée, décrits plus bas.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
   reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
   Madrépore se cultivent, une réaction-diffusion de Gray-Scott gelée à un
@@ -347,6 +348,43 @@ et le fichier exporté sont le même dessin, à deux échelles.
   un. S'y ajoutent une Empreinte digitale géante en rubans interrompus, un
   Herbier poussé par récursion, un plan de Métro fictif et des
   Constellations reliées à la règle.
+
+**Deux gestes récents, cinq familles.** Ils répondent à la même demande, celle
+des affiches géométriques, et ils s'y prennent par les deux bouts.
+
+*Le carreau* (`src/lib/carreaux.ts`) découpe le plan en cases carrées et donne
+à chacune un signe pris dans un jeu fini : quart de disque, demi-disque,
+triangle, amande, sautoir, bandes, anneau. Rien n'est dessiné qui ne tienne
+dans une case, et le rythme vient de ce serrage : deux quarts de disque voisins
+font un demi, quatre font un rond, et l'oeil lit une composition là où la règle
+n'a fait que remplir des cases. Quatre familles s'y partagent l'alphabet, et ce
+qui les sépare est la façon d'occuper la grille. **Bauhaus** laisse respirer,
+des cases vides, des aplats francs, une case sur cinq regroupée par quatre pour
+porter un signe deux fois plus grand. **Carreaux** ne laisse rien passer, chaque
+case a son aplat, et le motif se lit en camaïeu parce que le signe est toujours
+la teinte voisine de son aplat dans l'ordre des luminances. **Demi-lunes**
+n'emploie que les rondeurs et en tire des colonnades : les demi-disques
+s'appuient sur les bords, et deux voisines font un sablier, une amande ou un
+cercle que personne n'a dessiné. **Jetons** revient à deux tons et sème sur un
+damier lâche des pièces frappées, anneaux, rouages, hexagones, étoiles.
+
+Les signes évidés ne peignent pas leur creux : le contour et le trou entrent
+dans le même chemin, rempli en règle paire et impaire. C'est ce qui permet à un
+anneau de tomber indifféremment sur un aplat de case ou sur la page nue, sans
+que le geste ait à connaître le fond de la palette, qu'il ne reçoit pas.
+
+*La coulée* (`src/lib/coulees.ts`) fait l'inverse : au lieu de remplir des
+cases, elle les traverse. **Méandres** pose sur chaque tuile deux arcs épais qui
+entrent et sortent par le milieu de deux de ses côtés ; comme les milieux de
+côtés appartiennent à deux tuiles, les bandes se prolongent et serpentent d'un
+bord à l'autre du cadre, avec des épingles à cheveux que personne n'a placées.
+Ce qui fait la famille n'est pourtant pas le tracé, c'est la couleur : un ruban
+n'est une chose que si toute sa longueur porte la même teinte, et une tuile ne
+sait rien de la longueur qui la traverse. Les milieux de côtés sont donc réunis
+en classes par une union-trouve avant le moindre tracé, et la teinte se tire de
+la classe. Un ruban sur quatre environ n'est pas peint : le fond de la palette
+reste alors visible sur toute sa longueur, si bien que le vide se lit comme une
+bande de la même largeur que les autres.
 
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
 Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
@@ -406,7 +444,7 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **2 079 combinaisons** (63 familles × 11 palettes × 3 densités)
+Mesuré sur les **2 244 combinaisons** (68 familles × 11 palettes × 3 densités)
 en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
@@ -425,7 +463,9 @@ en dense, dont chaque rayure pliée traverse la page de haut en bas ; puis à
 celui qui se compresse le moins, et il a déjà rendu une génération de
 losanges, autant pour rester lisible en aplats francs que pour son poids.
 C'est le prix honnête d'un motif qui couvre tout plutôt que de semer des
-formes sur un aplat.
+formes sur un aplat. Les cinq familles du carreau et de la coulée n'ont pas
+bougé ces trois chiffres : un alphabet de signes posés sur une grille se
+compresse par bandes, et des rubans en aplats francs plus encore.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -628,9 +668,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 079 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 244 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 63 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 68 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

@@ -9,6 +9,34 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : cinq familles géométriques, le carreau et la coulée
+
+- **Cinq familles pour les affiches géométriques.** Bauhaus compose des cases
+  franches sur la page, des quarts de disque, des triangles, des sautoirs, une
+  case sur cinq regroupée par quatre pour porter un signe deux fois plus grand.
+  Carreaux remplit toute la grille en camaïeu, chaque signe posé sur la teinte
+  voisine de son aplat. Demi-lunes n'emploie que les rondeurs et en tire des
+  colonnades. Jetons revient à deux tons et sème des pièces frappées sur un
+  damier lâche. Méandres fait serpenter des rubans larges d'un bord à l'autre
+  de l'image. Le catalogue passe à soixante-huit familles.
+- **Deux gestes de plus dans le moteur.** Le carreau découpe le plan en cases
+  et donne à chacune un signe pris dans un jeu fini ; la coulée traverse ces
+  mêmes cases avec des bandes qui se raccordent. Ce sont les deux moitiés de
+  la même question, remplir une grille ou la parcourir.
+- **Un ruban de Méandres garde sa couleur sur toute sa longueur.** Une tuile ne
+  sait rien de ce qui la traverse : les milieux de côtés sont réunis en classes
+  avant le moindre tracé, et la teinte se tire de la classe. Sans cela, un
+  damier bariolé ; avec, un ruban qu'on suit du doigt sur toute la hauteur de
+  l'écran.
+- **Les signes creux montrent ce qu'il y a derrière.** Un anneau n'est plus un
+  disque couvert d'un disque plus petit de la couleur du fond, c'est un contour
+  et son trou dans le même chemin. Il tombe donc aussi bien sur un aplat que
+  sur la page, sans que le moteur ait à deviner ce qui est dessous.
+- **Le même contrat que tout le reste.** Déterministe au quadruplet près, la
+  même image à toute résolution, exportable en PNG comme en vectoriel, mesuré
+  par la sonde de lisibilité, et tenu par les mêmes vérifications que les
+  soixante-trois autres.
+
 ### Ajouté : dix-sept familles, et un cinquième groupe, les Matières
 
 - **Les Matières entrent au catalogue.** Un cinquième onglet, entre les
