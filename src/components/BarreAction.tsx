@@ -2,13 +2,14 @@
 
 import { useRef } from 'react'
 import { decimal, nombre, poids } from '../lib/format'
-import type { Format } from '../lib/export'
+import type { EchecExport, Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
 import type { Resolution } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
 
 export type Phase = 'repos' | 'calcul' | 'faite' | 'erreur'
-export type Echec = 'trop' | 'capacite' | 'generale' | 'formatRefuse' | 'presse' | 'svgDense'
+/* Les échecs de l'encodeur, plus celui que la barre détecte avant lui. */
+export type Echec = EchecExport | 'trop'
 
 export interface Fichier {
   largeur: number

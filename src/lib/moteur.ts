@@ -1911,6 +1911,8 @@ export function mesurer(
 
   const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre }
   memoire.set(cle, mesure)
+  /* Plafond simple : on évince la plus ancienne entrée, pas la moins
+     utilisée. À quatre cents mesures, raffiner ne changerait rien. */
   if (memoire.size > MEMOIRE_MAX) {
     const premiere = memoire.keys().next()
     if (!premiere.done) memoire.delete(premiere.value)

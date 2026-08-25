@@ -193,13 +193,6 @@ export function encoderImage(travail: Travail): Promise<Blob> {
   })
 }
 
-/** L'ancien nom, gardé parce qu'il dit exactement ce qu'il fait. */
-export function encoderPNG(
-  motif: Motif, largeur: number, hauteur: number, voile = true, sombre = false,
-): Promise<Blob> {
-  return encoderImage({ motif, largeur, hauteur, voile, sombre, format: 'png' })
-}
-
 /**
  * Le motif en vectoriel. Lève `svgDense` quand la famille compte trop de formes
  * pour que le fichier ait encore un sens.
