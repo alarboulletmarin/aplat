@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import { App } from './App'
-import { Accueil } from './components/accueil/Accueil'
 import { redirection, route } from './lib/route'
 // tokens.css d'abord : tout le reste s'y réfère.
 import './styles/tokens.css'
@@ -12,6 +10,19 @@ import './styles/base.css'
 import './styles/composants.css'
 import './styles/ecrans.css'
 import './styles/accueil.css'
+
+/* En différé : une seule des deux pages est montée, et l'import paresseux
+   coupe le paquet en deux, si bien qu'ouvrir la présentation ne télécharge pas
+   l'application, ni l'inverse.
+
+   La règle ci-dessous veille au rafraîchissement à chaud des fichiers de
+   composants ; ce fichier est l'entrée, il ne se rafraîchit qu'en entier. */
+/* eslint-disable react-refresh/only-export-components */
+const App = lazy(() => import('./App').then((m) => ({ default: m.App })))
+const Accueil = lazy(() =>
+  import('./components/accueil/Accueil').then((m) => ({ default: m.Accueil })),
+)
+/* eslint-enable react-refresh/only-export-components */
 
 /* Les liens partagés du temps où l'application vivait à la racine portent un
    motif que quelqu'un a voulu transmettre. Ils sont reconduits sous « /app »
@@ -33,7 +44,11 @@ if (!racine) {
 if (!ailleurs) {
   createRoot(racine).render(
     <StrictMode>
-      {route(window.location.pathname) === 'app' ? <App /> : <Accueil />}
+      {/* Rien pendant le chargement du morceau : la page porte déjà son fond
+          par le script d'index.html, un squelette ne ferait que clignoter. */}
+      <Suspense fallback={null}>
+        {route(window.location.pathname) === 'app' ? <App /> : <Accueil />}
+      </Suspense>
     </StrictMode>,
   )
 }

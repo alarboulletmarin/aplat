@@ -24,9 +24,9 @@
  */
 import {
   estDensite, estFamille, estPalette,
-  type Densite, type IdFamille, type IdPalette, type Motif,
+  type Densite, type IdFamille, type IdPaletteQuelconque, type Motif,
 } from './moteur'
-import { GRAINE_MAX } from './url'
+import { GRAINE_MAX } from './tirage'
 
 /** Le nom est préfixé : un jour, une autre application partagera cette origine. */
 export const CLE = 'aplat:motifs'
@@ -49,7 +49,7 @@ export const MAX_EPINGLES = 6
 /** Les clés sont celles de l'URL, courtes et déjà éprouvées. */
 export interface Entree {
   m: IdFamille
-  p: IdPalette
+  p: IdPaletteQuelconque
   d: Densite
   s: number
   /** 1 quand l'entrée est épinglée. Absent sinon : la liste reste minuscule. */

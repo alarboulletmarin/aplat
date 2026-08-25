@@ -33,7 +33,7 @@
  * un quota plein aussi, et une application qui promet de fonctionner hors ligne
  * n'a pas le droit de tomber pour ça.
  */
-import { empreintePalette, PREFIXE_PERSO, type Palette } from './moteur'
+import { empreintePalette, PREFIXE_PERSO, type IdPalettePerso, type Palette } from './moteur'
 
 /** Le nom est préfixé, comme celui de l'historique : une origine, deux clés. */
 export const CLE = 'aplat:palettes'
@@ -57,7 +57,7 @@ export const NOM_MAX = 24
 
 export interface PalettePerso {
   /** L'empreinte des couleurs, préfixée. Jamais saisi, toujours calculé. */
-  id: string
+  id: IdPalettePerso
   /** Vide pour une palette reçue par un lien et pas encore enregistrée. */
   nom: string
   fond: string
@@ -251,6 +251,10 @@ export function paletteDeRequete(recherche: string): PalettePerso | null {
   const suite = decoderTeintes(q.get('k'))
   if (!suite) return null
   const [fond, ...couleurs] = suite
-  if (empreintePalette(fond, couleurs) !== id) return null
-  return { id, nom: '', fond, couleurs }
+  /* L'empreinte recalculée sert aussi d'identifiant rendu : c'est la même
+     chaîne que `id`, la comparaison vient d'en répondre, et elle porte le type
+     que `id`, sorti d'une adresse, n'a pas. */
+  const empreinte = empreintePalette(fond, couleurs)
+  if (empreinte !== id) return null
+  return { id: empreinte, nom: '', fond, couleurs }
 }

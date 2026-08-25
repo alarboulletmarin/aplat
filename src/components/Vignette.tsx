@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useEffect, useRef } from 'react'
-import { dessiner, type Densite, type IdFamille, type IdPalette } from '../lib/moteur'
+import { dessiner, type Densite, type IdFamille, type IdPaletteQuelconque } from '../lib/moteur'
 import { useVisible } from '../hooks/useVisible'
 
 /**
@@ -19,7 +19,7 @@ export function Vignette({
   revision,
 }: {
   famille: IdFamille
-  palette: IdPalette
+  palette: IdPaletteQuelconque
   densite: Densite
   graine: number
   revision: number

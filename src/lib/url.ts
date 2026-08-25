@@ -2,8 +2,9 @@
 
 import {
   estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
-  type Densite, type IdFamille, type IdPalette, type Langue,
+  type Densite, type IdFamille, type IdPaletteQuelconque, type Langue,
 } from './moteur'
+import { GRAINE_MAX } from './tirage'
 import { type Affichage, type Theme } from './affichage'
 import { encoderTeintes } from './palettes'
 import { RES_MAX, RES_MIN, type Resolution } from './resolution'
@@ -25,7 +26,7 @@ export interface Reglages {
   langue: Langue
   theme: Theme
   famille: IdFamille
-  palette: IdPalette
+  palette: IdPaletteQuelconque
   densite: Densite
   graine: number
   /**
@@ -50,8 +51,6 @@ export interface Reglages {
   largeurSaisie: string
   hauteurSaisie: string
 }
-
-export const GRAINE_MAX = 99999
 
 export const REGLAGES_PAR_DEFAUT: Reglages = {
   langue: 'fr',

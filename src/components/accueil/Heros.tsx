@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { famille, FAMILLES, ORDRE_PALETTES, palette, type Langue } from '../../lib/moteur'
-import { GRAINE_MAX } from '../../lib/url'
+import { GRAINE_MAX } from '../../lib/tirage'
 import { nombre } from '../../lib/format'
 import { remplir, type Textes } from '../../i18n'
 import { Appareil } from './Appareil'

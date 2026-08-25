@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useEffect, useRef, useState } from 'react'
-import type { Densite, IdFamille, IdPalette } from '../lib/moteur'
+import type { Densite, IdFamille } from '../lib/moteur'
 import {
   composer, MAX_TEINTES, MIN_TEINTES, normaliserCouleur, teintes,
   type PalettePerso,
@@ -106,7 +106,7 @@ export function EditeurPalette({
           <span className="editeur-apercu">
             <Vignette
               famille={famille}
-              palette={brouillon.id as IdPalette}
+              palette={brouillon.id}
               densite={densite}
               graine={graine}
               revision={revision}

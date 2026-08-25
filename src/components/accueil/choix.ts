@@ -2,7 +2,7 @@
 
 import { FAMILLES, ORDRE_PALETTES, type Motif } from '../../lib/moteur'
 import { ORDINATEUR, TABLETTE, TELEPHONE } from '../../lib/resolution'
-import { GRAINE_MAX } from '../../lib/url'
+import { tirer, tirerGraine } from '../../lib/tirage'
 
 /**
  * Ce que la page d'accueil montre : douze motifs choisis, et trois formats.
@@ -72,21 +72,12 @@ export const VOILE: Motif = { famille: 'vagues', palette: 'lime', densite: 1, gr
  * changerait rien de visible ferait passer la page pour figée.
  */
 export function tirerMotif(precedent: Motif): Motif {
-  const tirer = <V,>(liste: readonly V[], sauf: V): V => {
-    const restantes = liste.filter((valeur) => valeur !== sauf)
-    const choix = restantes.length ? restantes : liste
-    return choix[Math.floor(Math.random() * choix.length)]
-  }
   return {
     famille: tirer(FAMILLES.map((f) => f.id), precedent.famille),
     palette: tirer(ORDRE_PALETTES, precedent.palette),
     densite: precedent.densite,
     graine: tirerGraine(),
   }
-}
-
-export function tirerGraine(): number {
-  return Math.floor(Math.random() * GRAINE_MAX) + 1
 }
 
 export const GALERIE: readonly Motif[] = [

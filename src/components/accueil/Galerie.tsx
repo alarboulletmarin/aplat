@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { famille, palette, type Langue } from '../../lib/moteur'
-import { GRAINE_MAX } from '../../lib/url'
+import { tirerGraine } from '../../lib/tirage'
 import { remplir, type Textes } from '../../i18n'
 import { Frise } from './Frise'
 import { Toile } from './Toile'
@@ -30,7 +30,7 @@ export function Galerie({ langue, textes }: { langue: Langue; textes: Textes }) 
   const relancer = (index: number) =>
     setGraines((precedentes) => ({
       ...precedentes,
-      [index]: Math.floor(Math.random() * GRAINE_MAX) + 1,
+      [index]: tirerGraine(),
     }))
 
   return (

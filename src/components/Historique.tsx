@@ -51,7 +51,7 @@ export function Historique({
   onEpingler,
   onOublier,
 }: {
-  liste: Entree[]
+  liste: readonly Entree[]
   courant: Motif
   langue: Langue
   textes: Textes

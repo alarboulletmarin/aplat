@@ -24,11 +24,11 @@ export const DELAI = 2500
  * chaque clic, il y est déjà.
  */
 export function useHistorique(motif: Motif): {
-  liste: Entree[]
+  liste: readonly Entree[]
   epingler: () => void
   oublier: () => void
 } {
-  const [liste, setListe] = useState<Entree[]>(lire)
+  const [liste, setListe] = useState<readonly Entree[]>(lire)
 
   /* Le motif en cours, lu par `epingler` sans entrer dans ses dépendances :
      un rappel qui change d'identité à chaque réglage refait le rendu de la
@@ -44,7 +44,7 @@ export function useHistorique(motif: Motif): {
         const suivante = ajouter(precedente, versEntree(motif))
         if (suivante === precedente) return precedente
         ecrire(suivante)
-        return suivante as Entree[]
+        return suivante
       })
     }, DELAI)
     return () => clearTimeout(minuterie)
@@ -63,11 +63,11 @@ export function useHistorique(motif: Motif): {
       const entree = versEntree(courant.current)
       const base = precedente.some((autre) => identique(autre, entree))
         ? precedente
-        : (ajouter(precedente, entree) as Entree[])
+        : ajouter(precedente, entree)
       const suivante = basculer(base, entree)
       if (suivante === precedente) return precedente
       ecrire(suivante)
-      return suivante as Entree[]
+      return suivante
     })
   }, [])
 

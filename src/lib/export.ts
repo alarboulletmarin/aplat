@@ -235,7 +235,7 @@ export function copierImage(blob: Blob | Promise<Blob>): Promise<void> {
     return Promise.reject(new ErreurExport('presse'))
   }
   try {
-    const item = new Item({ 'image/png': blob as unknown as Blob })
+    const item = new Item({ 'image/png': blob })
     return presse.write([item]).catch(() => {
       throw new ErreurExport('presse')
     })

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   enregistrerPalettes, FAMILLES, famille as trouverFamille, mesurer, ORDRE_PALETTES,
-  type Densite, type Groupe, type IdFamille, type IdPalette, type Langue, type Motif,
+  type Densite, type Groupe, type IdFamille, type IdPaletteQuelconque, type Langue, type Motif,
 } from './lib/moteur'
 import {
   ajouter as ajouterPalette, ecrire as ecrirePalettes, lire as lirePalettes,
@@ -12,7 +12,8 @@ import {
 import {
   depuisSaisie, detecter, MPX_MAX, TROIS_APPAREILS, typeAppareil,
 } from './lib/resolution'
-import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
+import { ecrireUrl, lireUrl, type Reglages, type Theme } from './lib/url'
+import { tirer, tirerGraine } from './lib/tirage'
 import { lireAffichage, retenirLangue, retenirTheme } from './lib/affichage'
 import { lienAccueil } from './lib/route'
 import {
@@ -266,7 +267,7 @@ export function App() {
 
   /* --- actions --- */
 
-  const nouvelleGraine = () => changer({ graine: Math.floor(Math.random() * GRAINE_MAX) + 1 })
+  const nouvelleGraine = () => changer({ graine: tirerGraine() })
 
   /* « Surprends-moi » : famille, palette et graine d'un coup. Le tirage exclut
      la valeur courante des deux listes, sinon un clic sur deux ne changerait
@@ -275,19 +276,14 @@ export function App() {
      tirage : ce sont des palettes, et les exclure ferait un hasard qui ignore
      précisément ce qu'on a choisi de fabriquer. */
   const surprendre = () => {
-    const tirer = <V,>(liste: readonly V[], sauf: V): V => {
-      const restantes = liste.filter((valeur) => valeur !== sauf)
-      const choix = restantes.length ? restantes : liste
-      return choix[Math.floor(Math.random() * choix.length)]
-    }
-    const palettes: IdPalette[] = [
+    const palettes: IdPaletteQuelconque[] = [
       ...ORDRE_PALETTES,
-      ...persos.map((p) => p.id as IdPalette),
+      ...persos.map((p) => p.id),
     ]
     changer({
       famille: tirer(FAMILLES.map((f) => f.id), reglages.famille),
       palette: tirer(palettes, reglages.palette),
-      graine: Math.floor(Math.random() * GRAINE_MAX) + 1,
+      graine: tirerGraine(),
     })
   }
 
@@ -324,7 +320,7 @@ export function App() {
     ecrirePalettes(suivante)
     setEditionPalette(null)
     setBrouillon(null)
-    changer({ palette: palette.id as IdPalette })
+    changer({ palette: palette.id })
   }
 
   const supprimerPalette = (id: string) => {
@@ -574,7 +570,7 @@ export function App() {
               densite={reglages.densite}
               graine={reglages.graine}
               revision={revision}
-              onChoisir={(palette: IdPalette) => changer({ palette })}
+              onChoisir={(palette: IdPaletteQuelconque) => changer({ palette })}
               onEditer={setEditionPalette}
               onBrouillon={setBrouillon}
               onEnregistrer={enregistrerPalette}

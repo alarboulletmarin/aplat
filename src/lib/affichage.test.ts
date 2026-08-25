@@ -7,6 +7,7 @@
  * d'adresse : ce qui en sort est traité avec la même défiance.
  */
 import { afterEach, describe, expect, it } from 'vitest'
+import pageIndex from '../../index.html?raw'
 import {
   adresseNettoyee, CLE_LANGUE, CLE_THEME, langueParDefaut, lireAffichage,
   retenirLangue, retenirTheme,
@@ -100,6 +101,17 @@ describe('retenue du choix', () => {
     expect(lireAffichage('', 'fr-FR')).toEqual({ langue: 'fr', theme: 'systeme' })
     expect(() => retenirLangue('en')).not.toThrow()
     expect(() => retenirTheme('systeme')).not.toThrow()
+  })
+})
+
+describe('le script d’index.html', () => {
+  /* Ce que ce test protège : le script anti-éclair d'index.html relit les
+     mêmes clés de stockage que ce module, écrites en dur parce qu'il court
+     avant tout import. Une clé renommée ici sans lui casserait le thème de la
+     première peinture, et aucun autre test ne le verrait. */
+  it('relit les clés de ce module, littéralement', () => {
+    expect(pageIndex).toContain(`'${CLE_THEME}'`)
+    expect(pageIndex).toContain(`'${CLE_LANGUE}'`)
   })
 })
 
