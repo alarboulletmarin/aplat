@@ -254,8 +254,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 41,
-    'onglets : les quatre couvrent les quarante et une familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 46,
+    'onglets : les quatre couvrent les quarante-six familles', onglets.comptes.join(' + '));
 
   await page.$eval('#onglet-fig', e => e.click());
   await page.waitForTimeout(300);
@@ -656,7 +656,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     for (const [w, h, attendu] of [[1179, 2556, 'Téléphone'], [1290, 2796, 'Téléphone'], [1440, 3200, 'Téléphone'],
                                    [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
       await ap.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
-      await ap.waitForTimeout(200);
+      /* L'application arrive par un chunk paresseux depuis la découpe du
+         bundle : au domcontentloaded le DOM n'est pas encore monté, et un
+         délai fixe parie sur l'horloge. On attend l'élément lui-même. */
+      await ap.waitForSelector('#res-appareil');
       const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(', ')[0]);
       if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
     }
@@ -1178,7 +1181,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
 
     const dire = () => vp.evaluate(() => ({
       ligne: document.getElementById('barre-voile').textContent,
-      presse: document.getElementById('btn-voile').getAttribute('aria-pressed'),
+      /* `data-voile` et non `aria-pressed` : le libellé du bouton décrit
+         l'action (« Retirer »/« Remettre »), et un état pressé par-dessus
+         disait l'inverse du mot lu. L'attribut de donnée porte le costume,
+         l'état se lit ici. */
+      presse: document.getElementById('btn-voile').dataset.voile,
       url: location.search,
       empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96),
       detail: document.getElementById('verdict-detail').textContent
@@ -1211,7 +1218,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await vp.waitForTimeout(500);
     const sans = await dire();
     t(/retiré du fichier/.test(sans.ligne), 'voile : la ligne suit l\'interrupteur', sans.ligne.slice(0, 60));
-    t(sans.presse === 'true', 'voile : l\'interrupteur dit son état');
+    t(sans.presse === 'non', 'voile : l\'interrupteur dit son état');
     const boiteApres = await boite();
     t(JSON.stringify(boiteAvant) === JSON.stringify(boiteApres),
       'voile : l\'interrupteur ne bouge pas d\'un pixel quand on l\'appuie',
@@ -1567,6 +1574,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
        tête, pendant que les autres passent. */
     for (let i = 0; i < 12; i++) {
       await ep.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=vagues&p=lime&d=1&s=' + (500 + i) + '&r=1179x2556', { waitUntil: 'domcontentloaded' });
+      /* Le regard de 2500 ms (DELAI de useHistorique) ne part qu'au montage,
+         et le chunk paresseux le retarde : l'attente se cale sur l'aperçu
+         monté, pas sur le domcontentloaded, pour garder sa marge. */
+      await ep.waitForSelector('#apercu');
       await ep.waitForTimeout(2700);
     }
     const apres = await ep.evaluate(() => {

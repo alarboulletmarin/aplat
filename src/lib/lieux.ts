@@ -36,7 +36,7 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 
-export const IDS_LIEUX = ['acropole', 'phare', 'pyramides', 'torii'] as const
+export const IDS_LIEUX = ['acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins'] as const
 
 export type IdLieu = (typeof IDS_LIEUX)[number]
 
@@ -156,7 +156,7 @@ export function tonsDeGravure(C: readonly string[]): { papier: string; encre: st
 
 /**
  * L'astre en réserve : le disque reste papier, quelle que soit la couche qui
- * passe dessous. C'est le geste commun des quatre lieux, et celui des gravures :
+ * passe dessous. C'est le geste commun des lieux, et celui des gravures :
  * le soleil n'est jamais encré, il est épargné.
  */
 function reserve(x: number, t: number, ax: number, at: number, r: number): number {
@@ -481,7 +481,198 @@ const torii: Scene = (rnd, rapport) => {
   }
 }
 
-const SCENES: Readonly<Record<IdLieu, Scene>> = { acropole, phare, pyramides, torii }
+/** L'aqueduc : deux rangs d'arches en travers de la vallée, la rivière dessous. */
+const aqueduc: Scene = (rnd, rapport) => {
+  const ciel = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const pierre = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const vallee = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const astreX = rapport * (0.16 + 0.68 * rnd())
+  const astreT = 0.07 + 0.08 * rnd()
+  const astreR = 0.045 + 0.03 * rnd()
+  const hautT = 0.3 + 0.07 * rnd()
+  const solT = 0.7 + 0.06 * rnd()
+  const bandeau = 0.025
+  /* L'étage des grandes arches occupe environ deux tiers de l'ouvrage,
+     comme sur les ponts romains : c'est cette inégalité qui fait la
+     silhouette, deux rangs égaux donneraient une grille. */
+  const etageT = hautT + bandeau + (solT - hautT - bandeau) * (0.32 + 0.08 * rnd())
+  const pGrand = 0.15 + 0.05 * rnd()
+  const decal = pGrand * rnd()
+  const demiG = pGrand * (0.3 + 0.05 * rnd())
+  const cintreG = etageT + 0.03 + demiG
+  /* Deux petites travées par grande : la période est la moitié, et le
+     décalage est le même, si bien que les piles des deux rangs tombent
+     l'une sur l'autre, comme le voudrait la maçonnerie. */
+  const pPetit = pGrand / 2
+  const demiP = pPetit * (0.3 + 0.06 * rnd())
+  const cintreP = hautT + bandeau + 0.02 + demiP
+  const lointainT = hautT + 0.12 + 0.05 * rnd()
+  const rivX = rapport * (0.25 + 0.5 * rnd())
+  const rivCourbe = (rnd() - 0.5) * 0.8
+
+  return (u, t) => {
+    const x = u * rapport
+    let c = 0.22 + 0.18 * t + (ciel(x * 2.6, t * 3.2) - 0.5) * 0.12
+
+    const astre = reserve(x, t, astreX, astreT, astreR)
+    if (astre >= 0) c = astre
+    else if (Math.hypot(x - astreX, t - astreT) < astreR * 1.7) c *= 0.6
+
+    /* Les collines du fond : on ne les voit qu'à travers les arches, et
+       c'est ce qui donne à l'ouvrage sa profondeur, chaque baie encadre un
+       morceau de paysage différent. */
+    const colline = lointainT + (vallee(x * 2.2 + 50, 3) - 0.5) * 0.09
+    if (t > colline) c = 0.42 + (vallee(x * 9, t * 9) - 0.5) * 0.18
+
+    if (t > hautT && t < solT) {
+      /* La position repliée sur la travée : la même formule dessine toutes
+         les arches d'un rang, et l'ouvrage traverse la page sans fin. */
+      const dxG = ((((x + decal) % pGrand) + pGrand) % pGrand) - pGrand / 2
+      const dxP = ((((x + decal) % pPetit) + pPetit) % pPetit) - pPetit / 2
+      let ouverte = false
+      let anneau = false
+      if (t > etageT) {
+        const d = t > cintreG ? Math.abs(dxG) : Math.hypot(dxG, t - cintreG)
+        ouverte = d < demiG
+        anneau = !ouverte && d < demiG + 0.014
+      } else if (t > hautT + bandeau) {
+        const d = t > cintreP ? Math.abs(dxP) : Math.hypot(dxP, t - cintreP)
+        ouverte = d < demiP
+        anneau = !ouverte && d < demiP + 0.011
+      }
+      /* Une baie ouverte ne repeint rien : le ciel et les collines restent,
+         et l'arche se lit en creux, ce qui est toute la marque du lieu. */
+      if (!ouverte) {
+        c = 0.3 + (pierre(x * 18, t * 18) - 0.5) * 0.2
+        if ((t * 40) % 1 < 0.12) c += 0.14
+        if (anneau) c = 0.88
+        if (t < hautT + bandeau) {
+          c = t - hautT < 0.008 ? 0.9 : 0.16
+        }
+      }
+    }
+
+    /* La vallée du premier plan, et la rivière en réserve : elle sort de
+       sous l'ouvrage et s'élargit en descendant, hachée par son courant. */
+    if (t > solT) {
+      c = 0.52 + (vallee(x * 12, t * 16) - 0.5) * 0.3 + (t - solT) * 0.3
+      const centre = rivX + rivCourbe * (t - solT) + (vallee(t * 4, 11) - 0.5) * 0.2
+      const demiRiv = 0.045 + (t - solT) * 0.35
+      const ecart = Math.abs(x - centre)
+      if (ecart < demiRiv) {
+        c = vallee(x * 26, t * 40) > 0.62 ? 0.3 : 0.1
+        if (demiRiv - ecart < 0.008) c = 0.75
+      }
+    }
+    return borner(c)
+  }
+}
+
+/** Les moulins : la croix des ailes sur un grand ciel, les champs en sillons. */
+const moulins: Scene = (rnd, rapport) => {
+  const ciel = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const terre = bruiteur(Math.floor(rnd() * 0xffffffff))
+  /* Les parcelles tirent leur ton et leurs sillons d'un hachage par bande :
+     c'est le remplaçant des tirages que la boucle des cellules s'interdit,
+     et il donne à chaque champ son caractère sans en tirer un seul. */
+  const graineChamps = Math.floor(rnd() * 0xffffffff)
+  const astreX = rapport * (0.16 + 0.68 * rnd())
+  const astreT = 0.08 + 0.08 * rnd()
+  const astreR = 0.04 + 0.03 * rnd()
+  const terreT = 0.56 + 0.08 * rnd()
+  const canalT = terreT + (1 - terreT) * (0.3 + 0.25 * rnd())
+  const canalE = 0.025 + 0.015 * rnd()
+  const hBande = 0.05 + 0.02 * rnd()
+  const mX = rapport * (0.3 + 0.4 * rnd())
+  const tourH = 0.17 + 0.05 * rnd()
+  const moyeuT = terreT - tourH
+  const aile = tourH * (0.75 + 0.15 * rnd())
+  const heure = rnd() * Math.PI * 0.5
+  const pX = mX + (mX < rapport / 2 ? 1 : -1) * rapport * (0.24 + 0.14 * rnd())
+  const pH = tourH * (0.38 + 0.12 * rnd())
+  const pHeure = rnd() * Math.PI * 0.5
+
+  /* La croix des ailes : 0 dehors, 2 sur le bord d'attaque, 1 sur le
+     treillis. Le bord est encré à plein et le treillis à moitié : c'est ce
+     partage qui fait tourner la croix au lieu d'en faire un X plein. */
+  const croix = (dx: number, dt: number, longueur: number, a: number): number => {
+    if (Math.hypot(dx, dt) > longueur) return 0
+    const demi = longueur * 0.085
+    for (let k = 0; k < 4; k += 1) {
+      const angle = a + (k * Math.PI) / 2
+      const rx = dx * Math.cos(angle) + dt * Math.sin(angle)
+      const ry = -dx * Math.sin(angle) + dt * Math.cos(angle)
+      if (rx > longueur * 0.12 && rx < longueur && Math.abs(ry) < demi) {
+        return ry < 0 ? 2 : 1
+      }
+    }
+    return 0
+  }
+
+  return (u, t) => {
+    const x = u * rapport
+    let c = 0.16 + 0.2 * (t / terreT)
+    c += (ciel(x * 2.1, t * 5.5) - 0.5) * 0.36 * lisse(borner(t / terreT))
+
+    const astre = reserve(x, t, astreX, astreT, astreR)
+    if (astre >= 0) c = astre
+
+    /* Les champs : des bandes horizontales, chacune avec son ton, sa période
+       et la pente de ses sillons. Le pays est plat, et c'est cette platitude
+       qui laisse toute la place au ciel et à la croix. */
+    const terreLigne = terreT + (terre(x * 3, 5) - 0.5) * 0.012
+    if (t > terreLigne) {
+      const bande = Math.floor((t - terreT) / hBande)
+      c = 0.18 + 0.34 * hacher(bande, 1, graineChamps)
+        + (terre(x * 8, t * 8) - 0.5) * 0.1
+      const pente = (hacher(bande, 2, graineChamps) - 0.5) * 2.2
+      const periode = 0.025 + 0.035 * hacher(bande, 3, graineChamps)
+      const sillon = (x + (t - terreT) * pente) / periode
+      if (((sillon % 1) + 1) % 1 < 0.42) c += 0.24
+      /* La lisière entre deux parcelles, et du même trait la ligne qui
+         détache la terre du ciel. */
+      if ((t - terreT) % hBande < 0.006) c = 0.7
+    }
+
+    /* Le canal : une bande d'eau épargnée en travers des champs, brisée par
+       ses rides. C'est la lumière du bas de page. */
+    if (t > canalT && t < canalT + canalE) {
+      c = terre(x * 24, t * 44) > 0.6 ? 0.3 : 0.08
+      if (t - canalT < 0.004 || canalT + canalE - t < 0.004) c = 0.65
+    }
+
+    /* Le moulin du lointain : la même silhouette, plus petite et grise,
+       jamais noire, c'est la distance qui se lit dans ce gris. */
+    const pMoyeuT = terreT - pH
+    if (t < terreT + 0.01) {
+      const dxp = x - pX
+      const dtp = t - pMoyeuT
+      if (t > pMoyeuT && Math.abs(dxp) < pH * (0.16 + 0.14 * dtp / pH)) c = 0.6
+      if (t <= pMoyeuT && Math.hypot(dxp, dtp * 1.3) < pH * 0.2) c = 0.6
+      if (croix(dxp, dtp, pH * 0.85, pHeure) > 0) c = 0.6
+    }
+
+    /* Le grand moulin, en dernier : la tour, sa calotte, puis la croix, qui
+       a le droit de passer devant l'astre comme devant les champs. */
+    const dx = x - mX
+    const dt = t - moyeuT
+    if (t > moyeuT && t < terreT + 0.02
+      && Math.abs(dx) < tourH * (0.16 + 0.14 * dt / tourH)) {
+      c = 0.97
+    }
+    if (t <= moyeuT && Math.hypot(dx, dt * 1.3) < tourH * 0.2) c = 0.97
+    const v = croix(dx, dt, aile, heure)
+    if (v === 2) c = 0.97
+    else if (v === 1) c = 0.55
+    if (Math.hypot(dx, dt) < aile * 0.09) c = 0.97
+
+    return borner(c)
+  }
+}
+
+const SCENES: Readonly<Record<IdLieu, Scene>> = {
+  acropole, phare, pyramides, torii, aqueduc, moulins,
+}
 
 /* ---------- la trame --------------------------------------------------------- */
 

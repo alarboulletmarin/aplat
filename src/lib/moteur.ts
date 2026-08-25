@@ -40,6 +40,9 @@ export type IdFamille =
   | 'sommets'
   | 'horizon'
   | 'nuages'
+  | 'dunes'
+  | 'falaises'
+  | 'archipel'
   /* lieux : les gravures tramées de lib/lieux.ts */
   | IdLieu
   /* figures */
@@ -67,6 +70,19 @@ export type IdPalette =
   | 'nuit'
   | 'orage'
   | 'encre'
+
+/**
+ * L'identifiant d'une palette composée : le préfixe, puis l'empreinte des
+ * teintes (voir `empreintePalette`).
+ */
+export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
+
+/**
+ * Une palette quelconque, livrée ou composée. C'est lui que l'adresse, les
+ * réglages et l'historique portent : `IdPalette` ne nomme que les onze
+ * livrées, et le dire dans le type évite de le rattraper par des assertions.
+ */
+export type IdPaletteQuelconque = IdPalette | IdPalettePerso
 
 /** 0 calme, 1 moyen, 2 dense. */
 export type Densite = 0 | 1 | 2
@@ -156,7 +172,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quarante et une familles, dans l'ordre de la liste : abstraits,
+ * Les quarante-six familles, dans l'ordre de la liste : abstraits,
  * paysages, lieux, figures. L'ordre est celui de la maquette, et il compte :
  * on descend du plus géométrique au plus figuratif, et le premier de chaque
  * groupe en donne le ton.
@@ -188,10 +204,15 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
+  { id: 'dunes', groupe: 'pay', fr: 'Dunes', en: 'Dunes' },
+  { id: 'falaises', groupe: 'pay', fr: 'Falaises', en: 'Cliffs' },
+  { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
   { id: 'acropole', groupe: 'lieu', fr: 'Acropole', en: 'Acropolis' },
   { id: 'phare', groupe: 'lieu', fr: 'Phare', en: 'Lighthouse' },
   { id: 'pyramides', groupe: 'lieu', fr: 'Pyramides', en: 'Pyramids' },
   { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
+  { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
+  { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
@@ -233,8 +254,8 @@ const PERSOS = new Map<string, Palette>()
 export const PREFIXE_PERSO = 'x'
 
 /** L'empreinte d'un jeu de couleurs, telle qu'elle nomme la palette. */
-export function empreintePalette(fond: string, couleurs: readonly string[]): string {
-  return PREFIXE_PERSO + empreinte36([fond, ...couleurs].join('-').toUpperCase())
+export function empreintePalette(fond: string, couleurs: readonly string[]): IdPalettePerso {
+  return `${PREFIXE_PERSO}${empreinte36([fond, ...couleurs].join('-').toUpperCase())}`
 }
 
 /** FNV-1a complet, en base 36 : court à lire, assez large pour ne pas cogner. */
@@ -264,7 +285,7 @@ export function enregistrerPalettes(liste: readonly (Palette & { id: string })[]
   }
 }
 
-export function estPaletteCustom(valeur: unknown): boolean {
+export function estIdPalettePerso(valeur: unknown): valeur is IdPalettePerso {
   return typeof valeur === 'string' && PERSOS.has(valeur)
 }
 
@@ -279,6 +300,11 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
+/** Vrai pour les onze palettes livrées, et pour elles seules. */
+export function estPaletteLivree(valeur: unknown): valeur is IdPalette {
+  return ORDRE_PALETTES.includes(valeur as IdPalette)
+}
+
 /**
  * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
  *
@@ -286,18 +312,18 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
  * palette composée que cet appareil ne connaît pas retombe sur la valeur par
  * défaut, exactement comme une adresse qui nomme n'importe quoi d'autre.
  */
-export function estPalette(valeur: unknown): valeur is IdPalette {
-  return ORDRE_PALETTES.includes(valeur as IdPalette) || estPaletteCustom(valeur)
+export function estPalette(valeur: unknown): valeur is IdPaletteQuelconque {
+  return estPaletteLivree(valeur) || estIdPalettePerso(valeur)
 }
 
 export function estDensite(valeur: unknown): valeur is Densite {
   return valeur === 0 || valeur === 1 || valeur === 2
 }
 
-export function palette(id: IdPalette): Palette {
-  const perso = PERSOS.get(id as string)
+export function palette(id: IdPaletteQuelconque): Palette {
+  const perso = PERSOS.get(id)
   if (perso) return perso
-  return ORDRE_PALETTES.includes(id) ? PALETTES[id] : PALETTES.lime
+  return estPaletteLivree(id) ? PALETTES[id] : PALETTES.lime
 }
 
 export function famille(id: IdFamille): Famille | undefined {
@@ -603,7 +629,7 @@ export function formes(
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
 
   /* Les lieux ont leur propre geste, la gravure tramée, et leur propre
-     module : quatre scènes décrites par un champ, une trame qui les grave.
+     module : six scènes décrites par un champ, une trame qui les grave.
      Ils passent par le même pinceau, la même graine et la même palette que
      tout le monde ; seul le dessin change de nature. */
   if (estLieu(id)) {
@@ -1462,6 +1488,146 @@ export function formes(
     return
   }
 
+  if (id === 'dunes') {
+    /* Des crêtes de sable superposées, du haut du ciel au bas de la page.
+       Chaque dune est bordée par une houle redressée : la valeur absolue
+       d'une houle fait des V là où elle s'annule, et la retourner donne des
+       crêtes vives entre des flancs lents. C'est exactement le profil d'une
+       dune, une arête nette entre deux pentes douces, et il sort des aides
+       existantes sans rien leur ajouter. Les teintes suivent la rampe de la
+       palette, dans un sens ou dans l'autre : le sable descend vers l'ombre,
+       ou en sort. */
+    const n = [4, 6, 9][densite]
+    const pas = Math.max(0.75, W / 2400)
+    const inverse = rnd() < 0.5
+    for (let i = 0; i < n; i += 1) {
+      const bord = houle(rnd)
+      const sommet = H * (0.16 + (0.8 * i) / n)
+      const creux = H * (0.09 + 0.07 * rnd())
+      const cycles = 0.6 + 0.9 * rnd()
+      const derive = rnd() * 2
+      const crete = (x: number) => sommet + creux * Math.abs(bord(derive + (x / W) * cycles))
+      ctx.fillStyle = palier(C, (inverse ? n - 1 - i : i) / (n - 1))
+      ctx.beginPath()
+      ctx.moveTo(0, crete(0))
+      for (let x = pas; x < W; x += pas) ctx.lineTo(x, crete(x))
+      ctx.lineTo(W, crete(W))
+      ctx.lineTo(W, H)
+      ctx.lineTo(0, H)
+      ctx.closePath()
+      ctx.fill()
+    }
+    return
+  }
+
+  if (id === 'falaises') {
+    /* Des parois qui tombent dans une mer plate. La mer est peinte d'abord,
+       d'un seul aplat : c'est elle qui fait le calme de la famille, et c'est
+       sur elle que la zone des icônes retombe. Les parois s'avancent depuis
+       un bord, les plus lointaines d'abord : chacune est plus étroite et
+       plus haute que la précédente, si bien que chaque couche recouvre la
+       précédente sauf son épaule, et l'oeil lit une côte qui recule. Le
+       flanc descend en redans francs plutôt qu'en courbe : une falaise est
+       une cassure, pas une colline, et c'est le trait droit qui le dit. */
+    const n = [3, 4, 6][densite]
+    const sens = rnd() < 0.5 ? 1 : -1
+    const bord = sens > 0 ? 0 : W
+    const merT = H * (0.5 + 0.16 * rnd())
+    ctx.fillStyle = col(0)
+    ctx.fillRect(0, merT, W, H - merT)
+    for (let i = 0; i < n; i += 1) {
+      const portee = W * (0.3 + (0.62 * (n - i)) / n) * (0.82 + 0.24 * rnd())
+      const sommet = merT - (merT - H * 0.05) * ((i + 1) / n) * (0.72 + 0.3 * rnd())
+      const pied = bord + sens * portee
+      const epauleX = bord + sens * portee * (0.42 + 0.2 * rnd())
+      const epauleY = sommet + (rnd() - 0.5) * H * 0.05
+      /* Les bases s'étagent d'un cran sous la ligne d'eau : la paroi proche
+         mouille plus bas que la lointaine, et le rivage se lit sans trait. */
+      const base = merT + H * 0.012 * (i + 1)
+      const marches = 2 + Math.floor(rnd() * 3)
+      /* Les redans sont tirés en poids puis normalisés : le nombre de
+         tirages ne dépend que du nombre de marches, et le pied retombe
+         exactement où la mer l'attend. */
+      const poids = Array.from(
+        { length: marches },
+        () => [0.35 + rnd(), 0.35 + rnd()] as const,
+      )
+      const totalX = poids.reduce((somme, p) => somme + p[0], 0)
+      const totalY = poids.reduce((somme, p) => somme + p[1], 0)
+      ctx.fillStyle = col(i + 1)
+      ctx.beginPath()
+      ctx.moveTo(bord, base)
+      ctx.lineTo(bord, sommet)
+      ctx.lineTo(epauleX, epauleY)
+      let xM = epauleX
+      let yM = epauleY
+      for (const [px, py] of poids) {
+        xM += ((pied - epauleX) * px) / totalX
+        ctx.lineTo(xM, yM)
+        yM += ((base - epauleY) * py) / totalY
+        ctx.lineTo(xM, yM)
+      }
+      ctx.closePath()
+      ctx.fill()
+    }
+    /* Quelques rides posées sur l'eau : assez pour dire que la mer est une
+       mer, pas assez pour lui retirer son aplat. */
+    const rides = [2, 4, 6][densite]
+    ctx.fillStyle = col(1)
+    for (let k = 0; k < rides; k += 1) {
+      const longueur = W * (0.07 + 0.11 * rnd())
+      gelule(ctx, W * 0.05 + (W * 0.9 - longueur) * rnd(),
+        merT + (H - merT) * (0.2 + 0.68 * rnd()), longueur, unite * 0.007)
+    }
+    return
+  }
+
+  if (id === 'archipel') {
+    /* Des îles posées sur l'eau, et un ciel laissé haut : c'est le vide qui
+       fait le large, et deux filaments de nuage suffisent à l'habiter. Les
+       îles sont des demi-ellipses à fond plat, une bosse posée dessus pour
+       casser la symétrie ; elles grandissent en descendant vers le bas de la
+       page, et c'est toute la perspective, la proche est grande et basse, la
+       lointaine petite et contre l'horizon. Chaque île traîne son reflet,
+       une gélule mêlée à la teinte de l'eau : ni l'île ni la mer, donc
+       lisible sur les deux. */
+    const n = [3, 5, 8][densite]
+    const merT = H * (0.4 + 0.14 * rnd())
+    ctx.fillStyle = col(0)
+    ctx.fillRect(0, merT, W, H - merT)
+    const filaments = 2 + Math.floor(rnd() * 2)
+    ctx.fillStyle = col(1)
+    for (let k = 0; k < filaments; k += 1) {
+      const longueur = W * (0.12 + 0.16 * rnd())
+      gelule(ctx, W * 0.06 + (W * 0.88 - longueur) * rnd(),
+        H * (0.06 + 0.2 * rnd()), longueur, unite * (0.009 + 0.006 * rnd()))
+    }
+    for (let i = 0; i < n; i += 1) {
+      /* La part avance avec l'indice : les lointaines sont peintes d'abord,
+         et une proche qui les croise passe devant, comme la dernière couche
+         de papier. */
+      const part = (i + 0.15 + 0.7 * rnd()) / n
+      const ligne = merT + (H - merT) * (0.06 + 0.86 * part)
+      const R = unite * (0.05 + 0.17 * part) * (0.8 + 0.4 * rnd())
+      const cx = W * (0.08 + 0.84 * rnd())
+      const teinte = col(i + 1)
+      ctx.fillStyle = teinte
+      ctx.beginPath()
+      ctx.ellipse(cx, ligne, R, R * (0.32 + 0.2 * rnd()), 0, Math.PI, 0)
+      ctx.closePath()
+      ctx.fill()
+      const bosse = R * (0.4 + 0.25 * rnd())
+      ctx.beginPath()
+      ctx.ellipse(cx + (rnd() - 0.5) * R * 0.9, ligne, bosse,
+        bosse * (0.9 + 0.4 * rnd()), 0, Math.PI, 0)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillStyle = melange(col(0), teinte, 0.5)
+      gelule(ctx, cx - R * 0.7, ligne + R * 0.06, R * 1.4, R * 0.09)
+    }
+    return
+  }
+
   /* --- figures, seconde série ------------------------------------------------- */
 
   if (id === 'agrumes') {
@@ -1664,28 +1830,35 @@ export function formes(
     return
   }
 
-  /* vagues : famille par défaut.
-     Le pas d'échantillonnage suit la largeur : la courbe reste lisse même
-     quand on zoome à 100 % dans un fond d'écran 4K. */
-  const n = [4, 7, 11][densite]
-  const pas = Math.max(0.75, W / 2400)
-  for (let i = 0; i < n; i += 1) {
-    const y = H * (0.14 + (0.88 * i) / n)
-    const amplitude = H * (0.012 + 0.032 * rnd())
-    const periode = W / (0.5 + 1.7 * rnd())
-    const phase = rnd() * Math.PI * 2
-    ctx.fillStyle = col(i)
-    ctx.beginPath()
-    ctx.moveTo(0, y + Math.sin(phase) * amplitude)
-    for (let x = 0; x <= W; x += pas) {
-      ctx.lineTo(x, y + Math.sin(phase + (x / periode) * Math.PI * 2) * amplitude)
+  if (id === 'vagues') {
+    /* Le pas d'échantillonnage suit la largeur : la courbe reste lisse même
+       quand on zoome à 100 % dans un fond d'écran 4K. */
+    const n = [4, 7, 11][densite]
+    const pas = Math.max(0.75, W / 2400)
+    for (let i = 0; i < n; i += 1) {
+      const y = H * (0.14 + (0.88 * i) / n)
+      const amplitude = H * (0.012 + 0.032 * rnd())
+      const periode = W / (0.5 + 1.7 * rnd())
+      const phase = rnd() * Math.PI * 2
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.moveTo(0, y + Math.sin(phase) * amplitude)
+      for (let x = 0; x <= W; x += pas) {
+        ctx.lineTo(x, y + Math.sin(phase + (x / periode) * Math.PI * 2) * amplitude)
+      }
+      ctx.lineTo(W, y + Math.sin(phase + (Math.PI * 2 * W) / periode) * amplitude)
+      ctx.lineTo(W, H)
+      ctx.lineTo(0, H)
+      ctx.closePath()
+      ctx.fill()
     }
-    ctx.lineTo(W, y + Math.sin(phase + (Math.PI * 2 * W) / periode) * amplitude)
-    ctx.lineTo(W, H)
-    ctx.lineTo(0, H)
-    ctx.closePath()
-    ctx.fill()
+    return
   }
+
+  /* Toute famille ajoutée à `IdFamille` doit avoir sa branche ci-dessus : sans
+     elle, `id` ne se réduit pas à `never` et la compilation s'arrête ici, au
+     lieu de retomber en silence sur les vagues. */
+  id satisfies never
 }
 
 /* ---------- grain ----------------------------------------------------------- */
@@ -1839,7 +2012,7 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 }
 
 export function mesurer(
-  id: IdFamille, idPalette: IdPalette, densite: Densite, graine: number,
+  id: IdFamille, idPalette: IdPaletteQuelconque, densite: Densite, graine: number,
   largeur: number, hauteur: number, sombre = false,
 ): Mesure {
   const P = palette(idPalette)
@@ -1981,7 +2154,7 @@ export function peindreVoile(ctx: Pinceau, W: number, H: number, mesure: Mesure)
 
 export interface Motif {
   famille: IdFamille
-  palette: IdPalette
+  palette: IdPaletteQuelconque
   densite: Densite
   graine: number
 }
