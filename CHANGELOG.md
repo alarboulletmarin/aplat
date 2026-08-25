@@ -9,6 +9,40 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : la frise d'arches, partout et vivante
+
+- **L'en-tête de l'application porte la frise de la présentation.** Le filet à
+  six barres s'efface : la même frise d'arches souligne le titre ici et sépare
+  les sections là-bas, et la marque ne change plus de silhouette en passant
+  d'un document à l'autre. En fenêtre couchée, la frise se baisse comme le
+  filet le faisait.
+- **Elle répond au doigt.** Toucher une arche la fait plonger puis rebondir,
+  et l'onde s'amortit sur ses voisines. Rien d'utile ne s'y cache : aucun
+  réglage ne bouge, et `prefers-reduced-motion` la tient immobile.
+
+### Corrigé : trois promesses, trois fois le même trait
+
+- Les trois cartes numérotées de la page d'accueil partageaient leur nom de
+  classe avec la carte du panneau de réglages : la deuxième et la troisième
+  héritaient d'un filet fin à la place de leur seuil d'encre. Chacune a
+  retrouvé son trait de trois pixels, le même pour les trois.
+
+### Corrigé : la barre d'action dit vrai jusque dans l'échec
+
+- **« Réessayer » se tait quand rejouer produirait le même échec.** Quand la
+  résolution dépasse le plafond de 40 Mpx, la carte d'erreur ne propose plus
+  de réessayer : la phrase dit le nombre et ce qu'il faut baisser, et le
+  bouton ne promet plus un essai qui échouerait pareil.
+- **« Copier le lien » copie le lien affiché.** Là où le navigateur refuse de
+  réécrire l'adresse, le presse-papiers pouvait recevoir une adresse en
+  retard d'un réglage ; le lien copié est désormais celui qui est calculé, le
+  même que celui du champ de repli.
+- **Une palette noire n'est plus une panne.** Le garde-fou qui détecte les
+  canevas refusés par les navigateurs mobiles prenait un fond noir pur (celui
+  qu'on compose justement pour un écran OLED) pour une image vide ; il
+  départage maintenant en écrivant un pixel et en le relisant.
+- L'adresse `/app/`, avec sa barre finale, mène aussi à l'application.
+
 ### Ajouté : le pied de page dit le droit en entier
 
 - **Deux liens de plus à côté de la version.** « AGPL-3.0 » mène au texte de la licence, au commit exact du build, et « Licences tierces » ouvre le fichier `THIRD-PARTY.txt` que chaque build régénère. Le fichier était servi depuis le début ; rien dans la page ne le désignait, et une licence qu'il faut deviner n'est pas mise à disposition.
