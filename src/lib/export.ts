@@ -82,8 +82,10 @@ export function nomFichier(
  * le dit au lieu de livrer une image vide.
  *
  * Une palette composée à la main, elle, peut être en noir pur : c'est même
- * exactement ce qu'on compose pour un écran OLED. Le contrôle est donc rendu
- * conditionnel par l'appelant, qui sait si le fond en est un.
+ * exactement ce qu'on compose pour un écran OLED. Quand les cinq points sont
+ * noirs, on départage donc en écrivant un pixel blanc et en le relisant : un
+ * canevas refusé n'enregistre pas l'écriture, une image légitimement noire
+ * si. Le pixel sondé est remis dans son état exact avant de conclure.
  */
 export function canevasNoir(ctx: CanvasRenderingContext2D, l: number, h: number): boolean {
   const points: [number, number][] = [
@@ -94,7 +96,13 @@ export function canevasNoir(ctx: CanvasRenderingContext2D, l: number, h: number)
       const d = ctx.getImageData(x, y, 1, 1).data
       if (d[0] || d[1] || d[2]) return false
     }
-    return true
+    const avant = ctx.getImageData(0, 0, 1, 1).data
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(0, 0, 1, 1)
+    const apres = ctx.getImageData(0, 0, 1, 1).data
+    ctx.fillStyle = `rgb(${avant[0]},${avant[1]},${avant[2]})`
+    ctx.fillRect(0, 0, 1, 1)
+    return !(apres[0] || apres[1] || apres[2])
   } catch {
     return false /* pas de lecture possible : on ne conclut pas */
   }
