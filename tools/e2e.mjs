@@ -264,9 +264,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     html: document.documentElement.lang,
     cta: document.getElementById('cta-libelle').textContent,
     title: document.title,
-    url: location.search
+    url: location.search,
+    stock: localStorage.getItem('aplat:langue')
   }));
-  t(en.html === 'en' && en.cta === 'Download' && /Download|generative/.test(en.title) && en.url.includes('l=en'), 'langue : bascule complète', JSON.stringify(en));
+  t(en.html === 'en' && en.cta === 'Download' && /Download|generative/.test(en.title) && en.stock === 'en' && !en.url.includes('l='),
+    'langue : bascule complète, retenue sur l\'appareil et pas dans l\'adresse', JSON.stringify(en));
 
   // --- 14. thème
   await tap('[data-theme="sombre"]');
@@ -274,17 +276,21 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   const th = await page.evaluate(() => ({
     attr: document.documentElement.getAttribute('data-theme'),
     bg: getComputedStyle(document.body).backgroundColor,
-    url: location.search
+    url: location.search,
+    stock: localStorage.getItem('aplat:theme')
   }));
-  t(th.attr === 'sombre' && th.url.includes('t=sombre'), 'thème : bascule et mémorisation dans l\'URL', th.bg);
+  t(th.attr === 'sombre' && th.stock === 'sombre' && !th.url.includes('t='),
+    'thème : bascule retenue sur l\'appareil et pas dans l\'adresse', th.bg);
 
   /* --- 15. ce qui est écrit sur l'appareil, et rien d'autre
-     Deux choses existent, et les annoncer absentes serait faux : le cache du
-     Service Worker, parce que l'application est installable, et l'historique
-     des motifs. On vérifie donc leur contenu, pas leur absence. Le cache ne
-     porte que les fichiers de l'application ; l'historique ne porte que dix
-     fois quatre réglages, sans image, sans horodatage, sans identifiant, sans
-     URL. Les autres mécanismes, eux, restent vides. */
+     Trois choses existent, et les annoncer absentes serait faux : le cache du
+     Service Worker, parce que l'application est installable ; l'historique
+     des motifs ; et l'affichage, parce que la langue et le thème viennent
+     d'être choisis aux étapes 13 et 14. On vérifie donc leur contenu, pas
+     leur absence. Le cache ne porte que les fichiers de l'application ;
+     l'historique ne porte que dix fois quatre réglages, sans image, sans
+     horodatage, sans identifiant, sans URL ; l'affichage ne porte que les
+     deux valeurs choisies. Les autres mécanismes, eux, restent vides. */
   await page.evaluate(() => navigator.serviceWorker && navigator.serviceWorker.ready).catch(() => {});
   await page.waitForTimeout(600);
   const store = await page.evaluate(async () => {
@@ -301,16 +307,22 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     return {
       cles, ss: sessionStorage.length,
       cookie: document.cookie.length, bases, entrees,
-      motifs: localStorage.getItem('aplat:motifs')
+      motifs: localStorage.getItem('aplat:motifs'),
+      langue: localStorage.getItem('aplat:langue'),
+      theme: localStorage.getItem('aplat:theme')
     };
   });
   t(store.ss === 0 && store.cookie === 0 && store.bases.length === 0,
     'vie privée : ni session, ni cookie, ni base indexée',
     `session ${store.ss}, cookies ${store.cookie}, bases ${store.bases.length}`);
-  const clesEnTrop = store.cles.filter(c => c !== 'aplat:motifs' && c !== 'aplat:palettes');
+  const clesEnTrop = store.cles.filter(c =>
+    c !== 'aplat:motifs' && c !== 'aplat:palettes' && c !== 'aplat:langue' && c !== 'aplat:theme');
   t(clesEnTrop.length === 0,
-    'vie privée : le stockage local ne porte que les motifs et les palettes composées',
+    'vie privée : le stockage ne porte que motifs, palettes composées et affichage choisi',
     store.cles.join(', ') || 'aucune clé');
+  t(store.langue === 'en' && store.theme === 'sombre',
+    'vie privée : l\'affichage retenu est exactement le choix des étapes 13 et 14',
+    `langue ${store.langue}, thème ${store.theme}`);
   t(!store.cles.includes('aplat:palettes'),
     'vie privée : rien n\'est écrit pour les palettes tant qu\'on n\'en compose aucune');
   {

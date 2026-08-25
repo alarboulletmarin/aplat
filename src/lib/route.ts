@@ -24,8 +24,10 @@ export const CHEMIN_ACCUEIL = '/'
 /**
  * Les paramètres qui décrivent un motif.
  *
- * `l` et `t` n'en sont pas : la langue et le thème valent pour les deux pages,
- * et `/?l=en` désigne l'accueil en anglais, pas l'application.
+ * `l` et `t` n'en sont pas : ce sont les restes des liens d'avant, quand
+ * l'affichage voyageait dans l'adresse. Ils sont encore honorés au chargement
+ * (`affichage.ts`), et `/?l=en` désigne toujours l'accueil en anglais, pas
+ * l'application.
  */
 const PARAMETRES_MOTIF = ['m', 'p', 'd', 's', 'r'] as const
 
@@ -66,32 +68,24 @@ export function redirection(chemin: string, recherche: string): string | null {
   return `${CHEMIN_APP}${recherche.startsWith('?') ? recherche : `?${recherche}`}`
 }
 
-/** Un chemin et sa requête, la requête omise quand elle est vide. */
-function lien(chemin: string, parametres: Record<string, string>): string {
-  const requete = new URLSearchParams(parametres).toString()
-  return requete ? `${chemin}?${requete}` : chemin
-}
-
 /**
- * Un lien vers l'application, avec les réglages d'affichage déjà posés.
+ * Le lien vers l'application, nu.
  *
- * La langue et le thème choisis sur l'accueil traversent le lien : arriver sur
- * l'application en français puis la voir en anglais parce que le navigateur en
- * a décidé autrement serait un pas en arrière visible.
+ * Il n'a rien à emporter : la langue et le thème choisis sur l'accueil sont
+ * retenus sur l'appareil (`affichage.ts`), et le stockage est commun aux deux
+ * pages. Arriver sur l'application dans sa langue ne passe plus par le lien.
  */
-export function lienApp(parametres: Record<string, string>): string {
-  return lien(CHEMIN_APP, parametres)
+export function lienApp(): string {
+  return CHEMIN_APP
 }
 
 /**
- * Un lien vers la présentation, avec les mêmes réglages d'affichage.
+ * Le lien vers la présentation, nu pour la même raison.
  *
- * C'est celui de la marque, en haut des deux pages : un logo ramène chez soi,
- * et le voyage de retour ne doit pas plus reperdre la langue que l'aller.
- *
+ * C'est celui de la marque, en haut des deux pages : un logo ramène chez soi.
  * Aucun paramètre de motif n'a le droit d'y entrer : `redirection()` renverrait
  * aussitôt vers `/app`, et le lien ne mènerait nulle part.
  */
-export function lienAccueil(parametres: Record<string, string>): string {
-  return lien(CHEMIN_ACCUEIL, parametres)
+export function lienAccueil(): string {
+  return CHEMIN_ACCUEIL
 }

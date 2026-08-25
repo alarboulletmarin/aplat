@@ -4,8 +4,9 @@
  *
  * 1. Les deux adresses. `/` présente, `/app` fait tourner, et un lien partagé
  *    du temps où l'application vivait à la racine ouvre encore son motif.
- * 2. Les deux bascules. Elles écrivent dans l'adresse, elles retournent le
- *    document, et leur nom accessible dit ce qu'un appui donnera.
+ * 2. Les deux bascules. Elles retiennent le choix sur l'appareil, elles
+ *    retournent le document, et leur nom accessible dit ce qu'un appui
+ *    donnera. Les liens d'avant, `?l=` et `?t=`, sont honorés puis nettoyés.
  * 3. Les toiles. Aucune image de la page n'est un fichier : si le moteur
  *    cesse d'y tourner, il ne reste rien à voir, et une page vide se remarque
  *    moins qu'une image cassée.
@@ -76,6 +77,9 @@ async function derouler(page) {
   await page.goto(base + '/?l=fr&t=clair', { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
 
+  t(new URL(page.url()).search === '',
+    'les liens d’avant sont honorés puis l’adresse est nettoyée', page.url());
+
   const langue = page.locator('.bascule-langue');
   const theme = page.locator('.bascule-theme');
 
@@ -92,8 +96,8 @@ async function derouler(page) {
   await page.waitForTimeout(300);
   t(await page.evaluate(() => document.documentElement.dataset.theme) === 'sombre',
     'un appui sur le thème retourne le document');
-  t(new URL(page.url()).searchParams.get('t') === 'sombre',
-    'et l’écrit dans l’adresse', page.url().split('?')[1]);
+  t(await page.evaluate(() => localStorage.getItem('aplat:theme')) === 'sombre',
+    'et le retient sur l’appareil');
   t(await page.locator('.bascule-theme').getAttribute('aria-label') === 'Passer au thème clair',
     'le bouton annonce alors le chemin inverse');
 
@@ -101,24 +105,39 @@ async function derouler(page) {
   await page.waitForTimeout(300);
   t(await page.evaluate(() => document.documentElement.lang) === 'en',
     'un appui sur la langue retourne le document');
-  t(new URL(page.url()).searchParams.get('l') === 'en',
-    'et l’écrit dans l’adresse', page.url().split('?')[1]);
+  t(await page.evaluate(() => localStorage.getItem('aplat:langue')) === 'en',
+    'et le retient sur l’appareil');
   t((await page.locator('.bascule-langue').getAttribute('aria-label') || '').startsWith('FR'),
     'le bouton annonce alors le chemin inverse');
 
-  /* Le lien d'entrée emporte les deux : personne ne choisit sa langue deux
-     fois. */
+  /* Le lien d'entrée est nu : le choix attend déjà sur l'appareil, et le
+     stockage est commun aux deux pages. Personne ne choisit sa langue deux
+     fois, et un lien copié n'impose rien à qui le reçoit. */
   const entree = new URL(await page.locator('.enseigne-app').getAttribute('href'), base);
   t(entree.pathname === '/app', 'le lien d’entrée mène à l’application', entree.pathname);
-  t(entree.searchParams.get('l') === 'en' && entree.searchParams.get('t') === 'sombre',
-    'et emporte la langue et le thème choisis ici', entree.search);
+  t(entree.search === '', 'et il est nu : le choix attend sur l’appareil', entree.search);
 
-  /* Sans choix explicite, le thème ne s'écrit pas : l'absence de choix
-     s'écrit par l'absence, et le lien suit. */
-  await page.goto(base + '/?l=fr', { waitUntil: 'networkidle' });
+  /* Le choix retenu traverse un rechargement d'adresse nue. */
+  await page.goto(base + '/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(200);
-  const nu = new URL(await page.locator('.enseigne-app').getAttribute('href'), base);
-  t(!nu.searchParams.has('t'), 'le thème « système » ne part pas dans le lien', nu.search);
+  t(await page.evaluate(() => document.documentElement.lang) === 'en' &&
+    await page.evaluate(() => document.documentElement.dataset.theme) === 'sombre',
+    'le choix retenu survit au rechargement, sans rien dans l’adresse');
+
+  /* Sans choix explicite, rien ne s'écrit : l'absence de choix s'écrit par
+     l'absence, sur l'appareil comme avant dans l'adresse. */
+  await page.evaluate(() => {
+    localStorage.removeItem('aplat:langue');
+    localStorage.removeItem('aplat:theme');
+  });
+  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(200);
+  const vierge = await page.evaluate(() => ({
+    l: localStorage.getItem('aplat:langue'),
+    t: localStorage.getItem('aplat:theme'),
+  }));
+  t(vierge.l === null && vierge.t === null,
+    'sans choix, rien n’est écrit sur l’appareil', JSON.stringify(vierge));
 
   /* --- 3. les toiles ------------------------------------------------------- */
 

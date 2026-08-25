@@ -4,19 +4,22 @@ import {
   estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
   type Densite, type IdFamille, type IdPalette, type Langue,
 } from './moteur'
+import { type Affichage, type Theme } from './affichage'
 import { encoderTeintes } from './palettes'
 import { RES_MAX, RES_MIN, type Resolution } from './resolution'
 
 /**
- * L'URL porte le motif affiché.
+ * L'URL porte le motif affiché, et rien que lui.
  *
- * Ni compte, ni cookie, ni base indexée : l'état partageable tient dans la
+ * Ni compte, ni cookie, ni base indexée : ce qui décrit l'image tient dans la
  * barre d'adresse, et c'est aussi ce qui rend un motif transmissible sans
- * passer par personne. La seule chose écrite sur l'appareil vit ailleurs, dans
- * `historique.ts`, et ne décrit que des motifs déjà vus.
+ * passer par personne. Ce qui ne décrit pas l'image n'y entre pas : la langue
+ * et le thème vivent sur l'appareil (`affichage.ts`), comme l'historique et
+ * les palettes composées.
  */
 
-export type Theme = 'clair' | 'sombre' | 'systeme'
+export type { Affichage, Theme } from './affichage'
+export { langueParDefaut } from './affichage'
 
 export interface Reglages {
   langue: Langue
@@ -63,11 +66,6 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   hauteurSaisie: '',
 }
 
-/** Le français si le navigateur le demande, l'anglais sinon. */
-export function langueParDefaut(langueNavigateur: string | undefined): Langue {
-  return (langueNavigateur || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en'
-}
-
 /** Une adresse illisible vaut une adresse vide : on retombe sur les défauts. */
 function requete(recherche: string): URLSearchParams {
   try {
@@ -77,47 +75,22 @@ function requete(recherche: string): URLSearchParams {
   }
 }
 
-export interface Affichage {
-  langue: Langue
-  theme: Theme
-}
-
-/**
- * La langue et le thème, seuls réglages qui ne décrivent pas une image.
- *
- * Ils sont lus à part parce qu'ils valent pour les deux pages : la
- * présentation, sur « / », n'a pas de motif à relire mais a une langue et un
- * thème, et les deux doivent s'écrire de la même façon des deux côtés. Un lien
- * `?l=en&t=sombre` dit la même chose partout.
- */
-export function lireAffichage(recherche: string, langueNavigateur?: string): Affichage {
-  const q = requete(recherche)
-  const langue = q.get('l')
-  const theme = q.get('t')
-  return {
-    langue: langue === 'fr' || langue === 'en' ? langue : langueParDefaut(langueNavigateur),
-    theme: theme === 'clair' || theme === 'sombre' ? theme : 'systeme',
-  }
-}
-
-/**
- * Les mêmes, en paramètres d'URL. « Système » ne s'écrit pas : c'est l'absence
- * de choix, et l'absence s'écrit par l'absence.
- */
-export function ecrireAffichage(affichage: Affichage): string {
-  const q = new URLSearchParams()
-  q.set('l', affichage.langue)
-  if (affichage.theme !== 'systeme') q.set('t', affichage.theme)
-  return q.toString()
-}
-
 /**
  * Lit les réglages d'une URL. Tout ce qui n'est pas reconnu retombe sur la
  * valeur par défaut : une URL forgée à la main ne peut produire qu'un motif
  * valide, jamais une erreur.
+ *
+ * L'affichage est fourni par l'appelant, pas lu ici : il vient de l'appareil
+ * (`affichage.ts`), et cette fonction n'assemble que l'état complet dont
+ * l'application a besoin pour rendre.
  */
 export function lireUrl(
-  recherche: string, detecte: Resolution, langueNavigateur?: string,
+  recherche: string,
+  detecte: Resolution,
+  affichage: Affichage = {
+    langue: REGLAGES_PAR_DEFAUT.langue,
+    theme: REGLAGES_PAR_DEFAUT.theme,
+  },
 ): Reglages {
   const q = requete(recherche)
 
@@ -125,7 +98,6 @@ export function lireUrl(
   const palette = q.get('p')
   const densite = Number.parseInt(q.get('d') ?? '', 10)
   const graine = Number.parseInt(q.get('s') ?? '', 10)
-  const affichage = lireAffichage(recherche, langueNavigateur)
 
   /* La résolution est un couple : une moitié illisible et on retombe
      entièrement sur la détection, plutôt que de mélanger l'écran de
@@ -164,6 +136,9 @@ export function lireUrl(
  * un réglage. Son absence veut dire « la résolution de l'appareil qui ouvre le
  * lien », ce qui sert aussi mieux le destinataire. Seule une saisie manuelle
  * est transmise.
+ *
+ * La langue et le thème n'y figurent pas non plus : ils habillent l'interface
+ * sans rien changer au fichier, et le destinataire d'un lien a les siens.
  */
 export function ecrireUrl(
   reglages: Reglages, resolution: Resolution, detecte: Resolution,
@@ -175,7 +150,6 @@ export function ecrireUrl(
   q.set('s', String(reglages.graine))
   if (!reglages.voile) q.set('v', '0')
   if (reglages.sombre) q.set('n', '1')
-  q.set('l', reglages.langue)
   /* Une palette composée à la main n'existe que sur l'appareil qui l'a
      composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre
      motif chez la personne qui le reçoit, ce qui est exactement ce que le
@@ -188,6 +162,5 @@ export function ecrireUrl(
     resolution.largeur > 0 && resolution.hauteur > 0 &&
     !(resolution.largeur === detecte.largeur && resolution.hauteur === detecte.hauteur)
   if (surMesure) q.set('r', `${resolution.largeur}x${resolution.hauteur}`)
-  if (reglages.theme !== 'systeme') q.set('t', reglages.theme)
   return q.toString()
 }

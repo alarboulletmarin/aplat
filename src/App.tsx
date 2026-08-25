@@ -13,6 +13,7 @@ import {
   depuisSaisie, detecter, MPX_MAX, TROIS_APPAREILS, typeAppareil,
 } from './lib/resolution'
 import { ecrireUrl, GRAINE_MAX, lireUrl, type Reglages, type Theme } from './lib/url'
+import { lireAffichage, retenirLangue, retenirTheme } from './lib/affichage'
 import { lienAccueil } from './lib/route'
 import {
   copierImage, encoderImage, encoderSVG, ErreurExport, facteur,
@@ -108,7 +109,11 @@ export function App() {
   enregistrerPalettes(inventaire.map(versPalette))
 
   const [reglages, setReglages] = useState<Reglages>(() =>
-    lireUrl(window.location.search, detecte, navigator.language),
+    lireUrl(
+      window.location.search,
+      detecte,
+      lireAffichage(window.location.search, navigator.language),
+    ),
   )
   const [ephemere, setEphemere] = useState<Ephemere>(EPHEMERE_INITIAL)
 
@@ -243,15 +248,10 @@ export function App() {
   )
   const lien = `${window.location.origin}${window.location.pathname}?${requete}`
 
-  /* La marque, en haut, ramène à la présentation avec la langue et le thème
-     déjà posés : revenir sur « / » ne doit pas coûter le choix qu'on vient de
-     faire. Aucun paramètre de motif n'y entre, sinon `redirection()` renverrait
-     le lien ici même. */
-  const retour = lienAccueil(
-    reglages.theme === 'systeme'
-      ? { l: reglages.langue }
-      : { l: reglages.langue, t: reglages.theme },
-  )
+  /* La marque, en haut, ramène à la présentation. Le lien est nu : la langue
+     et le thème attendent sur l'appareil, revenir sur « / » ne coûte pas le
+     choix qu'on vient de faire. */
+  const retour = lienAccueil()
 
   useEffect(() => {
     if (window.location.search.slice(1) === requete) return
@@ -642,13 +642,22 @@ export function App() {
         </main>
 
         {/* Langue et thème vivent ici : ils ne changent rien au fichier
-            téléchargé, et le panneau ne contient que ce qui agit sur lui. */}
+            téléchargé, et le panneau ne contient que ce qui agit sur lui.
+            Le choix est retenu sur l'appareil au moment où il est fait :
+            c'est lui que « / » relira, et que le script d'index.html relira
+            avant la première peinture des prochaines ouvertures. */}
         <Pied
           langue={reglages.langue}
           theme={reglages.theme}
           textes={T}
-          onLangue={(langue: Langue) => changer({ langue })}
-          onTheme={(theme: Theme) => changer({ theme })}
+          onLangue={(langue: Langue) => {
+            retenirLangue(langue)
+            changer({ langue })
+          }}
+          onTheme={(theme: Theme) => {
+            retenirTheme(theme)
+            changer({ theme })
+          }}
         />
 
         <BarreAction

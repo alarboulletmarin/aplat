@@ -73,12 +73,16 @@
     <!--
       Le thème et la langue, avant la première peinture.
 
-      Aplat n'écrit rien sur l'appareil : son état tient dans l'URL. Ces deux
-      valeurs s'y lisent donc directement, sans stockage ni requête. React les
-      repose lui-même une fois chargé. D'ici là, le document serait peint en
-      clair : sur un appareil en thème sombre, un éclair blanc à chaque
-      ouverture, le seul défaut d'affichage qu'on ne peut pas corriger après
-      coup puisqu'il a déjà eu lieu.
+      Ils vivent sur l'appareil (aplat:theme, aplat:langue, voir
+      src/lib/affichage.ts) et se lisent ici en synchrone. React les repose
+      lui-même une fois chargé. D'ici là, le document serait peint en clair :
+      sur un appareil en thème sombre, un éclair blanc à chaque ouverture, le
+      seul défaut d'affichage qu'on ne peut pas corriger après coup puisqu'il
+      a déjà eu lieu.
+
+      L'adresse passe d'abord : les liens d'avant portaient `?l=` et `?t=`,
+      et ils doivent encore ouvrir la page qu'ils promettaient. L'application
+      la nettoie ensuite.
 
       « Système » est résolu ici, et non par une requête de média dans la
       feuille de style : `data-theme` ne porte ainsi que « clair » ou
@@ -90,6 +94,13 @@
           var q = new URLSearchParams(location.search)
           var choix = q.get('t')
           if (choix !== 'clair' && choix !== 'sombre') {
+            try {
+              choix = localStorage.getItem('aplat:theme')
+            } catch (refus) {
+              choix = null
+            }
+          }
+          if (choix !== 'clair' && choix !== 'sombre') {
             choix = window.matchMedia('(prefers-color-scheme: dark)').matches
               ? 'sombre'
               : 'clair'
@@ -98,6 +109,13 @@
           var couleur = document.querySelector('meta[name="theme-color"]')
           if (couleur) couleur.setAttribute('content', choix === 'sombre' ? '#0E1729' : '#F2EDDD')
           var langue = q.get('l')
+          if (langue !== 'fr' && langue !== 'en') {
+            try {
+              langue = localStorage.getItem('aplat:langue')
+            } catch (refus) {
+              langue = null
+            }
+          }
           if (langue !== 'fr' && langue !== 'en') {
             langue =
               (navigator.language || 'fr').toLowerCase().indexOf('fr') === 0 ? 'fr' : 'en'

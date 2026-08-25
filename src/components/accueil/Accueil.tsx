@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Langue } from '../../lib/moteur'
 import { detecter } from '../../lib/resolution'
-import { ecrireAffichage, lireAffichage, type Affichage, type Theme } from '../../lib/url'
+import {
+  adresseNettoyee, lireAffichage, retenirLangue, retenirTheme,
+  type Affichage, type Theme,
+} from '../../lib/affichage'
 import { lienAccueil, lienApp } from '../../lib/route'
 import { textes as dictionnaire } from '../../i18n'
 import { useThemeResolu } from '../../hooks/useThemeResolu'
@@ -24,13 +27,12 @@ import { Appel } from './Appel'
  *
  * Elle garde les règles de l'application, parce que c'est le même produit :
  * un seul appel primaire, répété en bas de page mais jamais dédoublé ; aucune
- * animation qui ne dise ni une origine, ni un état, ni une continuité ; et
- * rien d'écrit sur l'appareil, l'état tenant dans l'adresse.
+ * animation qui ne dise ni une origine, ni un état, ni une continuité.
  *
- * Cet état se réduit à deux choses, la langue et le thème, qui sont aussi les
- * deux boutons de l'enseigne. Ils s'écrivent `?l=` et `?t=`, exactement comme
- * dans l'application, et le lien d'entrée les emporte : personne ne doit
- * choisir sa langue deux fois.
+ * Son état se réduit à deux choses, la langue et le thème, qui sont aussi les
+ * deux boutons de l'enseigne. Ils sont retenus sur l'appareil, exactement
+ * comme dans l'application et par le même stockage : personne ne choisit sa
+ * langue deux fois, et aucun lien n'a besoin de la transporter.
  */
 export function Accueil() {
   const [detecte] = useState(detecter)
@@ -59,30 +61,23 @@ export function Accueil() {
       ?.setAttribute('content', themeResolu === 'sombre' ? '#0E1729' : '#F2EDDD')
   }, [themeResolu, affichage.langue, T])
 
-  /* L'adresse suit les deux boutons, sans empiler d'entrée d'historique : un
-     aller-retour clair/sombre ne doit pas coûter deux appuis sur « retour ».
-     Le lien d'entrée est calculé à part, et non relu dans la barre d'adresse,
-     parce que `replaceState` peut être refusé par certaines ouvertures. */
-  const requete = useMemo(() => ecrireAffichage(affichage), [affichage])
-
+  /* Les liens d'avant portent encore `?l=` et `?t=` : ils sont honorés au
+     chargement, puis l'adresse est nettoyée, sans empiler d'entrée
+     d'historique. Elle ne porte plus l'affichage, qui vit sur l'appareil. */
   useEffect(() => {
-    if (window.location.search.slice(1) === requete) return
+    const propre = adresseNettoyee(window.location.pathname, window.location.search)
+    if (propre === null) return
     try {
-      window.history.replaceState(null, '', `${window.location.pathname}?${requete}`)
+      window.history.replaceState(null, '', propre)
     } catch {
       /* certaines ouvertures locales refusent replaceState : sans conséquence */
     }
-  }, [requete])
+  }, [])
 
-  /* Les deux liens internes de la page partent des mêmes deux paramètres :
-     celui de la porte, vers « /app », et celui de la marque, qui revient ici
-     en haut de page sans reperdre la langue ni le thème. */
-  const affiche: Record<string, string> =
-    affichage.theme === 'systeme'
-      ? { l: affichage.langue }
-      : { l: affichage.langue, t: affichage.theme }
-  const lien = lienApp(affiche)
-  const accueil = lienAccueil(affiche)
+  /* Les deux liens internes sont nus : le choix fait ici attend déjà sur
+     l'appareil, la porte vers « /app » comme la marque n'ont rien à porter. */
+  const lien = lienApp()
+  const accueil = lienAccueil()
 
   return (
     <>
@@ -97,10 +92,17 @@ export function Accueil() {
           textes={T}
           accueil={accueil}
           lien={lien}
-          onLangue={(langue: Langue) =>
+          /* Le choix est retenu au moment où il est fait : c'est lui que
+             « /app » relira, et que le script d'index.html relira avant la
+             première peinture des prochaines ouvertures. */
+          onLangue={(langue: Langue) => {
+            retenirLangue(langue)
             setAffichage((precedent) => ({ ...precedent, langue }))
-          }
-          onTheme={(theme: Theme) => setAffichage((precedent) => ({ ...precedent, theme }))}
+          }}
+          onTheme={(theme: Theme) => {
+            retenirTheme(theme)
+            setAffichage((precedent) => ({ ...precedent, theme }))
+          }}
         />
 
         {/* `tabIndex` négatif : sans lui, le lien d'évitement fait défiler la

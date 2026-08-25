@@ -49,35 +49,19 @@ describe('les liens partagés d’avant', () => {
   })
 })
 
-describe('le lien vers l’application', () => {
-  it('emporte la langue et le thème choisis sur l’accueil', () => {
-    expect(lienApp({ l: 'en', t: 'sombre' })).toBe('/app?l=en&t=sombre')
+/* Les deux liens internes sont nus : l'affichage vit sur l'appareil
+   (`affichage.ts`), il n'a rien à faire transporter par un lien. */
+describe('les liens internes', () => {
+  it('mènent à l’application et à la présentation, sans rien emporter', () => {
+    expect(lienApp()).toBe('/app')
+    expect(lienAccueil()).toBe('/')
   })
 
-  it('reste nu quand il n’y a rien à emporter', () => {
-    expect(lienApp({})).toBe('/app')
-  })
-})
-
-describe('le lien vers la présentation', () => {
-  it('emporte la langue et le thème dans l’autre sens aussi', () => {
-    expect(lienAccueil({ l: 'en', t: 'sombre' })).toBe('/?l=en&t=sombre')
-  })
-
-  it('reste nu quand il n’y a rien à emporter', () => {
-    expect(lienAccueil({})).toBe('/')
-  })
-
-  /* La marque de l'application mène ici : si ce lien portait un paramètre de
-     motif, `redirection()` le renverrait aussitôt sous `/app` et le retour
-     n'aurait jamais lieu. */
-  it('mène bien à l’accueil, sans être reconduit vers l’application', () => {
-    const jeux: Record<string, string>[] = [{}, { l: 'fr' }, { l: 'en', t: 'clair' }]
-    for (const parametres of jeux) {
-      const adresse = lienAccueil(parametres)
-      const [chemin, recherche = ''] = adresse.split('?')
-      expect(route(chemin)).toBe('accueil')
-      expect(redirection(chemin, recherche ? `?${recherche}` : '')).toBeNull()
-    }
+  /* La marque de l'application mène à l'accueil : si ce lien portait un
+     paramètre de motif, `redirection()` le renverrait aussitôt sous `/app`
+     et le retour n'aurait jamais lieu. */
+  it('ramènent bien à l’accueil, sans reconduite vers l’application', () => {
+    expect(route(lienAccueil())).toBe('accueil')
+    expect(redirection(lienAccueil(), '')).toBeNull()
   })
 })
