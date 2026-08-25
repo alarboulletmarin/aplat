@@ -16,6 +16,7 @@ const ETAPES = [
   ['typographie', 'typographie.mjs'],
   ['parcours complet', 'e2e.mjs'],
   ['page d’accueil', 'accueil.mjs'],
+  ['page du mécanisme', 'moteur.mjs'],
   ['URL hostiles', 'fuzz-url.mjs'],
   ['contrastes', 'a11y.mjs'],
   ['cibles tactiles et atteignabilité', 'reach.mjs'],
