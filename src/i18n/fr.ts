@@ -325,9 +325,12 @@ export const fr = {
     voileTitre: 'Le voile assombrit le bas de l’image pour que les libellés d’icônes tiennent le seuil',
     /* Les autres sorties. Elles ne servent pas la même chose, et le libellé le
        dit : la ligne du haut est le fond d'écran, les autres sont des usages. */
-    formats: 'Autres formats',
+    /* « Sorties » et non « formats » : la liste contient la copie et les trois
+       appareils, qui n'en sont pas. Le menu porte le mot du README, « ce
+       qu'on peut emporter ». */
+    formats: 'Autres sorties',
     formatsTitre: 'PNG doublé, WebP, SVG, presse-papiers, les trois appareils',
-    formatsFermer: 'Fermer les formats',
+    formatsFermer: 'Fermer les sorties',
     formatPng2x: 'PNG 2x',
     formatPng2xNote: 'Deux fois plus de pixels, pour un écran plus grand que celui-ci.',
     formatWebp: 'WebP',
