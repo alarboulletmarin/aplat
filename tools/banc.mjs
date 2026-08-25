@@ -18,11 +18,22 @@ const RACINE = path.resolve(ICI, '..');
 const SORTIE = path.join(ICI, '.banc', 'moteur.js');
 const SOURCE = path.join(RACINE, 'src', 'lib', 'moteur.ts');
 
-/** Construit le banc s'il manque ou si le moteur a changé depuis. */
+/** Construit le banc s'il manque ou si la lib a changé depuis.
+
+    La fraîcheur se juge sur tout `src/lib`, pas sur le seul `moteur.ts` :
+    le moteur importe ses gestes depuis des modules voisins, et un banc qui
+    ne surveillait que lui a resservi une copie d'avant un recalage de
+    Penrose, chiffres identiques à l'octet près sans que rien ne le dise. */
 function construire() {
+  const lib = path.dirname(SOURCE);
   const frais =
     fs.existsSync(SORTIE) &&
-    fs.statSync(SORTIE).mtimeMs > fs.statSync(SOURCE).mtimeMs;
+    fs.readdirSync(lib).every(
+      (fichier) =>
+        !fichier.endsWith('.ts') ||
+        fichier.endsWith('.test.ts') ||
+        fs.statSync(path.join(lib, fichier)).mtimeMs < fs.statSync(SORTIE).mtimeMs,
+    );
   if (frais) return SORTIE;
   execFileSync(
     path.join(RACINE, 'node_modules', '.bin', 'vite'),
