@@ -109,7 +109,7 @@ const PLEIN = JSON.stringify(
     console.log(`\n=== ${c.name} : ${report.length} contrôles ===`);
     if (unreachable.length) { bad++; console.log('  INATTEIGNABLES: ' + unreachable.map(r => r.id).join(', ')); }
     else console.log('  atteignables: tous');
-    if (small.length) console.log('  < 44 px: ' + small.map(r => `${r.id}(${r.w}x${r.h})`).join(', '));
+    if (small.length) { bad++; console.log('  CIBLES < 44 px: ' + small.map(r => `${r.id}(${r.w}x${r.h})`).join(', ')); }
     else console.log('  cibles >= 44 px: toutes');
     if (sousLaBarre) {
       bad++;

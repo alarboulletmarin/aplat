@@ -35,6 +35,11 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't', 'v', 'n', 'k'];
      retire, pas qu'il y en ait un nombre donné. Écrit en dur, ce contrôle
      tombait à chaque famille ajoutée sans rien avoir découvert. */
   await page.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'domcontentloaded' });
+  /* L'application arrive par un chunk paresseux depuis la découpe du bundle :
+     au domcontentloaded le DOM n'est pas monté, et un délai fixe parie sur
+     l'horloge. On attend le montage, borné pour qu'une page vraiment vide
+     reste un échec et non un blocage. */
+  await page.waitForSelector('.opt', { timeout: 5000 });
   await page.waitForTimeout(150);
   const ATTENDU = await page.evaluate(() => document.querySelectorAll('.opt').length);
   console.log('puces sur une adresse saine : ' + ATTENDU);
@@ -47,6 +52,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't', 'v', 'n', 'k'];
       let ok;
       try {
         await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('#apercu, #etat-vide', { timeout: 5000 });
         await page.waitForTimeout(90);
         ok = await page.evaluate(() => ({
           peint: (document.getElementById('apercu') || {}).dataset?.peint === '1' || !!document.getElementById('etat-vide'),
@@ -68,9 +74,12 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't', 'v', 'n', 'k'];
                    '?r=99999x99999&d=999&s=-1&l=zz&t=zz&p=zz&m=zz']) {
     n++;
     await page.goto('http://127.0.0.1:' + PORT + '/app' + q, { waitUntil: 'domcontentloaded' });
+    /* Le montage attendu comme plus haut ; s'il n'arrive pas, l'échec doit se
+       lire dans le rapport (« rien n'est peint »), pas arrêter l'outil. */
+    await page.waitForSelector('#apercu', { timeout: 5000 }).catch(() => null);
     await page.waitForTimeout(150);
     const ok = await page.evaluate(() => ({
-      peint: document.getElementById('apercu').width > 4,
+      peint: (document.getElementById('apercu')?.width ?? 0) > 4,
       url: location.search
     }));
     if (!ok.peint) problems.push(`${q} : rien n'est peint`);

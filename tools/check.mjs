@@ -25,6 +25,7 @@ const ETAPES = [
   ['amplitude du grain', 'dither-check.mjs'],
   ['captures et requêtes sortantes', 'shot.mjs'],
   ['installation et hors ligne', 'pwa.mjs'],
+  ['coût des actions', 'perf.mjs'],
   ['endurance', 'soak.mjs']
 ];
 
