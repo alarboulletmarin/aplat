@@ -163,8 +163,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(err.shown, 'état erreur : carte affichée');
   t(/49/.test(err.msg) && /40/.test(err.msg), 'état erreur : message chiffré', err.msg);
 
-  // --- 8. bouton Réessayer présent et cliquable
-  t(await page.isEnabled('#btn-reessayer'), 'état erreur : Réessayer actif');
+  // --- 8. pas de Réessayer : rejouer 49 Mpx produirait le même échec,
+  //        seule la résolution peut changer et la phrase le dit
+  t(await page.evaluate(() => !document.getElementById('btn-reessayer')),
+    'état erreur : Réessayer se tait quand seule la résolution peut changer');
 
   // --- 9. téléchargement réel
   await page.fill('#res-largeur', '1179');

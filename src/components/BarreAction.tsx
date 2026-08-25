@@ -254,14 +254,20 @@ export function BarreAction({
               <p className="note-t">{T.erreurTitre}</p>
               <p className="note-d" id="note-erreur-message">{message}</p>
             </div>
-            <button
-              type="button"
-              id="btn-reessayer"
-              className="note-reessayer"
-              onClick={() => onExporter('png')}
-            >
-              {T.reessayer}
-            </button>
+            {/* Réessayer relance un PNG : c'est le bon repli pour un format
+                refusé ou un presse-papiers fermé. Quand c'est la résolution
+                qui dépasse, le même essai produirait le même échec : le
+                bouton se tait, la phrase dit déjà quoi baisser. */}
+            {echec !== 'trop' && (
+              <button
+                type="button"
+                id="btn-reessayer"
+                className="note-reessayer"
+                onClick={() => onExporter('png')}
+              >
+                {T.reessayer}
+              </button>
+            )}
           </div>
         )}
       </div>
