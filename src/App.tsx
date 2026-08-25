@@ -304,7 +304,7 @@ export function App() {
     }
     try {
       if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(window.location.href).then(
+        navigator.clipboard.writeText(lien).then(
           () => fin(true),
           () => fin(false),
         )
