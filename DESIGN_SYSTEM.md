@@ -659,7 +659,12 @@ continuité**. Il y en a deux :
   il se tait quand seule la fenêtre a bougé ;
 - les trois points disent « c'est en cours » pendant le calcul.
 
-`prefers-reduced-motion: reduce` les coupe toutes les deux.
+À quoi s'ajoute une réponse au toucher, jamais spontanée : l'arche de la frise
+qu'on pince plonge et rebondit, et l'onde s'amortit sur ses voisines. Elle ne
+dit rien et ne mène nulle part, c'est son droit de décor : elle ne part que
+d'un doigt, aucun réglage ne bouge, et qui ne la trouve pas n'a rien manqué.
+
+`prefers-reduced-motion: reduce` les coupe toutes les trois.
 
 ---
 
