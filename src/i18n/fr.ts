@@ -165,10 +165,13 @@ export const fr = {
   reglages: {
     titre: 'Réglages',
     famille: 'Famille de motif',
-    /* Les trois groupes sont devenus trois onglets. Le mot du groupe ne change
-       pas pour autant : c'est le même classement, montré autrement. */
+    /* Les groupes sont devenus des onglets. Le mot du groupe ne change pas
+       pour autant : c'est le même classement, montré autrement. */
     groupeAbstraits: 'Abstraits',
     groupePaysages: 'Paysages',
+    /* Les gravures tramées : des endroits, pas des motifs. Le mot est court et
+       dit exactement ça. */
+    groupeLieux: 'Lieux',
     groupeFigures: 'Figures',
     onglets: 'Groupes de familles',
     palette: 'Palette',

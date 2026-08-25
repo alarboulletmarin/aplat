@@ -9,6 +9,28 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : les lieux, un second geste du moteur
+
+- **Quatre familles et un quatrième groupe.** Acropole, Phare, Pyramides,
+  Torii : des endroits, pas des motifs, rangés dans leur onglet « Lieux »
+  entre les paysages et les figures. Chacun varie avec sa graine, comme tout
+  le catalogue : le rocher, l'astre, la porte et les dunes se replacent à
+  chaque tirage.
+- **La gravure tramée.** Les lieux ne sont pas des aplats : chaque scène est
+  un champ de densité d'encre, et une trame de demi-teintes à hachures
+  croisées le transforme en points, comme une gravure ou un billet. Deux tons
+  seulement, pris dans la palette : le plus clair fait le papier, le plus
+  sombre fait l'encre. Sur les palettes sombres, la gravure s'inverse
+  d'elle-même, claire sur fond nuit, sans cas particulier.
+- **La densité règle la finesse de la trame**, pas le peuplement : le même
+  lieu, gravé plus gros ou plus fin.
+- **Le même contrat que tout le reste.** Déterministe au quadruplet près, la
+  même image à toute résolution, la sonde de lisibilité mesure la gravure
+  réelle, et le SVG passe sur la plupart des tirages, les points d'une rangée
+  fusionnés en rectangles. Les gravures les plus denses dépassent le plafond
+  du vectoriel, et le panneau des formats le dit alors, motif par motif,
+  exactement comme le garde-fou le prévoyait.
+
 ### Changé : la carte « Image enregistrée » sait partir
 
 - **Elle se retire d'elle-même après douze secondes**, le double du temps de

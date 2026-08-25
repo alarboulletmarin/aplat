@@ -133,6 +133,7 @@ vercel.json                   les en-têtes de cache qui décident des mises à 
 src/main.tsx                  point d'entrée, et le choix des deux pages
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
+src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
 src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
@@ -293,7 +294,7 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Trente-sept familles, trois groupes.**
+**Quarante et une familles, quatre groupes.**
 
 - **Abstraits** (vingt-trois) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
@@ -304,6 +305,12 @@ et le fichier exporté sont le même dessin, à deux échelles.
   et c'est ce qui les sépare des abstraits. C'est aussi ce qui les rend
   commodes en fond d'écran : la grille d'icônes tombe dans leur partie basse,
   et la sonde de lisibilité y trouve un aplat plutôt qu'un motif.
+- **Lieux** (quatre) : Acropole, Phare, Pyramides, Torii. Des gravures tramées
+  plutôt que des aplats : chaque scène est un champ de densité d'encre, une
+  trame de demi-teintes à hachures croisées le transforme en points, et deux
+  tons seulement sortent de la palette, le plus clair en papier, le plus
+  sombre en encre. La densité y règle la finesse de la trame, pas le
+  peuplement.
 - **Figures** (onze) : des objets posés sur un fond, reconnaissables un par un.
 
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
@@ -422,9 +429,10 @@ peindre : une famille ajoutée au moteur est donc exportable en vectoriel le jou
 même, et une primitive de tracé ajoutée sans être notée là-bas casse la
 compilation plutôt que de sortir un fichier faux. Deux choses n'y passent pas,
 et le produit le dit plutôt que de faire semblant : le grain, qui est une trame
-d'image, et les familles trop peuplées, qu'un plafond refuse. Aucune du
-catalogue actuel ne l'atteint (la plus dense, Mosaïque, compte moins de mille
-formes), et un test unitaire l'y tient.
+d'image, et les familles trop peuplées, qu'un plafond refuse. Aucune famille dessinée
+ne l'atteint (la plus dense, Mosaïque, compte moins de mille formes), et un
+test unitaire l'y tient ; les gravures des lieux, elles, jouent avec ce
+plafond, points fusionnés en rangées, et le panneau tranche motif par motif.
 
 Les trois appareils partent en trois téléchargements et non en archive : un
 fichier compressé demanderait une bibliothèque embarquée pour un gain nul sur un
@@ -439,7 +447,7 @@ appareil modeste refuse.
 L'aperçu et les vignettes ne dépendent pas des mêmes réglages : taper un chiffre
 dans le champ largeur ne concerne que l'aperçu, changer de palette ne concerne
 que les vignettes visibles. Les vignettes sont dessinées à l'entrée dans le
-champ de vision, pas toutes d'un coup : six ou sept sur trente-sept au premier
+champ de vision, pas toutes d'un coup : six ou sept sur quarante et une au premier
 affichage d'un téléphone.
 
 Mesuré avec le processeur bridé six fois, ce qui correspond à un téléphone

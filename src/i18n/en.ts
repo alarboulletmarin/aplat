@@ -117,6 +117,7 @@ export const en: Textes = {
     famille: 'Pattern family',
     groupeAbstraits: 'Abstract',
     groupePaysages: 'Landscapes',
+    groupeLieux: 'Places',
     groupeFigures: 'Figures',
     onglets: 'Family groups',
     palette: 'Palette',
