@@ -25,7 +25,7 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
 | Primaire | ce que le fichier contient de plus que le motif : le voile, et de quoi l'ôter | une ligne sous le bouton |
 | Secondaire | **Surprends-moi** et **Variante**, les deux tirages au sort | la même rangée, à gauche du primaire |
-| Secondaire | famille, palette, densité, version claire ou sombre, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
+| Secondaire | famille, palette, densité, version claire ou sombre, l'historique des motifs regardés, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
 | Caché | les autres formats : PNG 2x, WebP, SVG, presse-papiers, les trois appareils | un dépli attaché au primaire |
 | Caché | lien de partage | en bas du bloc, sous un filet |
 | Caché | langue, thème, version, licence, licences tierces, source, soutien, mentions légales | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
@@ -39,7 +39,7 @@ question et qu'on ne sait pas laquelle on veut avant de voir : « Variante » ne
 change que la graine, « Surprends-moi » tire aussi une famille et une palette.
 Les séparer, l'un dans la barre et l'autre à mille pixels plus bas dans le
 panneau, revenait à cacher la moitié du geste. La place se trouve sans toucher
-au primaire : sous 420 px les deux gardent leur pictogramme et rendent leur mot,
+au primaire : sous 600 px les deux gardent leur pictogramme et rendent leur mot,
 qui reste dans leur nom accessible ; sous 360 px, c'est le pictogramme du
 primaire qui cède, et lui seul.
 
@@ -102,7 +102,7 @@ Jamais une couleur brute dans une règle : toujours un jeton d'usage.
 `--fond` `--surface` `--surface-2` `--surface-74` `--champ` `--papier`
 `--encre` `--encre-douce` `--filet` `--filet-franc`
 `--accent` `--accent-encre` `--deco-1` `--deco-2`
-`--lien` `--lien-survol` `--focus` `--alerte`
+`--lien` `--lien-survol` `--focus` `--alerte` `--ombre-plate`
 
 ### Le sombre n'est pas une inversion
 
@@ -162,7 +162,7 @@ suivent la taille de l'objet.
 | Objet | Rayon |
 |---|---|
 | bloc de réglages | 42 px en haut, 12 px en bas |
-| bouton d'action | 24 / 7 px |
+| bouton d'action, dépli des formats | 24 / 7 px |
 | note | 22 / 7 px |
 | puce de famille et de palette, select, bouton de partage | 19 / 6 px |
 | champ, puce de densité | 17 / 5 px |
@@ -170,8 +170,9 @@ suivent la taille de l'objet.
 | vignette d'une puce de famille | 13 / 4 px |
 | vignette d'historique | 14 / 4 px, canevas 10 / 3 px |
 | échantillon de palette | 7 px, les quatre coins : c'est un aplat, pas un objet |
-| onglet de groupe, dépli des formats, interrupteur du voile | 16 / 5 px |
+| onglet de groupe, interrupteur du voile | 16 / 5 px |
 | éditeur de palette, feuille des formats | 20 / 6 px |
+| palette reçue d'un lien | 18 / 6 px |
 | appareil de la maquette | 13 % du petit côté (téléphone), 5,5 % (tablette), 2,4 % (ordinateur) |
 | marque | 23 % de son côté |
 
@@ -538,7 +539,7 @@ teinte seule ne suffit jamais.
   `--accent-encre` (et non `--encre`, qui est la crème en thème sombre et
   disparaîtrait sur le lime). 56 px de haut.
 - **Secondaire** : transparent, trait `--encre` à 2 px. 56 px, mais
-  `flex: 0 100 auto` : il cède toute sa place au primaire. Sous 420 px les deux
+  `flex: 0 100 auto` : il cède toute sa place au primaire. Sous 600 px les deux
   secondaires de la barre rendent leur mot et gardent leur pictogramme. Le mot
   n'est pas retiré du document mais rendu invisible : il reste le nom accessible
   du bouton, ce qu'un `aria-label` posé par-dessus un libellé visible aurait
