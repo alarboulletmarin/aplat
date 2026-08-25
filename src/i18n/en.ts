@@ -205,9 +205,9 @@ export const en: Textes = {
   },
   barre: {
     nouveau: 'Variation',
-    nouveauTitre: 'Redraws the same pattern with a new seed',
+    nouveauTitre: 'Redraws the same pattern with a new seed (key V)',
     surprise: 'Surprise me',
-    surpriseTitre: 'Draws a random family, palette and seed',
+    surpriseTitre: 'Draws a random family, palette and seed (key S)',
     telecharger: 'Download',
     rendu: 'Rendering',
     enregistre: 'Image saved',

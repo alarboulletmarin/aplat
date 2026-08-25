@@ -475,6 +475,27 @@ export function App() {
     )
   }
 
+  /* Trois touches pour la rangée d'action, cadeau de l'ordinateur : V pour
+     Variante, S pour Surprends-moi, T pour Télécharger. Jamais pendant une
+     saisie, jamais avec un modificateur (Ctrl+S reste au navigateur), jamais
+     en rafale d'appui maintenu. Les boutons les annoncent par
+     `aria-keyshortcuts` et leur infobulle. L'effet suit la déclaration
+     d'`exporter` et se réabonne à chaque rendu : trois fermetures fraîches,
+     jamais un réglage en retard. */
+  useEffect(() => {
+    const surTouche = (evenement: KeyboardEvent) => {
+      if (evenement.metaKey || evenement.ctrlKey || evenement.altKey || evenement.repeat) return
+      const cible = evenement.target as HTMLElement | null
+      if (cible?.closest('input, textarea, select, [contenteditable]')) return
+      const touche = evenement.key.toLowerCase()
+      if (touche === 'v') nouvelleGraine()
+      else if (touche === 's') surprendre()
+      else if (touche === 't') exporter('png')
+    }
+    window.addEventListener('keydown', surTouche)
+    return () => window.removeEventListener('keydown', surTouche)
+  })
+
   /**
    * La feuille de partage native, avec le fichier de la carte de succès :
    * « Enregistrer l'image » y met la pellicule à un appui. L'appui sur le

@@ -317,6 +317,7 @@ export function BarreAction({
           type="button"
           id="btn-surprise"
           className="btn-graine btn-compact"
+          aria-keyshortcuts="s"
           title={T.surpriseTitre}
           onClick={onSurprise}
         >
@@ -327,6 +328,7 @@ export function BarreAction({
           type="button"
           id="btn-graine"
           className="btn-graine btn-compact"
+          aria-keyshortcuts="v"
           title={T.nouveauTitre}
           onClick={onGraine}
         >
@@ -346,6 +348,7 @@ export function BarreAction({
             type="button"
             id="btn-export"
             className="btn-export"
+            aria-keyshortcuts="t"
             disabled={vide}
             aria-disabled={calcul}
             aria-busy={calcul}
