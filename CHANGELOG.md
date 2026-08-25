@@ -9,6 +9,26 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : dix-sept familles, et un cinquième groupe, les Matières
+
+- **Les Matières entrent au catalogue.** Un cinquième onglet, entre les
+  abstraits et les paysages : ce que la main reconnaît avant l'œil. Le
+  catalogue passe à soixante-trois familles.
+- **Le moteur gagne des gestes nouveaux**, à côté de l'aplat fermé et de la
+  gravure tramée : la ligne de niveau, la fracture, la réserve, la chimie, le
+  réseau, le pavage savant, la grille qui se déforme et interfère, la
+  grammaire de formes.
+- **Deux familles se cultivent au lieu de se dessiner.** Pelage et Madrépore
+  poussent par réaction-diffusion, la même chimie que les robes d'animaux et
+  les coraux ; la culture est mémoïsée et tient sous les cent millisecondes.
+- **Le kintsugi met l'or où ça s'est cassé** : l'accent de la palette vit
+  dans les jointures. Et Penrose pave sans jamais se répéter, ce qu'aucun
+  motif du catalogue ne savait faire.
+- **Le même contrat que tout le reste.** Déterministe au quadruplet près, la
+  même image à toute résolution, exportable, mesuré par la sonde de
+  lisibilité, et tenu par les mêmes vérifications que les cinquante-six
+  autres.
+
 ### Ajouté : trois touches, et une icône qui tire au sort
 
 - **V, S, T au clavier.** Variante, Surprends-moi, Télécharger, depuis
