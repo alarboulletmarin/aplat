@@ -9,6 +9,17 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : trois touches, et une icône qui tire au sort
+
+- **V, S, T au clavier.** Variante, Surprends-moi, Télécharger, depuis
+  n'importe où dans la page : le cadeau de l'ordinateur. Jamais pendant une
+  saisie, jamais avec un modificateur ; les infobulles des boutons disent
+  leur touche.
+- **L'appui long sur l'icône installée propose « Surprends-moi ».**
+  L'application s'ouvre sur un tirage déjà fait, et l'adresse redevient
+  concrète aussitôt : le lien qu'on partagerait porte le motif tiré, jamais
+  le hasard.
+
 ### Ajouté : la pellicule à un appui
 
 - **« Enregistrer dans les photos », dans la carte de succès.** La tâche
