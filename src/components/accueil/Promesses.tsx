@@ -3,9 +3,10 @@
 import { useState, type CSSProperties } from 'react'
 import { mesurer, RAYONS } from '../../lib/moteur'
 import { jetonsLibelle } from '../../lib/geometrie'
+import { tirerGraine } from '../../lib/tirage'
 import type { Textes } from '../../i18n'
 import { Toile } from './Toile'
-import { TELEPHONE, tirerGraine, VOILE } from './choix'
+import { TELEPHONE, VOILE } from './choix'
 
 /**
  * Les trois choses qu'Aplat fait autrement, dont une se démontre.
@@ -71,28 +72,28 @@ export function Promesses({ textes }: { textes: Textes }) {
      région à atteindre, ce sont trois notes en marge de ce qui précède. */
   return (
     <section className="promesses">
-      <div className="carte">
-        <span className="carte-n" aria-hidden="true">
+      <div className="promesse">
+        <span className="promesse-n" aria-hidden="true">
           01
         </span>
-        <h3 className="carte-t">{P.unTitre}</h3>
-        <p className="carte-p">{P.unCorps}</p>
+        <h3 className="promesse-t">{P.unTitre}</h3>
+        <p className="promesse-p">{P.unCorps}</p>
       </div>
 
-      <div className="carte">
-        <span className="carte-n carte-n-deux" aria-hidden="true">
+      <div className="promesse">
+        <span className="promesse-n promesse-n-deux" aria-hidden="true">
           02
         </span>
-        <h3 className="carte-t">{P.deuxTitre}</h3>
-        <p className="carte-p">{P.deuxCorps}</p>
+        <h3 className="promesse-t">{P.deuxTitre}</h3>
+        <p className="promesse-p">{P.deuxCorps}</p>
       </div>
 
-      <div className="carte">
-        <span className="carte-n carte-n-trois" aria-hidden="true">
+      <div className="promesse">
+        <span className="promesse-n promesse-n-trois" aria-hidden="true">
           03
         </span>
-        <h3 className="carte-t">{P.troisTitre}</h3>
-        <p className="carte-p">{P.troisCorps}</p>
+        <h3 className="promesse-t">{P.troisTitre}</h3>
+        <p className="promesse-p">{P.troisCorps}</p>
         <div className="voile-paire">
           {cote(false, P.sansVoile)}
           {cote(true, P.avecVoile)}

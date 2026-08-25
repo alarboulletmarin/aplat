@@ -493,31 +493,34 @@
   gap: clamp(18px, 3vw, 30px);
   align-items: start;
 }
-.carte {
+/* « promesse » et non « carte » : la carte, c'est le bloc de réglages de
+   l'application (`ecrans.css`), et son `.carte + .carte` posait ici son
+   filet de séparation à la place du seuil d'encre. Deux objets, deux noms. */
+.promesse {
   display: flex;
   flex-direction: column;
   gap: 9px;
   border-top: 3px solid var(--encre);
   padding-top: 14px;
 }
-.carte-n {
+.promesse-n {
   font-family: var(--display);
   font-size: 19px;
   letter-spacing: 0.02em;
   color: var(--deco-2);
 }
-.carte-n-deux {
+.promesse-n-deux {
   color: var(--deco-1);
 }
-.carte-n-trois {
+.promesse-n-trois {
   color: var(--violet);
 }
-.carte-t {
+.promesse-t {
   font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.015em;
 }
-.carte-p {
+.promesse-p {
   font-size: 14.5px;
   color: var(--encre-douce);
   max-width: 34ch;
