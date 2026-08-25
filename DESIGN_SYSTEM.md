@@ -284,7 +284,7 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi quarante et une familles et onze palettes : dès
+restait presque rien pour choisir parmi quarante-six familles et onze palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
 du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
