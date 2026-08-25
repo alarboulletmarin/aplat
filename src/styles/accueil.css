@@ -167,6 +167,17 @@
   flex: 0 0 22px;
   border-radius: 11px 11px 0 0;
 }
+/* Dans l'en-tête collant de l'application, sur téléphone, la frise revient
+   aux treize pixels de l'ancien filet : chaque pixel de la bande épinglée
+   est un pixel de moins pour les grilles, et `tools/repli.mjs` tient ce
+   partage fermé. Les frises de la présentation, elles, gardent leur taille :
+   la page défile, rien n'y est épinglé. La fenêtre couchée a sa propre
+   règle, à dix pixels, dans `ecrans.css`. */
+@media (max-width: 479px) {
+  .entete .frise {
+    height: 13px;
+  }
+}
 /* L'onde de la frise : l'arche touchée plonge, rebondit, et ses voisines la
    suivent avec un retard et un creux qui s'amortissent (les deux variables
    sont posées par le composant). La courbe dépasse un peu le repos avant de
