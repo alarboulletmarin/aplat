@@ -310,18 +310,20 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Quarante et une familles, quatre groupes.**
+**Quarante-six familles, quatre groupes.**
 
 - **Abstraits** (vingt-trois) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
   pas ; et quatre déformées, où un champ lisse plie une forme répétée, ce qui
   se reconnaît à une règle qu'on voit se tordre.
-- **Paysages** (trois) : Sommets, Horizon, Nuages. Elles ont un haut et un bas,
-  et c'est ce qui les sépare des abstraits. C'est aussi ce qui les rend
-  commodes en fond d'écran : la grille d'icônes tombe dans leur partie basse,
-  et la sonde de lisibilité y trouve un aplat plutôt qu'un motif.
-- **Lieux** (quatre) : Acropole, Phare, Pyramides, Torii. Des gravures tramées
+- **Paysages** (six) : Sommets, Horizon, Nuages, Dunes, Falaises, Archipel.
+  Elles ont un haut et un bas, et c'est ce qui les sépare des abstraits. C'est
+  aussi ce qui les rend commodes en fond d'écran : la grille d'icônes tombe
+  dans leur partie basse, et la sonde de lisibilité y trouve un aplat plutôt
+  qu'un motif.
+- **Lieux** (six) : Acropole, Phare, Pyramides, Torii, Aqueduc, Moulins. Des
+  gravures tramées
   plutôt que des aplats : chaque scène est un champ de densité d'encre, une
   trame de demi-teintes à hachures croisées le transforme en points, et deux
   tons seulement sortent de la palette, le plus clair en papier, le plus
@@ -387,21 +389,23 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **1 353 combinaisons** (41 familles × 11 palettes × 3 densités) en
+Mesuré sur les **1 518 combinaisons** (46 familles × 11 palettes × 3 densités) en
 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
-| médiane | 0,94 Mo | **0,43 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,75 Mo** |
+| médiane | 0,94 Mo | **0,45 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,86 Mo** |
 | maximum | 2,33 Mo | **1,35 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
-la seconde série, puis à celle des cinq familles déformées. Le maximum est
-passé de 0,98 à 1,04 Mo avec Azulejos en densité dense, dont le carrelage
-remplit la page de courbes, puis à 1,35 Mo avec Mirage en dense, dont chaque
-rayure pliée traverse la page de haut en bas : c'est le prix honnête d'un
-motif qui couvre tout plutôt que de semer des formes sur un aplat.
+la seconde série, à celle des cinq familles déformées, puis à celle des trois
+paysages et deux lieux. Le maximum est passé de 0,98 à 1,04 Mo avec Azulejos
+en densité dense, dont le carrelage remplit la page de courbes, puis à
+1,35 Mo avec Mirage en dense, dont chaque rayure pliée traverse la page de
+haut en bas : c'est le prix honnête d'un motif qui couvre tout plutôt que de
+semer des formes sur un aplat. Les cinq familles nouvelles n'y paraissent
+pas : aucune n'entre dans les plus lourdes.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -599,14 +603,14 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/reach.mjs` | atteignabilité et taille des cibles, de 320 à 1920 px |
 | `tools/repli.mjs` | le repli au défilement, et la part de la fenêtre laissée aux grilles |
 | `tools/overflow.mjs` | débordements sur 128 combinaisons de largeur, langue et résolution cible, avec et sans libellés allongés de 30 % |
-| `tools/fuzz-url.mjs` | 241 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
+| `tools/fuzz-url.mjs` | 383 URL hostiles : aucune erreur, aucune injection, la page rend toujours |
 | `tools/band-test.mjs` | hauteur des marches du voile |
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 353 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 1 518 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 41 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 46 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

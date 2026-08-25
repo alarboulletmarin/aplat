@@ -9,7 +9,18 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
-### Changé : la frise d'arches, partout et vivante
+### Ajouté : cinq familles encore, des dunes aux moulins
+
+- **Trois paysages.** Dunes, des crêtes de sable superposées aux flancs
+  lents ; Falaises, des parois en redans qui tombent dans une mer plate ;
+  Archipel, des îles posées sur l'eau sous un grand ciel, chacune avec son
+  reflet. Le catalogue passe à quarante-six familles.
+- **Deux lieux gravés.** Aqueduc, deux rangs d'arches dont les baies laissent
+  voir le ciel et les collines : la forme de la marque, lue en creux par la
+  trame. Moulins, un plat pays sous un ciel chargé, la croix des ailes devant
+  l'astre et un canal en réserve. Même contrat que les quatre premiers lieux :
+  deux tons pris dans la palette, la densité règle la finesse de la trame, et
+  chaque tirage replace la scène.
 
 - **L'en-tête de l'application porte la frise de la présentation.** Le filet à
   six barres s'efface : la même frise d'arches souligne le titre ici et sépare
