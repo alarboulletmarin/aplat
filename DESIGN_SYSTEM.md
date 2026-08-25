@@ -351,12 +351,16 @@ celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont ri
 est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
 ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
 
-L'onglet ouvert est **toujours celui de la famille en cours**. C'est là qu'est
-la mémoire du dernier onglet, et elle vaut mieux qu'un réglage enregistré :
-elle est dans l'adresse, avec le reste, donc elle survit à un rechargement comme
-à un lien partagé sans rien écrire sur l'appareil. Les flèches parcourent les
-onglets sans les ouvrir, sans quoi le clavier traverserait un rendu complet de
-grille par onglet pour atteindre le dernier.
+L'onglet s'ouvre sur **le groupe de la famille de l'adresse**, puis ne change
+plus que sous le doigt. Il a suivi la famille en cours un temps, et c'était un
+défaut : les groupes n'ont pas la même hauteur, et l'onglet qui basculait sous
+« Surprends-moi » ou une vignette d'historique faisait sauter tout le panneau
+au milieu du geste. La famille tirée reste sous les yeux dans l'aperçu, et son
+onglet la montre dès qu'on l'ouvre. Un rechargement comme un lien partagé
+rouvrent le bon onglet sans rien écrire sur l'appareil : la famille est dans
+l'adresse. Les flèches parcourent les onglets sans les ouvrir, sans quoi le
+clavier traverserait un rendu complet de grille par onglet pour atteindre le
+dernier.
 
 Les cinq groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
 test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses

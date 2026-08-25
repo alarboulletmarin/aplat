@@ -37,11 +37,11 @@ const GROUPES = [
  * au lieu d'un défilement.
  *
  * Rien n'est caché pour autant : les onglets sont visibles ensemble, ils
- * portent le nombre de familles qu'ils contiennent, et l'onglet ouvert est
- * toujours celui de la famille en cours. C'est là que se trouve la mémoire du
- * dernier onglet, et elle est meilleure qu'un réglage enregistré : elle est
- * dans l'adresse, avec le reste, donc elle survit à un rechargement comme à un
- * lien partagé sans rien écrire sur l'appareil.
+ * portent le nombre de familles qu'ils contiennent, et l'onglet s'ouvre sur le
+ * groupe de la famille de l'adresse, un rechargement comme un lien partagé
+ * retombant ainsi au bon endroit sans rien écrire sur l'appareil. Ensuite il
+ * ne change que sous le doigt : c'est `App` qui tient ce choix, et le
+ * commentaire de son état dit pourquoi il ne suit plus les tirages.
  */
 export function ChoixFamille({
   valeur,

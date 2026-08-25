@@ -933,8 +933,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const sctx3 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
     const sp = await sctx3.newPage();
+    /* La famille se lit dans l'adresse et non dans la grille : l'onglet ne
+       suit plus les tirages, et la famille tirée peut donc être cochée dans
+       un groupe que la grille ne montre pas. */
     const etat = () => sp.evaluate(() => ({
-      fam: document.querySelector('[data-famille][aria-checked="true"]').dataset.famille,
+      fam: new URLSearchParams(location.search).get('m'),
       pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
       dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
       graine: new URLSearchParams(location.search).get('s')

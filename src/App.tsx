@@ -158,17 +158,16 @@ export function App() {
   const vide = !resolution.largeur || !resolution.hauteur
   const type = typeAppareil(resolution.largeur, resolution.hauteur)
 
-  /* L'onglet ouvert des familles. Il suit la famille en cours dès qu'elle
-     change hors de lui, ce qui arrive avec « Surprends-moi », avec une
-     vignette d'historique et avec un lien reçu. C'est là qu'est la mémoire du
-     dernier onglet, et elle est dans l'adresse plutôt que sur l'appareil. */
-  const groupeDeLaFamille = trouverFamille(reglages.famille)?.groupe ?? 'abs'
-  const [groupe, setGroupe] = useState<Groupe>(groupeDeLaFamille)
-  const [familleVue, setFamilleVue] = useState<IdFamille>(reglages.famille)
-  if (familleVue !== reglages.famille) {
-    setFamilleVue(reglages.famille)
-    if (groupeDeLaFamille !== groupe) setGroupe(groupeDeLaFamille)
-  }
+  /* L'onglet ouvert des familles. Il s'ouvre sur le groupe de la famille de
+     l'adresse, puis ne bouge plus que sous le doigt. Il a suivi la famille en
+     cours un temps, et c'était un défaut : les groupes n'ont pas la même
+     hauteur, et l'onglet qui basculait sous « Surprends-moi » ou une vignette
+     d'historique faisait sauter tout le panneau au milieu du geste. La
+     famille tirée reste sous les yeux dans l'aperçu, et son onglet la montre
+     dès qu'on l'ouvre. */
+  const [groupe, setGroupe] = useState<Groupe>(
+    () => trouverFamille(reglages.famille)?.groupe ?? 'abs',
+  )
 
   const motif: Motif = useMemo(
     () => ({
