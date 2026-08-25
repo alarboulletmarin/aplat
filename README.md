@@ -136,7 +136,8 @@ src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
 src/lib/trace.ts              les outils des gestes : rubans, bruit, teintes
 src/lib/{niveaux,fractures,reserves,chimie,reseaux,pavages,trames,grammaires}.ts
-src/lib/{carreaux,coulees}.ts les gestes ajoutés : un module par mécanique de dessin
+src/lib/{carreaux,coulees,reliefs}.ts
+                              les gestes ajoutés : un module par mécanique de dessin
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
 src/lib/route.ts              « / » ou « /app », et les liens partagés d'avant
@@ -313,9 +314,9 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-huit familles, cinq groupes.**
+**Soixante-treize familles, cinq groupes.**
 
-- **Abstraits** (trente-trois) : les douze libres, qui sèment des formes sur un
+- **Abstraits** (trente-huit) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
   pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
@@ -323,7 +324,9 @@ et le fichier exporté sont le même dessin, à deux échelles.
   seconde série : Kintsugi et Banquise brisent la surface en pièces (Voronoï
   par découpe de demi-plans, les jointures affleurent), Claustra et Papel
   picado percent un aplat en réserve, Penrose pave sans période, par
-  déflation ; et cinq venues du carreau et de la coulée, décrits plus bas.
+  déflation ; cinq venues du carreau et de la coulée ; et cinq venues du
+  relief, où la teinte d'une face dit son orientation. Les trois gestes sont
+  décrits plus bas.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
   reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
   Madrépore se cultivent, une réaction-diffusion de Gray-Scott gelée à un
@@ -386,6 +389,46 @@ la classe. Un ruban sur quatre environ n'est pas peint : le fond de la palette
 reste alors visible sur toute sa longueur, si bien que le vide se lit comme une
 bande de la même largeur que les autres.
 
+**Le relief, sans un dégradé.** Le catalogue est en aplats fermés, et c'est un
+parti pris : un dégradé se trame, pèse trois fois plus en PNG et ne survit pas
+au vectoriel. Le geste du relief (`src/lib/reliefs.ts`) montre qu'on n'en a pas
+besoin. Un volume ne se voit pas parce que la lumière y glisse, il se voit
+parce que ses faces ne sont pas de la même valeur : trois aplats bien choisis
+font un cube plus sûrement qu'un dégradé.
+
+La lumière ne bouge jamais, elle vient d'en haut à gauche, et de devant. Une
+face qui la regarde prend sa teinte poussée vers le jour, une face qui s'en
+détourne la même poussée vers l'ombre. Le jour et l'ombre sont presque le blanc
+et presque le noir, teintés d'un quart par les deux bouts de la palette. Les
+deux réglages ont été essayés. Éclairer vers la teinte la plus claire de la
+palette semblait plus élégant et donnait de la boue : sur Lime & crème, une
+face de bleu marine poussée vers un jaune vert ressort kaki, et le cube perd la
+couleur pour laquelle on l'a choisi. Le blanc et le noir, eux, ne déplacent pas
+la teinte, ils montent et descendent sa valeur, ce qu'une lumière fait.
+
+Cinq familles, cinq façons de fabriquer la profondeur. **Cubes** empile des
+solides en axonométrie, trois faces par cube, la hauteur lue dans un bruit
+continu et la teinte prise par palier d'altitude, comme une carte
+hypsométrique. **Plis** froisse une nappe : les sommets restent sur un
+quadrillage à peine bousculé, les triangles pavent le plan sans un interstice,
+et la seule chose qui vienne de la troisième dimension est une hauteur qui
+n'orientera que les facettes. Le froissé est entièrement dans la valeur.
+**Bossage** ne creuse rien du tout : ses panneaux sont plats, et seul le
+chanfrein dit lesquels sortent et lesquels rentrent, les mêmes deux trapèzes
+échangés suffisant à retourner le volume. **Tuyaux** courbe la valeur en
+travers d'une barre droite, et une barre devient un cylindre ; les barres se
+tressent, et celle qui passe dessous reçoit l'ombre portée de celle qui passe
+dessus. **Point de fuite** abandonne l'axonométrie pour la perspective vraie :
+tout converge vers un point posé sur l'horizon, le damier au sol se resserre en
+s'en approchant, et la couleur pâlit avec la distance, ce que les peintres
+appellent la perspective aérienne. C'est la seule des cinq où le flanc visible
+d'un bloc dépend de sa place dans le cadre.
+
+Que le dessus d'un cube soit plus clair que son flanc gauche, et celui-ci plus
+clair que le flanc droit, tient à un test : inverser deux des trois laisse le
+dessin juste au pixel près, ne lève aucune erreur, et retourne le volume comme
+un masque creux.
+
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
 Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
 « Variante » ne change donc rien dessus ; il faut passer par la palette, la
@@ -444,14 +487,14 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **2 244 combinaisons** (68 familles × 11 palettes × 3 densités)
+Mesuré sur les **2 409 combinaisons** (73 familles × 11 palettes × 3 densités)
 en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
-| médiane | 0,94 Mo | **0,48 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,87 Mo** |
-| maximum | 2,33 Mo | **1,61 Mo** |
+| médiane | 0,94 Mo | **0,49 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,89 Mo** |
+| maximum | 2,33 Mo | **1,64 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
 la seconde série, à celle des cinq familles déformées, à celle des trois
@@ -465,7 +508,12 @@ losanges, autant pour rester lisible en aplats francs que pour son poids.
 C'est le prix honnête d'un motif qui couvre tout plutôt que de semer des
 formes sur un aplat. Les cinq familles du carreau et de la coulée n'ont pas
 bougé ces trois chiffres : un alphabet de signes posés sur une grille se
-compresse par bandes, et des rubans en aplats francs plus encore.
+compresse par bandes, et des rubans en aplats francs plus encore. Le relief
+a repris la tête d'un cheveu, 1,64 Mo avec Plis en dense, et c'était
+prévisible : une nappe froissée est faite de milliers de facettes dont
+aucune n'a la teinte de sa voisine, ce qui est exactement ce qu'un
+compresseur d'images ne sait pas faire. La médiane, elle, n'a pris qu'un
+centième.
 
 Trois causes, trois correctifs, tous mesurés :
 
@@ -668,9 +716,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 244 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 409 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 68 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 73 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

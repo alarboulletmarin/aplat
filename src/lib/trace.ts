@@ -109,6 +109,42 @@ export function luminanceHex(teinte: string): number {
   return 0.2126 * canal(0) + 0.7152 * canal(1) + 0.0722 * canal(2)
 }
 
+/**
+ * L'éclairage : une teinte, un niveau, et la face qu'il faut peindre.
+ *
+ * C'est tout ce qu'il faut pour du relief en aplats. Une surface plane ne
+ * devient un volume que si ses faces se distinguent par la valeur, et le
+ * moteur ne sait poser que des aplats : la teinte d'une face est donc sa
+ * teinte propre, poussée vers le jour ou vers l'ombre selon qu'elle regarde
+ * la lumière ou s'en détourne. Le niveau va de -1, l'ombre pleine, à 1, le
+ * plein jour.
+ *
+ * Le jour et l'ombre sont presque le blanc et presque le noir, teintés d'un
+ * quart par les deux bouts de la palette. Les deux réglages ont été essayés,
+ * et c'est celui-là qui tient.
+ *
+ * Éclairer vers la teinte la plus claire de la palette semblait plus élégant,
+ * et donnait de la boue : sur Lime & crème, une face de bleu marine poussée
+ * vers un jaune vert ressort kaki, et le cube entier perd la couleur pour
+ * laquelle on l'a choisi. Le blanc et le noir, eux, ne déplacent pas la
+ * teinte, ils ne font que monter et descendre sa valeur, ce qui est
+ * exactement ce qu'une lumière fait. Le quart de palette qui les teinte suffit
+ * à ce que le jour d'une palette chaude ne soit pas celui d'une palette froide.
+ *
+ * L'ombre est commune à toutes les teintes, et c'est voulu : les ombres d'une
+ * même scène convergent, elles ne gardent pas chacune la couleur de ce qui les
+ * porte.
+ */
+export function eclairage(C: readonly string[]): (base: string, niveau: number) => string {
+  const teintes = duClairAuSombre(C)
+  const jour = melangeHex(teintes[0], '#FFFFFF', 0.78)
+  const ombre = melangeHex(teintes[teintes.length - 1], '#000000', 0.74)
+  return (base, niveau) => {
+    const n = Math.max(-1, Math.min(1, niveau))
+    return n >= 0 ? melangeHex(base, jour, n) : melangeHex(base, ombre, -n)
+  }
+}
+
 /** La palette triée de la plus claire à la plus sombre, luminance WCAG. */
 export function duClairAuSombre(C: readonly string[]): string[] {
   return [...C].sort((a, b) => luminanceHex(b) - luminanceHex(a))

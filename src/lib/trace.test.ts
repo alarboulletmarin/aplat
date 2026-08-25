@@ -14,9 +14,17 @@
  * `hachurer` est éprouvé par ce qu'il pose plutôt que par ce qu'il calcule :
  * un pinceau qui note les polygones suffit à vérifier que rien ne sort du
  * contour et que le compte des bandes suit le pas demandé.
+ *
+ * S'y ajoute l'éclairage, sur lequel tout le relief repose. Une face plus
+ * claire que celle qui la surplombe retourne le volume comme un masque creux,
+ * et rien dans le dessin ne le signale : c'est la monotonie qu'il faut tenir,
+ * et le fait que les deux bouts restent hors de la palette, sans quoi une
+ * teinte déjà claire ne s'éclaircirait plus.
  */
 import { describe, expect, it } from 'vitest'
-import { couperDemiPlan, hachurer, polygone, tracerCercle, type Point } from './trace'
+import {
+  couperDemiPlan, eclairage, hachurer, luminanceHex, polygone, tracerCercle, type Point,
+} from './trace'
 import type { Pinceau } from './moteur'
 
 const CARRE: Point[] = [[0, 0], [10, 0], [10, 10], [0, 10]]
@@ -149,5 +157,53 @@ describe('chemins ouverts', () => {
     tracerCercle(ctx, 3, 4, 5)
     ctx.fill()
     expect(formes[1]).toEqual([[8, 4]])
+  })
+})
+
+describe('éclairage', () => {
+  const C = ['#DFF478', '#92BAD5', '#17243F', '#FF6648'] as const
+
+  it('éclaircit vers le haut, assombrit vers le bas, sans jamais s’inverser', () => {
+    const eclairer = eclairage(C)
+    for (const base of C) {
+      let precedent = -1
+      for (const niveau of [-1, -0.6, -0.2, 0, 0.2, 0.6, 1]) {
+        const valeur = luminanceHex(eclairer(base, niveau))
+        expect(valeur, `${base} à ${niveau}`).toBeGreaterThan(precedent)
+        precedent = valeur
+      }
+    }
+  })
+
+  it('rend la teinte intacte au niveau zéro', () => {
+    expect(eclairage(C)('#17243F', 0)).toBe('#17243F')
+  })
+
+  it('éclaircit encore la plus claire, assombrit encore la plus sombre', () => {
+    /* C'est la raison pour laquelle le jour et l'ombre sont pris hors de la
+       palette. Bornés à ses deux teintes extrêmes, une face déjà de cette
+       teinte n'aurait plus de marge, et le volume s'y aplatirait. */
+    const eclairer = eclairage(C)
+    expect(luminanceHex(eclairer('#DFF478', 0.5))).toBeGreaterThan(luminanceHex('#DFF478'))
+    expect(luminanceHex(eclairer('#17243F', -0.5))).toBeLessThan(luminanceHex('#17243F'))
+  })
+
+  it('borne le niveau plutôt que d’extrapoler', () => {
+    const eclairer = eclairage(C)
+    expect(eclairer('#FF6648', 4)).toBe(eclairer('#FF6648', 1))
+    expect(eclairer('#FF6648', -4)).toBe(eclairer('#FF6648', -1))
+  })
+
+  it('ne rend que des teintes hexadécimales, prêtes pour un attribut', () => {
+    const eclairer = eclairage(C)
+    for (const niveau of [-1, -0.37, 0, 0.37, 1]) {
+      for (const base of C) expect(eclairer(base, niveau)).toMatch(/^#[0-9A-F]{6}$/)
+    }
+  })
+
+  it('survit à une palette d’une seule teinte', () => {
+    const eclairer = eclairage(['#4E9B7C'])
+    expect(luminanceHex(eclairer('#4E9B7C', 0.6)))
+      .toBeGreaterThan(luminanceHex(eclairer('#4E9B7C', -0.6)))
   })
 })

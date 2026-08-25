@@ -9,6 +9,35 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : cinq familles en relief, sans un seul dégradé
+
+- **Le volume entre au catalogue.** Cubes empile des solides en axonométrie,
+  trois faces par cube et la hauteur lue dans un champ continu. Plis froisse
+  une nappe dont chaque facette prend la valeur de sa pente. Bossage grave des
+  panneaux dans la page, saillants ou creux selon le seul chanfrein. Tuyaux
+  tresse des cylindres qui s'ombrent les uns les autres. Point de fuite tire
+  une plaine vers un point d'horizon, en perspective vraie. Le catalogue passe
+  à soixante-treize familles.
+- **Pas un dégradé, pas une ombre portée floue.** Un volume ne se voit pas
+  parce que la lumière y glisse, il se voit parce que ses faces ne sont pas de
+  la même valeur : trois aplats bien choisis font un cube. Les fichiers
+  restent donc ce qu'ils étaient, nets, légers, et exportables en vectoriel
+  comme le reste du catalogue.
+- **La lumière ne bouge jamais.** Elle vient d'en haut à gauche, et de devant,
+  pour les cinq familles. C'est ce qui leur permet de se ressembler sans se
+  répéter, et c'est ce qui fait qu'un panneau creux se lit comme creux du
+  premier coup d'oeil.
+- **Le relief garde les couleurs de la palette.** Éclairer vers la teinte la
+  plus claire de la palette avait été essayé, et donnait de la boue : sur Lime
+  & crème, une face de bleu marine poussée vers un jaune vert ressort kaki. Le
+  jour et l'ombre sont donc presque le blanc et presque le noir, teintés d'un
+  quart par les deux bouts de la palette : la valeur monte et descend, la
+  couleur reste.
+- **Le poids n'a pas bougé.** Médiane à 0,49 Mo et neuvième décile à 0,89 Mo
+  sur les 2 409 combinaisons, contre 0,48 et 0,87 avant. Seul le maximum prend
+  trois centièmes, avec Plis en densité dense : une nappe froissée est faite de
+  milliers de facettes dont aucune n'a la teinte de sa voisine.
+
 ### Ajouté : cinq familles géométriques, le carreau et la coulée
 
 - **Cinq familles pour les affiches géométriques.** Bauhaus compose des cases
