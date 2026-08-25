@@ -7,7 +7,7 @@ import {
   adresseNettoyee, lireAffichage, retenirLangue, retenirTheme,
   type Affichage, type Theme,
 } from '../../lib/affichage'
-import { lienAccueil, lienApp } from '../../lib/route'
+import { lienAccueil, lienApp, lienMoteur } from '../../lib/route'
 import { textes as dictionnaire } from '../../i18n'
 import { useThemeResolu } from '../../hooks/useThemeResolu'
 import { Enseigne } from './Enseigne'
@@ -74,10 +74,12 @@ export function Accueil() {
     }
   }, [])
 
-  /* Les deux liens internes sont nus : le choix fait ici attend déjà sur
-     l'appareil, la porte vers « /app » comme la marque n'ont rien à porter. */
+  /* Les trois liens internes sont nus : le choix fait ici attend déjà sur
+     l'appareil, la porte vers « /app », celle vers « /moteur » et la marque
+     n'ont rien à porter. */
   const lien = lienApp()
   const accueil = lienAccueil()
+  const moteur = lienMoteur()
 
   return (
     <>
@@ -109,10 +111,10 @@ export function Accueil() {
             page mais laisse le focus derrière, dans l'enseigne. */}
         <main className="accueil-corps" id="contenu" tabIndex={-1}>
           <Heros langue={affichage.langue} textes={T} lien={lien} />
-          <Galerie langue={affichage.langue} textes={T} />
+          <Galerie langue={affichage.langue} textes={T} moteur={moteur} />
           <Ecrans langue={affichage.langue} textes={T} detecte={detecte} />
           <Promesses textes={T} />
-          <Appel textes={T} lien={lien} />
+          <Appel textes={T} lien={lien} moteur={moteur} />
         </main>
       </div>
     </>

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { etiquetteVersion, lienLicence, lienSource } from '../../lib/build'
 import type { Textes } from '../../i18n'
-import { Soutien } from '../Soutien'
+import { PiedDocument } from './PiedDocument'
 
 /**
  * Le bas de la page : l'appel, puis le pied.
@@ -12,14 +11,20 @@ import { Soutien } from '../Soutien'
  * l'enseigne pour trouver la porte serait une friction gratuite. Le libellé
  * est mot pour mot celui du héros, parce que ce n'est pas une autre offre.
  *
- * Le lien vers la source n'est pas de la décoration : l'AGPL demande que
- * quiconque utilise le logiciel puisse obtenir la source correspondante, et un
- * lien vers la branche principale ne la désigne pas. Le commit, si. La licence
- * et les notices tierces suivent la même règle que dans le pied de
- * l'application, et la ligne de l'hébergeur aussi : la LCEN vaut pour les deux
- * documents, et l'accueil est celui que les moteurs de recherche servent.
+ * Le pied lui-même est partagé avec la page du mécanisme (`PiedDocument`) :
+ * il porte les mentions de l'AGPL et de la LCEN, et deux exemplaires de ces
+ * lignes seraient un exemplaire de trop le jour où il faut les corriger.
  */
-export function Appel({ textes, lien }: { textes: Textes; lien: string }) {
+export function Appel({
+  textes,
+  lien,
+  moteur,
+}: {
+  textes: Textes
+  lien: string
+  /** Le lien vers la page du mécanisme, posé au pied. */
+  moteur: string
+}) {
   const A = textes.accueil
 
   return (
@@ -40,24 +45,7 @@ export function Appel({ textes, lien }: { textes: Textes; lien: string }) {
         </a>
       </section>
 
-      <footer className="accueil-pied">
-        <span>{textes.entete.mention}</span>
-        <span className="accueil-pied-meta">
-          <span>{etiquetteVersion()}</span>
-          <a href={lienSource()} rel="noopener noreferrer" target="_blank">
-            {textes.pied.source}
-          </a>
-          <a href={lienLicence()} rel="noopener noreferrer" target="_blank">
-            {textes.pied.licence}
-          </a>
-          <a href="/THIRD-PARTY.txt" rel="noopener noreferrer" target="_blank">
-            {textes.pied.tiers}
-          </a>
-          <Soutien textes={textes} />
-        </span>
-        <span>{A.pied.mention}</span>
-        <span className="accueil-pied-mentions">{textes.pied.hebergement}</span>
-      </footer>
+      <PiedDocument textes={textes} mention={A.pied.mention} moteur={moteur} />
     </>
   )
 }
