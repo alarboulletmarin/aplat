@@ -1279,7 +1279,10 @@
   .entete-marque {
     gap: 9px;
   }
-  .entete-filet {
+  /* La frise de l'en-tête se baisse comme le faisait le filet qu'elle
+     remplace : dix pixels d'arches, le seuil garde ses trois. La somme
+     `ENTETE_PAYSAGE` de `geometrie.ts` est bâtie dessus. */
+  .entete .frise {
     height: 10px;
   }
   .accroche {

@@ -55,7 +55,7 @@ const RESERVE_PAYSAGE = 212
  * ne se colle pas au bord de la fenêtre mais sous lui (`top: var(--bar)` dans
  * `ecrans.css`). La valeur est celle que dessine la variante compacte de
  * `@media (orientation: landscape)` : huit pixels de rembourrage, une marque de
- * trente pixels et ses sept pixels sous elle, un filet de dix et son seuil de
+ * trente pixels et ses sept pixels sous elle, une frise de dix et son seuil de
  * trois. Elle bascule avec cette règle, ou pas du tout.
  */
 const ENTETE_PAYSAGE = 58
