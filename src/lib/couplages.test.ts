@@ -12,14 +12,21 @@
  * bâties sur plusieurs règles à la fois. Elles restent tenues par
  * `tools/reach.mjs`, qui mesure le résultat dans un vrai navigateur.
  *
- * Les sources arrivent par `?raw` : c'est Vite qui lit les fichiers, et le
- * projet `src` n'a pas à connaître Node pour ça.
+ * Les sources sont lues par Node : ces tests tournent dans l'environnement
+ * `node` de vitest, et la référence ci-dessous apporte ses types à ce seul
+ * fichier, sans ouvrir le projet `src` aux globales de Node.
  */
+/// <reference types="node" />
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { BORDURE_APPAREIL, PAYSAGE_COURT } from './geometrie'
-import ecrans from '../styles/ecrans.css?raw'
-import scene from '../components/Scene.tsx?raw'
-import collantes from '../hooks/useHauteursCollantes.ts?raw'
+
+const lire = (chemin: string) =>
+  readFileSync(new URL(chemin, import.meta.url), 'utf8')
+
+const ecrans = lire('../styles/ecrans.css')
+const scene = lire('../components/Scene.tsx')
+const collantes = lire('../hooks/useHauteursCollantes.ts')
 
 describe('les nombres recopiés du CSS', () => {
   it('la bordure de l’appareil est celle de `.appareil`', () => {
