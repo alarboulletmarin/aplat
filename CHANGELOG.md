@@ -9,6 +9,22 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : la pellicule à un appui
+
+- **« Enregistrer dans les photos », dans la carte de succès.** La tâche
+  finit dans la pellicule, et le téléchargement seul s'arrêtait un geste
+  avant sur téléphone. Quand la feuille de partage native sait prendre le
+  fichier, la carte remplace son astuce en prose par un bouton qui l'ouvre :
+  « Enregistrer l'image » est à un appui. Rien ne sort de l'appareil de plus
+  qu'avant : c'est le même fichier, déjà téléchargé, tendu à la feuille du
+  système.
+- **L'astuce restante dit le chemin réel.** Là où la feuille de partage ne
+  prend pas le fichier, la phrase décrit ce qui se passe vraiment : ouvrir le
+  fichier téléchargé, puis « Enregistrer l'image ».
+- **Le dépli s'appelle « Autres sorties ».** Il contenait la copie et les
+  trois appareils, qui ne sont pas des formats ; le menu porte maintenant le
+  mot du README, ce qu'on peut emporter.
+
 ### Ajouté : cinq familles encore, des dunes aux moulins
 
 - **Trois paysages.** Dunes, des crêtes de sable superposées aux flancs

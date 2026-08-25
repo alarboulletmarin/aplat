@@ -204,6 +204,25 @@ export function encoderSVG(travail: Travail): Blob {
   return new Blob([rendu.texte], { type: 'image/svg+xml;charset=utf-8' })
 }
 
+/**
+ * Le fichier prêt pour la feuille de partage native, ou null si elle ne le
+ * prendra pas. La tâche du produit finit dans la pellicule, et le
+ * téléchargement seul s'arrête un geste avant sur téléphone : la feuille de
+ * partage, elle, met « Enregistrer l'image » à un appui. Le jugement se rend
+ * sur le fichier réel, au moment du succès : `navigator.canShare` refuse ce
+ * que la feuille refuserait.
+ */
+export function fichierPartageable(blob: Blob, nom: string): File | null {
+  try {
+    const fichier = new File([blob], nom, { type: blob.type })
+    return typeof navigator.canShare === 'function' && navigator.canShare({ files: [fichier] })
+      ? fichier
+      : null
+  } catch {
+    return null
+  }
+}
+
 /** Déclenche le téléchargement d'un blob sous le nom donné. */
 export function telecharger(blob: Blob, nom: string): void {
   const url = URL.createObjectURL(blob)

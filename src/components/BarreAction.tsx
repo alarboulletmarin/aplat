@@ -18,6 +18,8 @@ export interface Fichier {
   format: Format
   /** Trois pour l'export multi-appareils, un partout ailleurs. */
   nombre: number
+  /** Le fichier prêt pour la feuille de partage native, quand elle le prend. */
+  photos: File | null
 }
 
 /**
@@ -71,6 +73,7 @@ export function BarreAction({
   onFormats,
   onVoile,
   onFermerNote,
+  onPhotos,
 }: {
   cadre: React.RefObject<HTMLDivElement | null>
   /** La proposition de mise à jour, quand il y en a une. */
@@ -101,6 +104,8 @@ export function BarreAction({
   onFormats: () => void
   onVoile: () => void
   onFermerNote: () => void
+  /** Ouvre la feuille de partage native avec le fichier de la carte. */
+  onPhotos: () => void
 }) {
   const T = textes.barre
   const calcul = phase === 'calcul'
@@ -247,7 +252,22 @@ export function BarreAction({
                     })
                   : `${nombre(fichier.largeur, langue)}\u00a0×\u00a0${nombre(fichier.hauteur, langue)}\u00a0px, ${nomFormat[fichier.format]}, ${poids(fichier.octets, langue, T.ko, T.mo)}`}
               </p>
-              <p className="note-h">{T.astuce}</p>
+              {/* Le dernier mètre vers la pellicule. Quand la feuille de
+                  partage native prend le fichier, l'astuce en prose devient
+                  un bouton qui fait la chose au lieu de la décrire ; sinon
+                  la phrase reste, et décrit le chemin réel. */}
+              {fichier.photos ? (
+                <button
+                  type="button"
+                  id="note-photos"
+                  className="note-reessayer note-photos"
+                  onClick={onPhotos}
+                >
+                  {T.photos}
+                </button>
+              ) : (
+                <p className="note-h">{T.astuce}</p>
+              )}
             </div>
             <button
               type="button"

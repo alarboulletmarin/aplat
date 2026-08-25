@@ -18,7 +18,7 @@ import { lireAffichage, retenirLangue, retenirTheme } from './lib/affichage'
 import { lienAccueil } from './lib/route'
 import {
   copierImage, encoderImage, encoderSVG, ErreurExport, facteur,
-  nomFichier, telecharger, webpDisponible, type Format,
+  fichierPartageable, nomFichier, telecharger, webpDisponible, type Format,
 } from './lib/export'
 import { ELEMENTS_MAX, rendreSVG } from './lib/svg'
 import { nombre } from './lib/format'
@@ -393,7 +393,9 @@ export function App() {
           if (rendu.elements > ELEMENTS_MAX) throw new ErreurExport('svgDense')
           const blob = encoderSVG(travail)
           telecharger(blob, nom)
-          finir({ largeur, hauteur, octets: blob.size, format, nombre: 1 })
+          /* Pas de feuille de partage pour le SVG : la pellicule n'en veut
+             pas, et c'est la pellicule que le bouton promet. */
+          finir({ largeur, hauteur, octets: blob.size, format, nombre: 1, photos: null })
         } catch (erreur) {
           echouer(erreur)
         }
@@ -401,7 +403,10 @@ export function App() {
       }
       encoderImage(travail).then((blob) => {
         telecharger(blob, nom)
-        finir({ largeur, hauteur, octets: blob.size, format, nombre: 1 })
+        finir({
+          largeur, hauteur, octets: blob.size, format, nombre: 1,
+          photos: fichierPartageable(blob, nom),
+        })
       }, echouer)
     }, 70)
   }
@@ -464,9 +469,22 @@ export function App() {
           octets: total,
           format: 'png',
           nombre: TROIS_APPAREILS.length,
+          photos: null,
         }),
       echouer,
     )
+  }
+
+  /**
+   * La feuille de partage native, avec le fichier de la carte de succès :
+   * « Enregistrer l'image » y met la pellicule à un appui. L'appui sur le
+   * bouton est un geste frais, la seule chose que la feuille exige. Une
+   * feuille refermée sans choisir n'est pas un échec : le fichier est déjà
+   * téléchargé, la carte reste.
+   */
+  const enregistrerPhotos = () => {
+    const fichier = ephemere.fichier?.photos
+    if (fichier) navigator.share({ files: [fichier] }).catch(() => {})
   }
 
   /** L'image dans le presse-papiers, en PNG : c'est le seul type accepté partout. */
@@ -685,6 +703,7 @@ export function App() {
           }
           onVoile={() => changer({ voile: !reglages.voile })}
           onFermerNote={fermerNote}
+          onPhotos={enregistrerPhotos}
         >
           <MiseAJour textes={T} />
         </BarreAction>

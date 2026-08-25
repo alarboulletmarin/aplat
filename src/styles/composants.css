@@ -892,6 +892,12 @@
   font-size: 13px;
   color: var(--encre-douce);
 }
+/* Dans la colonne de texte de la carte de succès, le bouton ne s'étire pas
+   sur la largeur du texte : il fait la taille de son mot. */
+.note-photos {
+  align-self: flex-start;
+  margin-top: 2px;
+}
 .note-reessayer {
   flex: 0 0 auto;
   min-height: 44px;

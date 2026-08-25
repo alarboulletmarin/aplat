@@ -295,7 +295,10 @@ export const fr = {
     ko: 'Ko',
     mo: 'Mo',
     astuce:
-      'Sur téléphone\u00a0: appui long sur l’image téléchargée, puis « Ajouter aux photos ».',
+      'Sur téléphone\u00a0: ouvre le fichier téléchargé, puis « Enregistrer l’image ».',
+    /* Le bouton qui remplace l'astuce quand la feuille de partage native
+       prend le fichier : il fait la chose au lieu de la décrire. */
+    photos: 'Enregistrer dans les photos',
     fermer: 'Fermer',
     erreurTitre: 'Le rendu a échoué',
     erreurTrop: '{mpx}\u00a0Mpx dépassent ce que le navigateur peut produire. Reste sous 40\u00a0Mpx.',
