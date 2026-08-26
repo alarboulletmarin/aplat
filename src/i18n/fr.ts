@@ -515,8 +515,8 @@ export const fr = {
     /* Les autres sorties. Elles ne servent pas la même chose, et le libellé le
        dit : la ligne du haut est le fond d'écran, les autres sont des usages. */
     /* « Sorties » et non « formats » : la liste contient la copie et les trois
-       appareils, qui n'en sont pas. Le menu porte le mot du README, « ce
-       qu'on peut emporter ». */
+       appareils, qui n'en sont pas. Le menu porte le mot des notes de
+       conception, « ce qu'on peut emporter ». */
     formats: 'Autres sorties',
     formatsTitre: 'PNG doublé, WebP, SVG, presse-papiers, les trois appareils',
     formatsFermer: 'Fermer les sorties',

@@ -5,7 +5,8 @@
  *
  * `/` présente le projet, `/app` le fait tourner, `/moteur` explique comment
  * il tourne. La séparation n'est pas une navigation ajoutée à l'application :
- * celle-ci reste l'écran unique décrit par le README, et les deux autres pages
+ * celle-ci reste l'écran unique décrit par les notes de conception
+ * (docs/notes-de-conception.md), et les deux autres pages
  * sont ce qu'on voit avant d'y entrer, ou après en être sorti.
  *
  * Pas de bibliothèque de routage pour trois adresses. Le chemin est lu une
