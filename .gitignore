@@ -14,6 +14,7 @@ npm-debug.log*
 # Sorties des outils de vérification (tools/).
 .shots/
 .exports/
+.social/
 tools/.banc/
 
 # Généré au build à partir de package-lock.json.

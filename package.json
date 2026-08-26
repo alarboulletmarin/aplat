@@ -40,6 +40,8 @@
     "notices": "node scripts/generate-notices.mjs",
     "//verify": "La porte de sortie locale, que la CI rejoue à l'identique. Elle ne demande que Node. Le `build` en fait partie parce qu'il régénère les notices de licence : une dépendance ajoutée sans son texte de licence doit échouer ici, pas en production.",
     "verify": "npm run typographie && npm run typecheck && npm run lint && npm run test && npm run build",
+    "//social": "Les images des réseaux : trois stories, huit stories, une planche de quatre panneaux 4:5, une mosaïque de quatre quarts de story 9:16, deux cartes de manifeste bilingues, et cinq affiches où le nom et le motif se mêlent. Demande Chromium et un `npm run build` récent, comme `check` : les cartes sont peintes par le moteur du produit et reprennent la feuille de style livrée.",
+    "social": "node tools/social.mjs",
     "//check": "Les vérifications dans un vrai navigateur, sur le build servi par `vite preview`. Hors de `verify` à dessein : c'est la seule vérification du dépôt qui exige Chromium (`npx playwright install --with-deps chromium`), et faire dépendre la porte de sortie locale d'un téléchargement de cette taille la rendrait inutilisable là où elle sert le plus, sur une machine qui vient de cloner. La CI la joue dans un second travail, avec la même commande qu'ici.",
     "check": "node tools/check.mjs"
   },

@@ -70,6 +70,7 @@ demie, en plein balayage.
 | `cadrages.mjs` | neuf cadrages dans la fenêtre : ce qui tient au-dessus de la ligne de flottaison, et ce que recouvrent les deux barres collantes |
 | `planche.mjs` | planche-contact de toutes les familles à la résolution d'un téléphone |
 | `vitrine.mjs` | les images d'exemple du README, écrites dans `docs/vitrine/` : galerie de familles, le même motif en PNG, WebP et SVG, versions claire et sombre. Graine fixe : chaque image se refait à l'identique |
+| `social.mjs` | les images des réseaux, dans `.social/` : trois stories 9:16, huit stories, une planche de quatre panneaux 4:5 qui tiennent seuls et se recousent en 2160 × 2700, une mosaïque de quatre quarts de story pour la mise en page 2×2 d'Instagram, deux cartes de manifeste en français et en anglais, et cinq affiches où le motif porte le nom. Les motifs sortent du moteur, les maquettes de l'application qui tourne, la feuille de style est celle que `dist/index.html` déclare, et aucun chiffre n'est recopié. Un corps qui déborde de ses zones sûres est signalé plutôt que rogné. Drapeaux `--courte`, `--longue`, `--planche`, `--mosaique`, `--manifeste`, `--affiches`, adresse publique en argument |
 | `fidelity.mjs` | chaque déclaration et chaque jeton de la maquette se retrouvent-ils dans le portage |
 | `banc.mjs`, `serveur.mjs`, `pw.mjs` | l'infrastructure : moteur injectable, serveur d'aperçu, Chromium |
 

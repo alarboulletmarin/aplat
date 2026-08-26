@@ -1,0 +1,1191 @@
+/* Les cartes 9:16 pour les réseaux : la direction artistique du produit,
+   portée au format d'une story.
+
+   Rien n'est réinventé ici. Les couleurs sont les jetons de `tokens.css`, les
+   polices sont celles du produit, les arches gardent leur rapport de trois
+   pour dix, et la frise est celle de la page d'accueil, agrandie. Cette
+   feuille ne fait que donner à ces objets la taille d'une image de 1080 px de
+   large, vue à la taille d'une vignette.
+
+   Les zones sûres d'Instagram sont la seule contrainte qui ne vienne pas du
+   produit : la plateforme pose son avatar en haut et sa barre de réponse en
+   bas. Le rembourrage vertical de `.st` leur rend cette place, et rien
+   d'écrit ne descend en dessous. */
+
+:root {
+  --st-marge: 84px;
+  --st-haut: 190px;
+  --st-bas: 230px;
+}
+
+html,
+body {
+  background: var(--fond);
+}
+
+/* La carte elle-même : le format exact du fichier exporté. */
+.st {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--st-haut) var(--st-marge) var(--st-bas);
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--texte);
+  line-height: 1.45;
+}
+
+/* --- L'enseigne : la marque, le mot, le rang dans la série ---------------- */
+/* La coupe en diagonale : le fond de l'autre thème, posé sous le contenu.
+   Franche, sans trait ni ombre, comme tout ce que cette direction artistique
+   découpe. Les deux ordonnées sont posées au rendu, une fois la carte mise en
+   page, pour que la coupe tombe toujours entre le titre et le bloc du
+   dessous. */
+/* `color` est hérité en valeur calculée : redéfinir `--encre` plus bas ne
+   repeint pas ce qui l'avait déjà pris au-dessus. Le bloc inversé la reprend
+   donc explicitement, et ses descendants en héritent. */
+.st-inverse {
+  color: var(--encre);
+}
+.st-coupe {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--fond);
+  clip-path: polygon(0 var(--coupe-g, 60%), 100% var(--coupe-d, 55%), 100% 100%, 0 100%);
+}
+.st > .st-tete,
+.st > .frise,
+.st > .st-frise-cadre,
+.st > .st-corps,
+.st > .st-pied {
+  position: relative;
+  z-index: 1;
+}
+.st > .st-tete,
+.st > .frise,
+.st > .st-frise-cadre,
+.st > .st-pied {
+  flex: 0 0 auto;
+}
+
+.st-tete {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.st-tete .marque {
+  width: 76px;
+  height: 76px;
+  box-shadow: 0 0 0 3px var(--filet);
+}
+.st-mot {
+  font-family: var(--display);
+  font-size: 54px;
+  line-height: 0.84;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  padding-top: 6px;
+}
+/* La frise de l'accueil, à l'échelle de la carte. */
+.st-frise {
+  gap: 14px;
+  height: 58px;
+  border-bottom-width: 6px;
+}
+.st-frise i {
+  flex: 0 0 44px;
+  border-radius: 22px 22px 0 0;
+}
+
+/* --- Le corps ------------------------------------------------------------- */
+.st-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 44px;
+}
+
+.st-surtitre {
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-douce);
+  margin-bottom: 18px;
+}
+
+/* Le seul geste typographique du produit : la display condensée, serrée,
+   en capitales. Il ne se répète nulle part ailleurs sur la carte. */
+.st-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 104px;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  padding-bottom: 0.04em;
+}
+.st-titre-serre {
+  font-size: 92px;
+}
+.st-nom {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1em;
+  line-height: 0.74;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+/* La marque et le nom sont une seule chose, et se lisent comme telle : le
+   pictogramme est à la hauteur des capitales, pas à celle d'un surtitre. Sa
+   taille est dite en em, donc elle suit le corps du nom sans être reprise à
+   la main d'une série à l'autre. */
+.st-nom-bloc {
+  display: flex;
+  align-items: center;
+  gap: 0.13em;
+  font-size: 250px;
+}
+.st-nom-bloc .marque {
+  flex: 0 0 auto;
+  width: 0.72em;
+  height: 0.72em;
+  box-shadow: 0 0 0 0.018em var(--filet);
+}
+
+.st-accroche {
+  font-size: 39px;
+  line-height: 1.24;
+  letter-spacing: -0.018em;
+  font-weight: 500;
+  max-width: 20ch;
+  margin-top: 26px;
+}
+.st-p {
+  font-size: 29px;
+  line-height: 1.4;
+  color: var(--encre-douce);
+  max-width: 30ch;
+  margin-top: 22px;
+}
+.st-p-large {
+  max-width: none;
+}
+
+/* --- Le pied : l'adresse, et ce qu'elle coûte ---------------------------- */
+.st-pied {
+  margin-top: auto;
+  border-top: 4px solid var(--encre);
+  padding-top: 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+.st-url {
+  font-size: 31px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.st-mention {
+  font-size: 24px;
+  color: var(--encre-douce);
+  text-align: right;
+}
+
+/* --- Les objets qui portent une preuve ----------------------------------- */
+
+/* Un rendu du moteur. Toujours une arche : ouverte en haut, presque droite
+   en bas, dans le rapport de trois pour dix. */
+.st-toile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px 40px 12px 12px;
+  border: 3px solid var(--filet);
+}
+
+/* La maquette d'appareil, capturée dans l'application elle-même. */
+.st-appareil {
+  display: block;
+  max-height: 100%;
+  height: 100%;
+  width: auto;
+  margin: 0 auto;
+}
+
+/* La puce : le vocabulaire de la puce de choix, en plus grand. */
+.st-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 26px;
+  border: 3px solid var(--filet-franc);
+  border-radius: 24px 24px 7px 7px;
+  font-size: 26px;
+  font-weight: 700;
+}
+.st-puce-pleine {
+  background: var(--encre);
+  color: var(--papier);
+  border-color: var(--encre);
+}
+
+/* L'appel primaire : l'aplat lime, le trait d'encre, l'arche du bouton
+   Télécharger. Il ne partage sa place avec rien. */
+.st-appel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 116px;
+  padding: 0 40px;
+  border: 5px solid var(--accent-encre);
+  border-radius: 38px 38px 11px 11px;
+  background: var(--accent);
+  color: var(--accent-encre);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* --- 01. L'ouverture ------------------------------------------------------ */
+.st-un-ecran {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 34px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* --- 02. Les trois temps -------------------------------------------------- */
+.st-pas {
+  display: flex;
+  align-items: stretch;
+  gap: 30px;
+  border-top: 4px solid var(--encre);
+  padding-top: 24px;
+}
+.st-pas-toile {
+  flex: 0 0 218px;
+  height: 218px;
+}
+.st-pas-toile .st-toile {
+  border-radius: 34px 34px 10px 10px;
+}
+.st-pas-mots {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.st-pas-n {
+  font-family: var(--display);
+  font-size: 30px;
+  letter-spacing: 0.02em;
+  color: var(--deco-2);
+}
+.st-pas-deux .st-pas-n {
+  color: var(--deco-1);
+}
+.st-pas-trois .st-pas-n {
+  color: var(--violet);
+}
+.st-pas-t {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  margin-top: 2px;
+}
+.st-pas-p {
+  font-size: 27px;
+  line-height: 1.34;
+  color: var(--encre-douce);
+  margin-top: 8px;
+}
+
+/* --- 03. Le catalogue ----------------------------------------------------- */
+.st-grille {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.st-grille div {
+  aspect-ratio: 1179 / 2556;
+}
+.st-grille .st-toile {
+  border-radius: 30px 30px 9px 9px;
+}
+.st-chiffres {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 4px solid var(--encre);
+  margin: 30px 0 0;
+}
+.st-chiffre {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px 16px 0 0;
+}
+.st-chiffre-n {
+  font-family: var(--display);
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.st-chiffre-m {
+  font-size: 23px;
+  color: var(--encre-douce);
+  margin-top: 4px;
+}
+
+/* --- 04. Les formats -------------------------------------------------------
+   Trois rangées séparées par un filet, comme les cartes de l'accueil. La
+   vignette de chaque rangée garde le rapport exact de son format : c'est le
+   sujet de la carte, il ne peut pas être approché. */
+.st-formats-boite {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.st-format {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  border-top: 4px solid var(--encre);
+  padding-top: 22px;
+}
+.st-format-vue {
+  flex: 0 0 340px;
+  display: flex;
+  justify-content: center;
+}
+.st-cadre {
+  height: 160px;
+}
+.st-format .st-toile {
+  border-radius: 26px 26px 8px 8px;
+}
+.st-format-mots {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.st-format-t {
+  font-size: 33px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+.st-format-r {
+  font-size: 27px;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+.st-format-mpx {
+  font-family: var(--display);
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.st-format-mpx span {
+  font-family: var(--texte);
+  font-size: 23px;
+  font-weight: 700;
+  color: var(--encre-douce);
+}
+
+/* --- 05. Le voile --------------------------------------------------------- */
+.st-voile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+.st-voile .voile-boite {
+  border-width: 3px;
+  border-radius: 34px 34px 10px 10px;
+}
+/* La grille de libellés du produit, à l'échelle de la carte : les tailles y
+   sont en pourcentages, sauf le corps du libellé, qui est en pixels. */
+.st-voile .voile-boite {
+  aspect-ratio: 3 / 4;
+}
+.st-voile .voile-app-t {
+  font-size: 29px;
+  line-height: 1.2;
+}
+.st-voile-mot {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 16px;
+  color: var(--encre-douce);
+}
+.st-voile-actif .st-voile-mot {
+  color: var(--encre);
+}
+.st-verdict {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 34px;
+  font-size: 30px;
+  font-weight: 700;
+}
+.st-verdict-note {
+  font-size: 26px;
+  line-height: 1.36;
+  color: var(--encre-douce);
+  margin-top: 10px;
+}
+/* Les trois bandes ont chacune leur forme, jamais leur seule couleur : le
+   disque plein est celui de la bande haute. */
+.st-verdict i {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--encre);
+}
+/* --- 06. Ce qui ne sort pas ----------------------------------------------- */
+.st-preuve {
+  border-top: 4px solid var(--encre);
+  padding-top: 22px;
+}
+.st-preuve-t {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+.st-preuve-p {
+  font-size: 27px;
+  line-height: 1.34;
+  color: var(--encre-douce);
+  margin-top: 8px;
+}
+.st-code {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 12px 20px;
+  border: 3px solid var(--filet-franc);
+  border-radius: 20px 20px 6px 6px;
+  font-family: 'Archivo', monospace;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* --- 07. La graine et le lien --------------------------------------------- */
+.st-lien {
+  display: block;
+  border: 4px solid var(--encre);
+  border-radius: 32px 32px 10px 10px;
+  background: var(--champ);
+  padding: 26px 30px;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-all;
+}
+.st-lien b {
+  color: var(--encre);
+  background: var(--accent);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+.st-lien-douce {
+  color: var(--encre-douce);
+  font-weight: 400;
+}
+/* La flèche est dessinée, comme tous les pictogrammes du produit : deux
+   aplats, aucun jeu d'icônes. */
+.st-fleche {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+.st-fleche i {
+  width: 12px;
+  height: 54px;
+  background: var(--encre);
+  position: relative;
+}
+.st-fleche i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  width: 40px;
+  height: 40px;
+  background: var(--encre);
+  transform: translateX(-50%) rotate(45deg);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* --- 08. L'appel ---------------------------------------------------------- */
+.st-bande {
+  margin: 0 calc(var(--st-marge) * -1);
+  height: 560px;
+}
+/* La série courte pose trois puces au-dessus de la bande : elle lui rend la
+   hauteur qu'elles prennent. */
+.st-bande-courte {
+  height: 440px;
+}
+.st-bande .st-toile {
+  border-radius: 46px 46px 0 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+/* --- Les blocs qui portent les preuves, carte par carte -------------------
+   Chaque carte n'a qu'un bloc de preuve, et il est collé au bas du corps :
+   les mots en haut, la démonstration en bas, le pied dessous. La lecture
+   descend, comme sur la page d'accueil. */
+
+.st-pas-liste {
+  margin-top: auto;
+  padding-top: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+.st-grille-boite,
+.st-formats-boite,
+.st-cinq-boite,
+.st-sept-boite,
+.st-huit-appel {
+  margin-top: auto;
+  padding-top: 28px;
+}
+.st-preuves {
+  margin-top: auto;
+  padding-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 03. Douze vignettes sur deux rangées : assez grandes pour qu'on distingue
+   le motif, assez nombreuses pour qu'on voie qu'il y en a d'autres. */
+.st-grille {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+/* 05. Les deux vignettes du voile gardent le rapport 4/5 de la page
+   d'accueil, et se posent au centre : la comparaison est le sujet, elle n'a
+   pas à s'étirer sur toute la largeur. */
+.st-voile {
+  grid-template-columns: 430px 430px;
+  justify-content: center;
+}
+
+/* 07. Le lien, puis ce qu'il rend. */
+.st-sept-boite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.st-sept-boite .st-lien {
+  width: 100%;
+}
+.st-sept-toile {
+  width: 288px;
+  aspect-ratio: 1179 / 2556;
+}
+
+/* 08. L'appel, seul de sa page, et la bande de clôture sous lui. */
+.st-huit-appel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 34px;
+}
+/* Le seul titre qui monte au-dessus de cent : c'est la carte qui n'a rien à
+   démontrer, elle n'a qu'à appeler. */
+.st-final .st-titre {
+  font-size: 124px;
+}
+
+/* 04. Ce que le fichier sait faire, en trois puces : elles remplissent le
+   milieu de la carte, qui n'a que deux blocs, et disent chacune une borne
+   vraie du produit. */
+.st-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+/* 05. La démonstration du voile, collée au bas comme les autres preuves. */
+.st-cinq-boite {
+  display: block;
+}
+
+/* 06. Les quatre preuves, écartées pour tenir la hauteur. */
+.st-preuves {
+  gap: 34px;
+}
+
+.st-dessous {
+  margin-top: auto;
+}
+.st-dessous .st-p {
+  margin-bottom: 26px;
+}
+/* Le titre de la carte coupée cède quelques pixels : la diagonale et sa garde
+   veulent cent trente pixels que la carte n'avait pas. */
+.st-catalogue .st-titre {
+  font-size: 104px;
+}
+
+/* --- Série courte, carte 02 -------------------------------------------------
+   Douze vignettes sur deux rangées, puis un bloc de mesure. La démonstration
+   du voile ne tient pas ici : elle est remplacée par le chiffre que la sonde
+   mesure sur le motif de la carte du milieu, et par ce qu'il veut dire. */
+.st-catalogue .st-grille {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+.st-mesure {
+  margin-top: 18px;
+  border-top: 4px solid var(--encre);
+  padding-top: 16px;
+}
+
+/* --- La planche 2 sur 2 -----------------------------------------------------
+ *
+ * Quatre images de 1080 sur 1350, qui se lisent seules et se recousent en une
+ * planche de 2160 sur 2700. Deux principes, et ils ne bougent pas d'une image
+ * à l'autre :
+ *
+ * - Le fond est continu. La frise du haut et la coupe du bas traversent la
+ *   couture verticale : leur phase et leur pente sont calculées dans les
+ *   coordonnées de la planche, pas dans celles de l'image.
+ * - Le contenu est autonome. Chaque panneau garde ses marges et son bloc de
+ *   texte entier. Une image publiée seule ne montre jamais une phrase coupée.
+ */
+.st-planche {
+  height: 1350px;
+  --st-haut: 64px;
+  --st-bas: 76px;
+  --st-marge: 80px;
+}
+
+/* La frise déborde des marges : c'est elle qui coud le haut de la planche.
+   Le filet passe sur le cadre, sinon il s'arrêterait là où la frise est
+   décalée pour reprendre la phase de l'image d'à côté. */
+.st-frise-cadre {
+  margin: 0 calc(var(--st-marge) * -1);
+  overflow: hidden;
+  border-bottom: 6px solid var(--encre);
+}
+.st-planche .st-frise {
+  border-bottom: 0;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+}
+
+/* La coupe du bas, prise dans l'autre sens : c'est le papier du haut qui
+   reste, et il se referme en allant vers la droite. */
+.st-coupe-haut {
+  clip-path: polygon(0 0, 100% 0, 100% var(--coupe-d), 0 var(--coupe-g));
+}
+
+/* Le panneau d'entrée n'a pas d'enseigne : son enseigne est le bloc de nom,
+   marque comprise, en grand, juste sous la frise. */
+.st-planche .st-corps {
+  padding-top: 38px;
+  /* Le filet du pied va d'un bord à l'autre : sans cette réserve, la planche
+     de motifs et la maquette viennent s'asseoir dessus. */
+  padding-bottom: 26px;
+}
+.st-planche .st-pied {
+  margin-left: calc(var(--st-marge) * -1);
+  margin-right: calc(var(--st-marge) * -1);
+  padding-left: var(--st-marge);
+  padding-right: var(--st-marge);
+}
+/* Les deux panneaux du bas commencent leur texte à la même hauteur, quelle
+   que soit l'épaisseur du papier qui leur reste au-dessus : c'est ce qui fait
+   tenir la ligne de base d'un bord à l'autre de la planche. Après la règle
+   générale, à spécificité égale, sans quoi elle ne s'appliquerait pas. */
+.st-planche-bas .st-corps {
+  padding-top: 210px;
+}
+.st-planche .st-nom-bloc {
+  font-size: 214px;
+}
+.st-planche .st-accroche {
+  font-size: 36px;
+  max-width: 21ch;
+}
+
+/* A : le téléphone prend tout ce que le texte lui laisse. */
+.st-pa-ecran {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* B : la planche de motifs, cinq par rangée. */
+.st-pb .st-grille {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+.st-pb-boite {
+  margin-top: auto;
+  padding-top: 30px;
+}
+
+/* C : la démonstration du voile, enfin à sa taille. */
+.st-pc-boite {
+  margin-top: auto;
+  padding-top: 22px;
+}
+.st-pc .st-verdict {
+  margin-top: 28px;
+}
+.st-pc .st-titre {
+  font-size: 92px;
+}
+.st-pc .st-voile {
+  grid-template-columns: repeat(2, 390px);
+  justify-content: center;
+  gap: 30px;
+}
+.st-pc .voile-boite {
+  aspect-ratio: 4 / 5;
+}
+.st-pc .voile-app-t {
+  font-size: 27px;
+}
+
+/* D : l'appel, et la bande qui sort par le bord extérieur de la planche. */
+.st-pd-boite {
+  margin-top: auto;
+  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.st-pd-bande {
+  height: 250px;
+  margin-right: calc(var(--st-marge) * -1);
+}
+.st-pd-bande .st-toile {
+  border-radius: 40px 0 0 12px;
+  border-right: 0;
+}
+
+/* --- La mosaïque 2 sur 2, pour la mise en page des stories ------------------
+ *
+ * Instagram sait poser quatre images en deux colonnes et deux rangées dans
+ * une story. La cellule y est au format de la story, 9:16, et non 4:5 : une
+ * image 4:5 y est rognée de quinze pour cent de chaque côté, ce qui emporte
+ * les marges, donc le texte.
+ *
+ * Chaque panneau fait donc 540 sur 960, dessiné à la taille où il sera vu,
+ * puis exporté au double. Un quart de story, c'est la moitié de chaque
+ * dimension : tout ce qui s'écrit ici se lit deux fois plus petit que sur une
+ * story pleine, et la mise en page en tient compte, moins de mots et plus
+ * d'image.
+ *
+ * Deux bandes sont rendues à la plateforme : le bandeau de compte mord le
+ * haut de la rangée haute, la barre de réponse mord le bas de la rangée
+ * basse. Rien d'écrit n'y descend.
+ */
+.st-mosaique {
+  width: 540px;
+  height: 960px;
+  --st-marge: 40px;
+  --st-haut: 30px;
+  --st-bas: 30px;
+}
+.st-mosaique-haut {
+  --st-haut: 176px;
+}
+/* La rangée du bas commence son texte sous la coupe, et s'arrête au-dessus de
+   la barre de réponse. */
+.st-mosaique-bas {
+  --st-haut: 140px;
+  --st-bas: 240px;
+}
+.st-mosaique-bas .st-corps {
+  padding-top: 14px;
+}
+
+.st-mosaique .st-corps {
+  padding-top: 22px;
+}
+.st-mosaique .st-frise {
+  gap: 7px;
+  height: 28px;
+}
+.st-mosaique .st-frise i {
+  flex: 0 0 22px;
+  border-radius: 11px 11px 0 0;
+}
+.st-mosaique .st-frise-cadre {
+  border-bottom-width: 3px;
+}
+.st-mosaique .st-surtitre {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.st-mosaique .st-titre {
+  font-size: 52px;
+  line-height: 0.92;
+}
+.st-mosaique .st-nom-bloc {
+  font-size: 96px;
+}
+.st-mosaique .st-accroche {
+  font-size: 21px;
+  line-height: 1.3;
+  max-width: none;
+  margin-top: 14px;
+}
+.st-mosaique .st-p {
+  font-size: 20px;
+  line-height: 1.36;
+  margin-top: 12px;
+}
+.st-mosaique .st-pied {
+  border-top-width: 2px;
+  padding-top: 12px;
+}
+.st-mosaique .st-url {
+  font-size: 19px;
+}
+.st-mosaique .st-mention {
+  font-size: 14px;
+}
+.st-mosaique .st-toile {
+  border-width: 2px;
+  border-radius: 16px 16px 5px 5px;
+}
+.st-mosaique .st-appel {
+  min-height: 62px;
+  padding: 0 20px;
+  border-width: 3px;
+  border-radius: 20px 20px 6px 6px;
+  font-size: 22px;
+}
+.st-mosaique .st-verdict {
+  font-size: 18px;
+  gap: 9px;
+  margin-top: 14px;
+}
+.st-mosaique .st-verdict i {
+  width: 14px;
+  height: 14px;
+}
+
+/* A : la marque, la promesse, et la maquette. */
+.st-mo-ecran {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* B : huit vignettes, deux rangées. */
+.st-mo-grille {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+.st-mo-grille div {
+  aspect-ratio: 1179 / 2556;
+}
+
+/* C : la démonstration du voile, à la taille d'un quart de story. */
+.st-mo-voile {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+.st-mo-voile .voile-boite {
+  aspect-ratio: 4 / 5;
+  border-width: 2px;
+  border-radius: 16px 16px 5px 5px;
+}
+.st-mo-voile .voile-app-t {
+  font-size: 13px;
+}
+.st-mo-voile .st-voile-mot {
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+/* D : la bande de motif sort par le bord extérieur, puis l'appel. */
+.st-mo-appel {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.st-mo-bande {
+  height: 150px;
+  margin-right: calc(var(--st-marge) * -1);
+}
+.st-mo-bande .st-toile {
+  border-radius: 20px 0 0 6px;
+  border-right: 0;
+}
+
+/* --- Le manifeste : une phrase, et sa traduction ----------------------------
+ *
+ * Deux cartes où le texte est le sujet. Le français porte, l'anglais suit :
+ * même contenu, deux poids, jamais deux colonnes. Le code de langue reprend
+ * la puce de la bascule du pied de page, et l'attribut `lang` va avec, sans
+ * quoi une synthèse vocale française lirait l'anglais à la française.
+ */
+/* La phrase qui appuie le titre, pas qui le remplace. */
+.st-dit {
+  font-size: 42px;
+  line-height: 1.26;
+  letter-spacing: -0.018em;
+  font-weight: 500;
+  margin-top: 26px;
+}
+/* Le titre de ces deux cartes est ce qui se lit à un mètre : il monte à la
+   moitié de la hauteur d'une capitale de nom. */
+/* À cent cinquante pixels, l'interligne de 0,92 mangeait l'accent de la
+   seconde ligne : « GÉNÉRATIFS » sortait sans le sien. */
+.st-manifeste .st-titre {
+  font-size: 150px;
+  line-height: 1.04;
+}
+.st-manifeste .st-puces {
+  margin-top: 26px;
+}
+.st-manifeste .st-puce {
+  font-size: 27px;
+}
+.st-trad {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  margin-top: 30px;
+  border-top: 3px solid var(--filet-franc);
+  padding-top: 24px;
+}
+.st-trad-code {
+  flex: 0 0 auto;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--encre-douce);
+  border: 3px solid var(--filet-franc);
+  border-radius: 16px 16px 5px 5px;
+  padding: 7px 13px;
+}
+.st-trad-texte {
+  font-size: 30px;
+  line-height: 1.36;
+  color: var(--encre-douce);
+}
+
+/* La bande de motifs, d'un bord à l'autre : cinq rendus vrais, et le bord de
+   l'image qui en coupe deux, parce qu'il y en a trente-deux. */
+.st-bande-motifs {
+  margin: 0 calc(var(--st-marge) * -1);
+  margin-top: 36px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 620px;
+  display: flex;
+  gap: 14px;
+}
+.st-bande-motifs div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.st-bande-motifs .st-toile {
+  border-radius: 34px 34px 10px 10px;
+}
+
+/* --- Les affiches : le nom et le motif, ensemble ----------------------------
+ *
+ * Cinq façons de faire tenir la marque dans ce que le produit fabrique. Le
+ * motif n'illustre plus le propos, il le porte : il remplit les lettres, il
+ * couvre l'image entière, il habite les arches.
+ *
+ * La couleur du nom n'est jamais choisie à l'oeil quand il est posé sur un
+ * fond : c'est la sonde du produit qui la donne, la même qui décide de la
+ * couleur des libellés d'icône. Le mot est traité comme un libellé, et
+ * l'affiche démontre au passage ce que l'application promet.
+ */
+/* Le fond est un frère de l'entête et du pied, pas leur parent : posé en
+   absolu sur la boîte de rembourrage de la carte, il va d'un bord à l'autre
+   sans que le texte perde ses marges. */
+.st-fond {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.st-fond canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Le nom, ajusté à la largeur de sa colonne, et rempli d'un motif. */
+.st-mot {
+  display: inline-block;
+  align-self: flex-start;
+  white-space: nowrap;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+}
+.st-mot-motif {
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.st-affiche-mots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.st-affiche-note {
+  margin-top: 34px;
+  font-size: 30px;
+  line-height: 1.34;
+  color: var(--encre-douce);
+}
+
+/* 02, 04 : le nom au milieu d'un vrai fond d'écran. */
+.st-affiche-centre {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+.st-legende {
+  margin-top: 26px;
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.st-legende span {
+  font-weight: 400;
+  opacity: 0.78;
+}
+
+/* 03 : cinq arches, cinq motifs, cinq lettres. */
+.st-arches {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  margin-top: 30px;
+}
+.st-arche {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 999px 999px 16px 16px;
+  border: 3px solid var(--filet);
+}
+.st-arche canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.st-arche span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12%;
+  text-align: center;
+  font-family: var(--display);
+  font-size: 124px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* 05 : la planche pleine, et le nom posé en aplat par-dessus. */
+.st-planche-pleine {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 1fr;
+}
+.st-planche-pleine canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.st-bandeau {
+  position: relative;
+  z-index: 1;
+  margin: auto calc(var(--st-marge) * -1);
+  background: var(--accent);
+  border-top: 5px solid var(--accent-encre);
+  border-bottom: 5px solid var(--accent-encre);
+  padding: 40px var(--st-marge) 46px;
+  color: var(--accent-encre);
+}
+.st-bandeau .st-mot {
+  color: var(--accent-encre);
+}
+.st-bandeau p {
+  margin-top: 14px;
+  font-size: 30px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Le pied d'une affiche est posé sur le motif : il prend la couleur que la
+   sonde donne au nom, et non celle du thème, sans quoi l'encre douce du
+   thème clair disparaît sur un fond sombre. */
+.st-affiche .st-pied {
+  border-top-color: currentColor;
+}
+.st-affiche .st-url,
+.st-affiche .st-mention {
+  color: inherit;
+}
+.st-affiche .st-mention {
+  opacity: 0.72;
+}
