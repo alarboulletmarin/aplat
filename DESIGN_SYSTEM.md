@@ -472,11 +472,11 @@ et ça cacherait à la lecture ce que la page est censée expliquer. Le rang d'u
 étape est `aria-hidden` et le titre le double toujours, comme partout ailleurs
 où un signe repère sans porter d'information seule.
 
-**Les treize fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
+**Les quatorze fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
 que chaque écran est un bouton qui tire un autre motif ; ici, l'objet manipulé
 est le motif en cours de construction, et une fiche n'en tire pas un autre :
 elle fait adopter sa mécanique. Son exemple, lui, ne bouge jamais, sans quoi les
-treize fiches cesseraient d'être comparables entre elles.
+quatorze fiches cesseraient d'être comparables entre elles.
 
 **La treizième tuile de la galerie n'est pas une quatorzième image.** Elle est
 la porte vers ce document, elle ne porte pas de canevas, et elle ne ressemble

@@ -31,7 +31,7 @@
  * cessent d'être deux rubans, et la couleur ne le rattrape pas.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
-import { hacher } from './trace'
+import { arcEpais, hacher } from './trace'
 
 export const IDS_COULEES = ['meandres'] as const
 
@@ -63,23 +63,6 @@ function unir(parents: Int32Array, a: number, b: number): void {
 }
 
 /* ---------- tracé ------------------------------------------------------------ */
-
-/**
- * Un quart d'anneau : l'arc extérieur à l'aller, l'intérieur au retour, et les
- * deux bouts fermés droit. Le pinceau ne connaît pas le trait, alors une bande
- * courbe se construit comme une surface, exactement comme le ruban de
- * `trace.ts` construit une bande droite.
- */
-function arcEpais(
-  ctx: Pinceau, cx: number, cy: number, rayon: number,
-  depart: number, fin: number, epaisseur: number,
-): void {
-  ctx.beginPath()
-  ctx.arc(cx, cy, rayon + epaisseur / 2, depart, fin)
-  ctx.arc(cx, cy, rayon - epaisseur / 2, fin, depart, true)
-  ctx.closePath()
-  ctx.fill()
-}
 
 /**
  * Les méandres.
@@ -181,6 +164,7 @@ function meandres(
         if (couleur === null) continue
         ctx.fillStyle = couleur
         arcEpais(ctx, arc.cx, arc.cy, rayon, arc.de, arc.a, epaisseur)
+        ctx.fill()
       }
     }
   }

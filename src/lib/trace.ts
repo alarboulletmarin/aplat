@@ -219,6 +219,54 @@ export function ruban(ctx: Pinceau, points: readonly Point[], epaisseur: number)
 }
 
 /**
+ * Le quart d'anneau, ou n'importe quel secteur : l'arc extérieur à l'aller,
+ * l'intérieur au retour, et les deux bouts fermés droit.
+ *
+ * Le pinceau ne connaît pas le trait, alors une bande courbe se construit
+ * comme une surface, exactement comme `ruban` construit une bande droite. La
+ * coulée y fait serpenter ses rubans, la mesure y trace ses arcs de
+ * rapporteur.
+ */
+export function arcEpais(
+  ctx: Pinceau, cx: number, cy: number, rayon: number,
+  depart: number, fin: number, epaisseur: number,
+): void {
+  ctx.beginPath()
+  ctx.arc(cx, cy, rayon + epaisseur / 2, depart, fin)
+  ctx.arc(cx, cy, rayon - epaisseur / 2, fin, depart, true)
+  ctx.closePath()
+}
+
+/**
+ * Le pointillé : une ligne droite hachée en tirets, chacun posé comme un
+ * ruban.
+ *
+ * Le pas est constant et compté depuis le départ, si bien que deux lignes qui
+ * se croisent ne se coupent pas au même endroit de leur cadence, ce qui est
+ * précisément ce qui fait qu'un pointillé se lit comme un pointillé et non
+ * comme une trame. Le dernier tiret est tronqué plutôt que débordé.
+ */
+export function pointille(
+  ctx: Pinceau, de: Point, vers: Point, epaisseur: number, tiret: number, blanc: number,
+): void {
+  const dx = vers[0] - de[0]
+  const dy = vers[1] - de[1]
+  const longueur = Math.hypot(dx, dy)
+  const pas = tiret + blanc
+  if (!(longueur > 0) || !(pas > 0)) return
+  const ux = dx / longueur
+  const uy = dy / longueur
+  for (let t = 0; t < longueur; t += pas) {
+    const fin = Math.min(t + tiret, longueur)
+    ruban(ctx, [
+      [de[0] + ux * t, de[1] + uy * t],
+      [de[0] + ux * fin, de[1] + uy * fin],
+    ], epaisseur)
+    ctx.fill()
+  }
+}
+
+/**
  * La pastille allongée : un rectangle aux deux bouts ronds, posé à plat. C'est
  * la forme que la vectorisation des champs fusionne rangée par rangée, et le
  * point de couture des tissus. `roundRect` du pinceau est optionnel ; la

@@ -9,6 +9,35 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : quatre instruments, et un moteur qui sait écrire
+
+- **Le motif devient un objet d'atelier.** Tapis de coupe pose une trame au
+  centimètre, une réglette graduée le long des bords et, dans un coin, un
+  faisceau d'obliques aux angles usuels. Millimétré emboîte trois trames.
+  Rapporteur pose des demi-cadrans gradués au degré sur les bords et prolonge
+  chaque dizaine jusqu'au bord de l'image. Mire aligne des cibles de réglage,
+  étoiles de Siemens, croix de centrage, peignes et échelles de valeurs. Le
+  catalogue passe à soixante-seize familles.
+- **Le moteur sait écrire des nombres.** Il ne savait pas : le pinceau n'a
+  jamais eu de `fillText`, et lui en donner aurait demandé au fichier
+  vectoriel d'embarquer une police. Les chiffres sont donc dessinés, trois
+  cases sur cinq, en rectangles pleins. La fonte ne sait que dix chiffres et
+  un degré, et c'est exactement ce qu'un instrument écrit.
+- **Le trait aussi est une surface.** Une graduation est un rectangle quand
+  elle est droite, un ruban quand elle est oblique, un arc épais quand elle
+  tourne. Un tapis de coupe s'exporte donc en SVG comme le reste du
+  catalogue, sans une seule ligne au sens du dessin.
+- **Onze palettes, onze tapis.** Un tapis de coupe est sombre et du papier
+  millimétré est clair, quelle que soit la palette : ce n'est pas une
+  préférence, c'est ce que sont ces objets. La palette ne choisit donc pas la
+  clarté du fond, elle le teinte.
+- **Le poids s'en ressent, un peu.** Médiane à 0,52 Mo et neuvième décile à
+  0,94 Mo sur les 2 508 combinaisons, contre 0,49 et 0,89 avant. Le maximum
+  passe à 1,84 Mo avec Rapporteur en dense : un cadran pose cent
+  quatre-vingt-une graduations d'un cheveu d'épaisseur, et rien ne se
+  compresse plus mal qu'un cheveu. C'est aussi pourquoi il s'arrête à quatre
+  cadrans par image.
+
 ### Ajouté : quatre familles en relief, sans un seul dégradé
 
 - **Le volume entre au catalogue.** Cubes empile des solides en axonométrie,

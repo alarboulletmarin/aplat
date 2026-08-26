@@ -17,6 +17,7 @@ import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estLieu, peindreLieu, type IdLieu } from './lieux'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
+import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
@@ -48,13 +49,14 @@ export type IdFamille =
   | 'bassin'
   | 'strates'
   /* abstraits venus des nouveaux gestes : la fracture, la réserve, le
-     pavage savant, le carreau, la coulée, le relief */
+     pavage savant, le carreau, la coulée, le relief, la mesure */
   | IdFracture
   | IdReserve
   | IdPavage
   | IdCarreau
   | IdCoulee
   | IdRelief
+  | IdMesure
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
      déformée et l'interférence y mettent tout le reste */
   | IdChimie
@@ -200,7 +202,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-douze familles, dans l'ordre de la liste : abstraits,
+ * Les soixante-seize familles, dans l'ordre de la liste : abstraits,
  * matières, paysages, lieux, figures. L'ordre est celui de la maquette, et il
  * compte : on descend du plus géométrique au plus figuratif, et le premier de
  * chaque groupe en donne le ton. Les matières sont entre les deux mondes :
@@ -244,6 +246,10 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'plis', groupe: 'abs', fr: 'Plis', en: 'Folds' },
   { id: 'bossage', groupe: 'abs', fr: 'Bossage', en: 'Bosses' },
   { id: 'tuyaux', groupe: 'abs', fr: 'Tuyaux', en: 'Pipes' },
+  { id: 'tapis', groupe: 'abs', fr: 'Tapis de coupe', en: 'Cutting mat' },
+  { id: 'millimetre', groupe: 'abs', fr: 'Millimétré', en: 'Graph paper' },
+  { id: 'rapporteur', groupe: 'abs', fr: 'Rapporteur', en: 'Protractor' },
+  { id: 'mire', groupe: 'abs', fr: 'Mire', en: 'Test chart' },
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
   { id: 'madrepore', groupe: 'mat', fr: 'Madrépore', en: 'Brain coral' },
@@ -699,7 +705,8 @@ export function formes(
      une carte, le pavage subdivise sans période, la trame déforme ou fait
      interférer des grilles, la grammaire fait pousser des plantes, le carreau
      remplit une grille d'un alphabet de signes, la coulée fait serpenter des
-     rubans larges, et le relief fait dire l'orientation à la teinte. */
+     rubans larges, le relief fait dire l'orientation à la teinte, et la
+     mesure dessine des instruments gradués. */
   if (estNiveau(id)) {
     peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -742,6 +749,10 @@ export function formes(
   }
   if (estRelief(id)) {
     peindreRelief(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estMesure(id)) {
+    peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 
