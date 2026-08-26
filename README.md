@@ -314,9 +314,9 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-treize familles, cinq groupes.**
+**Soixante-douze familles, cinq groupes.**
 
-- **Abstraits** (trente-huit) : les douze libres, qui sèment des formes sur un
+- **Abstraits** (trente-sept) : les douze libres, qui sèment des formes sur un
   aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
   répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
   pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
@@ -324,7 +324,7 @@ et le fichier exporté sont le même dessin, à deux échelles.
   seconde série : Kintsugi et Banquise brisent la surface en pièces (Voronoï
   par découpe de demi-plans, les jointures affleurent), Claustra et Papel
   picado percent un aplat en réserve, Penrose pave sans période, par
-  déflation ; cinq venues du carreau et de la coulée ; et cinq venues du
+  déflation ; cinq venues du carreau et de la coulée ; et quatre venues du
   relief, où la teinte d'une face dit son orientation. Les trois gestes sont
   décrits plus bas.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
@@ -406,23 +406,25 @@ face de bleu marine poussée vers un jaune vert ressort kaki, et le cube perd la
 couleur pour laquelle on l'a choisi. Le blanc et le noir, eux, ne déplacent pas
 la teinte, ils montent et descendent sa valeur, ce qu'une lumière fait.
 
-Cinq familles, cinq façons de fabriquer la profondeur. **Cubes** empile des
-solides en axonométrie, trois faces par cube, la hauteur lue dans un bruit
-continu et la teinte prise par palier d'altitude, comme une carte
-hypsométrique. **Plis** froisse une nappe : les sommets restent sur un
-quadrillage à peine bousculé, les triangles pavent le plan sans un interstice,
-et la seule chose qui vienne de la troisième dimension est une hauteur qui
-n'orientera que les facettes. Le froissé est entièrement dans la valeur.
-**Bossage** ne creuse rien du tout : ses panneaux sont plats, et seul le
-chanfrein dit lesquels sortent et lesquels rentrent, les mêmes deux trapèzes
-échangés suffisant à retourner le volume. **Tuyaux** courbe la valeur en
-travers d'une barre droite, et une barre devient un cylindre ; les barres se
-tressent, et celle qui passe dessous reçoit l'ombre portée de celle qui passe
-dessus. **Point de fuite** abandonne l'axonométrie pour la perspective vraie :
-tout converge vers un point posé sur l'horizon, le damier au sol se resserre en
-s'en approchant, et la couleur pâlit avec la distance, ce que les peintres
-appellent la perspective aérienne. C'est la seule des cinq où le flanc visible
-d'un bloc dépend de sa place dans le cadre.
+Les quatre gardent les parallèles parallèles, et c'est l'axonométrie : elle
+donne du volume sans rien promettre de la distance. Une perspective vraie, avec
+son point de fuite et son damier qui se resserre, a été écrite puis retirée :
+elle choisit un endroit d'où regarder, et une grille d'icônes n'est pas cet
+endroit. Un fond d'écran se regarde de trop près et de trop longtemps pour
+supporter qu'on lui dise où se tenir.
+
+Quatre familles, donc, et quatre façons de fabriquer le volume. **Cubes**
+empile des solides, trois faces par cube, la hauteur lue dans un bruit continu
+et la teinte prise par palier d'altitude, comme une carte hypsométrique.
+**Plis** froisse une nappe : les sommets restent sur un quadrillage à peine
+bousculé, les triangles pavent le plan sans un interstice, et la seule chose
+qui vienne de la troisième dimension est une hauteur qui n'orientera que les
+facettes. Le froissé est entièrement dans la valeur. **Bossage** ne creuse rien
+du tout : ses panneaux sont plats, et seul le chanfrein dit lesquels sortent et
+lesquels rentrent, les mêmes deux trapèzes échangés suffisant à retourner le
+volume. **Tuyaux** courbe la valeur en travers d'une barre droite, et une barre
+devient un cylindre ; les barres se tressent, et celle qui passe dessous reçoit
+l'ombre portée de celle qui passe dessus.
 
 Que le dessus d'un cube soit plus clair que son flanc gauche, et celui-ci plus
 clair que le flanc droit, tient à un test : inverser deux des trois laisse le
@@ -487,14 +489,14 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **2 409 combinaisons** (73 familles × 11 palettes × 3 densités)
+Mesuré sur les **2 376 combinaisons** (72 familles × 11 palettes × 3 densités)
 en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
 | médiane | 0,94 Mo | **0,49 Mo** |
 | 9ᵉ décile | 2,33 Mo | **0,89 Mo** |
-| maximum | 2,33 Mo | **1,64 Mo** |
+| maximum | 2,33 Mo | **1,63 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
 la seconde série, à celle des cinq familles déformées, à celle des trois
@@ -509,7 +511,7 @@ C'est le prix honnête d'un motif qui couvre tout plutôt que de semer des
 formes sur un aplat. Les cinq familles du carreau et de la coulée n'ont pas
 bougé ces trois chiffres : un alphabet de signes posés sur une grille se
 compresse par bandes, et des rubans en aplats francs plus encore. Le relief
-a repris la tête d'un cheveu, 1,64 Mo avec Plis en dense, et c'était
+a repris la tête d'un cheveu, 1,63 Mo avec Plis en dense, et c'était
 prévisible : une nappe froissée est faite de milliers de facettes dont
 aucune n'a la teinte de sa voisine, ce qui est exactement ce qu'un
 compresseur d'images ne sait pas faire. La médiane, elle, n'a pris qu'un
@@ -716,9 +718,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 409 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 376 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 73 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 72 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

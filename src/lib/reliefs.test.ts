@@ -45,9 +45,6 @@ function abscisses(d: string): number[] {
   return nombres(d).filter((_, i) => i % 2 === 0)
 }
 
-/** Les familles dont la grille est calée sur le coin de l'image. */
-const CALEES = IDS_RELIEFS.filter((id) => id !== 'fuite')
-
 describe('liste des reliefs', () => {
   it('range chacun dans le catalogue, chez les abstraits', () => {
     for (const id of IDS_RELIEFS) {
@@ -59,8 +56,8 @@ describe('liste des reliefs', () => {
 
   it('ne reconnaît que les siens, jamais une clé héritée', () => {
     expect(estRelief('cubes')).toBe(true)
-    expect(estRelief('fuite')).toBe(true)
-    for (const valeur of ['vagues', 'bauhaus', 'constructor', '__proto__', '', 42, null]) {
+    expect(estRelief('tuyaux')).toBe(true)
+    for (const valeur of ['vagues', 'bauhaus', 'fuite', 'constructor', '__proto__', '', 42, null]) {
       expect(estRelief(valeur), String(valeur)).toBe(false)
     }
   })
@@ -140,12 +137,8 @@ describe('indépendance à la résolution', () => {
   it('ne redistribue pas la gauche de l’image quand elle gagne des colonnes', () => {
     /* La même discipline que pour le carreau : la grille se cale sur le coin
        de l'image et chaque case interroge la clé par ses coordonnées, si bien
-       qu'un cadre plus large n'ajoute que des cases à droite.
-
-       Point de fuite en est exclue, et c'est réglementaire : son point de
-       fuite est posé en fraction de la largeur, donc toute la scène se déplace
-       avec le cadre. C'est ce que fait une perspective. */
-    for (const id of CALEES) {
+       qu'un cadre plus large n'ajoute que des cases à droite. */
+    for (const id of IDS_RELIEFS) {
       const limite = 520
       const gauche = (largeur: number) =>
         formes(id, largeur, 420, 1).filter((forme) => Math.max(...abscisses(forme.d)) < limite)

@@ -200,7 +200,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-treize familles, dans l'ordre de la liste : abstraits,
+ * Les soixante-douze familles, dans l'ordre de la liste : abstraits,
  * matières, paysages, lieux, figures. L'ordre est celui de la maquette, et il
  * compte : on descend du plus géométrique au plus figuratif, et le premier de
  * chaque groupe en donne le ton. Les matières sont entre les deux mondes :
@@ -244,7 +244,6 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'plis', groupe: 'abs', fr: 'Plis', en: 'Folds' },
   { id: 'bossage', groupe: 'abs', fr: 'Bossage', en: 'Bosses' },
   { id: 'tuyaux', groupe: 'abs', fr: 'Tuyaux', en: 'Pipes' },
-  { id: 'fuite', groupe: 'abs', fr: 'Point de fuite', en: 'Vanishing point' },
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
   { id: 'madrepore', groupe: 'mat', fr: 'Madrépore', en: 'Brain coral' },

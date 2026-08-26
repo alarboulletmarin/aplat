@@ -11,31 +11,33 @@
  * sûrement qu'un dégradé.
  *
  * La lumière ne bouge jamais : elle vient d'en haut à gauche, et de devant.
- * C'est la seule règle que les cinq familles partagent, et c'est elle qui les
- * fait tenir ensemble. Une face tournée vers elle prend la teinte de la
+ * C'est la seule règle que les quatre familles partagent, et c'est elle qui
+ * les fait tenir ensemble. Une face tournée vers elle prend la teinte de la
  * palette poussée vers le jour, une face qui s'en détourne la même poussée
  * vers l'ombre (`eclairage`, dans `trace.ts`).
  *
- * Chacune fabrique sa profondeur autrement, et c'est ce qui les sépare.
- * **Cubes** empile des solides en axonométrie, trois faces par cube, sans
- * point de fuite. **Plis** froisse une nappe et donne à chaque facette la
- * valeur de sa pente, la profondeur venant du calcul et non du dessin.
- * **Bossage** ne creuse rien du tout : ses panneaux sont plats, et seul le
- * chanfrein dit lesquels sortent et lesquels rentrent. **Tuyaux** courbe la
- * valeur en travers d'une barre droite, et une barre devient un cylindre.
- * **Point de fuite** abandonne l'axonométrie pour la perspective vraie : tout
- * converge vers un point, et la couleur pâlit avec la distance.
+ * Toutes gardent les parallèles parallèles : c'est l'axonométrie, et elle
+ * donne du volume sans rien promettre de la distance. Un motif de fond
+ * d'écran se regarde de trop près et de trop longtemps pour qu'un point de
+ * fuite y tienne : la perspective vraie choisit un endroit d'où regarder, et
+ * une grille d'icônes n'est pas cet endroit.
+ *
+ * Chacune fabrique donc son volume autrement, et c'est ce qui les sépare.
+ * **Cubes** empile des solides, trois faces par cube. **Plis** froisse une
+ * nappe et donne à chaque facette la valeur de sa pente, la profondeur venant
+ * du calcul et non du dessin. **Bossage** ne creuse rien du tout : ses
+ * panneaux sont plats, et seul le chanfrein dit lesquels sortent et lesquels
+ * rentrent. **Tuyaux** courbe la valeur en travers d'une barre droite, et une
+ * barre devient un cylindre.
  *
  * Comme les familles de grille, aucune ne tire au sort dans une boucle dont le
  * compte dépend du format : la graine fabrique une clé, et chaque case ou
  * chaque sommet interroge cette clé par ses coordonnées.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
-import {
-  bruiteur, duClairAuSombre, eclairage, hacher, polygone, type Point,
-} from './trace'
+import { bruiteur, eclairage, hacher, polygone, type Point } from './trace'
 
-export const IDS_RELIEFS = ['cubes', 'plis', 'bossage', 'tuyaux', 'fuite'] as const
+export const IDS_RELIEFS = ['cubes', 'plis', 'bossage', 'tuyaux'] as const
 
 export type IdRelief = (typeof IDS_RELIEFS)[number]
 
@@ -458,144 +460,6 @@ function tuyaux(
   }
 }
 
-/* ---------- point de fuite --------------------------------------------------- */
-
-/**
- * La perspective vraie, celle qui a un point de fuite.
- *
- * Les quatre autres familles gardent les parallèles parallèles : c'est
- * l'axonométrie, elle donne du volume mais pas de distance. Ici tout converge
- * vers un point posé sur l'horizon, et le damier au sol se resserre en s'en
- * approchant. Une case au sol est un simple quadrilatère, et le calcul tient
- * en une ligne : à la profondeur `z`, tout se réduit d'un facteur `1 / z`, en
- * largeur comme en hauteur.
- *
- * La seconde profondeur est dans la couleur, et c'est celle qui compte le
- * plus. Un damier qui se resserre sans pâlir se lit comme un motif de plus en
- * plus fin ; le même damier pâli à mesure qu'il s'éloigne se lit comme une
- * plaine. Les peintres appellent ça la perspective aérienne.
- *
- * Elle se fait par l'éclairage et non par un mélange avec la couleur du ciel,
- * ce qui était le premier essai : mélanger un sol bleu marine avec un ciel
- * jaune vert rend un kaki, et la plaine ressortait boueuse sur la moitié des
- * palettes. Pousser la même teinte vers le jour ne déplace pas sa couleur, et
- * le lointain reste de la couleur du proche, en plus clair, ce qui est
- * exactement ce que fait l'air.
- *
- * Le sol est peint bande par bande, une par rangée de profondeur, parce qu'un
- * aplat unique ne saurait pas pâlir : c'est lui qui porte la brume, et les
- * cases du damier ne font que s'y poser.
- *
- * Les blocs debout donnent l'échelle, et leur flanc visible dépend du côté du
- * point de fuite où ils se trouvent. C'est la seule chose que l'axonométrie ne
- * sait pas faire, et c'est ce qui distingue vraiment cette famille des quatre
- * autres.
- */
-function fuite(
-  ctx: Pinceau, W: number, H: number, C: readonly string[],
-  densite: Densite, rnd: Alea, unite: number,
-): void {
-  const eclairer = eclairage(C)
-  const teintes = duClairAuSombre(C)
-  /* Le sol part de la teinte la plus sombre : c'est elle qui a le plus de
-     marge pour pâlir, et c'est la seule qui donne au premier plan de quoi
-     détacher les cases du damier posées dessus. */
-  const sol = teintes[teintes.length - 1]
-
-  const horizon = H * (0.2 + 0.14 * rnd())
-  const fx = W * (0.3 + 0.4 * rnd())
-  const cle = Math.floor(rnd() * 0x7fffffff)
-  const profondeurs = [10, 16, 24][densite]
-  const largeurs = [9, 14, 20][densite]
-  const bas = H - horizon
-
-  /* `u` est le facteur de réduction à la profondeur `z` : plein cadre au
-     premier plan, nul à l'horizon. */
-  const u = (z: number): number => 1 / (1 + z * 0.42)
-  const auSol = (lateral: number, z: number): Point => [
-    fx + lateral * unite * 0.3 * u(z),
-    horizon + bas * u(z),
-  ]
-  /* La distance lue de 0, au premier plan, à 1, sur l'horizon. */
-  const loin = (z: number): number => 1 - u(z)
-  /* La brume : de la teinte du sol au premier plan, presque celle du ciel au
-     bout de la plaine. */
-  const brume = (teinte: string, z: number, assise: number): string =>
-    eclairer(teinte, assise + (0.86 - assise) * loin(z))
-
-  /* Le ciel n'est pas peint : c'est le fond de la palette. Un ciel pris dans
-     les teintes ressortait presque blanc sur les onze, et Nuit comme Encre y
-     perdaient d'un coup ce pour quoi on les choisit. Le fond, lui, est sombre
-     quand la palette l'est, et la plaine embrumée s'y lit comme un banc de
-     brouillard sous un ciel de nuit.
-
-     Ce qui reste entre l'horizon et la rangée la plus lointaine : la plaine y
-     a déjà rejoint le lointain, et sans cette bande le damier buterait sur une
-     ligne nette. */
-  ctx.fillStyle = brume(sol, profondeurs, -0.1)
-  ctx.fillRect(0, horizon, W, H - horizon)
-
-  for (let z = profondeurs - 1; z >= 0; z -= 1) {
-    /* La bande de sol, sur toute la largeur : c'est elle qui pâlit avec la
-       distance, et le damier ne fait que s'y poser.
-
-       Chaque bande descend jusqu'au bas de l'image et la suivante, plus
-       proche, la recouvre : les bandes se joignent donc sans couture, et sans
-       le pixel de rattrapage qu'un raccord bord à bord réclamait. Un pixel
-       est une longueur, et aucune famille du moteur n'en connaît. */
-    const arriere = horizon + bas * u(z + 1)
-    ctx.fillStyle = brume(sol, z, -0.1)
-    ctx.fillRect(0, arriere, W, H - arriere)
-
-    for (let i = -largeurs; i < largeurs; i += 1) {
-      /* Une case sur deux seulement : l'autre laisse voir la bande de sol, et
-         le damier n'a pas à peindre deux fois la même surface. */
-      if (((i + z) % 2 + 2) % 2 !== 0) continue
-      const a = auSol(i, z)
-      const b = auSol(i + 1, z)
-      const c = auSol(i + 1, z + 1)
-      const d = auSol(i, z + 1)
-      if (Math.min(a[0], d[0]) > W || Math.max(b[0], c[0]) < 0) continue
-      face(ctx, brume(C[Math.floor(hacher(i, z, cle + 1) * C.length)], z, -0.2), [a, b, c, d])
-    }
-  }
-
-  /* Les blocs, du plus lointain au plus proche : trois faces chacun. */
-  const blocs = [4, 7, 11][densite]
-  const tirages = Array.from({ length: blocs }, () => ({
-    lateral: (rnd() - 0.5) * largeurs * 1.4,
-    z: rnd() * (profondeurs - 2),
-    largeur: 0.4 + 0.8 * rnd(),
-    hauteur: 0.5 + 1.3 * rnd(),
-    teinte: C[Math.floor(rnd() * C.length)],
-  })).sort((a, b) => b.z - a.z)
-
-  for (const bloc of tirages) {
-    const { lateral, z, largeur, hauteur, teinte } = bloc
-    const monte = bas * 0.62 * hauteur
-    const [xa, ya] = auSol(lateral, z)
-    const [xb] = auSol(lateral + largeur, z)
-    const [xc, yc] = auSol(lateral, z + largeur)
-    const [xd] = auSol(lateral + largeur, z + largeur)
-    const ha = monte * u(z)
-    const hb = monte * u(z + largeur)
-    const peindre = (niveau: number, points: readonly Point[]) =>
-      face(ctx, brume(teinte, z, niveau), points)
-
-    /* La face de devant, celle qui regarde le spectateur. */
-    peindre(0.06, [[xa, ya], [xb, ya], [xb, ya - ha], [xa, ya - ha]])
-    /* Le dessus, qui fuit vers le point. */
-    peindre(0.42, [[xa, ya - ha], [xb, ya - ha], [xd, yc - hb], [xc, yc - hb]])
-    /* Le flanc : à gauche du point de fuite on voit celui de droite, et
-       inversement. */
-    if ((xa + xb) / 2 < fx) {
-      peindre(-0.4, [[xb, ya], [xb, ya - ha], [xd, yc - hb], [xd, yc]])
-    } else {
-      peindre(-0.4, [[xa, ya], [xa, ya - ha], [xc, yc - hb], [xc, yc]])
-    }
-  }
-}
-
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreRelief(
@@ -605,6 +469,5 @@ export function peindreRelief(
   if (id === 'cubes') cubes(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'plis') plis(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'bossage') bossage(ctx, W, H, C, densite, rnd, unite)
-  else if (id === 'tuyaux') tuyaux(ctx, W, H, C, densite, rnd, unite)
-  else fuite(ctx, W, H, C, densite, rnd, unite)
+  else tuyaux(ctx, W, H, C, densite, rnd, unite)
 }
