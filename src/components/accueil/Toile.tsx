@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useEffect, useRef } from 'react'
-import { dessiner, type Motif } from '../../lib/moteur'
+import { dessiner, type Couche, type Motif } from '../../lib/moteur'
 import type { Resolution } from '../../lib/resolution'
 import { useTaille } from '../../hooks/useTaille'
 import { useVisible } from '../../hooks/useVisible'
@@ -33,11 +33,16 @@ import { useEconomie } from '../../hooks/useEconomie'
  * `resolution` : le format visé quand il diffère de la boîte. La sonde de
  * lisibilité mesure alors le format réellement exporté, comme dans
  * l'application, et le voile montré est celui du fichier.
+ *
+ * `arret` : la dernière couche peinte. Il ne sert qu'à la page « /moteur »,
+ * qui montre l'image se construire ; partout ailleurs l'image est entière, et
+ * c'est la valeur par défaut.
  */
 export function Toile({
   motif,
   resolution,
   voile = true,
+  arret,
   className,
   description,
 }: {
@@ -45,6 +50,8 @@ export function Toile({
   resolution?: Resolution
   /** Faux pour la démonstration du voile, qui montre justement son absence. */
   voile?: boolean
+  /** La dernière couche peinte. Toutes par défaut. */
+  arret?: Couche
   className?: string
   /** Le texte alternatif, ou rien quand une légende voisine dit déjà tout. */
   description?: string
@@ -85,6 +92,7 @@ export function Toile({
       if (!ctx) return
       dessiner(ctx, l, h, { famille, palette, densite, graine }, {
         voile,
+        arret,
         mesureW: mesureL,
         mesureH,
       })
@@ -101,7 +109,7 @@ export function Toile({
     const jeton = inactif(peindre, { timeout: 500 })
     return () => window.cancelIdleCallback?.(jeton)
   }, [
-    visible, largeur, hauteur, voile, economie,
+    visible, largeur, hauteur, voile, arret, economie,
     famille, palette, densite, graine, mesureL, mesureH,
   ])
 

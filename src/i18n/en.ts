@@ -48,6 +48,8 @@ export const en: Textes = {
       note: 'Real renders, computed right now, on this page. Tap an image to reroll its seed.',
       relancer: '{famille}, {palette} palette. Reroll the seed.',
       ouvrir: 'Open this pattern in the app',
+      moteurTitre: 'How it is made',
+      moteurNote: 'The mechanism, in six steps.',
     },
     ecrans: {
       titre: 'From pocket to desk',
@@ -74,6 +76,147 @@ export const en: Textes = {
     },
     pied: {
       mention: 'Computed in the browser, no data collected',
+    },
+  },
+  moteur: {
+    document: {
+      titre: 'How Aplat draws',
+      description:
+        'Four settings, thirteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
+    },
+    heros: {
+      surtitre: 'The mechanism',
+      titre: 'How it works',
+      accroche:
+        'Aplat does not pick from a stock of images: it computes one, on your device, out of four numbers. Here is how, in six steps.',
+      interaction:
+        'All six steps build the same pattern, and every one of them can be handled. The one you end up with is waiting at the bottom of the page.',
+      mention: 'No screenshots: everything you see here comes out of the engine, right now.',
+    },
+    etapes: {
+      unTitre: 'Four settings, nothing else',
+      unNote:
+        'A family, a palette, a density, a seed. Aplat knows nothing else about your image, and that is enough.',
+      deuxTitre: 'A seed is an address',
+      deuxNote:
+        'The same four settings always render the same image, at any size. Chance enters once, when the seed is drawn.',
+      troisTitre: 'Thirteen ways to lay down colour',
+      troisNote:
+        'A family does not pick a drawing, it picks a mechanic. The engine knows thirteen of them, and every family comes out of one.',
+      quatreTitre: 'Four layers, in this order',
+      quatreNote:
+        'The image is painted over itself, and the order is not a detail: the scrim is dosed for what it covers, the grain comes after it.',
+      cinqTitre: 'A probe measures what you are about to download',
+      cinqNote:
+        'Before painting, the engine measures the luminance under the icon grid, picks the label colour that holds, then doses the scrim.',
+      sixTitre: 'The preview is the file',
+      sixNote:
+        'No shape has a size in pixels: everything is relative to the short side. The pattern is recomputed at the size you ask for, never scaled up.',
+    },
+    reglages: {
+      groupe: 'Family group',
+      autre: 'Another family',
+      autreTitre: 'Draw another family from the {groupe} group',
+      legende: '{famille}, {palette} palette',
+      compte: '{familles} families, {palettes} palettes, {densites} densities, {graines} seeds.',
+    },
+    graine: {
+      valeur: 'Seed {graine}, out of {max}',
+      dessin: 'Drawing seed {n}, mixed from the family, the density and the seed.',
+      voisine: 'Take seed {graine}',
+      relancer: 'Another seed',
+      voisines: 'Neighbouring seeds',
+      sourdes:
+        'Four families ignore their seed: they are fully regular tilings, without a single draw.',
+    },
+    mecaniques: {
+      familles: 'Families: {liste}',
+      etAutres: '{liste} and {n} more',
+      adopter: 'See this mechanic on my pattern',
+      courante: 'This is your pattern’s mechanic',
+      semerNom: 'Flat shapes',
+      semerNote:
+        'Shapes sown or ranked on a solid ground, laid one over another. It is the original gesture, and it still paints half the families.',
+      niveauxNom: 'Contour lines',
+      niveauxNote:
+        'A relief is cut into steps, and each step becomes a closed flat. The shape comes out of the levels, never out of a stroke.',
+      fracturesNom: 'Fracture',
+      fracturesNote:
+        'Seeds share the surface out, each piece clipped by half-planes. The joints are not drawn, they show through.',
+      reservesNom: 'Reserve',
+      reservesNote:
+        'The pattern is what you take away: the panel first, the openings after, in the colour of whatever shows through.',
+      chimieNom: 'Reaction',
+      chimieNote:
+        'Two substances feed on and consume each other over a grid, and the culture is frozen at a chosen instant. Density sets the time here, not the count.',
+      pavagesNom: 'Aperiodic tiling',
+      pavagesNote:
+        'Ten golden triangles in a sun, then successive subdivisions: the surface is covered entirely without ever repeating.',
+      lieuxNom: 'Halftone engraving',
+      lieuxNote:
+        'A scene described as a field of ink density, which a cross-hatched halftone screen turns into dots. Two tones only.',
+      tramesNom: 'Warped screen',
+      tramesNote:
+        'A regular screen folded by a smooth field, or two screens laid over each other whose interference is computed point by point, never through transparency.',
+      reseauxNom: 'Network',
+      reseauxNote:
+        'Nodes and edges, drawn to the conventions of a map: lines that turn at fixed angles, stations as dots, interchanges ringed.',
+      grammairesNom: 'Grammar',
+      grammairesNote:
+        'A rule applied to its own result, down to a bounded depth. An axis bears leaflets that bear leaflets.',
+      carreauxNom: 'Tile alphabet',
+      carreauxNote:
+        'A grid of square cells, each holding one sign drawn from a finite set. Two neighbouring quarter discs make a half, four make a circle.',
+      couleesNom: 'Flow',
+      couleesNote:
+        'Thick arcs entering and leaving through the midpoints of a tile’s sides, carrying on from one tile to the next. A ribbon keeps its colour along its whole length.',
+      reliefsNom: 'Relief',
+      reliefsNote:
+        'The colour of a face states its orientation, under a light that never moves. Three well-chosen flats make a cube, without a single gradient.',
+    },
+    couches: {
+      arreter: 'Stop the drawing after {couche}',
+      fondNom: 'The ground',
+      fondNote: 'The palette’s background colour, edge to edge.',
+      formesNom: 'The shapes',
+      formesNote:
+        'The family itself. It is the only layer that changes from one family to the next, and the thirteen gestures that paint it are just above.',
+      ombreNom: 'The shade',
+      ombreNote:
+        'The dark version: a black flat dosed to bring any pattern to the same darkness.',
+      voileNom: 'The scrim',
+      voileNote:
+        'The image pushed towards the label colour, by just as much as it takes, and a little harder at the bottom. Here, {voile}%.',
+      grainNom: 'The grain',
+      grainNote:
+        'A three-level speckle, which breaks the scrim’s steps and keeps the file light.',
+      note: 'The dark version inserts a fifth one, the shade, between the shapes and the scrim.',
+    },
+    sonde: {
+      sans: 'no scrim',
+      avec: 'automatic scrim',
+      luminance: 'Luminance measured under the icons: {n}',
+      force: 'Scrim {n}%',
+      verdict: 'Readability {niveau}, {contraste}:1',
+      seuil: 'AA threshold: 4.5:1',
+      note:
+        'The measurement is taken on the file’s dimensions, never on the preview’s: a 4K wallpaper does not call for reading a hundred megabytes of pixels back.',
+    },
+    cadres: {
+      taille: '{largeur}\u00a0×\u00a0{hauteur} px',
+      pixels: '{n} Mpx',
+      choisir: 'See this pattern as {format}',
+      sorties:
+        'The same drawing comes out as PNG, as a PNG twice as large, as WebP, as SVG, or as three files at once, one per device.',
+      vectoriel:
+        'The vector export does not copy a single line of the engine: the shapes only know one brush, and a second one exists, which records the paths instead of painting them.',
+    },
+    appel: {
+      titre: 'Your pattern is waiting',
+      corps: 'The link carries the four settings, and nothing else.',
+      primaire: 'Open this pattern in the app',
+      adresse: 'Its address',
+      reglages: '{famille}, {palette}, density {densite}, seed {graine}',
     },
   },
   entete: {
@@ -256,6 +399,7 @@ export const en: Textes = {
     fermer: 'Later',
   },
   pied: {
+    moteur: 'How it works',
     source: 'Source code',
     licence: 'AGPL-3.0',
     tiers: 'Third-party licenses',

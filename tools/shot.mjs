@@ -11,9 +11,10 @@ const ICI = fileURLToPath(new URL('.', import.meta.url))
 const OUT = process.env.SHOT_OUT || path.resolve(ICI, '../.shots');
 let PORT = 0;
 
-/* `p` est le chemin : l'application est sous `/app`, la page d'accueil à la
-   racine. Les deux passent ici, parce que la promesse « aucun réseau » porte
-   sur le document servi, pas sur l'une de ses pages. */
+/* `p` est le chemin : l'application est sous `/app`, la présentation à la
+   racine, le mécanisme sous `/moteur`. Les trois passent ici, parce que la
+   promesse « aucun réseau » porte sur le document servi, pas sur l'une de ses
+   pages. */
 const CASES = [
   { name: 'phone-fr-light', p: '/app', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=fr' },
   { name: 'phone-fr-dark', p: '/app', w: 390, h: 844, dsf: 3, scheme: 'dark', q: '?l=fr&t=sombre' },
@@ -26,7 +27,10 @@ const CASES = [
   { name: 'accueil-desk-fr-light', p: '/', w: 1280, h: 900, dsf: 2, scheme: 'light', q: '?l=fr' },
   { name: 'accueil-desk-fr-dark', p: '/', w: 1280, h: 900, dsf: 2, scheme: 'dark', q: '?l=fr' },
   { name: 'accueil-phone-fr-light', p: '/', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=fr' },
-  { name: 'accueil-desk-en-light', p: '/', w: 1280, h: 900, dsf: 2, scheme: 'light', q: '?l=en' }
+  { name: 'accueil-desk-en-light', p: '/', w: 1280, h: 900, dsf: 2, scheme: 'light', q: '?l=en' },
+  { name: 'moteur-desk-fr-light', p: '/moteur', w: 1280, h: 900, dsf: 2, scheme: 'light', q: '?l=fr' },
+  { name: 'moteur-desk-fr-dark', p: '/moteur', w: 1280, h: 900, dsf: 2, scheme: 'dark', q: '?l=fr' },
+  { name: 'moteur-phone-en-light', p: '/moteur', w: 390, h: 844, dsf: 3, scheme: 'light', q: '?l=en' }
 ];
 
 (async () => {
@@ -54,10 +58,11 @@ const CASES = [
 
     await page.goto(`http://127.0.0.1:${PORT}${c.p}${c.q}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
-    /* Les toiles de l'accueil ne se peignent qu'en approchant du champ de
-       vision : une capture pleine page les prendrait vides. On parcourt la
-       page avant de capturer. */
-    if (c.p === '/') {
+    /* Les toiles des deux documents qui se déroulent ne se peignent qu'en
+       approchant du champ de vision : une capture pleine page les prendrait
+       vides. On parcourt la page avant de capturer. L'application, elle, tient
+       dans un écran et n'a rien à parcourir. */
+    if (c.p !== '/app') {
       const bas = await page.evaluate(() => document.body.scrollHeight);
       for (let y = 0; y < bas; y += c.h) {
         await page.evaluate(v => window.scrollTo(0, v), y);

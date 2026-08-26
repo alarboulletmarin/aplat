@@ -1,0 +1,574 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+/* ==========================================================================
+   La page du mécanisme, sur « /moteur ».
+
+   Elle emprunte le gabarit de la présentation plutôt que de le recopier : sa
+   racine porte `.accueil moteur`, donc la gouttière, l'enseigne, la frise, les
+   têtes de section, l'appel et le pied viennent d'`accueil.css`. Ce fichier ne
+   déclare que ce qui n'existait pas : les étapes, les commandes des
+   démonstrations, et les quatre blocs qui leur sont propres.
+
+   Il part avec le morceau différé de la page, et non depuis `main.tsx` comme
+   les six feuilles globales : l'application et la présentation ne paient pas
+   des règles qu'elles n'emploient jamais.
+
+   Aucune couleur en dur : tout passe par les jetons, qui se retournent avec le
+   thème. Aucune animation qui ne dise ni une origine, ni un état, ni une
+   continuité : les seules transitions d'ici accompagnent un appui.
+   ========================================================================== */
+
+.moteur-corps {
+  padding-bottom: clamp(30px, 5vw, 60px);
+}
+
+/* --- La tête de page --------------------------------------------------------
+   Le titre prend la place que l'écran unique ne peut pas donner. Il n'y a
+   qu'un `h1` par document, et c'est celui-là. */
+.moteur-tete {
+  padding: clamp(24px, 5vw, 48px) 0 clamp(20px, 3vw, 34px);
+}
+.moteur-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(46px, 11vw, 116px);
+  line-height: 0.84;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  padding-bottom: 0.08em;
+  margin-top: clamp(16px, 2.4vw, 26px);
+}
+.moteur-accroche {
+  font-size: clamp(16px, 2vw, 19px);
+  color: var(--encre-douce);
+  max-width: 52ch;
+  margin-top: 14px;
+}
+.moteur-mention {
+  font-size: 13px;
+  color: var(--encre-douce);
+  margin-top: 10px;
+}
+
+/* --- Une étape --------------------------------------------------------------
+   Le rang est décoratif : il repère, il ne porte rien seul, et le titre le
+   double toujours. */
+.etape {
+  padding: clamp(26px, 4.5vw, 52px) 0 0;
+}
+.etape-tete {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px clamp(12px, 2vw, 20px);
+  align-items: end;
+  margin-bottom: 16px;
+}
+.etape-n {
+  grid-row: span 2;
+  font-family: var(--display);
+  font-size: clamp(34px, 6vw, 62px);
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+  color: var(--deco-1);
+}
+.etape:nth-of-type(even) .etape-n {
+  color: var(--deco-2);
+}
+.etape .section-note {
+  max-width: 46ch;
+}
+.etape-vue {
+  margin-top: clamp(18px, 3vw, 30px);
+}
+
+/* Deux colonnes dès qu'il y a la place : la démonstration à gauche, ce qui
+   la commande à droite. En dessous, l'une sous l'autre, et la démonstration
+   passe la première parce que c'est elle qu'on est venu voir. */
+.etape-paire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(20px, 3.4vw, 40px);
+  align-items: flex-start;
+}
+.etape-commandes {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 20px);
+}
+.etape-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.etape-lu {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.etape-note {
+  font-size: 13px;
+  color: var(--encre-douce);
+  max-width: 62ch;
+  margin-top: 10px;
+}
+.etape-chiffres {
+  font-size: 13px;
+  color: var(--encre-douce);
+  border-top: 3px solid var(--encre);
+  padding-top: 10px;
+}
+
+/* --- Les commandes d'une étape --------------------------------------------- */
+.commande {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.commande-titre {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--encre-douce);
+}
+.commande-rangee {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.commande-lu {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+/* Un bouton de relance, jamais un appel : il porte le filet et non l'accent,
+   qui est réservé à la porte du bas. Cinquante-huit pixels sont la hauteur de
+   l'appel primaire ; celui-ci en fait quarante-quatre, la cible et rien de
+   plus. */
+.commande-relance {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--filet-franc);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--encre);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.commande-relance:hover {
+  border-color: var(--encre);
+}
+
+/* La puce mot des étapes : la même géométrie que celles de l'application,
+   déclarées dans `composants.css`, avec la cible portée à 44 px parce que la
+   page se déroule et n'a pas à compter ses pixels. */
+.opt-mot {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 13px;
+  font-size: 14px;
+}
+/* La pastille de palette montre le fond et une teinte : deux couleurs
+   suffisent à reconnaître une palette, et onze pastilles tiennent alors sur
+   une rangée de téléphone. */
+.opt-pastille {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.pastille-teinte {
+  width: 44%;
+  height: 44%;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.appareil-etape {
+  width: min(250px, 62vw);
+  aspect-ratio: 1179 / 2556;
+  height: auto;
+  border-radius: calc(var(--mu) * 12);
+  box-shadow: 13px 13px 0 var(--ombre-plate);
+}
+
+/* --- 02, les graines voisines ----------------------------------------------
+   Cinq nombres qui se suivent, cinq images étrangères. La rangée défile de
+   côté sous 420 px plutôt que de casser en deux : elle se lit comme une
+   règle graduée, et une règle graduée ne revient pas à la ligne. */
+.graines {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(6px, 1.4vw, 14px);
+}
+.graine-bouton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 2px solid var(--filet-franc);
+  border-radius: 16px 16px 5px 5px;
+  overflow: hidden;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.graine-bouton:hover {
+  transform: translateY(-3px);
+}
+.graine-ici .graine-bouton {
+  border-color: var(--encre);
+  border-width: 3px;
+}
+.graine-toile {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+.graine-n {
+  display: block;
+  min-height: 26px;
+  padding: 5px 4px;
+  background: var(--papier);
+  border-top: 2px solid var(--encre);
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.graine-ici .graine-n {
+  background: var(--accent);
+  color: var(--accent-encre);
+}
+
+/* --- 03, les treize gestes ----------------------------------------------------
+   Les fiches ne suivent pas le motif de la page : chacune garde son exemple,
+   et c'est ce qui les rend comparables entre elles. */
+.gestes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(232px, 100%), 1fr));
+  gap: clamp(12px, 2vw, 20px);
+}
+.geste {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--filet-franc);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.geste-ici {
+  border-color: var(--encre);
+  border-width: 3px;
+}
+.geste-toile {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-bottom: 2px solid var(--encre);
+}
+.geste-mots {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 14px;
+}
+.geste-nom {
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.geste-note {
+  font-size: 13px;
+  color: var(--encre-douce);
+}
+.geste-familles {
+  font-size: 12px;
+  color: var(--encre-douce);
+}
+/* Le nom du fichier, en chasse fixe : c'est un chemin, pas une phrase, et il
+   dit où aller lire si la fiche n'a pas suffi. */
+.geste-module {
+  margin-top: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--encre-douce);
+}
+.geste-adopter,
+.geste-ici-mot {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-top: 2px solid var(--encre);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+.geste-adopter {
+  width: 100%;
+  background: var(--surface-2);
+  color: var(--encre);
+  cursor: pointer;
+}
+.geste-adopter:hover {
+  background: var(--accent);
+  color: var(--accent-encre);
+}
+.geste-ici-mot {
+  background: var(--accent);
+  color: var(--accent-encre);
+}
+
+/* --- 04, l'escalier des couches --------------------------------------------
+   Les marches sont décalées vers la droite à mesure qu'on monte : l'image se
+   construit par-dessus elle-même, et la forme du contrôle le dit avant que le
+   texte ne l'explique. Le décalage s'annule dans la colonne étroite, où il ne
+   laisserait plus de largeur au texte de la marche. */
+.couches-toile {
+  flex: 0 0 auto;
+  display: block;
+  width: min(250px, 62vw);
+  aspect-ratio: 1179 / 2556;
+  border: 2px solid var(--encre);
+  border-radius: 14px;
+  box-shadow: 13px 13px 0 var(--ombre-plate);
+}
+.couches {
+  flex: 1 1 300px;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.couche {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 2px solid var(--filet-franc);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--encre);
+  text-align: left;
+  cursor: pointer;
+}
+.couche-ici {
+  border-color: var(--encre);
+  border-width: 3px;
+  background: var(--surface-2);
+}
+.couche-nom {
+  font-size: 15px;
+  font-weight: 700;
+}
+.couche-note {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+@media (min-width: 720px) {
+  .couche {
+    margin-left: calc(var(--marche) * 16px);
+    width: calc(100% - var(--marche) * 16px);
+  }
+}
+
+/* --- 05, la sonde ----------------------------------------------------------
+   La boîte reprend celle de la démonstration du voile de l'accueil, dont les
+   classes de libellés (`voile-app`) sont déjà globales. Ce qui change ici, ce
+   sont les chiffres : l'accueil montre le voile à qui ne sait pas ce que
+   c'est, cette page montre ce que la sonde a mesuré. */
+.sonde-boite {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(250px, 62vw);
+  aspect-ratio: 1179 / 2556;
+  border: 2px solid var(--encre);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 13px 13px 0 var(--ombre-plate);
+}
+.sonde-toile {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.sonde-grille {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: end;
+  gap: 9% 4%;
+  padding: 0 8% 12%;
+  color: var(--libelle);
+}
+.sonde-chiffres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 13.5px;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+}
+.sonde-verdict {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* La réglette : le rapport mesuré, le seuil AA à la moitié de la course. Elle
+   est décorative et ne porte rien seule, les deux nombres sont écrits juste
+   au-dessus. */
+.sonde-regle {
+  position: relative;
+  height: 10px;
+  border: 2px solid var(--encre);
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.sonde-regle-barre {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--part) * 100%);
+  background: var(--accent);
+}
+.sonde-regle-seuil {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  background: var(--encre);
+}
+.sonde-seuil {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+  margin-top: -6px;
+}
+
+/* --- 06, le cadre ----------------------------------------------------------
+   Un seul canevas, dont la boîte prend le rapport d'aspect visé : la forme
+   change sous les yeux, ce qui est exactement le propos. */
+.cadre {
+  flex: 1 1 260px;
+  max-width: 420px;
+  display: flex;
+  justify-content: center;
+}
+.cadre-toile {
+  display: block;
+  width: 100%;
+  max-height: 62vh;
+  aspect-ratio: var(--rapport);
+  border: 2px solid var(--encre);
+  border-radius: 12px;
+  box-shadow: 13px 13px 0 var(--ombre-plate);
+}
+.cadres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(148px, 100%), 1fr));
+  gap: 8px;
+}
+.cadre-choix {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--filet-franc);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--encre);
+  text-align: left;
+  cursor: pointer;
+}
+.cadre-choix-ici {
+  border-color: var(--encre);
+  border-width: 3px;
+  background: var(--surface-2);
+}
+.cadre-mot {
+  font-size: 14px;
+  font-weight: 700;
+}
+.cadre-taille {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- La sortie --------------------------------------------------------------
+   Le seul appel primaire de la page, et l'adresse du motif juste au-dessus :
+   la page vient d'expliquer que quatre réglages font l'image, le lien le
+   prouve en ne portant qu'eux. */
+.moteur-appel {
+  margin-top: clamp(34px, 6vw, 68px);
+}
+.moteur-reglages {
+  font-size: 15px;
+  font-weight: 700;
+}
+.moteur-adresse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 13px;
+}
+/* Le bloc de sortie est un aplat lime avec son encre, dans les deux thèmes :
+   `--encre-douce` et `--surface-2` y désignent des couleurs faites pour le
+   fond de la page, et le bleu clair du thème sombre disparaissait sur le lime.
+   Les deux lignes prennent donc l'encre de l'accent, qui, elle, ne bouge pas
+   d'un thème à l'autre. C'est le même raisonnement que le `--focus` local
+   d'`.appel`. */
+.moteur-adresse-mot {
+  color: var(--accent-encre);
+  font-weight: 600;
+}
+/* L'adresse peut être longue et ne se coupe pas n'importe où : elle défile
+   dans sa boîte plutôt que de pousser la page de côté. */
+.moteur-adresse code {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 3px 8px;
+  border: 2px solid var(--accent-encre);
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-encre);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  white-space: nowrap;
+}

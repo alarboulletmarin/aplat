@@ -13,7 +13,7 @@
  * part pas dans un lien.
  */
 import { describe, expect, it } from 'vitest'
-import { ecrireUrl, lireUrl, REGLAGES_PAR_DEFAUT } from './url'
+import { ecrireUrl, lienAppDuMotif, lireUrl, REGLAGES_PAR_DEFAUT } from './url'
 import { enregistrerPalettes } from './moteur'
 import { composer, versPalette } from './palettes'
 import { depuisSaisie } from './resolution'
@@ -208,5 +208,40 @@ describe('palette composée dans l’adresse', () => {
 
   it('n’écrit aucune teinte pour les palettes livrées', () => {
     expect(ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)).not.toContain('k=')
+  })
+})
+
+/* La page du mécanisme construit un motif d'étape en étape et le rend en lien.
+   Ce que ces trois cas protègent : le lien ouvre bien l'application, il porte
+   exactement les quatre réglages qu'on vient de composer, et il n'emporte pas
+   la résolution de celui qui l'a fabriqué. */
+describe('le lien de la page du mécanisme', () => {
+  const MOTIF = { famille: 'kintsugi', palette: 'nuit', densite: 2, graine: 4242 } as const
+
+  it('mène à l’application et relit les quatre réglages', () => {
+    const lien = lienAppDuMotif(MOTIF)
+    expect(lien.startsWith('/app?')).toBe(true)
+    const lu = lireUrl(lien.slice(lien.indexOf('?')), DETECTE)
+    expect(lu.famille).toBe(MOTIF.famille)
+    expect(lu.palette).toBe(MOTIF.palette)
+    expect(lu.densite).toBe(MOTIF.densite)
+    expect(lu.graine).toBe(MOTIF.graine)
+  })
+
+  /* Une résolution transmise imposerait au destinataire l'écran de
+     l'expéditeur, alors que la page vient d'expliquer que la taille est
+     détectée sur l'appareil qui ouvre le lien. */
+  it('n’emporte ni résolution, ni voile, ni version', () => {
+    const lien = lienAppDuMotif(MOTIF)
+    expect(lien).not.toContain('r=')
+    expect(lien).not.toContain('v=')
+    expect(lien).not.toContain('n=')
+  })
+
+  it('retombe sur l’image que l’application ouvre quand rien n’a été touché', () => {
+    const lien = lienAppDuMotif(REGLAGES_PAR_DEFAUT)
+    const lu = lireUrl(lien.slice(lien.indexOf('?')), DETECTE)
+    expect(lu.famille).toBe(REGLAGES_PAR_DEFAUT.famille)
+    expect(lu.graine).toBe(REGLAGES_PAR_DEFAUT.graine)
   })
 })

@@ -7,7 +7,7 @@
  * ouvrir son motif, et une adresse nue doit encore ouvrir la présentation.
  */
 import { describe, expect, it } from 'vitest'
-import { CHEMIN_APP, lienAccueil, lienApp, redirection, route } from './route'
+import { CHEMIN_APP, lienAccueil, lienApp, lienMoteur, redirection, route } from './route'
 
 describe('le chemin décide de la page', () => {
   it('donne l’application sous /app, à la barre oblique et à la casse près', () => {
@@ -16,8 +16,17 @@ describe('le chemin décide de la page', () => {
     }
   })
 
+  it('donne la page du moteur sous /moteur, aux mêmes tolérances', () => {
+    for (const chemin of ['/moteur', '/moteur/', '/moteur//', '/MOTEUR', '/Moteur/']) {
+      expect(route(chemin)).toBe('moteur')
+    }
+  })
+
   it('donne l’accueil partout ailleurs', () => {
-    for (const chemin of ['/', '', '/apps', '/app/reglages', '/accueil', '/index.html']) {
+    for (const chemin of [
+      '/', '', '/apps', '/app/reglages', '/accueil', '/index.html',
+      '/moteurs', '/moteur/couches',
+    ]) {
       expect(route(chemin)).toBe('accueil')
     }
   })
@@ -47,14 +56,22 @@ describe('les liens partagés d’avant', () => {
   it('ne reconduit jamais depuis l’application elle-même', () => {
     expect(redirection('/app', '?m=vagues')).toBeNull()
   })
+
+  /* La page du moteur part toujours du même motif choisi : un lien qui la
+     désigne mène à l'explication, et la reconduire vers l'outil rendrait la
+     page inatteignable dès qu'un paramètre traîne dans l'adresse. */
+  it('ne reconduit jamais depuis la page du moteur', () => {
+    expect(redirection('/moteur', '?m=vagues&p=lime&s=7314')).toBeNull()
+  })
 })
 
-/* Les deux liens internes sont nus : l'affichage vit sur l'appareil
+/* Les trois liens internes sont nus : l'affichage vit sur l'appareil
    (`affichage.ts`), il n'a rien à faire transporter par un lien. */
 describe('les liens internes', () => {
-  it('mènent à l’application et à la présentation, sans rien emporter', () => {
+  it('mènent aux trois pages, sans rien emporter', () => {
     expect(lienApp()).toBe('/app')
     expect(lienAccueil()).toBe('/')
+    expect(lienMoteur()).toBe('/moteur')
   })
 
   /* La marque de l'application mène à l'accueil : si ce lien portait un
