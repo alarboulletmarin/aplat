@@ -22,7 +22,7 @@
  * lettre pour que la sonde regarde la même scène que le fichier.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
-import { anneau, capsule, duClairAuSombre, melangeHex, type Point } from './trace'
+import { anneau, capsule, duClairAuSombre, melangeHex, polygone, type Point } from './trace'
 
 export const IDS_FRACTURES = ['kintsugi', 'banquise', 'sashiko'] as const
 
@@ -69,13 +69,6 @@ function cellule(
     poly = garde
   }
   return poly
-}
-
-function polygone(ctx: Pinceau, poly: readonly Point[]): void {
-  ctx.beginPath()
-  ctx.moveTo(poly[0][0], poly[0][1])
-  for (let i = 1; i < poly.length; i += 1) ctx.lineTo(poly[i][0], poly[i][1])
-  ctx.closePath()
 }
 
 /* ---------- kintsugi --------------------------------------------------------- */

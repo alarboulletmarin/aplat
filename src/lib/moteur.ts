@@ -9,12 +9,15 @@
  * ce qu'on voit derrière les icônes est exactement le fichier téléchargé.
  */
 
+import { estCarreau, peindreCarreau, type IdCarreau } from './carreaux'
 import { estChimie, peindreChimie, type IdChimie } from './chimie'
+import { estCoulee, peindreCoulee, type IdCoulee } from './coulees'
 import { estFracture, peindreFracture, type IdFracture } from './fractures'
 import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estLieu, peindreLieu, type IdLieu } from './lieux'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
+import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -45,10 +48,13 @@ export type IdFamille =
   | 'bassin'
   | 'strates'
   /* abstraits venus des nouveaux gestes : la fracture, la réserve, le
-     pavage savant */
+     pavage savant, le carreau, la coulée, le relief */
   | IdFracture
   | IdReserve
   | IdPavage
+  | IdCarreau
+  | IdCoulee
+  | IdRelief
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
      déformée et l'interférence y mettent tout le reste */
   | IdChimie
@@ -194,7 +200,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-trois familles, dans l'ordre de la liste : abstraits,
+ * Les soixante-douze familles, dans l'ordre de la liste : abstraits,
  * matières, paysages, lieux, figures. L'ordre est celui de la maquette, et il
  * compte : on descend du plus géométrique au plus figuratif, et le premier de
  * chaque groupe en donne le ton. Les matières sont entre les deux mondes :
@@ -229,6 +235,15 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'claustra', groupe: 'abs', fr: 'Claustra', en: 'Breeze block' },
   { id: 'papel', groupe: 'abs', fr: 'Papel picado', en: 'Papel picado' },
   { id: 'penrose', groupe: 'abs', fr: 'Penrose', en: 'Penrose' },
+  { id: 'bauhaus', groupe: 'abs', fr: 'Bauhaus', en: 'Bauhaus' },
+  { id: 'carreaux', groupe: 'abs', fr: 'Carreaux', en: 'Tiles' },
+  { id: 'demilunes', groupe: 'abs', fr: 'Demi-lunes', en: 'Half-moons' },
+  { id: 'jetons', groupe: 'abs', fr: 'Jetons', en: 'Tokens' },
+  { id: 'meandres', groupe: 'abs', fr: 'Méandres', en: 'Meanders' },
+  { id: 'cubes', groupe: 'abs', fr: 'Cubes', en: 'Blocks' },
+  { id: 'plis', groupe: 'abs', fr: 'Plis', en: 'Folds' },
+  { id: 'bossage', groupe: 'abs', fr: 'Bossage', en: 'Bosses' },
+  { id: 'tuyaux', groupe: 'abs', fr: 'Tuyaux', en: 'Pipes' },
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
   { id: 'madrepore', groupe: 'mat', fr: 'Madrépore', en: 'Brain coral' },
@@ -682,7 +697,9 @@ export function formes(
      La ligne de niveau révèle des paliers, la fracture brise la surface, la
      réserve perce un aplat, la chimie cultive une réaction, le réseau trace
      une carte, le pavage subdivise sans période, la trame déforme ou fait
-     interférer des grilles, la grammaire fait pousser des plantes. */
+     interférer des grilles, la grammaire fait pousser des plantes, le carreau
+     remplit une grille d'un alphabet de signes, la coulée fait serpenter des
+     rubans larges, et le relief fait dire l'orientation à la teinte. */
   if (estNiveau(id)) {
     peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -713,6 +730,18 @@ export function formes(
   }
   if (estGrammaire(id)) {
     peindreGrammaire(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estCarreau(id)) {
+    peindreCarreau(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estCoulee(id)) {
+    peindreCoulee(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estRelief(id)) {
+    peindreRelief(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 

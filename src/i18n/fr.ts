@@ -125,7 +125,7 @@ export const fr = {
     document: {
       titre: 'Comment Aplat dessine',
       description:
-        'Quatre réglages, dix mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
+        'Quatre réglages, treize mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
     },
     heros: {
       surtitre: 'Le mécanisme',
@@ -149,9 +149,9 @@ export const fr = {
       deuxTitre: 'La graine est une adresse',
       deuxNote:
         'Les mêmes quatre réglages rendent toujours la même image, à n’importe quelle taille. Le hasard n’entre qu’une fois, au tirage de la graine.',
-      troisTitre: 'Dix façons de poser la couleur',
+      troisTitre: 'Treize façons de poser la couleur',
       troisNote:
-        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît dix, et toutes les familles en sortent.',
+        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît treize, et toutes les familles en sortent.',
       quatreTitre: 'Quatre couches, dans cet ordre',
       quatreNote:
         'L’image se peint par-dessus elle-même, et l’ordre n’est pas un détail\u00a0: le voile est dosé pour ce qu’il couvre, le grain passe après lui.',
@@ -162,7 +162,7 @@ export const fr = {
       sixNote:
         'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
     },
-    /* Étape 01. Les cinq groupes plutôt que les soixante-trois familles : une
+    /* Étape 01. Les cinq groupes plutôt que les soixante-douze familles : une
        liste complète referait le panneau de l'application dans un autre
        document, et « une autre famille » donne accès au reste sans ça. */
     reglages: {
@@ -184,7 +184,7 @@ export const fr = {
       sourdes:
         'Quatre familles ignorent leur graine\u00a0: ce sont des pavages entièrement réguliers, sans un seul tirage.',
     },
-    /* Étape 03. Les dix fiches. Les familles de chacune ne sont pas écrites
+    /* Étape 03. Les treize fiches. Les familles de chacune ne sont pas écrites
        ici : elles sont lues dans les listes que les modules publient. */
     mecaniques: {
       familles: 'Familles\u00a0: {liste}',
@@ -221,6 +221,15 @@ export const fr = {
       grammairesNom: 'La grammaire',
       grammairesNote:
         'Une règle appliquée à son propre résultat, jusqu’à une profondeur bornée. Un axe porte des folioles qui portent des folioles.',
+      carreauxNom: 'Le carreau',
+      carreauxNote:
+        'Une grille de cases carrées, et dans chacune un signe pris dans un jeu fini. Deux quarts de disque voisins font un demi, quatre font un rond.',
+      couleesNom: 'La coulée',
+      couleesNote:
+        'Des arcs épais qui entrent et sortent par le milieu des côtés d’une tuile, et se prolongent d’une tuile à l’autre. Un ruban garde sa teinte sur toute sa longueur.',
+      reliefsNom: 'Le relief',
+      reliefsNote:
+        'La teinte d’une face dit son orientation, sous une lumière qui ne bouge jamais. Trois aplats bien choisis font un cube, sans un seul dégradé.',
     },
     /* Étape 04. Les noms des couches viennent d'ici, mais leur ordre vient du
        moteur (`COUCHES`) : une couche ajoutée là-bas manque ici, et la
@@ -231,7 +240,7 @@ export const fr = {
       fondNote: 'La couleur de fond de la palette, d’un bord à l’autre.',
       formesNom: 'Les formes',
       formesNote:
-        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les dix gestes qui la peignent sont juste au-dessus.',
+        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les treize gestes qui la peignent sont juste au-dessus.',
       ombreNom: 'L’ombre',
       ombreNote:
         'La version sombre\u00a0: un aplat noir dosé pour amener n’importe quel motif à la même obscurité.',

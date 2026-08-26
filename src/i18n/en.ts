@@ -82,7 +82,7 @@ export const en: Textes = {
     document: {
       titre: 'How Aplat draws',
       description:
-        'Four settings, ten drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
+        'Four settings, thirteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
     },
     heros: {
       surtitre: 'The mechanism',
@@ -100,9 +100,9 @@ export const en: Textes = {
       deuxTitre: 'A seed is an address',
       deuxNote:
         'The same four settings always render the same image, at any size. Chance enters once, when the seed is drawn.',
-      troisTitre: 'Ten ways to lay down colour',
+      troisTitre: 'Thirteen ways to lay down colour',
       troisNote:
-        'A family does not pick a drawing, it picks a mechanic. The engine knows ten of them, and every family comes out of one.',
+        'A family does not pick a drawing, it picks a mechanic. The engine knows thirteen of them, and every family comes out of one.',
       quatreTitre: 'Four layers, in this order',
       quatreNote:
         'The image is painted over itself, and the order is not a detail: the scrim is dosed for what it covers, the grain comes after it.',
@@ -164,6 +164,15 @@ export const en: Textes = {
       grammairesNom: 'Grammar',
       grammairesNote:
         'A rule applied to its own result, down to a bounded depth. An axis bears leaflets that bear leaflets.',
+      carreauxNom: 'Tile alphabet',
+      carreauxNote:
+        'A grid of square cells, each holding one sign drawn from a finite set. Two neighbouring quarter discs make a half, four make a circle.',
+      couleesNom: 'Flow',
+      couleesNote:
+        'Thick arcs entering and leaving through the midpoints of a tile’s sides, carrying on from one tile to the next. A ribbon keeps its colour along its whole length.',
+      reliefsNom: 'Relief',
+      reliefsNote:
+        'The colour of a face states its orientation, under a light that never moves. Three well-chosen flats make a cube, without a single gradient.',
     },
     couches: {
       arreter: 'Stop the drawing after {couche}',
@@ -171,7 +180,7 @@ export const en: Textes = {
       fondNote: 'The palette’s background colour, edge to edge.',
       formesNom: 'The shapes',
       formesNote:
-        'The family itself. It is the only layer that changes from one family to the next, and the ten gestures that paint it are just above.',
+        'The family itself. It is the only layer that changes from one family to the next, and the thirteen gestures that paint it are just above.',
       ombreNom: 'The shade',
       ombreNote:
         'The dark version: a black flat dosed to bring any pattern to the same darkness.',

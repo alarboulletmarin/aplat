@@ -9,11 +9,71 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : quatre familles en relief, sans un seul dégradé
+
+- **Le volume entre au catalogue.** Cubes empile des solides en axonométrie,
+  trois faces par cube et la hauteur lue dans un champ continu. Plis froisse
+  une nappe dont chaque facette prend la valeur de sa pente. Bossage grave des
+  panneaux dans la page, saillants ou creux selon le seul chanfrein. Tuyaux
+  tresse des cylindres qui s'ombrent les uns les autres. Le catalogue passe à
+  soixante-douze familles.
+- **Pas de point de fuite, et c'est un choix.** Les quatre gardent les
+  parallèles parallèles. Une perspective vraie a été écrite puis retirée :
+  elle choisit un endroit d'où regarder, et une grille d'icônes n'est pas cet
+  endroit. Un fond d'écran se regarde de trop près et de trop longtemps pour
+  supporter qu'on lui dise où se tenir.
+- **Pas un dégradé, pas une ombre portée floue.** Un volume ne se voit pas
+  parce que la lumière y glisse, il se voit parce que ses faces ne sont pas de
+  la même valeur : trois aplats bien choisis font un cube. Les fichiers
+  restent donc ce qu'ils étaient, nets, légers, et exportables en vectoriel
+  comme le reste du catalogue.
+- **La lumière ne bouge jamais.** Elle vient d'en haut à gauche, et de devant,
+  pour les quatre familles. C'est ce qui leur permet de se ressembler sans se
+  répéter, et c'est ce qui fait qu'un panneau creux se lit comme creux du
+  premier coup d'oeil.
+- **Le relief garde les couleurs de la palette.** Éclairer vers la teinte la
+  plus claire de la palette avait été essayé, et donnait de la boue : sur Lime
+  & crème, une face de bleu marine poussée vers un jaune vert ressort kaki. Le
+  jour et l'ombre sont donc presque le blanc et presque le noir, teintés d'un
+  quart par les deux bouts de la palette : la valeur monte et descend, la
+  couleur reste.
+- **Le poids n'a pas bougé.** Médiane à 0,49 Mo et neuvième décile à 0,89 Mo
+  sur les 2 376 combinaisons, contre 0,48 et 0,87 avant. Seul le maximum prend
+  deux centièmes, avec Plis en densité dense : une nappe froissée est faite de
+  milliers de facettes dont aucune n'a la teinte de sa voisine.
+
+### Ajouté : cinq familles géométriques, le carreau et la coulée
+
+- **Cinq familles pour les affiches géométriques.** Bauhaus compose des cases
+  franches sur la page, des quarts de disque, des triangles, des sautoirs, une
+  case sur cinq regroupée par quatre pour porter un signe deux fois plus grand.
+  Carreaux remplit toute la grille en camaïeu, chaque signe posé sur la teinte
+  voisine de son aplat. Demi-lunes n'emploie que les rondeurs et en tire des
+  colonnades. Jetons revient à deux tons et sème des pièces frappées sur un
+  damier lâche. Méandres fait serpenter des rubans larges d'un bord à l'autre
+  de l'image. Le catalogue passe à soixante-huit familles.
+- **Deux gestes de plus dans le moteur.** Le carreau découpe le plan en cases
+  et donne à chacune un signe pris dans un jeu fini ; la coulée traverse ces
+  mêmes cases avec des bandes qui se raccordent. Ce sont les deux moitiés de
+  la même question, remplir une grille ou la parcourir.
+- **Un ruban de Méandres garde sa couleur sur toute sa longueur.** Une tuile ne
+  sait rien de ce qui la traverse : les milieux de côtés sont réunis en classes
+  avant le moindre tracé, et la teinte se tire de la classe. Sans cela, un
+  damier bariolé ; avec, un ruban qu'on suit du doigt sur toute la hauteur de
+  l'écran.
+- **Les signes creux montrent ce qu'il y a derrière.** Un anneau n'est plus un
+  disque couvert d'un disque plus petit de la couleur du fond, c'est un contour
+  et son trou dans le même chemin. Il tombe donc aussi bien sur un aplat que
+  sur la page, sans que le moteur ait à deviner ce qui est dessous.
+- **Le même contrat que tout le reste.** Déterministe au quadruplet près, la
+  même image à toute résolution, exportable en PNG comme en vectoriel, mesuré
+  par la sonde de lisibilité, et tenu par les mêmes vérifications que les
+  soixante-trois autres.
 ### Ajouté : une page qui explique comment ça marche
 
 - **Une troisième adresse, `/moteur`.** `/` présente, `/app` fait tourner,
   `/moteur` explique comment il tourne. Six étapes numérotées, dans l'ordre où
-  le produit travaille : les quatre réglages, la graine, les dix gestes de
+  le produit travaille : les quatre réglages, la graine, les treize gestes de
   dessin, les couches, la sonde de lisibilité, la résolution.
 - **Un seul motif traverse les six étapes.** Ce qu'on choisit à la première se
   retrouve à la dernière, et la page se termine en offrant le lien qui l'ouvre
@@ -23,10 +83,12 @@ d'écran derrière mes icônes ?**
   graines voisines, l'escalier des couches, l'interrupteur du voile et les
   formats sont de vrais réglages, et chaque image sort du moteur, au
   chargement, dans le navigateur qui la lit.
-- **Dix fiches disent d'où viennent les soixante-trois familles** : les aplats,
-  la ligne de niveau, la fracture, la réserve, la réaction, le pavage
-  apériodique, la gravure tramée, la trame déformée, le réseau, la grammaire.
-  Toucher une fiche fait adopter sa mécanique par le motif de la page.
+- **Treize fiches disent d'où viennent les soixante-douze familles** : les
+  aplats, la ligne de niveau, la fracture, la réserve, la réaction, le pavage
+  apériodique, la gravure tramée, la trame déformée, le réseau, la grammaire,
+  le carreau, la coulée, le relief. Toucher une fiche fait adopter sa mécanique
+  par le motif de la page. Aucune n'écrit sa liste de familles : chacune prend
+  celle que son module publie, ce qu'un test vérifie des deux côtés.
 - **Trois portes y mènent, aucune n'est un appel** : le pied de la
   présentation, le pied de l'application, et une treizième tuile au bout de la
   galerie, qui prend au vol la question qui vient après douze images.

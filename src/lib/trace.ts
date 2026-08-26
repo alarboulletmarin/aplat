@@ -109,6 +109,42 @@ export function luminanceHex(teinte: string): number {
   return 0.2126 * canal(0) + 0.7152 * canal(1) + 0.0722 * canal(2)
 }
 
+/**
+ * L'éclairage : une teinte, un niveau, et la face qu'il faut peindre.
+ *
+ * C'est tout ce qu'il faut pour du relief en aplats. Une surface plane ne
+ * devient un volume que si ses faces se distinguent par la valeur, et le
+ * moteur ne sait poser que des aplats : la teinte d'une face est donc sa
+ * teinte propre, poussée vers le jour ou vers l'ombre selon qu'elle regarde
+ * la lumière ou s'en détourne. Le niveau va de -1, l'ombre pleine, à 1, le
+ * plein jour.
+ *
+ * Le jour et l'ombre sont presque le blanc et presque le noir, teintés d'un
+ * quart par les deux bouts de la palette. Les deux réglages ont été essayés,
+ * et c'est celui-là qui tient.
+ *
+ * Éclairer vers la teinte la plus claire de la palette semblait plus élégant,
+ * et donnait de la boue : sur Lime & crème, une face de bleu marine poussée
+ * vers un jaune vert ressort kaki, et le cube entier perd la couleur pour
+ * laquelle on l'a choisi. Le blanc et le noir, eux, ne déplacent pas la
+ * teinte, ils ne font que monter et descendre sa valeur, ce qui est
+ * exactement ce qu'une lumière fait. Le quart de palette qui les teinte suffit
+ * à ce que le jour d'une palette chaude ne soit pas celui d'une palette froide.
+ *
+ * L'ombre est commune à toutes les teintes, et c'est voulu : les ombres d'une
+ * même scène convergent, elles ne gardent pas chacune la couleur de ce qui les
+ * porte.
+ */
+export function eclairage(C: readonly string[]): (base: string, niveau: number) => string {
+  const teintes = duClairAuSombre(C)
+  const jour = melangeHex(teintes[0], '#FFFFFF', 0.78)
+  const ombre = melangeHex(teintes[teintes.length - 1], '#000000', 0.74)
+  return (base, niveau) => {
+    const n = Math.max(-1, Math.min(1, niveau))
+    return n >= 0 ? melangeHex(base, jour, n) : melangeHex(base, ombre, -n)
+  }
+}
+
 /** La palette triée de la plus claire à la plus sombre, luminance WCAG. */
 export function duClairAuSombre(C: readonly string[]): string[] {
   return [...C].sort((a, b) => luminanceHex(b) - luminanceHex(a))
@@ -225,5 +261,96 @@ export function peindreChampSeuille(
         debut = -1
       }
     }
+  }
+}
+
+/**
+ * Le contour d'un polygone, ajouté au chemin courant sans l'ouvrir.
+ *
+ * C'est lui qui permet d'évider un signe : le contour et son trou entrent dans
+ * le même chemin, que la règle paire et impaire remplit en anneau. Le pinceau
+ * ne sait pas détourer, et c'est la seule façon qu'a une forme creuse de
+ * laisser voir ce qui est derrière elle plutôt qu'une teinte devinée.
+ */
+export function tracerPolygone(ctx: Pinceau, points: readonly Point[]): void {
+  if (points.length < 2) return
+  ctx.moveTo(points[0][0], points[0][1])
+  for (let i = 1; i < points.length; i += 1) ctx.lineTo(points[i][0], points[i][1])
+  ctx.closePath()
+}
+
+/**
+ * Le contour d'un cercle, ajouté au chemin courant sans l'ouvrir. Le crayon
+ * est posé sur le départ de l'arc avant de le suivre : sans ce `moveTo`, l'arc
+ * traînerait derrière lui un segment venu de la forme précédente.
+ */
+export function tracerCercle(ctx: Pinceau, cx: number, cy: number, rayon: number): void {
+  ctx.moveTo(cx + rayon, cy)
+  ctx.arc(cx, cy, rayon, 0, Math.PI * 2)
+  ctx.closePath()
+}
+
+/**
+ * Un polygone fermé, sommet par sommet : le chemin, pas le remplissage.
+ *
+ * Le chemin est ouvert avant tout examen du nombre de sommets. C'est
+ * volontaire : une découpe peut ne rien laisser, et un `fill()` qui suivrait
+ * sans `beginPath()` repeindrait la forme d'avant au lieu de ne rien peindre.
+ */
+export function polygone(ctx: Pinceau, points: readonly Point[]): void {
+  ctx.beginPath()
+  tracerPolygone(ctx, points)
+}
+
+/**
+ * Un polygone convexe coupé par un demi-plan : ce qui reste du côté où
+ * `nx x + ny y <= d`. C'est la découpe de Sutherland et Hodgman, la même que
+ * la fracture pratique sur ses cellules ; elle est ici parce que le pinceau ne
+ * sait pas détourer, et qu'une bande de hachures doit donc arriver déjà
+ * taillée à la forme qui la porte.
+ */
+export function couperDemiPlan(
+  points: readonly Point[], nx: number, ny: number, d: number,
+): Point[] {
+  const garde: Point[] = []
+  for (let i = 0; i < points.length; i += 1) {
+    const a = points[i]
+    const b = points[(i + 1) % points.length]
+    const da = a[0] * nx + a[1] * ny - d
+    const db = b[0] * nx + b[1] * ny - d
+    if (da <= 0) garde.push(a)
+    if ((da <= 0) !== (db <= 0)) {
+      const t = da / (da - db)
+      garde.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])
+    }
+  }
+  return garde
+}
+
+/**
+ * Les hachures : des bandes parallèles taillées dans un polygone convexe.
+ *
+ * Le pinceau ne connaît que le remplissage, jamais le trait ni le détourage :
+ * chaque bande est donc calculée comme une surface, découpée deux fois contre
+ * la forme qui la porte. Le pas et la phase se mesurent sur la normale, si
+ * bien qu'une case et sa voisine hachurées du même angle continuent la même
+ * série au lieu de se décaler d'une demi-bande.
+ */
+export function hachurer(
+  ctx: Pinceau, contour: readonly Point[], angle: number, pas: number, part = 0.5,
+): void {
+  if (contour.length < 3 || !(pas > 0)) return
+  const nx = Math.cos(angle)
+  const ny = Math.sin(angle)
+  const projections = contour.map((p) => p[0] * nx + p[1] * ny)
+  const debut = Math.floor(Math.min(...projections) / pas) * pas
+  const fin = Math.max(...projections)
+  for (let d = debut; d < fin; d += pas) {
+    const bande = couperDemiPlan(
+      couperDemiPlan(contour, nx, ny, d + pas * part), -nx, -ny, -d,
+    )
+    if (bande.length < 3) continue
+    polygone(ctx, bande)
+    ctx.fill()
   }
 }
