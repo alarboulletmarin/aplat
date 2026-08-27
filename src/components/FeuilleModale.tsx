@@ -71,6 +71,11 @@ export function FeuilleModale({
 
   const surTouche = (evenement: React.KeyboardEvent<HTMLDivElement>) => {
     if (evenement.key === 'Escape') {
+      /* La propagation s'arrête ici : un événement synthétique remonte
+         l'arbre React, pas le document, et la feuille est rendue dans la
+         barre, dont le propre Échap basculerait `formats` une seconde fois.
+         Deux bascules dans le même lot, et la feuille ne fermait jamais. */
+      evenement.stopPropagation()
       onFermer()
       return
     }
