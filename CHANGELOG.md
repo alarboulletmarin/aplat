@@ -34,8 +34,14 @@ d'écran derrière mes icônes ?**
   à une seule sur un panneau de deux cents pixels : quatre cents pixels de
   navigation avant la première vignette, pour des vignettes de quatre-vingts.
   Chaque onglet y prend donc la largeur de son mot et la rangée s'étire jusqu'au
-  bord, ce qui ramène la barre à quatre rangées sur tous les téléphones et trois
-  à 320 px. On voit un motif sans avoir à faire défiler.
+  bord, sans jamais qu'un onglet passe la moitié de sa rangée. La barre tombe à
+  quatre rangées sur tous les téléphones, trois à 320 px : on voit un motif sans
+  avoir à faire défiler.
+- **Le panneau n'a plus qu'une gouttière.** Le titre d'une carte, les onglets et
+  les vignettes commençaient sur trois verticales différentes sur téléphone,
+  parce que la barre d'onglets débordait sa carte pour se loger. Ils partent
+  maintenant tous du même bord, à toute largeur : ce que la barre allait
+  chercher dehors, elle le prend sur son propre rembourrage.
 - **Aucun motif n'a changé.** Les familles ont changé d'onglet, pas de dessin :
   un lien partagé rouvre exactement la même image, dans son nouveau groupe.
 

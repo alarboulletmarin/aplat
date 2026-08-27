@@ -256,7 +256,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       coupes: tous.filter(o => {
         const l = o.querySelector('span');
         return l.scrollWidth > l.clientWidth;
-      }).map(o => o.dataset.groupe)
+      }).map(o => o.dataset.groupe),
+      /* La gouttière du panneau, vue par trois blocs qui se suivent. */
+      marges: (() => {
+        const g = document.querySelector('.panneau').getBoundingClientRect().left;
+        return ['.carte-h', '.onglets', '.grille-familles']
+          .map(sel => Math.round(document.querySelector(sel).getBoundingClientRect().left - g));
+      })()
     };
   });
   t(onglets.ouvert === 'abs', 'onglets : celui de la famille en cours est ouvert', onglets.ouvert);
@@ -265,13 +271,19 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     onglets.visibles + ' pour ' + onglets.comptes[0]);
   t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
     'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
-  /* Le panneau de ce téléphone fait 211 px de large : la barre s'y emballe sur
+  /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
      quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
      et la première vignette de famille en fait 86 : on ferait défiler un mur de
      navigation avant de voir un seul motif. Le plafond est donc la mesure de ce
      mur, pas un nombre choisi. */
-  t(onglets.hauteur <= 4 * 44 + 3 * 5,
+  t(onglets.hauteur <= 4 * 44 + 3 * 3,
     'onglets : la barre tient en quatre rangées sur un téléphone', onglets.hauteur + ' px');
+  /* Le titre, les onglets et les vignettes se suivent dans la même carte : ils
+     commencent sur la même verticale, ou l'oeil voit une marche. La barre a
+     débordé sa carte une fois pour se loger, et c'est ce contrôle qui manquait. */
+  t(new Set(onglets.marges).size === 1,
+    'onglets : titre, onglets et vignettes partent de la même verticale',
+    onglets.marges.join(' / ') + ' px');
   /* Le libellé est en `text-overflow: ellipsis` : un groupe au nom plus long
      que la place ne casserait rien, il s'abrégerait en silence. */
   t(onglets.coupes.length === 0,
@@ -311,7 +323,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }).map(o => o.dataset.groupe)
     };
   });
-  t(ongletsEn.hauteur <= 4 * 44 + 3 * 5 && ongletsEn.coupes.length === 0,
+  t(ongletsEn.hauteur <= 4 * 44 + 3 * 3 && ongletsEn.coupes.length === 0,
     'onglets : quatre rangées et aucun libellé abrégé en anglais aussi',
     ongletsEn.hauteur + ' px, ' + (ongletsEn.coupes.join(', ') || 'aucun abrégé'));
 
@@ -466,6 +478,57 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }, vign.hashes);
     t(apres.changed >= 4 && apres.same.length === 0, 'vignettes : remises à jour au changement de palette',
       apres.changed + ' changées, inchangées: ' + (apres.same.join(',') || 'aucune'));
+  }
+
+  // --- 11b. la barre d'onglets aux largeurs où elle est le plus serrée.
+  //          390 px est la largeur confortable : la rangée y garde vingt
+  //          pixels de marge avant de se casser. Les deux qui décident sont
+  //          360, où le panneau est le plus étroit du portage, et 430, où la
+  //          rangée du milieu en porte trois. Et c'est l'anglais qui serre, son
+  //          libellé le plus long faisant quatre pixels de plus que le nôtre.
+  {
+    for (const largeur of [360, 430]) {
+      for (const langue of ['fr', 'en']) {
+        const octx = await browser.newContext({
+          viewport: { width: largeur, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR'
+        });
+        const op = await octx.newPage();
+        await op.goto(`http://127.0.0.1:${PORT}/app?m=vagues&p=lime&d=1&s=7314&l=${langue}`,
+          { waitUntil: 'networkidle' });
+        await op.waitForTimeout(700);
+        const b = await op.evaluate(() => {
+          const pan = document.querySelector('.panneau').getBoundingClientRect();
+          const tous = [...document.querySelectorAll('.onglet')];
+          const r = tous.map(o => o.getBoundingClientRect());
+          const gouttiere = Math.round(
+            document.querySelector('.onglets').getBoundingClientRect().left - pan.left
+          );
+          return {
+            h: Math.round(Math.max(...r.map(x => x.bottom)) - Math.min(...r.map(x => x.top))),
+            coupes: tous.filter(o => {
+              const l = o.querySelector('span');
+              return l.scrollWidth > l.clientWidth;
+            }).length,
+            cible: Math.min(...r.map(x => Math.round(x.height))),
+            marges: ['.carte-h', '.onglets', '.grille-familles']
+              .map(sel => Math.round(document.querySelector(sel).getBoundingClientRect().left - pan.left)),
+            /* La gouttière doit rester au moins aussi large que l'écart entre
+               deux vignettes : plus petite, le mur serait plus proche qu'une
+               voisine et la rangée le compterait comme un des siens. */
+            gouttiere,
+            ecart: Math.round(parseFloat(getComputedStyle(document.querySelector('.grille-familles')).gap))
+          };
+        });
+        const ou = `${langue} ${largeur}`;
+        t(b.h <= 4 * 44 + 3 * 3 && b.coupes === 0 && b.cible >= 44,
+          `onglets ${ou} : quatre rangées, aucun libellé abrégé, cibles à 44 px`,
+          `${b.h} px, ${b.coupes} abrégé(s), cible ${b.cible} px`);
+        t(new Set(b.marges).size === 1 && b.gouttiere - 2 >= b.ecart,
+          `onglets ${ou} : gouttière commune, et jamais sous l'écart des vignettes`,
+          `marges ${b.marges.join('/')}, gouttière ${b.gouttiere - 2} contre écart ${b.ecart}`);
+        await octx.close();
+      }
+    }
   }
 
   // --- 12. clavier, sur une page fraîche : l'ordre de tabulation part du haut

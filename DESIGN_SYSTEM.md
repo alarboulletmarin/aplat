@@ -385,12 +385,25 @@ première vignette, pour des vignettes de quatre-vingts. Sur ce panneau, les
 onglets sont donc **emballés** plutôt qu'alignés : chacun prend la largeur de
 son mot, la rangée s'étire jusqu'au bord, et « Lieux » et « Figures » tiennent
 ensemble aussi bien qu'« Instruments » seul. La barre tombe à quatre rangées
-sur tous les téléphones, trois à 320 px. Deux mesures l'accompagnent, à ne pas
-défaire : la barre déborde le rembourrage de sa carte, seul élément à le faire,
-parce que ces vingt pixels décidaient d'une colonne ; et son libellé descend à
-12,5 px, seul texte de commande sous 13 px, ce qui s'assume sur huit noms
-communs en gras et se contrôle à chaque passage de `e2e`, dans les deux
-langues, sur la hauteur et sur l'absence de mot abrégé.
+sur tous les téléphones, trois à 320 px.
+
+Deux mesures l'accompagnent, à ne pas défaire. Son libellé descend à 12,5 px,
+seul texte de commande du portage sous 13 px, ce qui s'assume sur huit noms
+communs en gras. Et **un onglet ne prend jamais plus de la moitié d'une rangée,
+ni moins que ce que son mot demande** : sans le plafond, la dernière rangée
+d'un panneau de 430 px ne porte que « Figures », étiré sur toute la largeur,
+un aplat quatre fois plus long que ses voisins qui se lit comme une mise en
+avant alors qu'il n'est que le reste de la division ; sans le plancher, un mot
+plus long que la moitié d'une rangée étroite s'abrégerait en silence. Les deux
+se contrôlent à chaque passage de `e2e`, dans les deux langues, à 360, 390 et
+430 px : la hauteur, l'absence de mot abrégé, la cible à 44 px, et la gouttière
+commune.
+
+Le seuil est une largeur de panneau, jamais de fenêtre, et il vaut 320 px. Le
+chiffre n'est pas rond par hasard : à 340 px de fenêtre la page n'a qu'une
+colonne, le panneau y fait 308 px, et la grille y tenait encore à un pixel près
+sous ses deux colonnes. Le mur de 401 px revenait dans cette bande, entre deux
+largeurs qu'on avait regardées et qui allaient bien toutes les deux.
 
 Ce qui n'est **pas** dessiné : la coupure entre les quatre géométries, la
 matière qui fait charnière et les trois figurations. Elle se marquerait par un
@@ -398,6 +411,32 @@ matière qui fait charnière et les trois figurations. Elle se marquerait par un
 la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
 L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
 pas de le savoir.
+
+### La gouttière du panneau
+
+Le panneau a une gouttière, et **une seule pour tous les blocs qui s'y
+succèdent** : le titre d'une carte, la barre d'onglets et la grille de vignettes
+commencent sur la même verticale, à toute largeur. C'est une règle du même rang
+que les rayons ou les jetons de couleur, et elle a été apprise de travers.
+
+Une version de la barre d'onglets débordait sa carte de vingt pixels pour y
+loger une deuxième colonne. Le calcul était juste et le résultat visible : sur
+téléphone, les onglets partaient du trait du panneau et les vignettes de dix
+pixels plus loin, deux blocs qui se suivent avec deux marges. C'est le premier
+reproche qui a été fait à cet écran.
+
+La règle qui en sort tient en une phrase : **un bloc ne finance pas sa mise en
+page sur la gouttière du panneau**. Quand une rangée manque de place, elle la
+prend sur son propre rembourrage et sur ses propres écarts, jamais sur la marge
+qu'elle partage avec ses voisins. La barre resserrée en est l'exemple : elle
+rend les vingt pixels en passant son rembourrage de douze à quatre et l'écart
+entre deux onglets de sept à trois, et la gouttière ne bouge pas.
+
+Une seconde règle la borne : **jamais sous l'écart qui sépare deux voisines.**
+Une gouttière plus petite que le pas de la grille mettrait le mur plus près
+qu'un voisin, et la rangée le compterait comme un des siens : le même défaut,
+déplacé d'un bloc à l'autre. Les deux paliers la respectent, 18 contre 9 et 10
+contre 7, et `e2e` le vérifie à chaque passage.
 
 Le nombre de colonnes n'est écrit nulle part dans la feuille de style : un
 neuvième groupe s'y rangera sans qu'on y retouche.

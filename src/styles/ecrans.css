@@ -799,11 +799,7 @@
   overflow: hidden;
 }
 .carte {
-  /* Le rembourrage est nommé parce qu'un enfant a besoin de le rendre : la
-     barre d'onglets déborde la carte de cette valeur exacte pour retrouver la
-     largeur du panneau. Les deux ne peuvent donc pas diverger. */
-  --marge-carte: 18px;
-  padding: var(--marge-carte);
+  padding: 18px;
 }
 .carte + .carte,
 .bento,
@@ -977,30 +973,45 @@
    Huit onglets d'une seule colonne font 401 px, et une vignette de famille en
    fait 80 à 105 : sur un téléphone, on faisait défiler un mur de navigation
    avant d'atteindre ce qu'on était venu voir. Le panneau n'y fait pourtant que
-   172 à 248 px de large, et la règle générale, qui ne descend jamais sous la
+   196 à 308 px de large, et la règle générale, qui ne descend jamais sous la
    longueur du plus long libellé, y refuse la deuxième colonne.
 
-   Trois choses se reprennent ici, et trois seulement.
+   Trois choses se reprennent ici, et aucune n'est prise sur la gouttière. La
+   barre est un bloc de sa carte comme les autres : elle commence sur la même
+   verticale que le titre au-dessus et que les vignettes au-dessous, et une
+   version où elle débordait sa carte de vingt pixels pour gagner une colonne a
+   existé assez longtemps pour qu'on voie la marche que ça faisait. Ce qu'il
+   fallait à la rangée, elle le trouve donc en dedans.
 
-   La largeur : la barre déborde le rembourrage de la carte et retrouve celle du
-   panneau. C'est le seul élément à le faire, et c'est ce qui le justifie : les
-   onglets sont la navigation de la carte entière, pas un de ses contenus, et
-   ces vingt pixels décident d'une colonne.
+   La répartition d'abord. Des colonnes égales prennent leur largeur sur le plus
+   long libellé des deux langues : « Landscapes » fait 73 px, l'onglet en
+   demande une centaine avec son compte et ses marges, deux en demandent plus de
+   deux cents, et le panneau d'un téléphone de 360 px n'en offre que 176. La
+   grille repassait donc à une colonne exactement là où le mur était le plus
+   haut. Emballés, les onglets se répartissent sur ce que chacun mesure :
+   « Lieux » et « Figures » tiennent ensemble aussi bien qu'« Instruments »
+   seul, et `flex: 1 1 auto` étire chaque rangée jusqu'au bord, ce qui rend
+   l'inégalité des largeurs invisible.
 
-   Le corps du libellé, à 12,5 px. C'est la seule commande du portage dont le
-   texte descende sous 13 px, et c'est assumé : ce sont huit noms communs, en
+   Le rembourrage de l'onglet ensuite, et l'écart entre deux onglets : quatre
+   et trois pixels au lieu de douze et sept. Ce sont eux qui rendent les vingt
+   pixels que le débord allait chercher dehors, et ils les rendent là où
+   personne ne compare deux blocs.
+
+   Le corps du libellé enfin, à 12,5 px. C'est la seule commande du portage dont
+   le texte descende sous 13 px, et c'est assumé : ce sont huit noms communs, en
    gras, sur un aplat contrasté, pas de la prose.
 
-   Et surtout la répartition. Des colonnes égales prennent leur largeur sur le
-   plus long libellé des deux langues : « Landscapes » fait 73 px, l'onglet en
-   demande 100 avec son compte et ses marges, deux en demandent 205, et le
-   panneau d'un téléphone de 360 px n'en offre que 192. La grille repassait donc
-   à une colonne exactement là où le mur était le plus haut. Emballés, les
-   onglets se répartissent sur ce que chacun mesure : « Lieux » et « Figures »
-   tiennent ensemble aussi bien qu'« Instruments » seul, et `flex: 1 1 auto`
-   étire chaque rangée jusqu'au bord, ce qui rend l'inégalité des largeurs
-   invisible. La barre tombe à quatre rangées sur tous les téléphones, trois à
-   320 px, et le premier motif est sous les yeux sans un geste.
+   La barre tombe ainsi à quatre rangées sur tous les téléphones, trois à 320 et
+   340 px, et le premier motif est sous les yeux sans un geste.
+
+   Le seuil est une largeur de panneau et non de fenêtre, parce que c'est le
+   panneau qui manque de place : à 320 px de fenêtre il en fait 288, la page
+   n'ayant alors qu'une colonne, tandis qu'à 430 px il n'en fait que 239. Et il
+   est à 320 et non à 300 pour une raison qui se mesure : à 340 px de fenêtre le
+   panneau fait 308 px, et la grille y tenait encore un pixel sous ses deux
+   colonnes. Le mur de 401 px revenait dans cette bande-là, entre deux largeurs
+   qu'on avait regardées.
 
    Ce qui n'est pas dessiné ici : la coupure entre les quatre géométries, la
    matière qui fait charnière et les trois figurations. Elle se marquerait par
@@ -1008,17 +1019,31 @@
    de la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
    L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
    pas de le savoir. */
-@container panneau (max-width: 300px) {
+@container panneau (max-width: 320px) {
   .onglets {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    margin-inline: calc(-1 * var(--marge-carte));
+    gap: 3px;
   }
+  /* Un onglet ne prend jamais plus de la moitié d'une rangée, et jamais moins
+     que ce que son mot demande.
+
+     Sans le plafond, la dernière rangée d'un panneau de 430 px ne portait que
+     « Figures », étiré sur toute la largeur : un aplat quatre fois plus long
+     que ses voisins, qui se lit comme une mise en avant alors qu'il n'est que
+     le reste de la division. Avec, une rangée de deux tombe pile à la moitié
+     chacune, une rangée de trois se partage sans que le plafond morde, et un
+     onglet resté seul garde la largeur de la colonne au-dessus de lui.
+
+     Le plancher va avec : quand la moitié d'une rangée étroite est plus courte
+     que « Instruments », c'est le mot qui gagne et la rangée déborde un peu de
+     part et d'autre, plutôt qu'un libellé abrégé. */
   .onglet {
-    padding: 0 6px;
+    padding: 0 4px;
     font-size: 12.5px;
-    gap: 5px;
+    gap: 3px;
+    min-width: min-content;
+    max-width: calc(50% - 1.5px);
   }
   .onglet-n {
     font-size: 11.5px;
@@ -1281,9 +1306,6 @@
    Les cibles restent à 44 px : c'est le rembourrage qui cède, jamais la
    surface au doigt. */
 @media (min-width: 360px) and (max-width: 759px) {
-  .carte {
-    --marge-carte: 10px;
-  }
   .carte,
   .bento,
   .res-carte,
@@ -1319,6 +1341,7 @@
     padding: 9px 6px;
   }
 }
+
 
 /* --- Paysage court : la hauteur est la ressource rare ------------------------ */
 /* Une fenêtre couchée de moins de 560 px de haut ne peut pas porter le même
