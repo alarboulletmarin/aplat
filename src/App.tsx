@@ -140,6 +140,15 @@ export function App() {
   })
   const [ephemere, setEphemere] = useState<Ephemere>(EPHEMERE_INITIAL)
 
+  /* Le format de la session. Choisi au studio, il tient jusqu'au prochain
+     changement ou au rechargement : la puce de synthèse l'écrit sous le
+     bouton, et Télécharger produit exactement ce qu'elle écrit ; c'est cette
+     phrase qui rend la mémoire sûre. Il ne part ni dans l'adresse ni sur
+     l'appareil : un lien partagé et une prochaine visite repartent sur le
+     PNG, la promesse fraîche, et le contrat de stockage reste à quatre
+     clés. */
+  const [format, setFormat] = useState<Format>('png')
+
   /* Le verrou de réentrance ne peut pas vivre dans la phase d'affichage :
      n'importe quel réglage la remet à « repos », et un clic sur une palette
      pendant l'encodage relancerait un second export en parallèle du premier. */
@@ -511,7 +520,7 @@ export function App() {
       const touche = evenement.key.toLowerCase()
       if (touche === 'v') nouvelleGraine()
       else if (touche === 's') surprendre()
-      else if (touche === 't') exporter('png')
+      else if (touche === 't') exporter(format)
     }
     window.addEventListener('keydown', surTouche)
     return () => window.removeEventListener('keydown', surTouche)
@@ -600,9 +609,11 @@ export function App() {
         copiee={ephemere.copieImage}
         langue={reglages.langue}
         textes={T}
-        onExporter={(format) => {
+        format={format}
+        onFormat={setFormat}
+        onExporter={(choisi) => {
           fermerFeuille()
-          exporter(format)
+          exporter(choisi)
         }}
         onTrois={() => {
           fermerFeuille()
@@ -778,9 +789,18 @@ export function App() {
           textes={T}
           formats={ephemere.formats}
           copiee={ephemere.copieImage}
+          format={format}
           onSurprise={surprendre}
           onGraine={nouvelleGraine}
           onExporter={exporter}
+          onReessayer={() => {
+            /* Réessayer repart en PNG, et la session avec lui : les messages
+               d'échec le promettent (« le PNG, lui, passe partout »), et une
+               puce qui garderait le format fautif mentirait sur le fichier
+               que le bouton vient de produire. */
+            setFormat('png')
+            exporter('png')
+          }}
           onFormats={() =>
             setEphemere((precedent) => ({ ...precedent, formats: !precedent.formats }))
           }

@@ -18,10 +18,12 @@ import { GroupeRadio, OptionRadio } from './GroupeRadio'
  * pouce ni remonter le panneau.
  *
  * Le studio ne possède rien : l'état vit dans `App`, les mêmes réglages que
- * le panneau, si bien que les deux surfaces ne peuvent pas diverger. Seul le
- * format choisi est local, remis à PNG à chaque ouverture : c'est le défaut
- * dans neuf cas sur dix, et un studio qui rouvrirait sur le WebP d'hier
- * exporterait autre chose que ce que le bouton primaire promet.
+ * le panneau, si bien que les deux surfaces ne peuvent pas diverger. Le
+ * format aussi vient d'`App` : c'est un réglage de session, qui tient
+ * jusqu'au rechargement, que la puce de synthèse écrit sous le bouton et
+ * que Télécharger produit. Il ne part ni dans l'adresse ni sur l'appareil :
+ * une visite fraîche repart sur le PNG, la promesse d'origine, et Réessayer
+ * après un échec y revient aussi.
  *
  * Les préréglages de taille recopient ceux de `ChoixResolution` : la fonction
  * y est volontairement non exportée, parce qu'un module de composant qui
@@ -65,6 +67,8 @@ export function StudioExport({
   copiee,
   langue,
   textes,
+  format,
+  onFormat,
   onExporter,
   onTrois,
   onCopier,
@@ -86,6 +90,9 @@ export function StudioExport({
   copiee: boolean
   langue: Langue
   textes: Textes
+  /** Le format de la session, possédé par App comme le reste. */
+  format: Format
+  onFormat: (format: Format) => void
   onExporter: (format: Format) => void
   onTrois: () => void
   onCopier: () => void
@@ -98,7 +105,6 @@ export function StudioExport({
   const B = textes.barre
   const R = textes.resolution
 
-  const [format, setFormat] = useState<Format>('png')
   const [edition, setEdition] = useState(false)
 
   const liste = prereglages(textes, detecte)
@@ -170,7 +176,7 @@ export function StudioExport({
               id={`studio-format-${f.id}`}
               choisi={format === f.id}
               onChoisir={() => {
-                if (!f.indisponible) setFormat(f.id)
+                if (!f.indisponible) onFormat(f.id)
               }}
               className="opt studio-opt"
               aria-disabled={f.indisponible ? true : undefined}

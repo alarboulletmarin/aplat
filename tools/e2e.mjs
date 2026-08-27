@@ -1390,9 +1390,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const noteSvg = await fp.evaluate(() => document.getElementById('studio-format-note').textContent);
     t(/grain/.test(noteSvg), 'studio : la note du SVG dit ce que le vectoriel ne porte pas', noteSvg);
 
-    /* Une sortie referme la feuille : on la rouvre pour la suivante, c'est le
-       geste réel. Le format se recoche à chaque fois, le studio rouvrant
-       toujours sur le PNG. */
+    /* Une sortie referme la feuille : on la rouvre pour la suivante, c'est
+       le geste réel. Le format est un réglage de session : il reste coché
+       d'une ouverture à l'autre, on ne recoche que pour en changer. */
     const attraper = async (format) => {
       if (!(await fp.evaluate(() => !!document.getElementById('feuille-modale')))) {
         await ouvrirStudio();
@@ -1459,6 +1459,20 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(/^RIFF/.test(entete) && /WEBP/.test(entete), 'studio : le WebP est un WebP', webp.nom);
     t(webp.octets < png2x.octets, 'studio : le WebP est plus léger que le PNG doublé',
       webp.octets + ' o contre ' + png2x.octets + ' o');
+
+    /* Le format choisi tient pour la session : la puce de synthèse l'écrit
+       sous le bouton, et Télécharger produit exactement ce qu'elle dit.
+       C'est la phrase qui rend la mémoire sûre, et elle se vérifie ici sur
+       le WebP qui vient d'être choisi. */
+    const puceRetenue = await fp.evaluate(() => document.getElementById('synthese-sortie').textContent);
+    t(/WebP/.test(puceRetenue), 'studio : la puce porte le format de la session', puceRetenue.slice(0, 60));
+    const [retenu] = await Promise.all([
+      fp.waitForEvent('download', { timeout: 45000 }),
+      fp.$eval('#btn-export', e => e.click())
+    ]);
+    t(/\.webp$/.test(retenu.suggestedFilename()),
+      'studio : Télécharger produit le format que la puce écrit', retenu.suggestedFilename());
+    await fp.waitForTimeout(300);
 
     /* Le garde-fou du SVG ne se déclenche sur aucune famille livrée : la plus
        peuplée, Mosaïque en dense, compte moins de mille formes, et le plafond

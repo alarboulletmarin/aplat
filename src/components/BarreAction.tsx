@@ -63,9 +63,11 @@ export function BarreAction({
   textes,
   formats,
   copiee,
+  format,
   onSurprise,
   onGraine,
   onExporter,
+  onReessayer,
   onFormats,
   onFermerNote,
   onPhotos,
@@ -89,9 +91,13 @@ export function BarreAction({
   /** Le studio d'export est ouvert. */
   formats: boolean
   copiee: boolean
+  /** Le format de la session : la puce l'écrit, Télécharger le produit. */
+  format: Format
   onSurprise: () => void
   onGraine: () => void
   onExporter: (format: Format) => void
+  /** Rejoue l'export après un échec, en PNG : les messages le promettent. */
+  onReessayer: () => void
   /** Ouvre et referme le studio d'export. */
   onFormats: () => void
   onFermerNote: () => void
@@ -156,6 +162,15 @@ export function BarreAction({
     png2x: 'PNG',
     webp: 'WebP',
     svg: 'SVG',
+  }
+
+  /* Le nom du choix, pas celui du fichier : le PNG doublé se choisit comme
+     « PNG 2x » mais livre un PNG, et c'est `nomFormat` qui parle du fichier. */
+  const nomChoix: Record<Format, string> = {
+    png: 'PNG',
+    png2x: T.formatPng2x,
+    webp: T.formatWebp,
+    svg: T.formatSvg,
   }
 
   return (
@@ -233,7 +248,7 @@ export function BarreAction({
                 type="button"
                 id="btn-reessayer"
                 className="note-reessayer"
-                onClick={() => onExporter('png')}
+                onClick={onReessayer}
               >
                 {T.reessayer}
               </button>
@@ -288,7 +303,7 @@ export function BarreAction({
           disabled={vide}
           aria-disabled={calcul}
           aria-busy={calcul}
-          onClick={() => onExporter('png')}
+          onClick={() => onExporter(format)}
         >
           <span className="ico-descendre" aria-hidden="true">
             <i />
@@ -323,7 +338,12 @@ export function BarreAction({
 
           Et elle est le chemin du studio : un tap l'ouvre, comme la ligne de
           réglages des exports d'applis vidéo. Le primaire fait la chose, la
-          puce la décrit et la règle : aucun des deux ne ment sur son geste. */}
+          puce la décrit et la règle : aucun des deux ne ment sur son geste.
+
+          Le format qu'elle écrit est celui de la session : choisi au studio,
+          il tient jusqu'au prochain changement ou au rechargement, et c'est
+          lui que Télécharger produit. La mémoire n'est sûre que parce que la
+          puce l'écrit là, sous le bouton. */}
       <button
         type="button"
         id="synthese-sortie"
@@ -340,7 +360,7 @@ export function BarreAction({
             vide
               ? textes.resolution.aucune
               : `${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}\u00a0px`,
-            'PNG',
+            nomChoix[format],
             ...(sombre ? [textes.studio.syntheseSombre] : []),
             voile
               ? voilePeint

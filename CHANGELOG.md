@@ -27,6 +27,11 @@ d'écran derrière mes icônes ?**
   glissement de la poignée, Échap, ou la sortie choisie. Le focus y est
   bouclé, le reste de l'écran est retiré pendant l'ouverture, et il revient à
   la puce en sortant.
+- **Le format choisi tient pour la session.** Un WebP choisi au studio reste
+  le format de Télécharger, et la puce l'écrit sous le bouton : le bouton
+  produit toujours exactement ce qu'elle dit. Un rechargement repart sur le
+  PNG, et Réessayer après un échec y revient aussi, comme le message le
+  promet. Rien n'est écrit sur l'appareil ni dans le lien partagé.
 - **Variante a gagné un dé.** La flèche circulaire disait « recommencer », et
   sa pointe flottait à côté du trait ; le dé, légèrement penché comme s'il
   venait d'être lancé, dit « tirer encore », proprement.

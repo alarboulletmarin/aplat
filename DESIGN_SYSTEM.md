@@ -700,7 +700,11 @@ teinte seule ne suffit jamais.
   d'un bouton, trait de 1,5 px et coins 16 / 5, et son chevron se retourne à
   l'ouverture. Elle dit ce qui est peint, jamais ce qui est demandé : quand la
   version sombre passe sous le seuil du voile, elle écrit « voile sans objet »,
-  pas « voile inclus ».
+  pas « voile inclus ». Le format qu'elle écrit est celui de la session :
+  choisi au studio, il tient jusqu'au prochain changement ou au rechargement,
+  et **Télécharger** produit exactement ce que la puce écrit ; c'est cette
+  phrase, sous le bouton, qui rend la mémoire sûre. Il ne s'écrit ni dans
+  l'adresse ni sur l'appareil : une visite fraîche repart sur le PNG.
 - **La feuille d'export** est la seule modale du produit, l'exception encadrée
   de la section 13. Un voile grise l'arrière-plan, la feuille part du bord bas,
   une poignée la renvoie ; Échap, le tap sur le voile et la sortie choisie la
