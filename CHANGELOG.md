@@ -27,9 +27,15 @@ d'écran derrière mes icônes ?**
 - **Les onglets se répartissent d'eux-mêmes.** Ils basculaient d'une pile à une
   rangée à une largeur choisie, ce qui marchait à cinq et coupait les mots à
   huit. C'est désormais une grille : on donne la largeur sous laquelle un
-  onglet ne se lit plus, et elle décide du nombre de colonnes. Une sur
-  téléphone, deux sur tablette, trois sur bureau, jamais un mot coupé. Un
-  neuvième groupe s'y rangera sans qu'on retouche la feuille de style.
+  onglet ne se lit plus, et elle décide du nombre de colonnes. Deux sur
+  tablette, trois sur bureau, jamais un mot coupé. Un neuvième groupe s'y
+  rangera sans qu'on retouche la feuille de style.
+- **Et sur téléphone, ils s'emballent.** À huit, des colonnes égales retombaient
+  à une seule sur un panneau de deux cents pixels : quatre cents pixels de
+  navigation avant la première vignette, pour des vignettes de quatre-vingts.
+  Chaque onglet y prend donc la largeur de son mot et la rangée s'étire jusqu'au
+  bord, ce qui ramène la barre à quatre rangées sur tous les téléphones et trois
+  à 320 px. On voit un motif sans avoir à faire défiler.
 - **Aucun motif n'a changé.** Les familles ont changé d'onglet, pas de dessin :
   un lien partagé rouvre exactement la même image, dans son nouveau groupe.
 

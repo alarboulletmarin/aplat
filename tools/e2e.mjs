@@ -245,17 +245,37 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
      d'ouvrir son onglet, ce qui est exactement ce que la grille plate ne
      demandait pas et ce pour quoi elle mettait mille pixels entre deux
      motifs. */
-  const onglets = await page.evaluate(() => ({
-    ouvert: document.querySelector('.onglet[aria-selected="true"]').dataset.groupe,
-    visibles: document.querySelectorAll('#liste-familles .opt').length,
-    comptes: [...document.querySelectorAll('.onglet-n')].map(n => parseInt(n.textContent, 10))
-  }));
+  const onglets = await page.evaluate(() => {
+    const tous = [...document.querySelectorAll('.onglet')];
+    const boites = tous.map(o => o.getBoundingClientRect());
+    return {
+      ouvert: document.querySelector('.onglet[aria-selected="true"]').dataset.groupe,
+      visibles: document.querySelectorAll('#liste-familles .opt').length,
+      comptes: [...document.querySelectorAll('.onglet-n')].map(n => parseInt(n.textContent, 10)),
+      hauteur: Math.round(Math.max(...boites.map(b => b.bottom)) - Math.min(...boites.map(b => b.top))),
+      coupes: tous.filter(o => {
+        const l = o.querySelector('span');
+        return l.scrollWidth > l.clientWidth;
+      }).map(o => o.dataset.groupe)
+    };
+  });
   t(onglets.ouvert === 'abs', 'onglets : celui de la famille en cours est ouvert', onglets.ouvert);
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
   t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
     'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+  /* Le panneau de ce téléphone fait 211 px de large : la barre s'y emballe sur
+     quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
+     et la première vignette de famille en fait 86 : on ferait défiler un mur de
+     navigation avant de voir un seul motif. Le plafond est donc la mesure de ce
+     mur, pas un nombre choisi. */
+  t(onglets.hauteur <= 4 * 44 + 3 * 5,
+    'onglets : la barre tient en quatre rangées sur un téléphone', onglets.hauteur + ' px');
+  /* Le libellé est en `text-overflow: ellipsis` : un groupe au nom plus long
+     que la place ne casserait rien, il s'abrégerait en silence. */
+  t(onglets.coupes.length === 0,
+    'onglets : aucun libellé abrégé', onglets.coupes.join(', ') || 'aucun');
 
   await page.$eval('#onglet-fig', e => e.click());
   await page.waitForTimeout(300);
@@ -277,6 +297,23 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   }));
   t(en.html === 'en' && en.cta === 'Download' && /Download|generative/.test(en.title) && en.stock === 'en' && !en.url.includes('l='),
     'langue : bascule complète, retenue sur l\'appareil et pas dans l\'adresse', JSON.stringify(en));
+  /* C'est l'anglais qui a le libellé le plus long, « Landscapes », et c'est lui
+     qui décide de la largeur d'un onglet emballé. Le contrôle du français ne
+     dit donc rien de la langue qui serre le plus. */
+  const ongletsEn = await page.evaluate(() => {
+    const tous = [...document.querySelectorAll('.onglet')];
+    const boites = tous.map(o => o.getBoundingClientRect());
+    return {
+      hauteur: Math.round(Math.max(...boites.map(b => b.bottom)) - Math.min(...boites.map(b => b.top))),
+      coupes: tous.filter(o => {
+        const l = o.querySelector('span');
+        return l.scrollWidth > l.clientWidth;
+      }).map(o => o.dataset.groupe)
+    };
+  });
+  t(ongletsEn.hauteur <= 4 * 44 + 3 * 5 && ongletsEn.coupes.length === 0,
+    'onglets : quatre rangées et aucun libellé abrégé en anglais aussi',
+    ongletsEn.hauteur + ' px, ' + (ongletsEn.coupes.join(', ') || 'aucun abrégé'));
 
   // --- 14. thème
   await tap('[data-theme="sombre"]');

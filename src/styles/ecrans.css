@@ -799,7 +799,11 @@
   overflow: hidden;
 }
 .carte {
-  padding: 18px;
+  /* Le rembourrage est nommé parce qu'un enfant a besoin de le rendre : la
+     barre d'onglets déborde la carte de cette valeur exacte pour retrouver la
+     largeur du panneau. Les deux ne peuvent donc pas diverger. */
+  --marge-carte: 18px;
+  padding: var(--marge-carte);
 }
 .carte + .carte,
 .bento,
@@ -968,6 +972,59 @@
   outline: 2px solid transparent;
   outline-offset: -4px;
 }
+
+/* --- La barre resserrée du téléphone -----------------------------------------
+   Huit onglets d'une seule colonne font 401 px, et une vignette de famille en
+   fait 80 à 105 : sur un téléphone, on faisait défiler un mur de navigation
+   avant d'atteindre ce qu'on était venu voir. Le panneau n'y fait pourtant que
+   172 à 248 px de large, et la règle générale, qui ne descend jamais sous la
+   longueur du plus long libellé, y refuse la deuxième colonne.
+
+   Trois choses se reprennent ici, et trois seulement.
+
+   La largeur : la barre déborde le rembourrage de la carte et retrouve celle du
+   panneau. C'est le seul élément à le faire, et c'est ce qui le justifie : les
+   onglets sont la navigation de la carte entière, pas un de ses contenus, et
+   ces vingt pixels décident d'une colonne.
+
+   Le corps du libellé, à 12,5 px. C'est la seule commande du portage dont le
+   texte descende sous 13 px, et c'est assumé : ce sont huit noms communs, en
+   gras, sur un aplat contrasté, pas de la prose.
+
+   Et surtout la répartition. Des colonnes égales prennent leur largeur sur le
+   plus long libellé des deux langues : « Landscapes » fait 73 px, l'onglet en
+   demande 100 avec son compte et ses marges, deux en demandent 205, et le
+   panneau d'un téléphone de 360 px n'en offre que 192. La grille repassait donc
+   à une colonne exactement là où le mur était le plus haut. Emballés, les
+   onglets se répartissent sur ce que chacun mesure : « Lieux » et « Figures »
+   tiennent ensemble aussi bien qu'« Instruments » seul, et `flex: 1 1 auto`
+   étire chaque rangée jusqu'au bord, ce qui rend l'inégalité des largeurs
+   invisible. La barre tombe à quatre rangées sur tous les téléphones, trois à
+   320 px, et le premier motif est sous les yeux sans un geste.
+
+   Ce qui n'est pas dessiné ici : la coupure entre les quatre géométries, la
+   matière qui fait charnière et les trois figurations. Elle se marquerait par
+   un écart, or la fin d'une rangée dépend maintenant de la longueur des mots et
+   de la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
+   L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
+   pas de le savoir. */
+@container panneau (max-width: 300px) {
+  .onglets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-inline: calc(-1 * var(--marge-carte));
+  }
+  .onglet {
+    padding: 0 6px;
+    font-size: 12.5px;
+    gap: 5px;
+  }
+  .onglet-n {
+    font-size: 11.5px;
+  }
+}
+
 
 .grille-familles {
   display: grid;
@@ -1224,6 +1281,9 @@
    Les cibles restent à 44 px : c'est le rembourrage qui cède, jamais la
    surface au doigt. */
 @media (min-width: 360px) and (max-width: 759px) {
+  .carte {
+    --marge-carte: 10px;
+  }
   .carte,
   .bento,
   .res-carte,

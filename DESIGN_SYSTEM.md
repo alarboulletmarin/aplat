@@ -360,7 +360,7 @@ qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-cinq onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+huit onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
@@ -372,16 +372,35 @@ ne marche plus à huit : la rangée partageait la largeur entre tous, et huit
 parts d'un panneau de trois cents pixels réduisent « Abstraits » à « A… », ce
 que le dessin refuse. La grille pose le problème dans l'autre sens : on donne
 la largeur minimale sous laquelle un onglet ne se lit plus, celle du plus long
-libellé des deux langues, et c'est elle qui décide du nombre de colonnes. Une
-colonne sur le panneau d'un téléphone, deux sur une tablette, trois sur un
-bureau ; jamais un mot coupé, à aucune largeur.
+libellé des deux langues, et c'est elle qui décide du nombre de colonnes. Deux
+sur une tablette, trois sur un bureau ; jamais un mot coupé, à aucune largeur.
 
-Le prix se paie sur téléphone, et il faut le dire : huit onglets en une colonne
-font quatre cents pixels avant la première vignette. C'est le coût honnête de
-huit groupes sur un panneau de deux cents pixels de large, et la seule façon de
-l'éviter serait de couper les mots, ce qu'on refuse. Le nombre de colonnes
-n'est pas écrit dans la feuille de style : un neuvième groupe s'y rangera sans
-qu'on y retouche.
+**Sur téléphone, la même règle donnait un mur**, et c'est le seul endroit du
+portage où elle est remplacée. Des colonnes égales prennent leur largeur sur le
+plus long libellé : « Landscapes » demande cent pixels avec son compte et ses
+marges, deux colonnes en demandent deux cent cinq, et le panneau d'un téléphone
+de 360 px n'en offre que cent quatre-vingt-douze. La grille y retombait donc à
+une colonne, soit huit rangées et quatre cents pixels de navigation avant la
+première vignette, pour des vignettes de quatre-vingts. Sur ce panneau, les
+onglets sont donc **emballés** plutôt qu'alignés : chacun prend la largeur de
+son mot, la rangée s'étire jusqu'au bord, et « Lieux » et « Figures » tiennent
+ensemble aussi bien qu'« Instruments » seul. La barre tombe à quatre rangées
+sur tous les téléphones, trois à 320 px. Deux mesures l'accompagnent, à ne pas
+défaire : la barre déborde le rembourrage de sa carte, seul élément à le faire,
+parce que ces vingt pixels décidaient d'une colonne ; et son libellé descend à
+12,5 px, seul texte de commande sous 13 px, ce qui s'assume sur huit noms
+communs en gras et se contrôle à chaque passage de `e2e`, dans les deux
+langues, sur la hauteur et sur l'absence de mot abrégé.
+
+Ce qui n'est **pas** dessiné : la coupure entre les quatre géométries, la
+matière qui fait charnière et les trois figurations. Elle se marquerait par un
+écart, or la fin d'une rangée dépend maintenant de la longueur des mots et de
+la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
+L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
+pas de le savoir.
+
+Le nombre de colonnes n'est écrit nulle part dans la feuille de style : un
+neuvième groupe s'y rangera sans qu'on y retouche.
 
 L'onglet s'ouvre sur **le groupe de la famille de l'adresse**, puis ne change
 plus que sous le doigt. Il a suivi la famille en cours un temps, et c'était un
