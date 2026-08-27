@@ -4,7 +4,6 @@ import { useRef, type ReactNode } from 'react'
 import { decimal, nombre, poids } from '../lib/format'
 import type { EchecExport, Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
-import type { Proto } from '../lib/proto'
 import type { Resolution } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
 import { FeuilleModale } from './FeuilleModale'
@@ -40,15 +39,14 @@ export interface Fichier {
  * leur pictogramme : le libellé reste dans leur nom accessible, la place revient
  * à « Télécharger », qui ne s'élide ni ne se coupe jamais.
  *
- * Les autres sorties sont derrière un dépli attaché au primaire, et non à côté
- * de lui. Un PNG doublé, un WebP, un SVG et le presse-papiers sont quatre
- * façons de finir la même tâche : elles n'ont pas à disputer sa place à celle
- * qui la finit dans neuf cas sur dix.
- *
- * Sous le tout, une ligne dit si le voile de lisibilité est dans le fichier, et
- * un interrupteur l'enlève. Elle est là parce que l'aperçu ne pouvait pas le
- * dire : le voile y est déjà peint, et personne ne compare une image à une
- * image qu'il n'a pas vue.
+ * Tout le reste de l'export tient dans le studio (`StudioExport`), une feuille
+ * basse ouverte par la puce de synthèse sous le primaire. La puce dit le
+ * fichier que « Télécharger » produira : taille, format, version, voile ; un
+ * tap dessus ouvre la feuille qui le règle. C'est le pattern des exports
+ * d'applis vidéo : le primaire fait la chose dans neuf cas sur dix, la
+ * configuration complète est à un geste, et aucun bouton ne ment sur le sien.
+ * La ligne du voile d'avant vivait ici pour la même raison que la puce :
+ * l'aperçu ne peut pas dire ce qu'il contient déjà, il faut l'écrire.
  */
 export function BarreAction({
   cadre,
@@ -64,19 +62,13 @@ export function BarreAction({
   langue,
   textes,
   formats,
-  svgPossible,
-  webpPossible,
   copiee,
   onSurprise,
   onGraine,
   onExporter,
-  onCopier,
-  onTrois,
   onFormats,
-  onVoile,
   onFermerNote,
   onPhotos,
-  proto = null,
   studio,
 }: {
   cadre: React.RefObject<HTMLDivElement | null>
@@ -94,39 +86,26 @@ export function BarreAction({
   sombre: boolean
   langue: Langue
   textes: Textes
-  /** Le dépli des autres formats est ouvert. */
+  /** Le studio d'export est ouvert. */
   formats: boolean
-  /** Le motif tient dans un SVG utile. */
-  svgPossible: boolean
-  webpPossible: boolean
   copiee: boolean
   onSurprise: () => void
   onGraine: () => void
   onExporter: (format: Format) => void
-  onCopier: () => void
-  onTrois: () => void
+  /** Ouvre et referme le studio d'export. */
   onFormats: () => void
-  onVoile: () => void
   onFermerNote: () => void
   /** Ouvre la feuille de partage native avec le fichier de la carte. */
   onPhotos: () => void
-  /** Le banc d'essai des sorties (`lib/proto.ts`) : null hors prototype. */
-  proto?: Proto
-  /** Le contenu du studio d'export, fourni par App sous `?proto=studio`. */
-  studio?: ReactNode
+  /** Le contenu du studio d'export, câblé par App sur le même état. */
+  studio: ReactNode
 }) {
   const T = textes.barre
   const calcul = phase === 'calcul'
 
-  /* Échap referme le dépli et rend le focus à son déclencheur : la feuille
-     n'est pas un piège à focus, mais sans ce chemin de sortie le clavier
-     devait retraverser les cinq sorties pour revenir à la rangée. */
+  /* La puce reprend le focus quand le studio se referme : c'est elle qui l'a
+     ouvert, et la feuille (FeuilleModale) fait le reste, Échap compris. */
   const boutonFormats = useRef<HTMLButtonElement>(null)
-  const surEchap = (evenement: React.KeyboardEvent<HTMLDivElement>) => {
-    if (evenement.key !== 'Escape' || !formats) return
-    onFormats()
-    boutonFormats.current?.focus()
-  }
 
   /* Le glissement qui retire la note de succès. Un seul doigt, vers le bas,
      le sens dans lequel une carte posée en bas de l'écran peut partir. Le
@@ -179,58 +158,8 @@ export function BarreAction({
     svg: 'SVG',
   }
 
-  const sorties: {
-    id: string
-    format: Format | null
-    titre: string
-    note: string
-    indisponible: string | null
-    action: () => void
-  }[] = [
-    {
-      id: 'format-png2x',
-      format: 'png2x',
-      titre: T.formatPng2x,
-      note: T.formatPng2xNote,
-      indisponible: null,
-      action: () => onExporter('png2x'),
-    },
-    {
-      id: 'format-webp',
-      format: 'webp',
-      titre: T.formatWebp,
-      note: T.formatWebpNote,
-      indisponible: webpPossible ? null : T.erreurFormat,
-      action: () => onExporter('webp'),
-    },
-    {
-      id: 'format-svg',
-      format: 'svg',
-      titre: T.formatSvg,
-      note: T.formatSvgNote,
-      indisponible: svgPossible ? null : T.formatSvgDense,
-      action: () => onExporter('svg'),
-    },
-    {
-      id: 'format-trois',
-      format: null,
-      titre: T.formatTrois,
-      note: T.formatTroisNote,
-      indisponible: null,
-      action: onTrois,
-    },
-    {
-      id: 'format-copie',
-      format: null,
-      titre: copiee ? T.copiee : T.formatCopie,
-      note: T.formatCopieNote,
-      indisponible: null,
-      action: onCopier,
-    },
-  ]
-
   return (
-    <div className="barre" ref={cadre} onKeyDown={surEchap}>
+    <div className="barre" ref={cadre}>
       <div className="barre-live" aria-live="polite">
         {/* La proposition de mise à jour monte dans la région live, déjà en
             place et vide au chargement : une région insérée déjà remplie
@@ -351,230 +280,77 @@ export function BarreAction({
             `aria-disabled` le neutralise sans le rendre infocusable, et
             l'export refuse de repartir de lui-même. `disabled` ne reste que
             pour l'état vide, où le bouton n'a rien à faire dans le parcours. */}
-        {proto === 'trio' ? (
-          /* La variante trio du banc d'essai : le primaire télécharge, comme
-             partout, et sans chevron accolé. C'est la ligne de synthèse, plus
-             bas, qui ouvre le studio : un bouton nommé « Exporter » qui
-             n'exportait pas mentait sur le geste. */
-          <button
-            type="button"
-            id="btn-export"
-            className="btn-export"
-            aria-keyshortcuts="t"
-            disabled={vide}
-            aria-disabled={calcul}
-            aria-busy={calcul}
-            onClick={() => onExporter('png')}
-          >
-            <span className="ico-descendre" aria-hidden="true">
-              <i />
-              <b />
-            </span>
-            <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
-          </button>
-        ) : (
-          <div className="btn-paire">
-            <button
-              type="button"
-              id="btn-export"
-              className="btn-export"
-              aria-keyshortcuts="t"
-              disabled={vide}
-              aria-disabled={calcul}
-              aria-busy={calcul}
-              onClick={() => onExporter('png')}
-            >
-              <span className="ico-descendre" aria-hidden="true">
-                <i />
-                <b />
-              </span>
-              <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
-            </button>
-            <button
-              type="button"
-              id="btn-formats"
-              ref={boutonFormats}
-              className="btn-formats"
-              aria-expanded={formats}
-              aria-controls={proto === null ? 'feuille-formats' : 'feuille-modale'}
-              aria-haspopup={proto === null ? undefined : 'dialog'}
-              aria-label={formats ? T.formatsFermer : T.formats}
-              title={T.formatsTitre}
-              onClick={onFormats}
-            >
-              <span className="ico-chevron" aria-hidden="true" />
-            </button>
-          </div>
-        )}
+        <button
+          type="button"
+          id="btn-export"
+          className="btn-export"
+          aria-keyshortcuts="t"
+          disabled={vide}
+          aria-disabled={calcul}
+          aria-busy={calcul}
+          onClick={() => onExporter('png')}
+        >
+          <span className="ico-descendre" aria-hidden="true">
+            <i />
+            <b />
+          </span>
+          <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
+        </button>
       </div>
 
-      {/* Le banc d'essai des sorties (`lib/proto.ts`) : sous `?proto=`, le
-          dépli cède sa place à une feuille basse modale portée hors de la
-          barre. Le choix d'une sortie referme la feuille avant d'agir : la
-          carte de résultat vit dans la barre, derrière le voile. */}
-      {proto === 'feuille' && (
-        <FeuilleModale
-          id="feuille-modale"
-          titreId="feuille-modale-titre"
-          titre={T.formats}
-          ouverte={formats}
-          onFermer={onFormats}
-          retourFocus={boutonFormats}
-        >
-          <ul className="feuille-liste">
-            {sorties.map((sortie) => (
-              <li key={sortie.id}>
-                <button
-                  type="button"
-                  id={sortie.id}
-                  className="feuille-b"
-                  disabled={vide}
-                  aria-disabled={sortie.indisponible ? true : undefined}
-                  onClick={
-                    sortie.indisponible
-                      ? undefined
-                      : () => {
-                          onFormats()
-                          sortie.action()
-                        }
-                  }
-                >
-                  <span className="feuille-t">{sortie.titre}</span>
-                  <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </FeuilleModale>
-      )}
-      {(proto === 'studio' || proto === 'trio') && (
-        <FeuilleModale
-          id="feuille-modale"
-          titreId="feuille-modale-titre"
-          titre={textes.studio.titre}
-          ouverte={formats}
-          grande
-          onFermer={onFormats}
-          retourFocus={boutonFormats}
-        >
-          {studio}
-        </FeuilleModale>
-      )}
+      {/* Le studio d'export, porté hors de la barre : une feuille basse
+          modale, la seule du produit, ouverte par la puce ci-dessous. Le
+          choix d'une sortie referme la feuille avant d'agir : la carte de
+          résultat vit dans la barre, derrière le voile. */}
+      <FeuilleModale
+        id="feuille-modale"
+        titreId="feuille-modale-titre"
+        titre={textes.studio.titre}
+        ouverte={formats}
+        grande
+        onFermer={onFormats}
+        retourFocus={boutonFormats}
+      >
+        {studio}
+      </FeuilleModale>
 
-      {/* Le dépli suit son déclencheur dans le document, pour que Tab y entre
-          juste après lui. Il se montre pourtant au-dessus de la rangée : la
-          barre est collée en bas de l'écran, et une liste qui pousserait vers
-          le bas sortirait de la fenêtre. C'est `order`, dans composants.css,
-          qui fait cet écart entre l'ordre lu et l'ordre vu. */}
-      {proto === null && formats && (
-        <div className="feuille" id="feuille-formats">
-          <ul className="feuille-liste">
-            {sorties.map((sortie) => (
-              <li key={sortie.id}>
-                {/* `aria-disabled` et non `disabled` : la ligne indisponible
-                    garde sa raison affichée, et un focus qui ne peut pas s'y
-                    poser ne peut pas la lire. Même raisonnement que le bouton
-                    primaire pendant le rendu. `disabled` ne reste que pour
-                    l'état vide, où toute la feuille est sans objet. */}
-                <button
-                  type="button"
-                  id={sortie.id}
-                  className="feuille-b"
-                  disabled={vide}
-                  aria-disabled={sortie.indisponible ? true : undefined}
-                  onClick={sortie.indisponible ? undefined : sortie.action}
-                >
-                  <span className="feuille-t">{sortie.titre}</span>
-                  <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* La puce de synthèse. Elle est la ligne du fichier : la seule chose
+          de l'écran qui dise ce que « Télécharger » produira au-delà du motif
+          choisi, taille, format, version et voile. Elle dit ce qui est peint,
+          et non ce qui est demandé : la version sombre descend sous le seuil
+          que le voile vise, la sonde n'a alors plus de voile à poser, et
+          écrire « voile inclus » là serait faux.
 
-      {/* La ligne du fichier. Elle n'est pas une note de bas de page : c'est la
-          seule chose de l'écran qui dise ce que le fichier contient de plus
-          que le motif choisi.
-
-          Elle dit ce qui est peint, et non ce qui est demandé. La nuance a un
-          cas courant : la version sombre descend sous le seuil que le voile
-          vise, si bien que la sonde n'a plus de voile à poser. Écrire là « le
-          voile est inclus dans le fichier » serait faux, et c'est exactement le
-          genre de phrase que ce produit ne doit pas écrire.
-
-          Les deux libellés du bouton sont posés l'un sur l'autre, et celui qui
-          ne sert pas garde sa place sans se montrer : sa largeur est donc celle
-          du plus long des deux, dans n'importe quelle langue, et le bouton ne
-          se déplace pas sous le doigt qui vient de l'appuyer. La phrase, elle,
-          prend toute la place qui reste, ce qui ancre le bouton au bord plutôt
-          qu'à la fin du texte, dont la longueur change aussi. */}
-      {/* La puce de synthèse de la variante trio : elle remplace la ligne du
-          voile et dit tout ce que la ligne disait, plus la taille et le
-          format. C'est le pattern des exports d'applis vidéo : le primaire
-          produit le fichier avec ces réglages, la puce les montre et les
-          ouvre. Un tap dessus, et le studio est là. */}
-      {proto === 'trio' && (
-        <button
-          type="button"
-          id="synthese-sortie"
-          ref={boutonFormats}
-          className="synthese-sortie"
-          aria-haspopup="dialog"
-          aria-expanded={formats}
-          aria-controls="feuille-modale"
-          title={textes.studio.titre}
-          onClick={onFormats}
-        >
-          <span className="synthese-texte">
-            {[
-              vide
-                ? textes.resolution.aucune
-                : `${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}\u00a0px`,
-              'PNG',
-              ...(sombre ? [textes.studio.syntheseSombre] : []),
-              voile
-                ? voilePeint
-                  ? textes.studio.syntheseVoile
-                  : textes.studio.syntheseVoileNul
-                : textes.studio.syntheseSansVoile,
-            ].join(', ')}
-          </span>
-          <span className="ico-chevron" aria-hidden="true" />
-        </button>
-      )}
-
-      {proto !== 'trio' && (
-      <p className="barre-voile" id="barre-voile">
-        <span>
-          {sombre ? `${T.versionSombre} ` : ''}
-          {voile ? (voilePeint ? T.voileInclus : T.voileNul) : T.voileAbsent}
+          Et elle est le chemin du studio : un tap l'ouvre, comme la ligne de
+          réglages des exports d'applis vidéo. Le primaire fait la chose, la
+          puce la décrit et la règle : aucun des deux ne ment sur son geste. */}
+      <button
+        type="button"
+        id="synthese-sortie"
+        ref={boutonFormats}
+        className="synthese-sortie"
+        aria-haspopup="dialog"
+        aria-expanded={formats}
+        aria-controls="feuille-modale"
+        title={textes.studio.titre}
+        onClick={onFormats}
+      >
+        <span className="synthese-texte">
+          {[
+            vide
+              ? textes.resolution.aucune
+              : `${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}\u00a0px`,
+            'PNG',
+            ...(sombre ? [textes.studio.syntheseSombre] : []),
+            voile
+              ? voilePeint
+                ? textes.studio.syntheseVoile
+                : textes.studio.syntheseVoileNul
+              : textes.studio.syntheseSansVoile,
+          ].join(', ')}
         </span>
-        {/* Pas d'aria-pressed ici : le libellé décrit l'action à venir
-            (« Retirer » ou « Remettre »), et un état pressé par-dessus disait
-            l'inverse du mot lu. L'épingle d'Historique garde le sien parce
-            qu'il suit son état, pressé quand c'est épinglé. L'attribut de
-            donnée ne porte que le costume : l'état, c'est la phrase à côté
-            qui le dit. */}
-        <button
-          type="button"
-          id="btn-voile"
-          className="btn-voile"
-          data-voile={voile ? 'oui' : 'non'}
-          title={T.voileTitre}
-          onClick={onVoile}
-        >
-          <span className="btn-double">
-            <span className="btn-double-l" data-actif={voile ? 'oui' : 'non'}>
-              {T.voileRetirer}
-            </span>
-            <span className="btn-double-l" data-actif={voile ? 'non' : 'oui'}>
-              {T.voileRemettre}
-            </span>
-          </span>
-        </button>
-      </p>
-      )}
+        <span className="ico-chevron" aria-hidden="true" />
+      </button>
     </div>
   )
 }

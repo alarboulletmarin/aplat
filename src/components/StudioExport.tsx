@@ -11,23 +11,23 @@ import type { Textes } from '../i18n'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
 
 /**
- * Le studio d'export du banc d'essai (`lib/proto.ts`, `?proto=studio`) : tout
- * ce qui décide du fichier, rassemblé dans la feuille basse, valeurs
- * courantes présélectionnées, un bouton qui confirme. La philosophie à
- * éprouver : le scénario complet (taille sur mesure, version, voile, format)
- * sans jamais quitter la zone du pouce, contre le panneau dispersé
- * d'aujourd'hui.
+ * Le studio d'export : tout ce qui décide du fichier, rassemblé dans la
+ * feuille basse que la puce de synthèse ouvre, valeurs courantes
+ * présélectionnées, un bouton qui confirme. Le scénario complet, taille sur
+ * mesure, version, voile et format, se règle sans jamais quitter la zone du
+ * pouce ni remonter le panneau.
  *
  * Le studio ne possède rien : l'état vit dans `App`, les mêmes réglages que
  * le panneau, si bien que les deux surfaces ne peuvent pas diverger. Seul le
  * format choisi est local, remis à PNG à chaque ouverture : c'est le défaut
- * dans neuf cas sur dix, et un studio qui rouvre sur le WebP d'hier
+ * dans neuf cas sur dix, et un studio qui rouvrirait sur le WebP d'hier
  * exporterait autre chose que ce que le bouton primaire promet.
  *
  * Les préréglages de taille recopient ceux de `ChoixResolution` : la fonction
- * y est volontairement non exportée (rafraîchissement à chaud), et le banc
- * d'essai n'a pas à réécrire un composant du produit pour exister. Si le
- * studio gagne, cette duplication disparaît avec le banc.
+ * y est volontairement non exportée, parce qu'un module de composant qui
+ * exporte autre chose perd le rafraîchissement à chaud. Les deux listes
+ * partent des mêmes constantes de `lib/resolution.ts`, la duplication ne
+ * porte que l'assemblage.
  */
 
 interface Prereglage {
@@ -128,13 +128,24 @@ export function StudioExport({
     }
   }
 
-  const formats: { id: Format; nom: string; indisponible: string | null }[] = [
-    { id: 'png', nom: 'PNG', indisponible: null },
-    { id: 'png2x', nom: B.formatPng2x, indisponible: null },
-    { id: 'webp', nom: B.formatWebp, indisponible: webpPossible ? null : B.erreurFormat },
-    { id: 'svg', nom: B.formatSvg, indisponible: svgPossible ? null : B.formatSvgDense },
+  const formats: { id: Format; nom: string; note: string; indisponible: string | null }[] = [
+    { id: 'png', nom: 'PNG', note: B.formatPngNote, indisponible: null },
+    { id: 'png2x', nom: B.formatPng2x, note: B.formatPng2xNote, indisponible: null },
+    {
+      id: 'webp',
+      nom: B.formatWebp,
+      note: B.formatWebpNote,
+      indisponible: webpPossible ? null : B.erreurFormat,
+    },
+    {
+      id: 'svg',
+      nom: B.formatSvg,
+      note: B.formatSvgNote,
+      indisponible: svgPossible ? null : B.formatSvgDense,
+    },
   ]
   const indisponibles = formats.filter((f) => f.indisponible)
+  const choisi = formats.find((f) => f.id === format) ?? formats[0]
 
   /* La synthèse dit ce qui sera peint, pas ce qui est demandé : mêmes nuances
      que la ligne du voile de la barre. */
@@ -156,6 +167,7 @@ export function StudioExport({
           {formats.map((f) => (
             <OptionRadio
               key={f.id}
+              id={`studio-format-${f.id}`}
               choisi={format === f.id}
               onChoisir={() => {
                 if (!f.indisponible) setFormat(f.id)
@@ -167,8 +179,11 @@ export function StudioExport({
             </OptionRadio>
           ))}
         </GroupeRadio>
-        {/* La raison d'un format éteint se lit avant l'appui, comme dans le
-            dépli : une ligne par indisponibilité, jamais un échec au clic. */}
+        {/* La note du format choisi : ce que la sortie donne de plus ou de
+            moins, dit au moment du choix. Et la raison d'un format éteint se
+            lit avant l'appui : une ligne par indisponibilité, jamais un
+            échec au clic. */}
+        <span className="studio-note" id="studio-format-note">{choisi.note}</span>
         {indisponibles.map((f) => (
           <span className="studio-indisponible" key={f.id}>
             {`${f.nom}\u00a0: ${f.indisponible}`}
@@ -290,12 +305,15 @@ export function StudioExport({
         <span>{T.exporter}</span>
       </button>
 
+      {/* Deux actions, pas des formats : elles portent le costume complet
+          d'un bouton, trait et coins, parce qu'une rangée nue se lisait
+          comme une ligne d'aide et non comme quelque chose à appuyer. */}
       <div className="studio-secondaires">
-        <button type="button" id="studio-trois" className="feuille-b" disabled={vide} onClick={onTrois}>
+        <button type="button" id="studio-trois" className="studio-action" disabled={vide} onClick={onTrois}>
           <span className="feuille-t">{B.formatTrois}</span>
           <span className="feuille-n">{B.formatTroisNote}</span>
         </button>
-        <button type="button" id="studio-copie" className="feuille-b" disabled={vide} onClick={onCopier}>
+        <button type="button" id="studio-copie" className="studio-action" disabled={vide} onClick={onCopier}>
           <span className="feuille-t">{copiee ? B.copiee : B.formatCopie}</span>
           <span className="feuille-n">{B.formatCopieNote}</span>
         </button>

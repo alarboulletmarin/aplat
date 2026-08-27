@@ -4,17 +4,17 @@ import { useEffect, useRef, type ReactNode, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
- * La feuille basse modale du banc d'essai (`lib/proto.ts`). Le produit n'a
- * aucune modale, et c'est une règle : ce composant existe pour éprouver cette
- * règle sur pièce, pas pour la contourner. Il n'est monté que sous
- * `?proto=feuille` ou `?proto=studio`, et disparaît avec la décision.
+ * La feuille basse du studio d'export : la seule modale du produit, et une
+ * exception au refus des modales, encadrée par DESIGN_SYSTEM.md, section 13.
+ * Elle a gagné sa place sur banc d'essai contre le dépli d'avant : le voile
+ * qui grise l'arrière-plan sépare le réglage du reste au moment précis où
+ * l'on décide du fichier, et c'est le seul moment du produit où l'écran
+ * entier sert une seule question.
  *
- * L'anatomie est celle que la proposition défend : un voile qui grise
- * l'arrière-plan pour séparer les plans, une poignée, un glissement vers le
- * bas qui renvoie la feuille. Le glissement suit le doigt, c'est de la
- * manipulation directe et non une animation ; la glissade d'entrée, elle, est
- * une transition CSS que `base.css` neutralise déjà sous
- * `prefers-reduced-motion`.
+ * L'anatomie : un voile, une poignée, un glissement vers le bas qui renvoie
+ * la feuille. Le glissement suit le doigt, c'est de la manipulation directe
+ * et non une animation ; la glissade d'entrée, elle, est une animation CSS
+ * que `base.css` neutralise déjà sous `prefers-reduced-motion`.
  *
  * Une modale se doit entière : `role="dialog"`, focus posé dessus à
  * l'ouverture, Tab qui boucle dedans, `inert` sur le reste du document,

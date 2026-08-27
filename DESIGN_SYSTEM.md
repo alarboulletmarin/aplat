@@ -23,10 +23,10 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Rang | Quoi | Où |
 |---|---|---|
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
-| Primaire | ce que le fichier contient de plus que le motif : le voile, et de quoi l'ôter | une ligne sous le bouton |
+| Primaire | ce que le fichier sera : taille, format, version, voile | la puce de synthèse, sous le bouton ; un tap l'ouvre en studio |
 | Secondaire | **Surprends-moi** et **Variante**, les deux tirages au sort | la même rangée, à gauche du primaire |
 | Secondaire | famille, palette, densité, version claire ou sombre, l'historique des motifs regardés, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
-| Caché | les autres formats : PNG 2x, WebP, SVG, presse-papiers, les trois appareils | un dépli attaché au primaire |
+| Caché | le studio d'export : format, taille, version, voile, les trois appareils, le presse-papiers | une feuille basse, ouverte par la puce de synthèse |
 | Caché | lien de partage | en bas du bloc, sous un filet |
 | Caché | langue, thème, version, licence, licences tierces, source, soutien, mentions légales | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
@@ -43,10 +43,13 @@ au primaire : sous 600 px les deux gardent leur pictogramme et rendent leur mot,
 qui reste dans leur nom accessible ; sous 360 px, c'est le pictogramme du
 primaire qui cède, et lui seul.
 
-Les autres sorties sont derrière un dépli attaché au primaire, et non à côté de
-lui. Un PNG doublé, un WebP, un SVG, le presse-papiers et les trois appareils
-sont cinq façons de finir la même tâche : elles n'ont pas à disputer sa place à
-celle qui la finit dans neuf cas sur dix.
+Tout le reste de l'export tient dans le studio, une feuille basse ouverte par
+la puce de synthèse. Un PNG doublé, un WebP, un SVG, le presse-papiers et les
+trois appareils sont des façons de finir la même tâche : elles n'ont pas à
+disputer sa place à celle qui la finit dans neuf cas sur dix. Et le partage des
+rôles est celui des mots : **Télécharger** télécharge, la puce décrit et ouvre.
+Un primaire qui ouvrirait un panneau au lieu de faire ce qu'il dit mentirait
+sur son geste, et c'est ce mensonge que la puce évite.
 
 ---
 
@@ -162,7 +165,8 @@ suivent la taille de l'objet.
 | Objet | Rayon |
 |---|---|
 | bloc de réglages | 42 px en haut, 12 px en bas |
-| bouton d'action, dépli des formats | 24 / 7 px |
+| bouton d'action | 24 / 7 px |
+| feuille d'export | 24 px en haut, 0 en bas : elle part du bord |
 | note | 22 / 7 px |
 | puce de famille et de palette, select, bouton de partage | 19 / 6 px |
 | champ, puce de densité | 17 / 5 px |
@@ -171,7 +175,9 @@ suivent la taille de l'objet.
 | vignette d'historique | 14 / 4 px, canevas 10 / 3 px |
 | échantillon de palette | 7 px, les quatre coins : c'est un aplat, pas un objet |
 | onglet de groupe, interrupteur du voile | 16 / 5 px |
-| éditeur de palette, feuille des formats | 20 / 6 px |
+| éditeur de palette | 20 / 6 px |
+| puce de synthèse | 16 / 5 px |
+| action du studio | 14 / 4 px |
 | palette reçue d'un lien | 18 / 6 px |
 | appareil de la maquette | 13 % du petit côté (téléphone), 5,5 % (tablette), 2,4 % (ordinateur) |
 | marque | 23 % de son côté |
@@ -689,14 +695,22 @@ teinte seule ne suffit jamais.
   n'est pas retiré du document mais rendu invisible : il reste le nom accessible
   du bouton, ce qu'un `aria-label` posé par-dessus un libellé visible aurait
   cassé aux largeurs supérieures.
-- **Le dépli** du primaire : même hauteur, même rayon, mais pas d'aplat. Il
-  n'appelle à rien, il ouvre. Enfoncé, il prend l'aplat inversé et son chevron
-  se retourne.
-- **La feuille des formats** s'ouvre **au-dessus** de la rangée : la barre est
-  collée en bas de l'écran, et une liste qui pousserait vers le bas sortirait de
-  la fenêtre. Chaque sortie y porte son nom et une ligne qui dit à quoi elle
-  sert ; une sortie indisponible garde sa ligne et y met la raison, plutôt que
-  de disparaître sans explication.
+- **La puce de synthèse**, sous le primaire : la ligne du fichier, taille,
+  format, version, voile, et la porte du studio. Elle porte le costume complet
+  d'un bouton, trait de 1,5 px et coins 16 / 5, et son chevron se retourne à
+  l'ouverture. Elle dit ce qui est peint, jamais ce qui est demandé : quand la
+  version sombre passe sous le seuil du voile, elle écrit « voile sans objet »,
+  pas « voile inclus ».
+- **La feuille d'export** est la seule modale du produit, l'exception encadrée
+  de la section 13. Un voile grise l'arrière-plan, la feuille part du bord bas,
+  une poignée la renvoie ; Échap, le tap sur le voile et la sortie choisie la
+  ferment aussi. Le focus y est bouclé, le reste du document est retiré
+  (`inert`), et le focus revient à la puce en sortant : autant de chemins de
+  sortie que d'entrées. Dedans, le studio : les formats en puces avec la note
+  du format choisi, la taille et ses préréglages, la version, le voile, la
+  synthèse, **Exporter**, puis deux actions, les trois appareils et le
+  presse-papiers, au costume complet de bouton. Un format indisponible garde
+  sa puce et sa raison s'écrit dessous, avant qu'on appuie.
 
 ### Les notes
 
@@ -872,8 +886,14 @@ ne se coupe jamais.
 - Un format offert qui échoue au clic. Une sortie que le navigateur ou le motif
   ne permet pas garde sa ligne dans la feuille et y met la raison, avant qu'on
   appuie.
-- Onboarding en modales, tour guidé, pop-up de bienvenue.
-- Plus d'un appel primaire par écran.
+- Onboarding en modales, tour guidé, pop-up de bienvenue. La feuille d'export
+  est la seule modale tolérée, et elle est encadrée : jugée sur banc d'essai
+  contre le dépli qu'elle remplace, ouverte seulement par le geste qui la
+  demande, et complète (voile, poignée, Échap, focus bouclé, `inert`, retour
+  au déclencheur). Une deuxième modale ne s'ajouterait qu'au même prix.
+- Plus d'un appel primaire par écran. Le bouton **Exporter** du studio n'en
+  est pas un second : la feuille remplace l'écran le temps d'une question, et
+  il est le primaire de cette question-là.
 - Emoji.
 - Bibliothèque de composants ou de style.
 - Une deuxième section dans l'application. La présentation et le mécanisme sont

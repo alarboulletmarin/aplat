@@ -1154,47 +1154,9 @@
   display: contents;
 }
 
-/* --- Les autres formats -------------------------------------------------------
-   Un dépli attaché au primaire, posé au-dessus de la rangée : la barre est
-   collée en bas de l'écran, et une liste qui pousserait vers le bas sortirait
-   de la fenêtre. */
-.feuille {
-  border: 2px solid var(--encre);
-  border-radius: 20px 20px 6px 6px;
-  background: var(--surface);
-  padding: 7px;
-  max-height: 46vh;
-  overflow-y: auto;
-}
-.feuille-liste {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  list-style: none;
-}
-.feuille-b {
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 11px;
-  cursor: pointer;
-  border: 0;
-  border-radius: 14px 14px 4px 4px;
-  background: transparent;
-  color: var(--encre);
-  font-family: var(--texte);
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.feuille-b:hover {
-  background: var(--surface-2);
-}
-.feuille-b[disabled],
-.feuille-b[aria-disabled='true'] {
-  opacity: 0.55;
-  cursor: default;
-}
+/* --- Les rangées de la feuille d'export ----------------------------------------
+   Le titre et la note d'une action du studio : la ligne du haut dit la
+   sortie, celle du bas ce qu'elle donne de plus ou de moins. */
 .feuille-t {
   font-weight: 700;
   font-size: 14.5px;
@@ -1203,26 +1165,6 @@
   font-size: 12.5px;
   color: var(--encre-douce);
   overflow-wrap: anywhere;
-}
-
-/* --- La ligne du voile ---------------------------------------------------------
-   Sous le bouton, et pas ailleurs : c'est la seule chose de l'écran qui dise ce
-   que le fichier contient de plus que le motif choisi. Quelqu'un qui télécharge
-   sans avoir lu la page d'accueil recevait une image plus sombre que celle
-   qu'il croyait avoir choisie, et rien ne le lui disait. */
-.barre-voile {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12.5px;
-  color: var(--encre-douce);
-}
-/* La phrase prend toute la place qui reste : c'est ce qui ancre l'interrupteur
-   au bord de la barre plutôt qu'à la fin du texte, dont la longueur change
-   quand on l'appuie. */
-.barre-voile > span {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 /* --- Pied de page ---------------------------------------------------------------- */
@@ -1393,11 +1335,6 @@
   .btn-export {
     min-height: 44px;
     border-radius: 18px 18px 5px 5px;
-  }
-  /* Sans lui, la réduction ne rendait rien : la rangée est à hauteurs
-     partagées, et le dépli des formats, resté à 56 px, la tenait ouverte. */
-  .btn-formats {
-    min-height: 44px;
   }
   .btn-graine {
     min-width: 44px;

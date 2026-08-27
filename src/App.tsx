@@ -13,7 +13,6 @@ import {
   depuisSaisie, detecter, MPX_MAX, TROIS_APPAREILS, typeAppareil,
 } from './lib/resolution'
 import { ecrireUrl, lireUrl, type Reglages, type Theme } from './lib/url'
-import { lireProto } from './lib/proto'
 import { tirer, tirerGraine } from './lib/tirage'
 import { lireAffichage, retenirLangue, retenirTheme } from './lib/affichage'
 import { lienAccueil } from './lib/route'
@@ -40,9 +39,6 @@ import { BarreAction, type Echec, type Fichier, type Phase } from './components/
 import { StudioExport } from './components/StudioExport'
 import { MiseAJour } from './components/MiseAJour'
 import { Pied } from './components/Pied'
-/* La feuille du banc d'essai des sorties : importée ici et non dans main.tsx,
-   pour qu'elle parte dans le morceau de l'application et nulle part ailleurs. */
-import './styles/prototypes.css'
 
 interface Ephemere {
   phase: Phase
@@ -87,11 +83,6 @@ const NOTE_VISIBLE_MS = 12000
  */
 export function App() {
   const [detecte] = useState(detecter)
-
-  /* Le banc d'essai des sorties (`lib/proto.ts`) : lu une fois au montage,
-     comme le chemin. Null hors prototype, et l'application est alors,
-     chemin par chemin, celle d'avant. */
-  const [proto] = useState(() => lireProto(window.location.search))
 
   /* --- les palettes composées, avant tout le reste ---------------------------
      Le registre du moteur doit être posé avant qu'une palette ne soit lue :
@@ -284,19 +275,14 @@ export function App() {
      choix qu'on vient de faire. */
   const retour = lienAccueil()
 
-  /* Le paramètre du banc d'essai survit aux réécritures d'adresse : sans ça,
-     le premier réglage l'effaçait. Il n'entre jamais dans `lien` : un
-     prototype ne se partage pas. */
-  const requeteComplete = proto ? `${requete}&proto=${proto}` : requete
-
   useEffect(() => {
-    if (window.location.search.slice(1) === requeteComplete) return
+    if (window.location.search.slice(1) === requete) return
     try {
-      window.history.replaceState(null, '', `${window.location.pathname}?${requeteComplete}`)
+      window.history.replaceState(null, '', `${window.location.pathname}?${requete}`)
     } catch {
       /* certaines ouvertures locales refusent replaceState : sans conséquence */
     }
-  }, [requeteComplete])
+  }, [requete])
 
   useEffect(() => () => clearTimeout(minuterieCopie.current), [])
 
@@ -590,7 +576,7 @@ export function App() {
 
   const webpPossible = useMemo(() => webpDisponible(), [])
 
-  /* --- le banc d'essai des sorties (`lib/proto.ts`) --------------------------
+  /* --- le studio d'export ----------------------------------------------------
      Le studio ne possède aucun état : il écrit les mêmes réglages que le
      panneau, si bien que les deux surfaces ne peuvent pas diverger. Une
      sortie choisie referme la feuille avant d'agir : la carte de résultat
@@ -599,8 +585,7 @@ export function App() {
     setEphemere((precedent) =>
       precedent.formats ? { ...precedent, formats: false } : precedent,
     )
-  const studio =
-    proto === 'studio' || proto === 'trio' ? (
+  const studio = (
       <StudioExport
         largeurSaisie={reglages.largeurSaisie}
         hauteurSaisie={reglages.hauteurSaisie}
@@ -634,7 +619,7 @@ export function App() {
         onVoile={() => changer({ voile: !reglages.voile })}
         onSombre={(sombre) => changer({ sombre })}
       />
-    ) : undefined
+  )
 
   return (
     <>
@@ -792,21 +777,15 @@ export function App() {
           langue={reglages.langue}
           textes={T}
           formats={ephemere.formats}
-          svgPossible={svgPossible}
-          webpPossible={webpPossible}
           copiee={ephemere.copieImage}
           onSurprise={surprendre}
           onGraine={nouvelleGraine}
           onExporter={exporter}
-          onCopier={copierLImage}
-          onTrois={exporterTrois}
           onFormats={() =>
             setEphemere((precedent) => ({ ...precedent, formats: !precedent.formats }))
           }
-          onVoile={() => changer({ voile: !reglages.voile })}
           onFermerNote={fermerNote}
           onPhotos={enregistrerPhotos}
-          proto={proto}
           studio={studio}
         >
           <MiseAJour textes={T} />

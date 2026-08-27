@@ -512,20 +512,15 @@ export const fr = {
        le fichier » là serait faux, et c'est exactement le genre de phrase que
        ce produit ne doit pas écrire. */
     voileNul: 'Le fichier n’a pas besoin de voile de lisibilité.',
-    /* La version, nommée sous le bouton qui la télécharge : c'est là qu'on
-       décide, et le nom du fichier le dira ensuite. */
-    versionSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
     voileRetirer: 'Retirer',
     voileRemettre: 'Remettre',
     voileTitre: 'Le voile assombrit le bas de l’image pour que les libellés d’icônes tiennent le seuil',
-    /* Les autres sorties. Elles ne servent pas la même chose, et le libellé le
-       dit : la ligne du haut est le fond d'écran, les autres sont des usages. */
-    /* « Sorties » et non « formats » : la liste contient la copie et les trois
-       appareils, qui n'en sont pas. Le menu porte le mot des notes de
-       conception, « ce qu'on peut emporter ». */
-    formats: 'Autres sorties',
-    formatsTitre: 'PNG doublé, WebP, SVG, presse-papiers, les trois appareils',
-    formatsFermer: 'Fermer les sorties',
+    /* Les sorties du studio. Elles ne servent pas la même chose, et le
+       libellé le dit : la ligne du haut est le fond d'écran, les autres sont
+       des usages. */
+    /* La note du PNG n'existait pas du temps du dépli : il n'y avait pas de
+       ligne PNG, le bouton primaire la remplaçait. Le studio en a une. */
+    formatPngNote: 'Le fond d’écran, tel que l’aperçu le montre.',
     formatPng2x: 'PNG 2x',
     formatPng2xNote: 'Deux fois plus de pixels, pour un écran plus grand que celui-ci.',
     formatWebp: 'WebP',
@@ -541,10 +536,9 @@ export const fr = {
     enregistresTrois: 'Trois images enregistrées',
     metaTrois: 'Téléphone, tablette et ordinateur. PNG, {poids} en tout.',
   },
-  /* Le studio d'export du banc d'essai (`lib/proto.ts`, `?proto=studio`).
-     Cette section part avec le banc, quelle que soit la décision. La synthèse
-     est une énumération courte, pas une phrase : elle se lit d'un regard
-     au-dessus du bouton qui produit le fichier. */
+  /* Le studio d'export : la feuille basse que la puce de synthèse ouvre. La
+     synthèse est une énumération courte, pas une phrase : elle se lit d'un
+     regard, dans la puce comme au-dessus du bouton qui produit le fichier. */
   studio: {
     titre: 'Exporter',
     format: 'Le format',
