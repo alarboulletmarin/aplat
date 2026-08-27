@@ -367,20 +367,29 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-seize familles, cinq groupes.**
+**Soixante-seize familles, huit groupes.**
 
-- **Abstraits** (quarante et un) : les douze libres, qui sèment des formes sur un
-  aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
-  répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
-  pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
-  se reconnaît à une règle qu'on voit se tordre ; cinq venues des gestes de la
-  seconde série : Kintsugi et Banquise brisent la surface en pièces (Voronoï
-  par découpe de demi-plans, les jointures affleurent), Claustra et Papel
-  picado percent un aplat en réserve, Penrose pave sans période, par
-  déflation ; cinq venues du carreau et de la coulée ; quatre venues du
-  relief, où la teinte d'une face dit son orientation ; et quatre venues de la
-  mesure, qui dessine des instruments gradués. Les quatre gestes sont décrits
-  plus bas.
+Un groupe n'existe que si son critère tient en une phrase. « Abstraits » n'en
+avait pas : il était le bac de ce qui n'était rangé nulle part, et il a fini par
+porter quarante et une familles sur soixante-seize, c'est-à-dire le défaut
+d'avant les onglets, revenu à l'intérieur d'un onglet. Il a donc été coupé en
+quatre, avec quatre phrases.
+
+- **Abstraits** (dix-sept) : des formes libres sur un aplat, rien n'y revient à
+  intervalle régulier. Les douze qui sèment des formes, les quatre déformées où
+  un champ lisse plie une forme répétée, et Kintsugi et Banquise, qui brisent la
+  surface en pièces par découpe de demi-plans, les jointures affleurant.
+- **Pavages** (seize) : une maille revient, et l'oeil la suit du doigt. Les
+  réglées d'origine, Claustra et Papel picado qui percent un aplat en réserve,
+  Penrose qui pave sans période par déflation, et les quatre du carreau, dont
+  chaque case reçoit un signe pris dans un jeu fini.
+- **Volumes** (quatre) : c'est plat, et on y voit pourtant un volume. Les
+  quatre du relief, où la teinte d'une face dit son orientation, sans un seul
+  dégradé.
+- **Instruments** (quatre) : le motif est gradué, il mesure. Les quatre de la
+  mesure, tapis de coupe, papier millimétré, rapporteur, mire de réglage.
+- La coulée reste chez les abstraits : ses rubans serpentent, et rien n'y
+  revient.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
   reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
   Madrépore se cultivent, une réaction-diffusion de Gray-Scott gelée à un

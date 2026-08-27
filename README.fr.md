@@ -42,9 +42,10 @@ est installable et pleinement utilisable hors ligne.
 - **La résolution exacte.** La taille de l'écran est détectée ; n'importe
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
-- **76 familles de motifs** en cinq groupes (abstraits, matières, paysages,
-  lieux, figures), **11 palettes composées à la main**, trois densités, et des
-  palettes personnelles de trois à six couleurs.
+- **76 familles de motifs** en huit groupes (abstraits, pavages, volumes,
+  instruments, matières, paysages, lieux, figures), **11 palettes composées à
+  la main**, trois densités, et des palettes personnelles de trois à six
+  couleurs.
 - **Un moteur déterministe.** `(famille, palette, densité, graine)` donne
   toujours la même image, à n'importe quelle résolution. Partager un lien,
   c'est partager l'image.

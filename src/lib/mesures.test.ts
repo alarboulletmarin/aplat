@@ -40,11 +40,11 @@ function nombres(d: string): number[] {
 }
 
 describe('liste des mesures', () => {
-  it('range chacune dans le catalogue, chez les abstraits', () => {
+  it('range chacune dans le catalogue, chez les instruments', () => {
     for (const id of IDS_MESURES) {
       const entree = FAMILLES.find((f) => f.id === id)
       expect(entree, id).toBeDefined()
-      expect(entree?.groupe, id).toBe('abs')
+      expect(entree?.groupe, id).toBe('ins')
     }
   })
 

@@ -311,11 +311,34 @@ l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les cinq groupes de familles, en cinq onglets
+### Les huit groupes de familles, en huit onglets
 
-La liste des familles est longue, et une liste longue se range. Cinq
-groupes : les **abstraits**, les **matières**, les **paysages**, les
-**lieux**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Huit groupes :
+les **abstraits**, les **pavages**, les **volumes**, les **instruments**, les
+**matières**, les **paysages**, les **lieux**, les **figures**.
+
+**Un groupe n'existe que si son critère tient en une phrase.** C'est la règle,
+et elle sert à quelque chose : « abstraits » n'en avait pas, il était le bac de
+ce qui n'était rangé nulle part, et il a fini par porter quarante et une
+familles sur soixante-seize. Les onglets avaient été inventés contre exactement
+ça ; le défaut était revenu à l'intérieur d'un onglet.
+
+| Groupe | La phrase |
+|---|---|
+| Abstraits | des formes libres sur un aplat, rien n'y revient à intervalle régulier |
+| Pavages | une maille revient, et l'oeil la suit du doigt |
+| Volumes | c'est plat, et on y voit pourtant un volume |
+| Instruments | le motif est gradué, il mesure |
+| Matières | la main les reconnaît avant l'oeil |
+| Paysages | ils ont un haut et un bas |
+| Lieux | des gravures tramées, deux tons seulement |
+| Figures | des objets posés sur un fond, reconnaissables un par un |
+
+**Un plafond tient la règle.** Un test (`src/lib/moteur.test.ts`) refuse qu'un
+groupe passe vingt familles. Personne ne voit un fourre-tout se former, parce
+qu'une famille de plus ne se voit jamais ; le test le voit à la place. Le jour
+où il échoue, la réponse n'est pas de relever le plafond : c'est qu'un groupe
+demande à être coupé, et qu'il faut lui trouver la phrase qui le coupe.
 
 Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
 silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
@@ -343,13 +366,22 @@ contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
 remplace la vue d'ensemble perdue.
 
-Ils sont **empilés quand la colonne est étroite**, sur une rangée dès qu'elle
-peut porter trois mots. La bascule se règle sur la largeur du panneau et non sur
-celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont rien
-à voir : sur un téléphone de 390 px, le panneau tient dans une colonne de
-207 px, où cinq onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
-est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
-ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
+Ils sont posés en **grille qui se répartit d'elle-même**, et non en pile qui
+bascule en rangée à une largeur choisie. La bascule marchait à cinq onglets et
+ne marche plus à huit : la rangée partageait la largeur entre tous, et huit
+parts d'un panneau de trois cents pixels réduisent « Abstraits » à « A… », ce
+que le dessin refuse. La grille pose le problème dans l'autre sens : on donne
+la largeur minimale sous laquelle un onglet ne se lit plus, celle du plus long
+libellé des deux langues, et c'est elle qui décide du nombre de colonnes. Une
+colonne sur le panneau d'un téléphone, deux sur une tablette, trois sur un
+bureau ; jamais un mot coupé, à aucune largeur.
+
+Le prix se paie sur téléphone, et il faut le dire : huit onglets en une colonne
+font quatre cents pixels avant la première vignette. C'est le coût honnête de
+huit groupes sur un panneau de deux cents pixels de large, et la seule façon de
+l'éviter serait de couper les mots, ce qu'on refuse. Le nombre de colonnes
+n'est pas écrit dans la feuille de style : un neuvième groupe s'y rangera sans
+qu'on y retouche.
 
 L'onglet s'ouvre sur **le groupe de la famille de l'adresse**, puis ne change
 plus que sous le doigt. Il a suivi la famille en cours un temps, et c'était un
@@ -362,10 +394,14 @@ l'adresse. Les flèches parcourent les onglets sans les ouvrir, sans quoi le
 clavier traverserait un rendu complet de grille par onglet pour atteindre le
 dernier.
 
-Les cinq groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
-test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
-grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
-sauterait de place à l'écran sans que rien ne le signale.
+Les huit groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
+les quatre géométriques, puis les matières qui sont entre les deux mondes, puis
+les trois figuratifs. Un test le tient fermé (`src/lib/moteur.test.ts`) : le
+panneau construit ses grilles en filtrant sur le groupe, et une famille rangée
+hors de son bloc sauterait de place à l'écran sans que rien ne le signale.
+C'est aussi le filet qui rattrape la faute de frappe la plus probable de la
+liste, `pav` écrit `pay` : les deux existent, le compilateur laisse passer, et
+la famille se retrouverait dans les paysages.
 
 ### Les palettes qu'on écrit soi-même
 

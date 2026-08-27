@@ -133,18 +133,24 @@ export interface Palette {
 }
 
 /**
- * `abs` abstraits, `pay` paysages, `lieu` lieux, `fig` figures : les quatre
- * groupes de la liste. Les paysages se sont détachés des abstraits quand ils
- * ont été trois : une silhouette de montagne, un couchant et des nuages ne se
- * cherchent pas au milieu des trames et des damiers. Les lieux se sont
- * détachés des paysages pour la même raison : une gravure à deux tons ne se
- * cherche pas au milieu des aplats.
+ * Les huit groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
+ *
+ * Un groupe n'existe que si son critère tient en une phrase. C'est la règle du
+ * système de design, et elle sert à quelque chose : « abstraits » n'en avait
+ * pas, et il est devenu le bac de tout ce qui n'était rangé nulle part, jusqu'à
+ * porter quarante et une familles sur soixante-seize. Les onglets avaient été
+ * inventés contre exactement ça.
+ *
+ * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `vol` du
+ * volume en aplats, `ins` des instruments gradués, `mat` ce que la main
+ * reconnaît, `pay` ce qui a un haut et un bas, `lieu` des gravures tramées,
+ * `fig` des objets reconnaissables un par un.
  *
  * Ils sont devenus des onglets dans le panneau, et le type est donc nommé :
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'mat' | 'pay' | 'lieu' | 'fig'
+export type Groupe = 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -202,60 +208,66 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-seize familles, dans l'ordre de la liste : abstraits,
- * matières, paysages, lieux, figures. L'ordre est celui de la maquette, et il
- * compte : on descend du plus géométrique au plus figuratif, et le premier de
- * chaque groupe en donne le ton. Les matières sont entre les deux mondes :
- * bois, peau, tissu, interférence, ce que la main reconnaît avant l'oeil.
+ * Les soixante-seize familles, dans l'ordre de la liste : les quatre groupes
+ * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
+ * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
+ * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
+ * plus figuratif, et le premier de chaque groupe en donne le ton.
  */
 export const FAMILLES: readonly Famille[] = [
+  /* abstraits : des formes libres sur un aplat, rien n'y revient à intervalle régulier */
   { id: 'vagues', groupe: 'abs', fr: 'Vagues', en: 'Waves' },
   { id: 'blobs', groupe: 'abs', fr: 'Blobs', en: 'Blobs' },
-  { id: 'arches', groupe: 'abs', fr: 'Arches', en: 'Arches' },
   { id: 'decoupes', groupe: 'abs', fr: 'Découpes', en: 'Cut-outs' },
   { id: 'obliques', groupe: 'abs', fr: 'Obliques', en: 'Diagonals' },
   { id: 'ondes', groupe: 'abs', fr: 'Ondes', en: 'Ripples' },
-  { id: 'pointille', groupe: 'abs', fr: 'Fondu pointillé', en: 'Dotted fade' },
-  { id: 'trame', groupe: 'abs', fr: 'Trame', en: 'Dither' },
   { id: 'colonnes', groupe: 'abs', fr: 'Colonnes', en: 'Columns' },
-  { id: 'ecailles', groupe: 'abs', fr: 'Écailles', en: 'Scales' },
   { id: 'terrazzo', groupe: 'abs', fr: 'Terrazzo', en: 'Terrazzo' },
   { id: 'confettis', groupe: 'abs', fr: 'Confettis', en: 'Confetti' },
-  { id: 'arcade', groupe: 'abs', fr: 'Arcade', en: 'Arcade' },
-  { id: 'truchet', groupe: 'abs', fr: 'Truchet', en: 'Truchet' },
-  { id: 'azulejos', groupe: 'abs', fr: 'Azulejos', en: 'Azulejos' },
   { id: 'vitrail', groupe: 'abs', fr: 'Vitrail', en: 'Stained glass' },
   { id: 'persiennes', groupe: 'abs', fr: 'Persiennes', en: 'Shutters' },
-  { id: 'mosaique', groupe: 'abs', fr: 'Mosaïque', en: 'Mosaic' },
-  { id: 'tresse', groupe: 'abs', fr: 'Tresse', en: 'Weave' },
   { id: 'mirage', groupe: 'abs', fr: 'Mirage', en: 'Mirage' },
   { id: 'terrasses', groupe: 'abs', fr: 'Terrasses', en: 'Terraces' },
   { id: 'bassin', groupe: 'abs', fr: 'Bassin', en: 'Pool' },
   { id: 'strates', groupe: 'abs', fr: 'Strates', en: 'Strata' },
   { id: 'kintsugi', groupe: 'abs', fr: 'Kintsugi', en: 'Kintsugi' },
   { id: 'banquise', groupe: 'abs', fr: 'Banquise', en: 'Ice floes' },
-  { id: 'claustra', groupe: 'abs', fr: 'Claustra', en: 'Breeze block' },
-  { id: 'papel', groupe: 'abs', fr: 'Papel picado', en: 'Papel picado' },
-  { id: 'penrose', groupe: 'abs', fr: 'Penrose', en: 'Penrose' },
-  { id: 'bauhaus', groupe: 'abs', fr: 'Bauhaus', en: 'Bauhaus' },
-  { id: 'carreaux', groupe: 'abs', fr: 'Carreaux', en: 'Tiles' },
-  { id: 'demilunes', groupe: 'abs', fr: 'Demi-lunes', en: 'Half-moons' },
-  { id: 'jetons', groupe: 'abs', fr: 'Jetons', en: 'Tokens' },
   { id: 'meandres', groupe: 'abs', fr: 'Méandres', en: 'Meanders' },
-  { id: 'cubes', groupe: 'abs', fr: 'Cubes', en: 'Blocks' },
-  { id: 'plis', groupe: 'abs', fr: 'Plis', en: 'Folds' },
-  { id: 'bossage', groupe: 'abs', fr: 'Bossage', en: 'Bosses' },
-  { id: 'tuyaux', groupe: 'abs', fr: 'Tuyaux', en: 'Pipes' },
-  { id: 'tapis', groupe: 'abs', fr: 'Tapis de coupe', en: 'Cutting mat' },
-  { id: 'millimetre', groupe: 'abs', fr: 'Millimétré', en: 'Graph paper' },
-  { id: 'rapporteur', groupe: 'abs', fr: 'Rapporteur', en: 'Protractor' },
-  { id: 'mire', groupe: 'abs', fr: 'Mire', en: 'Test chart' },
+  /* pavages : une maille revient, et l'oeil la suit du doigt */
+  { id: 'arches', groupe: 'pav', fr: 'Arches', en: 'Arches' },
+  { id: 'pointille', groupe: 'pav', fr: 'Fondu pointillé', en: 'Dotted fade' },
+  { id: 'trame', groupe: 'pav', fr: 'Trame', en: 'Dither' },
+  { id: 'ecailles', groupe: 'pav', fr: 'Écailles', en: 'Scales' },
+  { id: 'arcade', groupe: 'pav', fr: 'Arcade', en: 'Arcade' },
+  { id: 'truchet', groupe: 'pav', fr: 'Truchet', en: 'Truchet' },
+  { id: 'azulejos', groupe: 'pav', fr: 'Azulejos', en: 'Azulejos' },
+  { id: 'mosaique', groupe: 'pav', fr: 'Mosaïque', en: 'Mosaic' },
+  { id: 'tresse', groupe: 'pav', fr: 'Tresse', en: 'Weave' },
+  { id: 'claustra', groupe: 'pav', fr: 'Claustra', en: 'Breeze block' },
+  { id: 'papel', groupe: 'pav', fr: 'Papel picado', en: 'Papel picado' },
+  { id: 'penrose', groupe: 'pav', fr: 'Penrose', en: 'Penrose' },
+  { id: 'bauhaus', groupe: 'pav', fr: 'Bauhaus', en: 'Bauhaus' },
+  { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
+  { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
+  { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
+  /* volumes : c'est plat, et on y voit pourtant un volume */
+  { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
+  { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
+  { id: 'bossage', groupe: 'vol', fr: 'Bossage', en: 'Bosses' },
+  { id: 'tuyaux', groupe: 'vol', fr: 'Tuyaux', en: 'Pipes' },
+  /* instruments : le motif est gradué, il mesure */
+  { id: 'tapis', groupe: 'ins', fr: 'Tapis de coupe', en: 'Cutting mat' },
+  { id: 'millimetre', groupe: 'ins', fr: 'Millimétré', en: 'Graph paper' },
+  { id: 'rapporteur', groupe: 'ins', fr: 'Rapporteur', en: 'Protractor' },
+  { id: 'mire', groupe: 'ins', fr: 'Mire', en: 'Test chart' },
+  /* matières : la main les reconnaît avant l'oeil */
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
   { id: 'madrepore', groupe: 'mat', fr: 'Madrépore', en: 'Brain coral' },
   { id: 'drape', groupe: 'mat', fr: 'Drapé', en: 'Drape' },
   { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
   { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
+  /* paysages : ils ont un haut et un bas */
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
   { id: 'nuages', groupe: 'pay', fr: 'Nuages', en: 'Clouds' },
@@ -264,12 +276,14 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
   { id: 'relief', groupe: 'pay', fr: 'Relief', en: 'Contours' },
   { id: 'maree', groupe: 'pay', fr: 'Marée', en: 'Tideline' },
+  /* lieux : des gravures tramées, deux tons seulement */
   { id: 'acropole', groupe: 'lieu', fr: 'Acropole', en: 'Acropolis' },
   { id: 'phare', groupe: 'lieu', fr: 'Phare', en: 'Lighthouse' },
   { id: 'pyramides', groupe: 'lieu', fr: 'Pyramides', en: 'Pyramids' },
   { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
   { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
   { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
+  /* figures : des objets posés sur un fond, reconnaissables un par un */
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },

@@ -354,6 +354,9 @@ export const fr = {
     /* Les groupes sont devenus des onglets. Le mot du groupe ne change pas
        pour autant : c'est le même classement, montré autrement. */
     groupeAbstraits: 'Abstraits',
+    groupePavages: 'Pavages',
+    groupeVolumes: 'Volumes',
+    groupeInstruments: 'Instruments',
     /* Bois, peau, tissu, interférence : ce que la main reconnaît avant
        l'oeil. Entre l'abstrait et le paysage, comme dans la liste. */
     groupeMatieres: 'Matières',

@@ -89,11 +89,11 @@ describe('données', () => {
   })
 
   /* Le panneau construit ses grilles en filtrant `FAMILLES` sur le groupe :
-     une famille dont le groupe ne serait aucun des cinq disparaîtrait de
+     une famille dont le groupe ne serait aucun des huit disparaîtrait de
      l'interface sans erreur, et personne ne s'en apercevrait avant de la
-     chercher. Les cinq grilles doivent couvrir la liste entière. */
-  it('range chaque famille dans l’un des cinq groupes, et aucun n’est vide', () => {
-    const groupes = ['abs', 'mat', 'pay', 'lieu', 'fig'] as const
+     chercher. Les huit grilles doivent couvrir la liste entière. */
+  it('range chaque famille dans l’un des huit groupes, et aucun n’est vide', () => {
+    const groupes = ['abs', 'pav', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig'] as const
     const comptes = groupes.map((g) => FAMILLES.filter((f) => f.groupe === g).length)
     expect(comptes.reduce((somme, n) => somme + n, 0)).toBe(FAMILLES.length)
     for (const [indice, compte] of comptes.entries()) {
@@ -101,16 +101,42 @@ describe('données', () => {
     }
   })
 
-  /* Les cinq grilles se suivent dans le panneau, dans cet ordre. Une famille
+  /* Les huit grilles se suivent dans le panneau, dans cet ordre. Une famille
      rangée hors de son bloc sauterait de place à l'écran sans que rien ne le
      signale : le parcours clavier d'un groupe passerait par une vignette
-     affichée dans un autre. */
-  it('garde les cinq groupes d’un seul tenant, abstraits, matières, paysages, lieux puis figures', () => {
+     affichée dans un autre.
+
+     C'est aussi le filet qui rattrape la faute de frappe la plus probable de
+     cette liste, `pav` écrit `pay` : les deux existent, le compilateur laisse
+     passer, et la famille se retrouverait dans les paysages. Hors de son bloc,
+     donc ici. */
+  it('garde les huit groupes d’un seul tenant, dans l’ordre du panneau', () => {
     const ordre = FAMILLES.map((f) => f.groupe)
-    const rang = ['abs', 'mat', 'pay', 'lieu', 'fig']
+    const rang = ['abs', 'pav', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig']
     expect(ordre).toEqual([...ordre].sort(
       (a, b) => rang.indexOf(a) - rang.indexOf(b),
     ))
+  })
+
+  /**
+   * Le plafond, et c'est le contrôle le plus utile de ce bloc.
+   *
+   * Les onglets ont été inventés contre une liste trop longue pour qu'on y
+   * compare deux motifs. Rien n'empêchait ensuite un groupe de regrossir : les
+   * abstraits ont porté quarante et une familles sur soixante-seize, c'est-à-dire
+   * exactement le défaut d'avant les onglets, à l'intérieur d'un onglet.
+   *
+   * Personne ne remarque ça en ajoutant une famille, parce qu'une famille de
+   * plus ne se voit pas. Ce test le remarque à la place, et le jour où il
+   * échoue la réponse n'est pas de relever le plafond : c'est qu'un groupe
+   * demande à être coupé, et qu'il faut lui trouver la phrase qui le coupe.
+   */
+  it('ne laisse aucun groupe redevenir un fourre-tout', () => {
+    const PLAFOND = 20
+    for (const groupe of new Set(FAMILLES.map((f) => f.groupe))) {
+      const compte = FAMILLES.filter((f) => f.groupe === groupe).length
+      expect(compte, `${groupe} porte ${compte} familles`).toBeLessThanOrEqual(PLAFOND)
+    }
   })
 
   it('nomme chaque famille et chaque palette dans les deux langues', () => {

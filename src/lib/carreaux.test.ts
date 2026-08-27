@@ -51,11 +51,15 @@ function abscisses(d: string): number[] {
 }
 
 describe('liste des familles neuves', () => {
-  it('range chacune dans le catalogue, chez les abstraits', () => {
-    for (const id of NEUVES) {
-      const entree = FAMILLES.find((f) => f.id === id)
-      expect(entree, id).toBeDefined()
-      expect(entree?.groupe, id).toBe('abs')
+  it('range le carreau dans les pavages et la coulée dans les abstraits', () => {
+    /* Les deux gestes ne rangent pas au même endroit, et c'est le sens même
+       des groupes : le carreau pose une maille qui revient, la coulée fait
+       serpenter des rubans dont rien ne se répète. */
+    for (const id of IDS_CARREAUX) {
+      expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('pav')
+    }
+    for (const id of IDS_COULEES) {
+      expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('abs')
     }
   })
 

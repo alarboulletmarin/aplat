@@ -9,6 +9,30 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : le catalogue passe de cinq groupes à huit
+
+- **« Abstraits » était devenu le fourre-tout.** Quarante et une familles sur
+  soixante-seize dans un seul onglet, c'est-à-dire exactement le défaut contre
+  lequel les onglets avaient été inventés, revenu à l'intérieur d'un onglet.
+  Il est coupé en quatre : **Abstraits** garde les formes libres, **Pavages**
+  prend tout ce dont la maille revient, **Volumes** les quatre reliefs,
+  **Instruments** les quatre familles graduées.
+- **Un groupe n'existe que si son critère tient en une phrase.** C'était déjà
+  la règle des paysages et des matières ; elle vaut maintenant pour les huit,
+  et chaque phrase est écrite dans le système de design.
+- **Un plafond tient la règle.** Un test refuse qu'un groupe passe vingt
+  familles. Personne ne voit un fourre-tout se former, parce qu'une famille de
+  plus ne se voit jamais ; le test le voit à la place, et le jour où il échoue
+  la réponse est de couper le groupe, pas de relever le plafond.
+- **Les onglets se répartissent d'eux-mêmes.** Ils basculaient d'une pile à une
+  rangée à une largeur choisie, ce qui marchait à cinq et coupait les mots à
+  huit. C'est désormais une grille : on donne la largeur sous laquelle un
+  onglet ne se lit plus, et elle décide du nombre de colonnes. Une sur
+  téléphone, deux sur tablette, trois sur bureau, jamais un mot coupé. Un
+  neuvième groupe s'y rangera sans qu'on retouche la feuille de style.
+- **Aucun motif n'a changé.** Les familles ont changé d'onglet, pas de dessin :
+  un lien partagé rouvre exactement la même image, dans son nouveau groupe.
+
 ### Ajouté : quatre instruments, et un moteur qui sait écrire
 
 - **Le motif devient un objet d'atelier.** Tapis de coupe pose une trame au

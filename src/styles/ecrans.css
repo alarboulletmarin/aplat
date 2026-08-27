@@ -881,30 +881,35 @@
   border-radius: 50% 50% 50% 0;
 }
 
-/* --- Les trois onglets de familles ---------------------------------------------
-   Trente-sept vignettes en grille plate, dans une colonne étroite, mettaient
-   mille pixels entre la première et la dernière : on ne pouvait pas comparer
-   deux motifs éloignés. Trois onglets ramènent chaque liste à ce qu'un écran
-   montre.
+/* --- Les onglets de familles ----------------------------------------------------
+   Des vignettes en grille plate, dans une colonne étroite, mettaient mille
+   pixels entre la première et la dernière : on ne pouvait pas comparer deux
+   motifs éloignés. Les onglets ramènent chaque liste à ce qu'un écran montre.
 
-   Ils ne cachent rien : les trois sont là, chacun porte son compte, et l'onglet
+   Ils ne cachent rien : tous sont là, chacun porte son compte, et l'onglet
    ouvert est toujours celui de la famille en cours. L'aplat inversé de la puce
    de choix sert ici aussi, pour que « ouvert » se lise au remplissage et non à
    la teinte. */
-/* Empilés par défaut, sur une rangée dès que la colonne peut porter trois mots.
-   Dans cet ordre, et non l'inverse : un navigateur qui ne connaîtrait pas les
-   requêtes de conteneur garde la pile, qui est lisible, plutôt que la rangée,
-   où « Abstraits » se réduirait à « A… ». */
+/* Une grille qui se répartit d'elle-même, et non une pile qui bascule en
+   rangée à une largeur choisie.
+
+   La bascule marchait à cinq onglets et ne marche plus à huit : la rangée
+   partageait la largeur entre tous, et huit parts d'un panneau de trois cents
+   pixels réduisent « Abstraits » à « A… », ce que le dessin refuse. La grille
+   pose le problème dans l'autre sens : on donne la largeur minimale sous
+   laquelle un onglet ne se lit plus, et c'est elle qui décide du nombre de
+   colonnes. Une par colonne étroite, comme avant ; deux, puis quatre à mesure
+   que le panneau s'élargit ; jamais un mot coupé.
+
+   Les 132 pixels sont la mesure du plus long libellé des deux langues,
+   « Instruments », plus son compte et ses marges. Un onglet plus long à venir
+   les augmente : c'est une longueur de texte, pas un nombre d'onglets, et
+   c'est ce qui fait qu'ajouter un groupe ne demande pas de retoucher ceci. */
 .onglets {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 7px;
   margin-bottom: 13px;
-}
-@container panneau (min-width: 330px) {
-  .onglets {
-    flex-direction: row;
-  }
 }
 .onglet {
   flex: 1 1 auto;
@@ -921,18 +926,13 @@
   font-size: 13.5px;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 7px;
 }
-/* Empilés, les onglets se lisent comme une liste : le mot à gauche, le compte
-   au bout, alignés d'une ligne à l'autre. */
-.onglets:not([data-rangee]) .onglet {
+/* Le mot à gauche, le compte au bout, alignés d'une case à l'autre : la grille
+   ayant des colonnes de largeur égale, la lecture en liste tient aussi bien à
+   une colonne qu'à quatre. */
+.onglet {
   justify-content: space-between;
-}
-@container panneau (min-width: 330px) {
-  .onglet {
-    justify-content: center;
-  }
 }
 .onglet > span:first-child {
   min-width: 0;

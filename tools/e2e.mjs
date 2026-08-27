@@ -240,7 +240,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(await page.evaluate(() => !!document.getElementById('note-faite')),
     'succès : carte en place avant le test des onglets');
 
-  /* --- 11. les trois onglets de familles, et un réglage touché efface la
+  /* --- 11. les onglets de familles, et un réglage touché efface la
      carte succès. « Étoiles » est dans les figures : l'atteindre demande
      d'ouvrir son onglet, ce qui est exactement ce que la grille plate ne
      demandait pas et ce pour quoi elle mettait mille pixels entre deux
@@ -255,7 +255,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
   t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
-    'onglets : les cinq couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+    'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
 
   await page.$eval('#onglet-fig', e => e.click());
   await page.waitForTimeout(300);
@@ -1470,10 +1470,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'historique : rien tant que rien n\'a été regardé', JSON.stringify(neuf.stockage));
 
     /* Un motif traversé en un clin d'oeil ne compte pas : sans ce délai,
-       parcourir les familles remplirait la liste de motifs jamais regardés. */
+       parcourir les familles remplirait la liste de motifs jamais regardés.
+
+       Les deux familles cliquées doivent être dans l'onglet ouvert, celui de
+       la famille de l'adresse : une vignette d'un autre groupe n'est pas dans
+       le document, et le clic ne trouve rien. L'adresse ci-dessus ouvre sur
+       Vagues, donc sur les abstraits, et Blobs comme Découpes en sont. */
     await hp.$eval('[data-famille="blobs"]', e => e.click());
     await hp.waitForTimeout(500);
-    await hp.$eval('[data-famille="arches"]', e => e.click());
+    await hp.$eval('[data-famille="decoupes"]', e => e.click());
     await hp.waitForTimeout(500);
     const traverse = await lu();
     t(traverse.stockage.length === 0,
@@ -1481,7 +1486,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
 
     await hp.waitForTimeout(2600);
     const regarde = await lu();
-    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'arches',
+    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'decoupes',
       'historique : un motif regardé s\'enregistre', JSON.stringify(regarde.stockage));
 
     /* Dix-huit familles regardées : la liste s'arrête à dix, la plus ancienne
