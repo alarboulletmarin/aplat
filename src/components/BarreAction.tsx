@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { decimal, nombre, poids } from '../lib/format'
 import type { EchecExport, Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
+import type { Proto } from '../lib/proto'
 import type { Resolution } from '../lib/resolution'
 import { remplir, type Textes } from '../i18n'
+import { FeuilleModale } from './FeuilleModale'
 
 export type Phase = 'repos' | 'calcul' | 'faite' | 'erreur'
 /* Les échecs de l'encodeur, plus celui que la barre détecte avant lui. */
@@ -74,6 +76,8 @@ export function BarreAction({
   onVoile,
   onFermerNote,
   onPhotos,
+  proto = null,
+  studio,
 }: {
   cadre: React.RefObject<HTMLDivElement | null>
   /** La proposition de mise à jour, quand il y en a une. */
@@ -106,6 +110,10 @@ export function BarreAction({
   onFermerNote: () => void
   /** Ouvre la feuille de partage native avec le fichier de la carte. */
   onPhotos: () => void
+  /** Le banc d'essai des sorties (`lib/proto.ts`) : null hors prototype. */
+  proto?: Proto
+  /** Le contenu du studio d'export, fourni par App sous `?proto=studio`. */
+  studio?: ReactNode
 }) {
   const T = textes.barre
   const calcul = phase === 'calcul'
@@ -343,45 +351,125 @@ export function BarreAction({
             `aria-disabled` le neutralise sans le rendre infocusable, et
             l'export refuse de repartir de lui-même. `disabled` ne reste que
             pour l'état vide, où le bouton n'a rien à faire dans le parcours. */}
-        <div className="btn-paire">
+        {proto === 'trio' ? (
+          /* La variante trio du banc d'essai : plus de paire, le primaire
+             ouvre la feuille et la feuille fait tout. Le PNG courant passe
+             de un geste à deux, c'est exactement ce que ce banc mesure. */
           <button
             type="button"
             id="btn-export"
+            ref={boutonFormats}
             className="btn-export"
-            aria-keyshortcuts="t"
             disabled={vide}
             aria-disabled={calcul}
             aria-busy={calcul}
-            onClick={() => onExporter('png')}
+            aria-haspopup="dialog"
+            aria-expanded={formats}
+            aria-controls="feuille-modale"
+            title={T.formatsTitre}
+            onClick={onFormats}
           >
             <span className="ico-descendre" aria-hidden="true">
               <i />
               <b />
             </span>
-            <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
+            <span id="cta-libelle">{calcul ? T.rendu : textes.studio.titre}</span>
           </button>
-          <button
-            type="button"
-            id="btn-formats"
-            ref={boutonFormats}
-            className="btn-formats"
-            aria-expanded={formats}
-            aria-controls="feuille-formats"
-            aria-label={formats ? T.formatsFermer : T.formats}
-            title={T.formatsTitre}
-            onClick={onFormats}
-          >
-            <span className="ico-chevron" aria-hidden="true" />
-          </button>
-        </div>
+        ) : (
+          <div className="btn-paire">
+            <button
+              type="button"
+              id="btn-export"
+              className="btn-export"
+              aria-keyshortcuts="t"
+              disabled={vide}
+              aria-disabled={calcul}
+              aria-busy={calcul}
+              onClick={() => onExporter('png')}
+            >
+              <span className="ico-descendre" aria-hidden="true">
+                <i />
+                <b />
+              </span>
+              <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
+            </button>
+            <button
+              type="button"
+              id="btn-formats"
+              ref={boutonFormats}
+              className="btn-formats"
+              aria-expanded={formats}
+              aria-controls={proto === null ? 'feuille-formats' : 'feuille-modale'}
+              aria-haspopup={proto === null ? undefined : 'dialog'}
+              aria-label={formats ? T.formatsFermer : T.formats}
+              title={T.formatsTitre}
+              onClick={onFormats}
+            >
+              <span className="ico-chevron" aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Le banc d'essai des sorties (`lib/proto.ts`) : sous `?proto=`, le
+          dépli cède sa place à une feuille basse modale portée hors de la
+          barre. Le choix d'une sortie referme la feuille avant d'agir : la
+          carte de résultat vit dans la barre, derrière le voile. */}
+      {proto === 'feuille' && (
+        <FeuilleModale
+          id="feuille-modale"
+          titreId="feuille-modale-titre"
+          titre={T.formats}
+          ouverte={formats}
+          onFermer={onFormats}
+          retourFocus={boutonFormats}
+        >
+          <ul className="feuille-liste">
+            {sorties.map((sortie) => (
+              <li key={sortie.id}>
+                <button
+                  type="button"
+                  id={sortie.id}
+                  className="feuille-b"
+                  disabled={vide}
+                  aria-disabled={sortie.indisponible ? true : undefined}
+                  onClick={
+                    sortie.indisponible
+                      ? undefined
+                      : () => {
+                          onFormats()
+                          sortie.action()
+                        }
+                  }
+                >
+                  <span className="feuille-t">{sortie.titre}</span>
+                  <span className="feuille-n">{sortie.indisponible ?? sortie.note}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </FeuilleModale>
+      )}
+      {(proto === 'studio' || proto === 'trio') && (
+        <FeuilleModale
+          id="feuille-modale"
+          titreId="feuille-modale-titre"
+          titre={textes.studio.titre}
+          ouverte={formats}
+          grande
+          onFermer={onFormats}
+          retourFocus={boutonFormats}
+        >
+          {studio}
+        </FeuilleModale>
+      )}
 
       {/* Le dépli suit son déclencheur dans le document, pour que Tab y entre
           juste après lui. Il se montre pourtant au-dessus de la rangée : la
           barre est collée en bas de l'écran, et une liste qui pousserait vers
           le bas sortirait de la fenêtre. C'est `order`, dans composants.css,
           qui fait cet écart entre l'ordre lu et l'ordre vu. */}
-      {formats && (
+      {proto === null && formats && (
         <div className="feuille" id="feuille-formats">
           <ul className="feuille-liste">
             {sorties.map((sortie) => (
@@ -424,6 +512,7 @@ export function BarreAction({
           se déplace pas sous le doigt qui vient de l'appuyer. La phrase, elle,
           prend toute la place qui reste, ce qui ancre le bouton au bord plutôt
           qu'à la fin du texte, dont la longueur change aussi. */}
+      {proto !== 'trio' && (
       <p className="barre-voile" id="barre-voile">
         <span>
           {sombre ? `${T.versionSombre} ` : ''}
@@ -453,6 +542,7 @@ export function BarreAction({
           </span>
         </button>
       </p>
+      )}
     </div>
   )
 }

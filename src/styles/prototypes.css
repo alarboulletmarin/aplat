@@ -1,0 +1,173 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+/* ==========================================================================
+   Le banc d'essai des sorties : `lib/proto.ts`, prototypes/README.md.
+
+   Importée par App.tsx et non par main.tsx : Vite range cette feuille avec le
+   morceau de l'application, l'accueil et la page du moteur ne la chargent
+   pas. Tous les sélecteurs sont propres au banc (`feuille-scrim`,
+   `feuille-modale`, `studio-`) : aucune règle ne peut toucher le rendu par
+   défaut, et le fichier entier part avec la décision.
+   ========================================================================== */
+
+/* --- Le voile qui sépare les plans ----------------------------------------- */
+.feuille-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(23, 36, 63, 0.45);
+  touch-action: none;
+}
+:root[data-theme='sombre'] .feuille-scrim {
+  background: rgba(4, 8, 18, 0.62);
+}
+
+/* --- La feuille basse ------------------------------------------------------- */
+.feuille-modale {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  margin: 0 auto;
+  max-width: 760px;
+  background: var(--surface);
+  color: var(--encre);
+  border: 2px solid var(--encre);
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  padding: 0 16px calc(14px + env(safe-area-inset-bottom));
+  max-height: min(62dvh, 62vh);
+  display: flex;
+  flex-direction: column;
+  animation: feuille-montee 240ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.feuille-modale-grande {
+  max-height: min(86dvh, 86vh);
+}
+/* Pendant le glissement, la feuille suit le doigt sans inertie ajoutée. */
+.feuille-modale-saisie {
+  transition: none;
+}
+@keyframes feuille-montee {
+  from {
+    transform: translateY(28px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* La poignée : une prise, pas un décor. Sa zone d'appui fait la largeur de la
+   feuille et 28 px de haut, le trait dessiné reste fin. */
+.feuille-poignee {
+  flex: 0 0 auto;
+  padding: 9px 0;
+  cursor: grab;
+  touch-action: none;
+}
+.feuille-poignee i {
+  display: block;
+  width: 36px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: var(--filet-franc);
+}
+.feuille-titre {
+  flex: 0 0 auto;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding-bottom: 10px;
+}
+.feuille-modale-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  touch-action: pan-y;
+}
+/* La liste des sorties reprend telle quelle la grammaire du dépli
+   (`.feuille-liste`, `.feuille-b`) : seule la coquille change. */
+
+/* --- Le studio --------------------------------------------------------------- */
+.studio {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+.studio-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.studio-libelle {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--encre-douce);
+}
+.studio-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.studio-opt {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px 14px 4px 4px;
+  font-family: var(--texte);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.studio-opt[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+.studio-indisponible {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+.studio-select select {
+  width: 100%;
+}
+.studio-voile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+.studio-voile > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* La synthèse : la seule phrase de la feuille qui décrive le fichier entier,
+   juste au-dessus du bouton qui le produit. */
+.studio-synthese {
+  border-top: 2px solid var(--filet);
+  padding-top: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.studio-exporter {
+  width: 100%;
+}
+.studio-secondaires {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}

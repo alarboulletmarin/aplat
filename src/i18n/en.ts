@@ -399,6 +399,16 @@ export const en: Textes = {
     enregistresTrois: 'Three images saved',
     metaTrois: 'Phone, tablet and computer. PNG, {poids} in total.',
   },
+  studio: {
+    titre: 'Export',
+    format: 'The format',
+    taille: 'The size',
+    exporter: 'Export',
+    syntheseSombre: 'dark version',
+    syntheseVoile: 'veil included',
+    syntheseVoileNul: 'veil not needed',
+    syntheseSansVoile: 'no veil',
+  },
   miseAJour: {
     texte: 'A new version of Aplat is ready.',
     action: 'Reload',

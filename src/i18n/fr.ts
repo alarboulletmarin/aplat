@@ -541,6 +541,20 @@ export const fr = {
     enregistresTrois: 'Trois images enregistrées',
     metaTrois: 'Téléphone, tablette et ordinateur. PNG, {poids} en tout.',
   },
+  /* Le studio d'export du banc d'essai (`lib/proto.ts`, `?proto=studio`).
+     Cette section part avec le banc, quelle que soit la décision. La synthèse
+     est une énumération courte, pas une phrase : elle se lit d'un regard
+     au-dessus du bouton qui produit le fichier. */
+  studio: {
+    titre: 'Exporter',
+    format: 'Le format',
+    taille: 'La taille',
+    exporter: 'Exporter',
+    syntheseSombre: 'version sombre',
+    syntheseVoile: 'voile inclus',
+    syntheseVoileNul: 'voile sans objet',
+    syntheseSansVoile: 'sans voile',
+  },
   miseAJour: {
     texte: 'Une nouvelle version d’Aplat est prête.',
     action: 'Recharger',
