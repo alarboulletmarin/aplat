@@ -9,6 +9,38 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : l'export tient dans un studio
+
+- **Télécharger télécharge, et la barre tient en trois boutons.**
+  Surprends-moi, Variante, Télécharger. Le PNG à la résolution de l'appareil
+  reste à un geste, comme avant.
+- **La ligne du voile devient la puce de synthèse.** Sous le bouton, elle dit
+  désormais tout le fichier à venir, taille, format, version, voile, et elle
+  s'appuie : un tap ouvre le studio d'export.
+- **Le studio d'export remplace le dépli des formats.** Une feuille basse, la
+  première et seule modale du produit : le format et sa note, la taille et ses
+  préréglages, la version, le voile, une synthèse, **Exporter**. Le scénario
+  complet, sur mesure, sombre, sans voile, se règle sous le pouce sans jamais
+  remonter la page. Les trois appareils et le presse-papiers y sont devenus de
+  vrais boutons, trait et coins compris.
+- **La feuille se ferme comme elle s'ouvre.** Une croix en tête de feuille,
+  le tap sur le voile grisé, le glissement de la poignée, Échap, ou la sortie
+  choisie. Le focus y est bouclé, le reste de l'écran est retiré pendant
+  l'ouverture, et il revient à la puce en sortant.
+- **Le format choisi tient pour la session.** Un WebP choisi au studio reste
+  le format de Télécharger, et la puce l'écrit sous le bouton : le bouton
+  produit toujours exactement ce qu'elle dit. Un rechargement repart sur le
+  PNG, et Réessayer après un échec y revient aussi, comme le message le
+  promet. Rien n'est écrit sur l'appareil ni dans le lien partagé.
+- **Variante a gagné un dé.** La flèche circulaire disait « recommencer », et
+  sa pointe flottait à côté du trait ; le dé, légèrement penché comme s'il
+  venait d'être lancé, dit « tirer encore », proprement.
+- **La décision vient d'un banc d'essai.** Cinq variantes comparées au doigt,
+  gestes comptés, états d'échec compris : le dépli témoin a perdu sur le
+  scénario complet, le studio l'a emporté sans coûter un geste au PNG. La
+  règle « pas de modale » gagne son exception encadrée, écrite dans le système
+  de design.
+
 ### Changé : le catalogue passe de cinq groupes à huit
 
 - **« Abstraits » était devenu le fourre-tout.** Quarante et une familles sur

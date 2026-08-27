@@ -36,6 +36,7 @@ import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
 import { BarreAction, type Echec, type Fichier, type Phase } from './components/BarreAction'
+import { StudioExport } from './components/StudioExport'
 import { MiseAJour } from './components/MiseAJour'
 import { Pied } from './components/Pied'
 
@@ -138,6 +139,15 @@ export function App() {
     return initiaux
   })
   const [ephemere, setEphemere] = useState<Ephemere>(EPHEMERE_INITIAL)
+
+  /* Le format de la session. Choisi au studio, il tient jusqu'au prochain
+     changement ou au rechargement : la puce de synthèse l'écrit sous le
+     bouton, et Télécharger produit exactement ce qu'elle écrit ; c'est cette
+     phrase qui rend la mémoire sûre. Il ne part ni dans l'adresse ni sur
+     l'appareil : un lien partagé et une prochaine visite repartent sur le
+     PNG, la promesse fraîche, et le contrat de stockage reste à quatre
+     clés. */
+  const [format, setFormat] = useState<Format>('png')
 
   /* Le verrou de réentrance ne peut pas vivre dans la phase d'affichage :
      n'importe quel réglage la remet à « repos », et un clic sur une palette
@@ -510,7 +520,7 @@ export function App() {
       const touche = evenement.key.toLowerCase()
       if (touche === 'v') nouvelleGraine()
       else if (touche === 's') surprendre()
-      else if (touche === 't') exporter('png')
+      else if (touche === 't') exporter(format)
     }
     window.addEventListener('keydown', surTouche)
     return () => window.removeEventListener('keydown', surTouche)
@@ -574,6 +584,53 @@ export function App() {
   ])
 
   const webpPossible = useMemo(() => webpDisponible(), [])
+
+  /* --- le studio d'export ----------------------------------------------------
+     Le studio ne possède aucun état : il écrit les mêmes réglages que le
+     panneau, si bien que les deux surfaces ne peuvent pas diverger. Une
+     sortie choisie referme la feuille avant d'agir : la carte de résultat
+     vit dans la barre, derrière le voile. */
+  const fermerFeuille = () =>
+    setEphemere((precedent) =>
+      precedent.formats ? { ...precedent, formats: false } : precedent,
+    )
+  const studio = (
+      <StudioExport
+        largeurSaisie={reglages.largeurSaisie}
+        hauteurSaisie={reglages.hauteurSaisie}
+        resolution={resolution}
+        detecte={detecte}
+        vide={vide}
+        voile={reglages.voile}
+        voilePeint={Boolean(mesure && mesure.voile > 0.02)}
+        sombre={reglages.sombre}
+        svgPossible={svgPossible}
+        webpPossible={webpPossible}
+        copiee={ephemere.copieImage}
+        langue={reglages.langue}
+        textes={T}
+        format={format}
+        onFormat={setFormat}
+        onExporter={(choisi) => {
+          fermerFeuille()
+          exporter(choisi)
+        }}
+        onTrois={() => {
+          fermerFeuille()
+          exporterTrois()
+        }}
+        onCopier={() => {
+          fermerFeuille()
+          copierLImage()
+        }}
+        onSaisir={(largeurSaisie, hauteurSaisie) => changer({ largeurSaisie, hauteurSaisie })}
+        onPreset={(largeur, hauteur) =>
+          changer({ largeurSaisie: String(largeur), hauteurSaisie: String(hauteur) }, false)
+        }
+        onVoile={() => changer({ voile: !reglages.voile })}
+        onSombre={(sombre) => changer({ sombre })}
+      />
+  )
 
   return (
     <>
@@ -731,20 +788,25 @@ export function App() {
           langue={reglages.langue}
           textes={T}
           formats={ephemere.formats}
-          svgPossible={svgPossible}
-          webpPossible={webpPossible}
           copiee={ephemere.copieImage}
+          format={format}
           onSurprise={surprendre}
           onGraine={nouvelleGraine}
           onExporter={exporter}
-          onCopier={copierLImage}
-          onTrois={exporterTrois}
+          onReessayer={() => {
+            /* Réessayer repart en PNG, et la session avec lui : les messages
+               d'échec le promettent (« le PNG, lui, passe partout »), et une
+               puce qui garderait le format fautif mentirait sur le fichier
+               que le bouton vient de produire. */
+            setFormat('png')
+            exporter('png')
+          }}
           onFormats={() =>
             setEphemere((precedent) => ({ ...precedent, formats: !precedent.formats }))
           }
-          onVoile={() => changer({ voile: !reglages.voile })}
           onFermerNote={fermerNote}
           onPhotos={enregistrerPhotos}
+          studio={studio}
         >
           <MiseAJour textes={T} />
         </BarreAction>

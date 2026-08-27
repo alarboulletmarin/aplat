@@ -934,15 +934,11 @@
   gap: 10px;
   align-items: stretch;
 }
-/* Le dépli des formats suit son déclencheur dans le document, pour que Tab y
-   entre juste après lui ; `order` le repose au-dessus de la rangée, où il
-   s'ouvre puisque la barre colle au bas de l'écran. Les notes gardent la
-   première place, comme avant. */
+/* Les notes de résultat se montrent au-dessus de la rangée : la barre colle
+   au bas de l'écran, et une carte qui pousserait vers le bas sortirait de la
+   fenêtre. */
 .barre .note {
   order: -2;
-}
-.barre .feuille {
-  order: -1;
 }
 /* Les deux secondaires cèdent la place au primaire : avec des facteurs de
    rétrécissement voisins les libellés étaient coupés, y compris
@@ -1056,58 +1052,20 @@
   .btn-compact {
     min-width: 44px;
   }
-  .btn-paire {
-    gap: 4px;
-  }
   .btn-export {
     padding: 0 12px;
   }
   .btn-export .ico-descendre {
     display: none;
   }
-  .btn-formats {
-    width: 44px;
-  }
 }
 
-/* Le primaire et son dépli forment une paire : deux boutons, un seul appel.
-   Le dépli n'a pas d'aplat, il n'appelle à rien ; il ouvre. */
-.btn-paire {
-  flex: 1 0 auto;
-  min-width: 0;
-  display: flex;
-  gap: 5px;
-}
-.btn-paire .btn-export {
-  flex: 1 1 auto;
-}
-.btn-formats {
-  flex: 0 0 auto;
-  width: 48px;
-  min-height: 56px;
-  cursor: pointer;
-  border-radius: 24px 24px 7px 7px;
-  border: 2px solid var(--encre);
-  background: transparent;
-  color: var(--encre);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .ico-chevron {
   width: 11px;
   height: 8px;
   background: currentColor;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transition: transform 180ms ease;
-}
-.btn-formats[aria-expanded='true'] {
-  border-color: var(--encre);
-  background: var(--encre);
-  color: var(--papier);
-}
-.btn-formats[aria-expanded='true'] .ico-chevron {
-  transform: rotate(180deg);
 }
 
 /* L'interrupteur du voile : un mot, à côté de la phrase qu'il change. */
@@ -1157,29 +1115,303 @@
   visibility: hidden;
 }
 
+/* --- La puce de synthèse --------------------------------------------------------
+   Sous le primaire, la ligne du fichier : taille, format, version, voile.
+   Elle est un bouton, et elle en porte le costume : un tap ouvre le studio
+   qui règle ce qu'elle décrit. Le chevron tourne avec l'ouverture, comme le
+   faisait celui du dépli. */
+.synthese-sortie {
+  min-height: 44px;
+  padding: 0 12px;
+  cursor: pointer;
+  border-radius: 16px 16px 5px 5px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.synthese-sortie .synthese-texte {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.synthese-sortie[aria-expanded='true'] .ico-chevron {
+  transform: rotate(180deg);
+}
+
+/* --- La feuille d'export ---------------------------------------------------------
+   La seule modale du produit, et une exception encadrée : DESIGN_SYSTEM.md,
+   section 13. Portée hors de la barre par FeuilleModale.tsx : un voile qui
+   grise l'arrière-plan, une feuille ancrée en bas, une poignée qui la
+   renvoie. La glissade d'entrée est une animation, que base.css neutralise
+   sous `prefers-reduced-motion` ; le glissement de renvoi suit le doigt et
+   n'en est pas une. */
+.feuille-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(23, 36, 63, 0.45);
+  touch-action: none;
+}
+:root[data-theme='sombre'] .feuille-scrim {
+  background: rgba(4, 8, 18, 0.62);
+}
+.feuille-modale {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  margin: 0 auto;
+  max-width: 760px;
+  background: var(--surface);
+  color: var(--encre);
+  border: 2px solid var(--encre);
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  padding: 0 16px calc(14px + env(safe-area-inset-bottom));
+  max-height: min(62dvh, 62vh);
+  display: flex;
+  flex-direction: column;
+  animation: feuille-montee 240ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.feuille-modale-grande {
+  max-height: min(86dvh, 86vh);
+}
+/* Pendant le glissement, la feuille suit le doigt, sans inertie ajoutée. */
+.feuille-modale-saisie {
+  transition: none;
+}
+@keyframes feuille-montee {
+  from {
+    transform: translateY(28px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+/* La poignée : une prise, pas un décor. Sa zone d'appui fait la largeur de la
+   feuille et 28 px de haut, le trait dessiné reste fin. */
+.feuille-poignee {
+  flex: 0 0 auto;
+  padding: 9px 0;
+  cursor: grab;
+  touch-action: none;
+}
+.feuille-poignee i {
+  display: block;
+  width: 36px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: var(--filet-franc);
+}
+/* Le titre et la croix se partagent la tête de feuille : le titre nomme la
+   question, la croix est la sortie qui se voit, au costume complet d'un
+   bouton comme les actions du studio. */
+.feuille-tete {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.feuille-titre {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.feuille-fermer {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: transparent;
+  color: var(--encre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feuille-fermer:hover {
+  background: var(--surface-2);
+}
+.ico-croix {
+  position: relative;
+  width: 13px;
+  height: 13px;
+}
+.ico-croix i,
+.ico-croix b {
+  position: absolute;
+  left: 0;
+  top: 5.25px;
+  width: 13px;
+  height: 2.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.ico-croix i {
+  transform: rotate(45deg);
+}
+.ico-croix b {
+  transform: rotate(-45deg);
+}
+.feuille-modale-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  touch-action: pan-y;
+}
+
+/* --- Le studio d'export ---------------------------------------------------------- */
+.studio {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+.studio-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.studio-libelle {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--encre-douce);
+}
+.studio-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.studio-opt {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px 14px 4px 4px;
+  font-family: var(--texte);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.studio-opt[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}
+.studio-note,
+.studio-indisponible {
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+.studio-select select {
+  width: 100%;
+}
+.studio-voile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--encre-douce);
+}
+.studio-voile > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* La synthèse : la seule phrase de la feuille qui décrive le fichier entier,
+   juste au-dessus du bouton qui le produit. */
+.studio-synthese {
+  border-top: 2px solid var(--filet);
+  padding-top: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.studio-exporter {
+  width: 100%;
+}
+.studio-secondaires {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Deux actions, pas des formats : le costume complet d'un bouton, trait et
+   coins, parce qu'une rangée nue se lisait comme une ligne d'aide et non
+   comme quelque chose à appuyer. */
+.studio-action {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  cursor: pointer;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.studio-action:hover {
+  background: var(--surface-2);
+}
+.studio-action[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
 /* --- Pictogrammes, dessinés dans la direction artistique ---------------------- */
 /* Flèche circulaire : une boucle ouverte et sa pointe. */
 .ico-encore {
   position: relative;
   flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
+/* Un dé, légèrement penché : il vient d'être lancé. La flèche circulaire
+   disait « recommencer » là où le bouton tire ; le dé est le mot juste, et
+   c'est celui des générateurs. Deux formes, comme partout : le corps du dé,
+   puis un point et son ombre portée pour les deux autres. L'inclinaison est
+   portée par chaque forme, le cadre reste droit sous le doigt. */
 .ico-encore i {
   position: absolute;
-  inset: 0;
-  border: 2.5px solid currentColor;
-  border-radius: 50%;
-  border-top-color: transparent;
+  inset: 0.5px;
+  border: 2px solid currentColor;
+  border-radius: 5px 5px 2.5px 2.5px;
+  transform: rotate(-9deg);
 }
 .ico-encore b {
   position: absolute;
-  top: -1px;
-  right: -2px;
-  width: 7px;
-  height: 7px;
+  top: 4.6px;
+  left: 4.2px;
+  width: 3.1px;
+  height: 3.1px;
+  border-radius: 50%;
   background: currentColor;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  box-shadow: 5px 4.4px 0 0 currentColor;
+  transform: rotate(-9deg);
 }
 /* Téléchargement : une pointe vers le bas et son seuil. */
 .ico-descendre {

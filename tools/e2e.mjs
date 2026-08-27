@@ -1156,7 +1156,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       coche: [...document.querySelectorAll('#liste-version [role="radio"]')]
         .map((b) => b.dataset.version + ':' + b.getAttribute('aria-checked')).join(' '),
       detail: document.getElementById('verdict-detail').textContent,
-      ligne: document.getElementById('barre-voile').textContent,
+      ligne: document.getElementById('synthese-sortie').textContent,
       alternative: document.getElementById('apercu').getAttribute('aria-label')
     }));
 
@@ -1228,15 +1228,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'version : le texte alternatif la dit, l\'image n\'est pas la même',
       sombre.alternative.slice(-60));
 
-    /* La ligne sous le bouton dit ce que le fichier contient, et elle doit dire
+    /* La puce de synthèse dit ce que le fichier contient, et elle doit dire
        vrai jusqu'au bout : la version sombre passe sous le seuil que le voile
        vise, la sonde n'a donc plus de voile à poser, et annoncer là un voile
        inclus serait le même genre de mensonge que celui du rideau. */
-    t(/[Vv]ersion sombre/.test(sombre.ligne) && !/[Vv]ersion sombre/.test(claire.ligne),
-      'version : la ligne sous le bouton la nomme', sombre.ligne.slice(0, 70));
-    t(/inclus dans le fichier/.test(claire.ligne),
-      'version : en clair, la ligne annonce le voile', claire.ligne.slice(0, 70));
-    t(!/inclus dans le fichier/.test(sombre.ligne) && /sans voile/.test(sombre.detail),
+    t(/version sombre/.test(sombre.ligne) && !/version sombre/.test(claire.ligne),
+      'version : la puce de synthèse la nomme', sombre.ligne.slice(0, 70));
+    t(/voile inclus/.test(claire.ligne),
+      'version : en clair, la puce annonce le voile', claire.ligne.slice(0, 70));
+    t(!/voile inclus/.test(sombre.ligne) && /sans voile/.test(sombre.detail),
       'version : en sombre, elle n\'annonce pas un voile que le fichier ne porte pas',
       sombre.ligne.slice(0, 90));
 
@@ -1269,11 +1269,13 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await dctx.close();
   }
 
-  /* --- 21b. le voile est dans le fichier, et l'interrupteur l'en retire
+  /* --- 21b. le voile est dans le fichier, et le studio l'en retire
      C'est le défaut que cette section tient fermé : le voile était brûlé dans
      le PNG sans que rien de l'écran ne le dise, et quelqu'un qui téléchargeait
      sans avoir lu la présentation recevait une image plus sombre que celle
-     qu'il croyait avoir choisie. */
+     qu'il croyait avoir choisie. La puce de synthèse le dit maintenant sous le
+     bouton, et l'interrupteur vit dans le studio, avec les autres réglages du
+     fichier. */
   {
     const vctx = await browser.newContext({
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
@@ -1283,31 +1285,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await vp.waitForTimeout(400);
 
     const dire = () => vp.evaluate(() => ({
-      ligne: document.getElementById('barre-voile').textContent,
-      /* `data-voile` et non `aria-pressed` : le libellé du bouton décrit
-         l'action (« Retirer »/« Remettre »), et un état pressé par-dessus
-         disait l'inverse du mot lu. L'attribut de donnée porte le costume,
-         l'état se lit ici. */
-      presse: document.getElementById('btn-voile').dataset.voile,
+      ligne: document.getElementById('synthese-sortie').textContent,
       url: location.search,
       empreinte: document.getElementById('apercu').toDataURL('image/png').slice(-96),
       detail: document.getElementById('verdict-detail').textContent
     }));
 
-    /* Un bouton qui change de taille ou de place à l'instant où on l'appuie se
-       dérobe sous le doigt. Ici deux choses changeaient : le libellé, plus long
-       dans un sens que dans l'autre, et la phrase à côté, plus courte une fois
-       le voile retiré. Les deux mots occupent maintenant la même cellule, et la
-       phrase prend toute la place qui reste. */
-    const boite = () => vp.evaluate(() => {
-      const b = document.getElementById('btn-voile').getBoundingClientRect();
-      return [+b.x.toFixed(1), +b.y.toFixed(1), +b.width.toFixed(1)];
-    });
-    const boiteAvant = await boite();
-
     const avec = await dire();
-    t(/inclus dans le fichier/.test(avec.ligne),
-      'voile : une ligne sous le bouton dit qu\'il est dans le fichier', avec.ligne.slice(0, 60));
+    t(/voile inclus/.test(avec.ligne),
+      'voile : la puce de synthèse dit qu\'il est dans le fichier', avec.ligne.slice(0, 60));
     t(!/v=0/.test(avec.url), 'voile : l\'adresse ne dit rien tant qu\'il est là');
 
     const [avecFichier] = await Promise.all([
@@ -1317,15 +1303,36 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const cheminAvec = path.join(OUT, 'voile-' + avecFichier.suggestedFilename());
     await avecFichier.saveAs(cheminAvec);
 
-    await vp.$eval('#btn-voile', e => e.click());
-    await vp.waitForTimeout(500);
-    const sans = await dire();
-    t(/retiré du fichier/.test(sans.ligne), 'voile : la ligne suit l\'interrupteur', sans.ligne.slice(0, 60));
-    t(sans.presse === 'non', 'voile : l\'interrupteur dit son état');
+    /* L'interrupteur, dans le studio. `data-voile` et non `aria-pressed` : le
+       libellé du bouton décrit l'action (« Retirer »/« Remettre »), et un
+       état pressé par-dessus disait l'inverse du mot lu. L'attribut de
+       donnée porte le costume, l'état se lit ici. */
+    await vp.$eval('#synthese-sortie', e => e.click());
+    await vp.waitForTimeout(400);
+    t(await vp.evaluate(() => document.getElementById('studio-voile').dataset.voile) === 'oui',
+      'voile : l\'interrupteur du studio dit son état');
+
+    /* Un bouton qui change de taille ou de place à l'instant où on l'appuie
+       se dérobe sous le doigt : les deux mots occupent la même cellule, et la
+       phrase à côté prend toute la place qui reste. */
+    const boite = () => vp.evaluate(() => {
+      const b = document.getElementById('studio-voile').getBoundingClientRect();
+      return [+b.x.toFixed(1), +b.y.toFixed(1), +b.width.toFixed(1)];
+    });
+    const boiteAvant = await boite();
+    await vp.$eval('#studio-voile', e => e.click());
+    await vp.waitForTimeout(400);
     const boiteApres = await boite();
     t(JSON.stringify(boiteAvant) === JSON.stringify(boiteApres),
       'voile : l\'interrupteur ne bouge pas d\'un pixel quand on l\'appuie',
       JSON.stringify(boiteAvant) + ' -> ' + JSON.stringify(boiteApres));
+    t(await vp.evaluate(() => /retiré/.test(document.querySelector('.studio-voile span').textContent)),
+      'voile : la phrase du studio suit l\'interrupteur');
+
+    await vp.keyboard.press('Escape');
+    await vp.waitForTimeout(300);
+    const sans = await dire();
+    t(/sans voile/.test(sans.ligne), 'voile : la puce suit l\'interrupteur', sans.ligne.slice(0, 60));
     t(/v=0/.test(sans.url), 'voile : le retrait part dans l\'adresse, il change le fichier');
     t(sans.empreinte !== avec.empreinte, 'voile : l\'aperçu est redessiné, il reste le fichier');
     t(/voile retiré/.test(sans.detail), 'voile : le verdict le nomme autrement qu\'un voile nul mesuré',
@@ -1345,10 +1352,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await vctx.close();
   }
 
-  /* --- 21c. les autres formats
-     Quatre sorties de plus derrière un dépli, et le presse-papiers. Ce qui doit
-     tenir : chacune livre le type qu'elle annonce, et le SVG se refuse quand le
-     motif compte trop de formes plutôt que de livrer un fichier inouvrable. */
+  /* --- 21c. les autres sorties du studio
+     Quatre formats et deux actions dans la feuille d'export. Ce qui doit
+     tenir : chaque sortie livre le type qu'elle annonce, la note du format
+     choisi se lit avant l'appui, et le SVG se refuse quand le motif compte
+     trop de formes plutôt que de livrer un fichier inouvrable. */
   {
     const fctx = await browser.newContext({
       viewport: { width: 900, height: 1000 }, locale: 'fr-FR', acceptDownloads: true
@@ -1357,30 +1365,65 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=arches&p=nuit&d=0&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
     await fp.waitForTimeout(400);
 
-    await fp.$eval('#btn-formats', e => e.click());
-    await fp.waitForTimeout(300);
-    const ouvert = await fp.evaluate(() => ({
-      deplie: document.getElementById('btn-formats').getAttribute('aria-expanded'),
-      sorties: [...document.querySelectorAll('#feuille-formats .feuille-b')].map(b => b.id),
-      svgActif: !document.getElementById('format-svg').disabled
-    }));
-    t(ouvert.deplie === 'true', 'formats : le dépli dit son état');
-    t(ouvert.sorties.length === 5, 'formats : cinq sorties de plus', ouvert.sorties.join(', '));
-    t(ouvert.svgActif, 'formats : le SVG est offert pour une famille géométrique calme');
+    const ouvrirStudio = async () => {
+      await fp.$eval('#synthese-sortie', e => e.click());
+      await fp.waitForTimeout(400);
+    };
 
-    const attraper = async (id) => {
+    await ouvrirStudio();
+    const ouvert = await fp.evaluate(() => ({
+      deplie: document.getElementById('synthese-sortie').getAttribute('aria-expanded'),
+      dialogue: !!document.querySelector('#feuille-modale[role="dialog"]'),
+      formats: [...document.querySelectorAll('#studio-formats .opt')].map(b => b.id),
+      actions: [...document.querySelectorAll('.studio-action')].map(b => b.id),
+      svgActif: document.getElementById('studio-format-svg').getAttribute('aria-disabled') !== 'true'
+    }));
+    t(ouvert.deplie === 'true', 'studio : la puce dit son état');
+    t(ouvert.dialogue, 'studio : la feuille est un vrai dialogue');
+    t(ouvert.formats.length === 4, 'studio : quatre formats au choix', ouvert.formats.join(', '));
+    t(ouvert.actions.length === 2, 'studio : deux actions de plus', ouvert.actions.join(', '));
+    t(ouvert.svgActif, 'studio : le SVG est offert pour une famille géométrique calme');
+
+    /* La croix : la sortie qui se voit. Elle ferme la feuille et rend le
+       focus à la puce, comme Échap et le voile. */
+    await fp.evaluate(() => document.querySelector('.feuille-fermer').click());
+    await fp.waitForTimeout(300);
+    t(await fp.evaluate(() => !document.getElementById('feuille-modale')),
+      'studio : la croix referme la feuille');
+    t(await fp.evaluate(() => document.activeElement?.id === 'synthese-sortie'),
+      'studio : et rend le focus à la puce');
+    await ouvrirStudio();
+
+    /* La note du format choisi se lit au moment du choix, avant l'appui. */
+    await fp.$eval('#studio-format-svg', e => e.click());
+    await fp.waitForTimeout(200);
+    const noteSvg = await fp.evaluate(() => document.getElementById('studio-format-note').textContent);
+    t(/grain/.test(noteSvg), 'studio : la note du SVG dit ce que le vectoriel ne porte pas', noteSvg);
+
+    /* Une sortie referme la feuille : on la rouvre pour la suivante, c'est
+       le geste réel. Le format est un réglage de session : il reste coché
+       d'une ouverture à l'autre, on ne recoche que pour en changer. */
+    const attraper = async (format) => {
+      if (!(await fp.evaluate(() => !!document.getElementById('feuille-modale')))) {
+        await ouvrirStudio();
+      }
+      if (format) {
+        await fp.$eval('#studio-format-' + format, e => e.click());
+        await fp.waitForTimeout(150);
+      }
       const [dl] = await Promise.all([
         fp.waitForEvent('download', { timeout: 45000 }),
-        fp.$eval(id, e => e.click())
+        fp.$eval('#studio-exporter', e => e.click())
       ]);
       const chemin = path.join(OUT, dl.suggestedFilename());
       await dl.saveAs(chemin);
+      await fp.waitForTimeout(300);
       return { nom: dl.suggestedFilename(), chemin, octets: fs.statSync(chemin).size };
     };
 
-    const svg = await attraper('#format-svg');
+    const svg = await attraper(null);
     const texte = fs.readFileSync(svg.chemin, 'utf8');
-    t(/\.svg$/.test(svg.nom) && texte.startsWith('<?xml'), 'formats : le SVG est un vrai SVG', svg.nom);
+    t(/\.svg$/.test(svg.nom) && texte.startsWith('<?xml'), 'studio : le SVG est un vrai SVG', svg.nom);
 
     /* Le vectoriel est le même fichier dans un autre format, version sombre
        comprise : il doit porter l'aplat noir, à l'opacité que la sonde a dosée,
@@ -1390,50 +1433,56 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
        `fill-opacity`, mais sur la teinte de son libellé, jamais sur du noir
        pur. C'est ce couple qu'il faut chercher, pas l'opacité seule. */
     const ombreDe = (svg) => svg.match(/fill="#000000" fill-opacity="([0-9.]+)"/);
-    t(!ombreDe(texte), 'formats : le SVG clair ne porte aucun aplat de version');
+    t(!ombreDe(texte), 'studio : le SVG clair ne porte aucun aplat de version');
 
-    /* Un réglage ne referme pas la feuille : elle reste ouverte pendant qu'on
-       change de version, et il n'y a donc rien à rouvrir entre les deux. */
+    /* La feuille s'est refermée avec la sortie : la version se règle au
+       panneau, puis le studio se rouvre pour le fichier suivant. */
     await fp.$eval('#liste-version [data-version="sombre"]', e => e.click());
     await fp.waitForTimeout(500);
-    const svgSombre = await attraper('#format-svg');
+    const svgSombre = await attraper('svg');
     const texteSombre = fs.readFileSync(svgSombre.chemin, 'utf8');
     const ombre = ombreDe(texteSombre);
-    t(/-sombre\.svg$/.test(svgSombre.nom), 'formats : le SVG sombre se nomme comme le PNG', svgSombre.nom);
+    t(/-sombre\.svg$/.test(svgSombre.nom), 'studio : le SVG sombre se nomme comme le PNG', svgSombre.nom);
     t(Boolean(ombre) && Number(ombre[1]) > 0.2,
-      'formats : le SVG sombre porte l\'aplat de la version, dosé par la sonde',
+      'studio : le SVG sombre porte l\'aplat de la version, dosé par la sonde',
       ombre ? ombre[1] : 'aucun');
     await fp.$eval('#liste-version [data-version="claire"]', e => e.click());
     await fp.waitForTimeout(400);
-    t(/viewBox="0 0 1179 2556"/.test(texte), 'formats : le SVG porte la résolution visée');
+    t(/viewBox="0 0 1179 2556"/.test(texte), 'studio : le SVG porte la résolution visée');
     /* Le voile est peint en rgba() sur un canevas ; dans un SVG, cette notation
        n'appartient pas à la norme 1.1 et un outil de dessin y perdrait les
        bandes. L'opacité doit donc être sortie dans `fill-opacity`. */
-    t(!/rgba?\(/.test(texte), 'formats : le SVG n\'écrit aucune couleur fonctionnelle');
-    t(/fill-opacity=/.test(texte), 'formats : le voile y passe par fill-opacity');
+    t(!/rgba?\(/.test(texte), 'studio : le SVG n\'écrit aucune couleur fonctionnelle');
+    t(/fill-opacity=/.test(texte), 'studio : le voile y passe par fill-opacity');
     const teintes = [...texte.matchAll(/fill="([^"]*)"/g)].map(m => m[1]);
     t(teintes.length > 0 && teintes.every(c => /^#[0-9A-F]{6}$/.test(c)),
-      'formats : toutes ses couleurs sont hexadécimales', teintes.length + ' remplissages');
+      'studio : toutes ses couleurs sont hexadécimales', teintes.length + ' remplissages');
 
-    await fp.$eval('#btn-formats', e => e.click());
-    await fp.waitForTimeout(200);
-    await fp.$eval('#btn-formats', e => e.click());
-    await fp.waitForTimeout(200);
-    const png2x = await attraper('#format-png2x');
+    const png2x = await attraper('png2x');
     const tete = fs.readFileSync(png2x.chemin).subarray(0, 8);
     t(tete.equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
-      'formats : le PNG 2x est un PNG', png2x.nom);
-    t(/2358x5112/.test(png2x.nom), 'formats : le PNG 2x fait deux fois la résolution', png2x.nom);
+      'studio : le PNG 2x est un PNG', png2x.nom);
+    t(/2358x5112/.test(png2x.nom), 'studio : le PNG 2x fait deux fois la résolution', png2x.nom);
 
-    await fp.$eval('#btn-formats', e => e.click());
-    await fp.waitForTimeout(200);
-    await fp.$eval('#btn-formats', e => e.click());
-    await fp.waitForTimeout(200);
-    const webp = await attraper('#format-webp');
+    const webp = await attraper('webp');
     const entete = fs.readFileSync(webp.chemin).subarray(0, 12).toString('latin1');
-    t(/^RIFF/.test(entete) && /WEBP/.test(entete), 'formats : le WebP est un WebP', webp.nom);
-    t(webp.octets < png2x.octets, 'formats : le WebP est plus léger que le PNG doublé',
+    t(/^RIFF/.test(entete) && /WEBP/.test(entete), 'studio : le WebP est un WebP', webp.nom);
+    t(webp.octets < png2x.octets, 'studio : le WebP est plus léger que le PNG doublé',
       webp.octets + ' o contre ' + png2x.octets + ' o');
+
+    /* Le format choisi tient pour la session : la puce de synthèse l'écrit
+       sous le bouton, et Télécharger produit exactement ce qu'elle dit.
+       C'est la phrase qui rend la mémoire sûre, et elle se vérifie ici sur
+       le WebP qui vient d'être choisi. */
+    const puceRetenue = await fp.evaluate(() => document.getElementById('synthese-sortie').textContent);
+    t(/WebP/.test(puceRetenue), 'studio : la puce porte le format de la session', puceRetenue.slice(0, 60));
+    const [retenu] = await Promise.all([
+      fp.waitForEvent('download', { timeout: 45000 }),
+      fp.$eval('#btn-export', e => e.click())
+    ]);
+    t(/\.webp$/.test(retenu.suggestedFilename()),
+      'studio : Télécharger produit le format que la puce écrit', retenu.suggestedFilename());
+    await fp.waitForTimeout(300);
 
     /* Le garde-fou du SVG ne se déclenche sur aucune famille livrée : la plus
        peuplée, Mosaïque en dense, compte moins de mille formes, et le plafond
@@ -1442,16 +1491,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
        le PNG qu'il remplace. */
     await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=mosaique&p=nuit&d=2&s=7314&r=2560x1440', { waitUntil: 'networkidle' });
     await fp.waitForTimeout(400);
-    await fp.$eval('#btn-formats', e => e.click());
+    await ouvrirStudio();
     await fp.waitForTimeout(600);
-    const dense = await fp.evaluate(() => ({
-      actif: !document.getElementById('format-svg').disabled,
-      note: document.querySelector('#format-svg .feuille-n').textContent
-    }));
-    t(dense.actif, 'formats : le SVG est offert même sur la famille la plus peuplée');
-    t(/grain/.test(dense.note), 'formats : et la note dit ce que le vectoriel ne porte pas', dense.note);
-    const svgDense = await attraper('#format-svg');
-    t(svgDense.octets < 400000, 'formats : le SVG dense reste un fichier raisonnable',
+    t(await fp.evaluate(() => document.getElementById('studio-format-svg').getAttribute('aria-disabled') !== 'true'),
+      'studio : le SVG est offert même sur la famille la plus peuplée');
+    const svgDense = await attraper('svg');
+    t(svgDense.octets < 400000, 'studio : le SVG dense reste un fichier raisonnable',
       Math.round(svgDense.octets / 1024) + ' Ko');
     await fctx.close();
   }
@@ -1718,9 +1763,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     tp.on('download', dl => recus.push(dl.suggestedFilename()));
     await tp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&m=arches&p=nuit&d=0&s=7314&r=1179x2556', { waitUntil: 'networkidle' });
     await tp.waitForTimeout(400);
-    await tp.$eval('#btn-formats', e => e.click());
-    await tp.waitForTimeout(200);
-    await tp.$eval('#format-trois', e => e.click());
+    await tp.$eval('#synthese-sortie', e => e.click());
+    await tp.waitForTimeout(300);
+    await tp.$eval('#studio-trois', e => e.click());
     await tp.waitForTimeout(9000);
     t(recus.length === 3, 'trois appareils : trois fichiers partent', recus.join(', '));
     t(recus.some(n => /1179x2556/.test(n)) && recus.some(n => /2048x2732/.test(n))
