@@ -46,11 +46,11 @@ function abscisses(d: string): number[] {
 }
 
 describe('liste des reliefs', () => {
-  it('range chacun dans le catalogue, chez les abstraits', () => {
+  it('range chacun dans le catalogue, chez les volumes', () => {
     for (const id of IDS_RELIEFS) {
       const entree = FAMILLES.find((f) => f.id === id)
       expect(entree, id).toBeDefined()
-      expect(entree?.groupe, id).toBe('abs')
+      expect(entree?.groupe, id).toBe('vol')
     }
   })
 

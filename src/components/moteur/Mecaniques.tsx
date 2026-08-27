@@ -25,13 +25,13 @@ function lister(
 }
 
 /**
- * Étape 03 : les treize gestes.
+ * Étape 03 : les quatorze gestes.
  *
  * C'est la partie « sous le capot » de la page, et la seule où le motif de la
  * page ne se retrouve pas : chaque fiche garde son exemple, famille et palette
  * figées. Une fiche qui suivrait la palette du moment démontrerait la palette
  * au lieu de démontrer la mécanique, et changer une pastille à l'étape 01
- * repeindrait treize toiles pour rien.
+ * repeindrait quatorze toiles pour rien.
  *
  * Le fil tient dans l'autre sens : toucher une fiche fait passer le motif de la
  * page à sa mécanique, et les cinq autres étapes suivent. La palette, la

@@ -240,22 +240,54 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(await page.evaluate(() => !!document.getElementById('note-faite')),
     'succès : carte en place avant le test des onglets');
 
-  /* --- 11. les trois onglets de familles, et un réglage touché efface la
+  /* --- 11. les onglets de familles, et un réglage touché efface la
      carte succès. « Étoiles » est dans les figures : l'atteindre demande
      d'ouvrir son onglet, ce qui est exactement ce que la grille plate ne
      demandait pas et ce pour quoi elle mettait mille pixels entre deux
      motifs. */
-  const onglets = await page.evaluate(() => ({
-    ouvert: document.querySelector('.onglet[aria-selected="true"]').dataset.groupe,
-    visibles: document.querySelectorAll('#liste-familles .opt').length,
-    comptes: [...document.querySelectorAll('.onglet-n')].map(n => parseInt(n.textContent, 10))
-  }));
+  const onglets = await page.evaluate(() => {
+    const tous = [...document.querySelectorAll('.onglet')];
+    const boites = tous.map(o => o.getBoundingClientRect());
+    return {
+      ouvert: document.querySelector('.onglet[aria-selected="true"]').dataset.groupe,
+      visibles: document.querySelectorAll('#liste-familles .opt').length,
+      comptes: [...document.querySelectorAll('.onglet-n')].map(n => parseInt(n.textContent, 10)),
+      hauteur: Math.round(Math.max(...boites.map(b => b.bottom)) - Math.min(...boites.map(b => b.top))),
+      coupes: tous.filter(o => {
+        const l = o.querySelector('span');
+        return l.scrollWidth > l.clientWidth;
+      }).map(o => o.dataset.groupe),
+      /* La gouttière du panneau, vue par trois blocs qui se suivent. */
+      marges: (() => {
+        const g = document.querySelector('.panneau').getBoundingClientRect().left;
+        return ['.carte-h', '.onglets', '.grille-familles']
+          .map(sel => Math.round(document.querySelector(sel).getBoundingClientRect().left - g));
+      })()
+    };
+  });
   t(onglets.ouvert === 'abs', 'onglets : celui de la famille en cours est ouvert', onglets.ouvert);
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 72,
-    'onglets : les cinq couvrent les soixante-douze familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
+    'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+  /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
+     quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
+     et la première vignette de famille en fait 86 : on ferait défiler un mur de
+     navigation avant de voir un seul motif. Le plafond est donc la mesure de ce
+     mur, pas un nombre choisi. */
+  t(onglets.hauteur <= 4 * 44 + 3 * 3,
+    'onglets : la barre tient en quatre rangées sur un téléphone', onglets.hauteur + ' px');
+  /* Le titre, les onglets et les vignettes se suivent dans la même carte : ils
+     commencent sur la même verticale, ou l'oeil voit une marche. La barre a
+     débordé sa carte une fois pour se loger, et c'est ce contrôle qui manquait. */
+  t(new Set(onglets.marges).size === 1,
+    'onglets : titre, onglets et vignettes partent de la même verticale',
+    onglets.marges.join(' / ') + ' px');
+  /* Le libellé est en `text-overflow: ellipsis` : un groupe au nom plus long
+     que la place ne casserait rien, il s'abrégerait en silence. */
+  t(onglets.coupes.length === 0,
+    'onglets : aucun libellé abrégé', onglets.coupes.join(', ') || 'aucun');
 
   await page.$eval('#onglet-fig', e => e.click());
   await page.waitForTimeout(300);
@@ -277,6 +309,23 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   }));
   t(en.html === 'en' && en.cta === 'Download' && /Download|generative/.test(en.title) && en.stock === 'en' && !en.url.includes('l='),
     'langue : bascule complète, retenue sur l\'appareil et pas dans l\'adresse', JSON.stringify(en));
+  /* C'est l'anglais qui a le libellé le plus long, « Landscapes », et c'est lui
+     qui décide de la largeur d'un onglet emballé. Le contrôle du français ne
+     dit donc rien de la langue qui serre le plus. */
+  const ongletsEn = await page.evaluate(() => {
+    const tous = [...document.querySelectorAll('.onglet')];
+    const boites = tous.map(o => o.getBoundingClientRect());
+    return {
+      hauteur: Math.round(Math.max(...boites.map(b => b.bottom)) - Math.min(...boites.map(b => b.top))),
+      coupes: tous.filter(o => {
+        const l = o.querySelector('span');
+        return l.scrollWidth > l.clientWidth;
+      }).map(o => o.dataset.groupe)
+    };
+  });
+  t(ongletsEn.hauteur <= 4 * 44 + 3 * 3 && ongletsEn.coupes.length === 0,
+    'onglets : quatre rangées et aucun libellé abrégé en anglais aussi',
+    ongletsEn.hauteur + ' px, ' + (ongletsEn.coupes.join(', ') || 'aucun abrégé'));
 
   // --- 14. thème
   await tap('[data-theme="sombre"]');
@@ -429,6 +478,57 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }, vign.hashes);
     t(apres.changed >= 4 && apres.same.length === 0, 'vignettes : remises à jour au changement de palette',
       apres.changed + ' changées, inchangées: ' + (apres.same.join(',') || 'aucune'));
+  }
+
+  // --- 11b. la barre d'onglets aux largeurs où elle est le plus serrée.
+  //          390 px est la largeur confortable : la rangée y garde vingt
+  //          pixels de marge avant de se casser. Les deux qui décident sont
+  //          360, où le panneau est le plus étroit du portage, et 430, où la
+  //          rangée du milieu en porte trois. Et c'est l'anglais qui serre, son
+  //          libellé le plus long faisant quatre pixels de plus que le nôtre.
+  {
+    for (const largeur of [360, 430]) {
+      for (const langue of ['fr', 'en']) {
+        const octx = await browser.newContext({
+          viewport: { width: largeur, height: 844 }, deviceScaleFactor: 3, locale: 'fr-FR'
+        });
+        const op = await octx.newPage();
+        await op.goto(`http://127.0.0.1:${PORT}/app?m=vagues&p=lime&d=1&s=7314&l=${langue}`,
+          { waitUntil: 'networkidle' });
+        await op.waitForTimeout(700);
+        const b = await op.evaluate(() => {
+          const pan = document.querySelector('.panneau').getBoundingClientRect();
+          const tous = [...document.querySelectorAll('.onglet')];
+          const r = tous.map(o => o.getBoundingClientRect());
+          const gouttiere = Math.round(
+            document.querySelector('.onglets').getBoundingClientRect().left - pan.left
+          );
+          return {
+            h: Math.round(Math.max(...r.map(x => x.bottom)) - Math.min(...r.map(x => x.top))),
+            coupes: tous.filter(o => {
+              const l = o.querySelector('span');
+              return l.scrollWidth > l.clientWidth;
+            }).length,
+            cible: Math.min(...r.map(x => Math.round(x.height))),
+            marges: ['.carte-h', '.onglets', '.grille-familles']
+              .map(sel => Math.round(document.querySelector(sel).getBoundingClientRect().left - pan.left)),
+            /* La gouttière doit rester au moins aussi large que l'écart entre
+               deux vignettes : plus petite, le mur serait plus proche qu'une
+               voisine et la rangée le compterait comme un des siens. */
+            gouttiere,
+            ecart: Math.round(parseFloat(getComputedStyle(document.querySelector('.grille-familles')).gap))
+          };
+        });
+        const ou = `${langue} ${largeur}`;
+        t(b.h <= 4 * 44 + 3 * 3 && b.coupes === 0 && b.cible >= 44,
+          `onglets ${ou} : quatre rangées, aucun libellé abrégé, cibles à 44 px`,
+          `${b.h} px, ${b.coupes} abrégé(s), cible ${b.cible} px`);
+        t(new Set(b.marges).size === 1 && b.gouttiere - 2 >= b.ecart,
+          `onglets ${ou} : gouttière commune, et jamais sous l'écart des vignettes`,
+          `marges ${b.marges.join('/')}, gouttière ${b.gouttiere - 2} contre écart ${b.ecart}`);
+        await octx.close();
+      }
+    }
   }
 
   // --- 12. clavier, sur une page fraîche : l'ordre de tabulation part du haut
@@ -1470,10 +1570,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       'historique : rien tant que rien n\'a été regardé', JSON.stringify(neuf.stockage));
 
     /* Un motif traversé en un clin d'oeil ne compte pas : sans ce délai,
-       parcourir les familles remplirait la liste de motifs jamais regardés. */
+       parcourir les familles remplirait la liste de motifs jamais regardés.
+
+       Les deux familles cliquées doivent être dans l'onglet ouvert, celui de
+       la famille de l'adresse : une vignette d'un autre groupe n'est pas dans
+       le document, et le clic ne trouve rien. L'adresse ci-dessus ouvre sur
+       Vagues, donc sur les abstraits, et Blobs comme Découpes en sont. */
     await hp.$eval('[data-famille="blobs"]', e => e.click());
     await hp.waitForTimeout(500);
-    await hp.$eval('[data-famille="arches"]', e => e.click());
+    await hp.$eval('[data-famille="decoupes"]', e => e.click());
     await hp.waitForTimeout(500);
     const traverse = await lu();
     t(traverse.stockage.length === 0,
@@ -1481,7 +1586,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
 
     await hp.waitForTimeout(2600);
     const regarde = await lu();
-    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'arches',
+    t(regarde.stockage.length === 1 && regarde.stockage[0].m === 'decoupes',
       'historique : un motif regardé s\'enregistre', JSON.stringify(regarde.stockage));
 
     /* Dix-huit familles regardées : la liste s'arrête à dix, la plus ancienne

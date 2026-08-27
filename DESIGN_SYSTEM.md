@@ -311,11 +311,34 @@ l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les cinq groupes de familles, en cinq onglets
+### Les huit groupes de familles, en huit onglets
 
-La liste des familles est longue, et une liste longue se range. Cinq
-groupes : les **abstraits**, les **matières**, les **paysages**, les
-**lieux**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Huit groupes :
+les **abstraits**, les **pavages**, les **volumes**, les **instruments**, les
+**matières**, les **paysages**, les **lieux**, les **figures**.
+
+**Un groupe n'existe que si son critère tient en une phrase.** C'est la règle,
+et elle sert à quelque chose : « abstraits » n'en avait pas, il était le bac de
+ce qui n'était rangé nulle part, et il a fini par porter quarante et une
+familles sur soixante-seize. Les onglets avaient été inventés contre exactement
+ça ; le défaut était revenu à l'intérieur d'un onglet.
+
+| Groupe | La phrase |
+|---|---|
+| Abstraits | des formes libres sur un aplat, rien n'y revient à intervalle régulier |
+| Pavages | une maille revient, et l'oeil la suit du doigt |
+| Volumes | c'est plat, et on y voit pourtant un volume |
+| Instruments | le motif est gradué, il mesure |
+| Matières | la main les reconnaît avant l'oeil |
+| Paysages | ils ont un haut et un bas |
+| Lieux | des gravures tramées, deux tons seulement |
+| Figures | des objets posés sur un fond, reconnaissables un par un |
+
+**Un plafond tient la règle.** Un test (`src/lib/moteur.test.ts`) refuse qu'un
+groupe passe vingt familles. Personne ne voit un fourre-tout se former, parce
+qu'une famille de plus ne se voit jamais ; le test le voit à la place. Le jour
+où il échoue, la réponse n'est pas de relever le plafond : c'est qu'un groupe
+demande à être coupé, et qu'il faut lui trouver la phrase qui le coupe.
 
 Les paysages se sont détachés des abstraits le jour où ils ont été trois. Une
 silhouette de montagne, un couchant et des nuages ne se cherchent pas au milieu
@@ -337,19 +360,86 @@ qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-cinq onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+huit onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
 remplace la vue d'ensemble perdue.
 
-Ils sont **empilés quand la colonne est étroite**, sur une rangée dès qu'elle
-peut porter trois mots. La bascule se règle sur la largeur du panneau et non sur
-celle de la fenêtre, par une requête de conteneur, parce que les deux n'ont rien
-à voir : sur un téléphone de 390 px, le panneau tient dans une colonne de
-207 px, où cinq onglets côte à côte réduiraient « Abstraits » à « A… ». La pile
-est la valeur par défaut et la rangée l'exception, si bien qu'un navigateur qui
-ne connaîtrait pas les requêtes de conteneur garde la forme lisible.
+Ils sont posés en **grille qui se répartit d'elle-même**, et non en pile qui
+bascule en rangée à une largeur choisie. La bascule marchait à cinq onglets et
+ne marche plus à huit : la rangée partageait la largeur entre tous, et huit
+parts d'un panneau de trois cents pixels réduisent « Abstraits » à « A… », ce
+que le dessin refuse. La grille pose le problème dans l'autre sens : on donne
+la largeur minimale sous laquelle un onglet ne se lit plus, celle du plus long
+libellé des deux langues, et c'est elle qui décide du nombre de colonnes. Deux
+sur une tablette, trois sur un bureau ; jamais un mot coupé, à aucune largeur.
+
+**Sur téléphone, la même règle donnait un mur**, et c'est le seul endroit du
+portage où elle est remplacée. Des colonnes égales prennent leur largeur sur le
+plus long libellé : « Landscapes » demande cent pixels avec son compte et ses
+marges, deux colonnes en demandent deux cent cinq, et le panneau d'un téléphone
+de 360 px n'en offre que cent quatre-vingt-douze. La grille y retombait donc à
+une colonne, soit huit rangées et quatre cents pixels de navigation avant la
+première vignette, pour des vignettes de quatre-vingts. Sur ce panneau, les
+onglets sont donc **emballés** plutôt qu'alignés : chacun prend la largeur de
+son mot, la rangée s'étire jusqu'au bord, et « Lieux » et « Figures » tiennent
+ensemble aussi bien qu'« Instruments » seul. La barre tombe à quatre rangées
+sur tous les téléphones, trois à 320 px.
+
+Deux mesures l'accompagnent, à ne pas défaire. Son libellé descend à 12,5 px,
+seul texte de commande du portage sous 13 px, ce qui s'assume sur huit noms
+communs en gras. Et **un onglet ne prend jamais plus de la moitié d'une rangée,
+ni moins que ce que son mot demande** : sans le plafond, la dernière rangée
+d'un panneau de 430 px ne porte que « Figures », étiré sur toute la largeur,
+un aplat quatre fois plus long que ses voisins qui se lit comme une mise en
+avant alors qu'il n'est que le reste de la division ; sans le plancher, un mot
+plus long que la moitié d'une rangée étroite s'abrégerait en silence. Les deux
+se contrôlent à chaque passage de `e2e`, dans les deux langues, à 360, 390 et
+430 px : la hauteur, l'absence de mot abrégé, la cible à 44 px, et la gouttière
+commune.
+
+Le seuil est une largeur de panneau, jamais de fenêtre, et il vaut 320 px. Le
+chiffre n'est pas rond par hasard : à 340 px de fenêtre la page n'a qu'une
+colonne, le panneau y fait 308 px, et la grille y tenait encore à un pixel près
+sous ses deux colonnes. Le mur de 401 px revenait dans cette bande, entre deux
+largeurs qu'on avait regardées et qui allaient bien toutes les deux.
+
+Ce qui n'est **pas** dessiné : la coupure entre les quatre géométries, la
+matière qui fait charnière et les trois figurations. Elle se marquerait par un
+écart, or la fin d'une rangée dépend maintenant de la longueur des mots et de
+la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
+L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
+pas de le savoir.
+
+### La gouttière du panneau
+
+Le panneau a une gouttière, et **une seule pour tous les blocs qui s'y
+succèdent** : le titre d'une carte, la barre d'onglets et la grille de vignettes
+commencent sur la même verticale, à toute largeur. C'est une règle du même rang
+que les rayons ou les jetons de couleur, et elle a été apprise de travers.
+
+Une version de la barre d'onglets débordait sa carte de vingt pixels pour y
+loger une deuxième colonne. Le calcul était juste et le résultat visible : sur
+téléphone, les onglets partaient du trait du panneau et les vignettes de dix
+pixels plus loin, deux blocs qui se suivent avec deux marges. C'est le premier
+reproche qui a été fait à cet écran.
+
+La règle qui en sort tient en une phrase : **un bloc ne finance pas sa mise en
+page sur la gouttière du panneau**. Quand une rangée manque de place, elle la
+prend sur son propre rembourrage et sur ses propres écarts, jamais sur la marge
+qu'elle partage avec ses voisins. La barre resserrée en est l'exemple : elle
+rend les vingt pixels en passant son rembourrage de douze à quatre et l'écart
+entre deux onglets de sept à trois, et la gouttière ne bouge pas.
+
+Une seconde règle la borne : **jamais sous l'écart qui sépare deux voisines.**
+Une gouttière plus petite que le pas de la grille mettrait le mur plus près
+qu'un voisin, et la rangée le compterait comme un des siens : le même défaut,
+déplacé d'un bloc à l'autre. Les deux paliers la respectent, 18 contre 9 et 10
+contre 7, et `e2e` le vérifie à chaque passage.
+
+Le nombre de colonnes n'est écrit nulle part dans la feuille de style : un
+neuvième groupe s'y rangera sans qu'on y retouche.
 
 L'onglet s'ouvre sur **le groupe de la famille de l'adresse**, puis ne change
 plus que sous le doigt. Il a suivi la famille en cours un temps, et c'était un
@@ -362,10 +452,14 @@ l'adresse. Les flèches parcourent les onglets sans les ouvrir, sans quoi le
 clavier traverserait un rendu complet de grille par onglet pour atteindre le
 dernier.
 
-Les cinq groupes se suivent d'un seul tenant dans le moteur, dans cet ordre. Un
-test le tient fermé (`src/lib/moteur.test.ts`) : le panneau construit ses
-grilles en filtrant sur le groupe, et une famille rangée hors de son bloc
-sauterait de place à l'écran sans que rien ne le signale.
+Les huit groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
+les quatre géométriques, puis les matières qui sont entre les deux mondes, puis
+les trois figuratifs. Un test le tient fermé (`src/lib/moteur.test.ts`) : le
+panneau construit ses grilles en filtrant sur le groupe, et une famille rangée
+hors de son bloc sauterait de place à l'écran sans que rien ne le signale.
+C'est aussi le filet qui rattrape la faute de frappe la plus probable de la
+liste, `pav` écrit `pay` : les deux existent, le compilateur laisse passer, et
+la famille se retrouverait dans les paysages.
 
 ### Les palettes qu'on écrit soi-même
 
@@ -472,11 +566,11 @@ et ça cacherait à la lecture ce que la page est censée expliquer. Le rang d'u
 étape est `aria-hidden` et le titre le double toujours, comme partout ailleurs
 où un signe repère sans porter d'information seule.
 
-**Les treize fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
+**Les quatorze fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
 que chaque écran est un bouton qui tire un autre motif ; ici, l'objet manipulé
 est le motif en cours de construction, et une fiche n'en tire pas un autre :
 elle fait adopter sa mécanique. Son exemple, lui, ne bouge jamais, sans quoi les
-treize fiches cesseraient d'être comparables entre elles.
+quatorze fiches cesseraient d'être comparables entre elles.
 
 **La treizième tuile de la galerie n'est pas une quatorzième image.** Elle est
 la porte vers ce document, elle ne porte pas de canevas, et elle ne ressemble

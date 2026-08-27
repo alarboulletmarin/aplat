@@ -9,6 +9,71 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : le catalogue passe de cinq groupes à huit
+
+- **« Abstraits » était devenu le fourre-tout.** Quarante et une familles sur
+  soixante-seize dans un seul onglet, c'est-à-dire exactement le défaut contre
+  lequel les onglets avaient été inventés, revenu à l'intérieur d'un onglet.
+  Il est coupé en quatre : **Abstraits** garde les formes libres, **Pavages**
+  prend tout ce dont la maille revient, **Volumes** les quatre reliefs,
+  **Instruments** les quatre familles graduées.
+- **Un groupe n'existe que si son critère tient en une phrase.** C'était déjà
+  la règle des paysages et des matières ; elle vaut maintenant pour les huit,
+  et chaque phrase est écrite dans le système de design.
+- **Un plafond tient la règle.** Un test refuse qu'un groupe passe vingt
+  familles. Personne ne voit un fourre-tout se former, parce qu'une famille de
+  plus ne se voit jamais ; le test le voit à la place, et le jour où il échoue
+  la réponse est de couper le groupe, pas de relever le plafond.
+- **Les onglets se répartissent d'eux-mêmes.** Ils basculaient d'une pile à une
+  rangée à une largeur choisie, ce qui marchait à cinq et coupait les mots à
+  huit. C'est désormais une grille : on donne la largeur sous laquelle un
+  onglet ne se lit plus, et elle décide du nombre de colonnes. Deux sur
+  tablette, trois sur bureau, jamais un mot coupé. Un neuvième groupe s'y
+  rangera sans qu'on retouche la feuille de style.
+- **Et sur téléphone, ils s'emballent.** À huit, des colonnes égales retombaient
+  à une seule sur un panneau de deux cents pixels : quatre cents pixels de
+  navigation avant la première vignette, pour des vignettes de quatre-vingts.
+  Chaque onglet y prend donc la largeur de son mot et la rangée s'étire jusqu'au
+  bord, sans jamais qu'un onglet passe la moitié de sa rangée. La barre tombe à
+  quatre rangées sur tous les téléphones, trois à 320 px : on voit un motif sans
+  avoir à faire défiler.
+- **Le panneau n'a plus qu'une gouttière.** Le titre d'une carte, les onglets et
+  les vignettes commençaient sur trois verticales différentes sur téléphone,
+  parce que la barre d'onglets débordait sa carte pour se loger. Ils partent
+  maintenant tous du même bord, à toute largeur : ce que la barre allait
+  chercher dehors, elle le prend sur son propre rembourrage.
+- **Aucun motif n'a changé.** Les familles ont changé d'onglet, pas de dessin :
+  un lien partagé rouvre exactement la même image, dans son nouveau groupe.
+
+### Ajouté : quatre instruments, et un moteur qui sait écrire
+
+- **Le motif devient un objet d'atelier.** Tapis de coupe pose une trame au
+  centimètre, une réglette graduée le long des bords et, dans un coin, un
+  faisceau d'obliques aux angles usuels. Millimétré emboîte trois trames.
+  Rapporteur pose des demi-cadrans gradués au degré sur les bords et prolonge
+  chaque dizaine jusqu'au bord de l'image. Mire aligne des cibles de réglage,
+  étoiles de Siemens, croix de centrage, peignes et échelles de valeurs. Le
+  catalogue passe à soixante-seize familles.
+- **Le moteur sait écrire des nombres.** Il ne savait pas : le pinceau n'a
+  jamais eu de `fillText`, et lui en donner aurait demandé au fichier
+  vectoriel d'embarquer une police. Les chiffres sont donc dessinés, trois
+  cases sur cinq, en rectangles pleins. La fonte ne sait que dix chiffres et
+  un degré, et c'est exactement ce qu'un instrument écrit.
+- **Le trait aussi est une surface.** Une graduation est un rectangle quand
+  elle est droite, un ruban quand elle est oblique, un arc épais quand elle
+  tourne. Un tapis de coupe s'exporte donc en SVG comme le reste du
+  catalogue, sans une seule ligne au sens du dessin.
+- **Onze palettes, onze tapis.** Un tapis de coupe est sombre et du papier
+  millimétré est clair, quelle que soit la palette : ce n'est pas une
+  préférence, c'est ce que sont ces objets. La palette ne choisit donc pas la
+  clarté du fond, elle le teinte.
+- **Le poids s'en ressent, un peu.** Médiane à 0,52 Mo et neuvième décile à
+  0,94 Mo sur les 2 508 combinaisons, contre 0,49 et 0,89 avant. Le maximum
+  passe à 1,84 Mo avec Rapporteur en dense : un cadran pose cent
+  quatre-vingt-une graduations d'un cheveu d'épaisseur, et rien ne se
+  compresse plus mal qu'un cheveu. C'est aussi pourquoi il s'arrête à quatre
+  cadrans par image.
+
 ### Ajouté : quatre familles en relief, sans un seul dégradé
 
 - **Le volume entre au catalogue.** Cubes empile des solides en axonométrie,

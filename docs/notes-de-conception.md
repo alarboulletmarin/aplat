@@ -142,7 +142,7 @@ src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
 src/lib/trace.ts              les outils des gestes : rubans, bruit, teintes
 src/lib/{niveaux,fractures,reserves,chimie,reseaux,pavages,trames,grammaires}.ts
-src/lib/{carreaux,coulees,reliefs}.ts
+src/lib/{carreaux,coulees,reliefs,mesures}.ts
                               les gestes ajoutés : un module par mécanique de dessin
 src/lib/palettes.ts           les palettes composées à la main, et leur adresse
 src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui note
@@ -230,7 +230,7 @@ nue, ou qui ne porte que la langue et le thème, reste sur l'accueil.
 
 `/moteur` répond à la question que l'accueil laisse ouverte : « comment c'est
 fait ». Elle déroule le mécanisme en six étapes numérotées, dans l'ordre où le
-produit travaille : les quatre réglages, la graine, les treize gestes de dessin,
+produit travaille : les quatre réglages, la graine, les quatorze gestes de dessin,
 les couches, la sonde de lisibilité, la résolution.
 
 Elle suit les mêmes règles que l'accueil, et pour les mêmes raisons : aucune
@@ -249,7 +249,7 @@ le motif monte à la racine de la page, ce qui décrit la façon de le regarder 
 couche montrée, l'interrupteur du voile, le cadre visé) reste dans l'étape qui
 le regarde. Sans elle, toucher le voile repeindrait les cinq autres étapes.
 
-Les treize fiches de gestes font exception au fil, et c'est voulu : chacune garde
+Les quatorze fiches de gestes font exception au fil, et c'est voulu : chacune garde
 son exemple, famille et palette figées, sinon elles démontreraient la palette du
 moment au lieu de démontrer une mécanique. Le fil tient dans l'autre sens,
 toucher une fiche fait adopter sa mécanique par le motif de la page.
@@ -367,19 +367,29 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-douze familles, cinq groupes.**
+**Soixante-seize familles, huit groupes.**
 
-- **Abstraits** (trente-sept) : les douze libres, qui sèment des formes sur un
-  aplat ; sept réglées, où une grille porte le motif, reconnaissables à une
-  répétition qu'on peut suivre du doigt, ce que les blobs et le terrazzo n'ont
-  pas ; quatre déformées, où un champ lisse plie une forme répétée, ce qui
-  se reconnaît à une règle qu'on voit se tordre ; cinq venues des gestes de la
-  seconde série : Kintsugi et Banquise brisent la surface en pièces (Voronoï
-  par découpe de demi-plans, les jointures affleurent), Claustra et Papel
-  picado percent un aplat en réserve, Penrose pave sans période, par
-  déflation ; cinq venues du carreau et de la coulée ; et quatre venues du
-  relief, où la teinte d'une face dit son orientation. Les trois gestes sont
-  décrits plus bas.
+Un groupe n'existe que si son critère tient en une phrase. « Abstraits » n'en
+avait pas : il était le bac de ce qui n'était rangé nulle part, et il a fini par
+porter quarante et une familles sur soixante-seize, c'est-à-dire le défaut
+d'avant les onglets, revenu à l'intérieur d'un onglet. Il a donc été coupé en
+quatre, avec quatre phrases.
+
+- **Abstraits** (dix-sept) : des formes libres sur un aplat, rien n'y revient à
+  intervalle régulier. Les douze qui sèment des formes, les quatre déformées où
+  un champ lisse plie une forme répétée, et Kintsugi et Banquise, qui brisent la
+  surface en pièces par découpe de demi-plans, les jointures affleurant.
+- **Pavages** (seize) : une maille revient, et l'oeil la suit du doigt. Les
+  réglées d'origine, Claustra et Papel picado qui percent un aplat en réserve,
+  Penrose qui pave sans période par déflation, et les quatre du carreau, dont
+  chaque case reçoit un signe pris dans un jeu fini.
+- **Volumes** (quatre) : c'est plat, et on y voit pourtant un volume. Les
+  quatre du relief, où la teinte d'une face dit son orientation, sans un seul
+  dégradé.
+- **Instruments** (quatre) : le motif est gradué, il mesure. Les quatre de la
+  mesure, tapis de coupe, papier millimétré, rapporteur, mire de réglage.
+- La coulée reste chez les abstraits : ses rubans serpentent, et rien n'y
+  revient.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
   reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
   Madrépore se cultivent, une réaction-diffusion de Gray-Scott gelée à un
@@ -484,6 +494,43 @@ clair que le flanc droit, tient à un test : inverser deux des trois laisse le
 dessin juste au pixel près, ne lève aucune erreur, et retourne le volume comme
 un masque creux.
 
+**Un motif qui mesure.** Les autres gestes dessinent des choses ; la mesure
+(`src/lib/mesures.ts`) dessine ce avec quoi on dessine. **Tapis de coupe**
+pose une trame au centimètre, ses axes tous les cinq, une réglette graduée le
+long des deux bords, et dans un coin la rose de l'atelier, un faisceau
+d'obliques aux angles usuels et des arcs pour reporter une distance. Les
+obliques y sont en pointillé et les axes en plein, comme sur un vrai tapis :
+ce qui se lit en plein est ce qu'on coupe, ce qui se lit en pointillé est ce
+qui aide à viser. **Millimétré** n'est que trois trames emboîtées, et tout est
+dans le dosage des trois épaisseurs : le millimètre à la limite du visible, le
+demi-centimètre qui se devine, le centimètre qui se lit. **Rapporteur** pose
+des demi-cadrans sur les bords, gradués au degré, et prolonge chaque dizaine
+jusqu'au bord de l'image. **Mire** est une planche de cibles de réglage,
+étoiles de Siemens, croix de centrage, peignes et échelles de valeurs.
+
+Trois choses manquaient au moteur pour les faire. Le trait, d'abord : le
+pinceau ne connaît que le remplissage, alors une graduation est un rectangle
+quand elle est droite, un ruban quand elle est oblique, un arc épais quand
+elle tourne. C'est plus de travail qu'un `lineWidth`, et c'est ce qui fait
+qu'un tapis de coupe s'exporte en vectoriel comme le reste. Le pointillé
+ensuite, pour les lignes de construction.
+
+Et les chiffres. Un instrument sans nombres n'est qu'un quadrillage, et le
+moteur n'avait jamais su écrire : `Pinceau` n'a pas de `fillText`, et lui en
+donner un aurait demandé au vectoriel d'embarquer une police. La fonte est donc
+dessinée, trois cases sur cinq, en rectangles pleins, et elle ne sait que les
+dix chiffres et un degré, ce qui est exactement ce qu'un instrument écrit.
+C'est le seul endroit du moteur où une donnée saisie caractère par caractère
+devient un dessin : une case oubliée dans un glyphe ne lève rien et fait
+afficher `20` là où il faudrait `26`. La table est donc publiée, et un test la
+relit case par case.
+
+Chaque famille du geste peint son propre fond, et c'est le seul du catalogue à
+le faire pour toutes les siennes. Un tapis de coupe est sombre, du papier
+millimétré est clair : ce n'est pas une préférence, c'est ce que sont ces
+objets. La palette ne choisit donc pas la clarté du fond, elle le teinte, et
+un test le tient sur les onze.
+
 **Quatre familles ignorent leur graine**, et c'est voulu : Écailles, Arcade,
 Azulejos et Tresse sont des pavages entièrement réguliers, sans un seul tirage.
 « Variante » ne change donc rien dessus ; il faut passer par la palette, la
@@ -550,14 +597,14 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **2 376 combinaisons** (72 familles × 11 palettes × 3 densités)
+Mesuré sur les **2 508 combinaisons** (76 familles × 11 palettes × 3 densités)
 en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
 |---|---|---|
-| médiane | 0,94 Mo | **0,49 Mo** |
-| 9ᵉ décile | 2,33 Mo | **0,89 Mo** |
-| maximum | 2,33 Mo | **1,63 Mo** |
+| médiane | 0,94 Mo | **0,52 Mo** |
+| 9ᵉ décile | 2,33 Mo | **0,94 Mo** |
+| maximum | 2,33 Mo | **1,84 Mo** |
 
 Les chiffres « après » ont été remesurés à l'arrivée des quatorze familles de
 la seconde série, à celle des cinq familles déformées, à celle des trois
@@ -569,7 +616,12 @@ en dense, dont chaque rayure pliée traverse la page de haut en bas ; puis à
 celui qui se compresse le moins, et il a déjà rendu une génération de
 losanges, autant pour rester lisible en aplats francs que pour son poids.
 C'est le prix honnête d'un motif qui couvre tout plutôt que de semer des
-formes sur un aplat. Les cinq familles du carreau et de la coulée n'ont pas
+formes sur un aplat. La mesure a repris la tête, et c'était couru :
+un cadran de rapporteur pose cent quatre-vingt-une graduations d'un cheveu
+d'épaisseur, et rien ne se compresse plus mal qu'un cheveu. C'est aussi
+pourquoi le geste s'est arrêté à quatre cadrans par image : à cinq, le fichier
+passait deux mégaoctets, ce qui n'était plus le prix d'un instrument mais celui
+d'une négligence. Les cinq familles du carreau et de la coulée n'ont pas
 bougé ces trois chiffres : un alphabet de signes posés sur une grille se
 compresse par bandes, et des rubans en aplats francs plus encore. Le relief
 a repris la tête d'un cheveu, 1,63 Mo avec Plis en dense, et c'était
@@ -780,9 +832,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 376 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 508 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 72 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 76 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 
