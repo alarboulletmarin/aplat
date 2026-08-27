@@ -1162,24 +1162,31 @@
 .ico-encore {
   position: relative;
   flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
+/* Un dé, légèrement penché : il vient d'être lancé. La flèche circulaire
+   disait « recommencer » là où le bouton tire ; le dé est le mot juste, et
+   c'est celui des générateurs. Deux formes, comme partout : le corps du dé,
+   puis un point et son ombre portée pour les deux autres. L'inclinaison est
+   portée par chaque forme, le cadre reste droit sous le doigt. */
 .ico-encore i {
   position: absolute;
-  inset: 0;
-  border: 2.5px solid currentColor;
-  border-radius: 50%;
-  border-top-color: transparent;
+  inset: 0.5px;
+  border: 2px solid currentColor;
+  border-radius: 5px 5px 2.5px 2.5px;
+  transform: rotate(-9deg);
 }
 .ico-encore b {
   position: absolute;
-  top: -1px;
-  right: -2px;
-  width: 7px;
-  height: 7px;
+  top: 4.6px;
+  left: 4.2px;
+  width: 3.1px;
+  height: 3.1px;
+  border-radius: 50%;
   background: currentColor;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  box-shadow: 5px 4.4px 0 0 currentColor;
+  transform: rotate(-9deg);
 }
 /* Téléchargement : une pointe vers le bas et son seuil. */
 .ico-descendre {

@@ -352,28 +352,25 @@ export function BarreAction({
             l'export refuse de repartir de lui-même. `disabled` ne reste que
             pour l'état vide, où le bouton n'a rien à faire dans le parcours. */}
         {proto === 'trio' ? (
-          /* La variante trio du banc d'essai : plus de paire, le primaire
-             ouvre la feuille et la feuille fait tout. Le PNG courant passe
-             de un geste à deux, c'est exactement ce que ce banc mesure. */
+          /* La variante trio du banc d'essai : le primaire télécharge, comme
+             partout, et sans chevron accolé. C'est la ligne de synthèse, plus
+             bas, qui ouvre le studio : un bouton nommé « Exporter » qui
+             n'exportait pas mentait sur le geste. */
           <button
             type="button"
             id="btn-export"
-            ref={boutonFormats}
             className="btn-export"
+            aria-keyshortcuts="t"
             disabled={vide}
             aria-disabled={calcul}
             aria-busy={calcul}
-            aria-haspopup="dialog"
-            aria-expanded={formats}
-            aria-controls="feuille-modale"
-            title={T.formatsTitre}
-            onClick={onFormats}
+            onClick={() => onExporter('png')}
           >
             <span className="ico-descendre" aria-hidden="true">
               <i />
               <b />
             </span>
-            <span id="cta-libelle">{calcul ? T.rendu : textes.studio.titre}</span>
+            <span id="cta-libelle">{calcul ? T.rendu : T.telecharger}</span>
           </button>
         ) : (
           <div className="btn-paire">
@@ -512,6 +509,41 @@ export function BarreAction({
           se déplace pas sous le doigt qui vient de l'appuyer. La phrase, elle,
           prend toute la place qui reste, ce qui ancre le bouton au bord plutôt
           qu'à la fin du texte, dont la longueur change aussi. */}
+      {/* La puce de synthèse de la variante trio : elle remplace la ligne du
+          voile et dit tout ce que la ligne disait, plus la taille et le
+          format. C'est le pattern des exports d'applis vidéo : le primaire
+          produit le fichier avec ces réglages, la puce les montre et les
+          ouvre. Un tap dessus, et le studio est là. */}
+      {proto === 'trio' && (
+        <button
+          type="button"
+          id="synthese-sortie"
+          ref={boutonFormats}
+          className="synthese-sortie"
+          aria-haspopup="dialog"
+          aria-expanded={formats}
+          aria-controls="feuille-modale"
+          title={textes.studio.titre}
+          onClick={onFormats}
+        >
+          <span className="synthese-texte">
+            {[
+              vide
+                ? textes.resolution.aucune
+                : `${nombre(resolution.largeur, langue)}\u00a0×\u00a0${nombre(resolution.hauteur, langue)}\u00a0px`,
+              'PNG',
+              ...(sombre ? [textes.studio.syntheseSombre] : []),
+              voile
+                ? voilePeint
+                  ? textes.studio.syntheseVoile
+                  : textes.studio.syntheseVoileNul
+                : textes.studio.syntheseSansVoile,
+            ].join(', ')}
+          </span>
+          <span className="ico-chevron" aria-hidden="true" />
+        </button>
+      )}
+
       {proto !== 'trio' && (
       <p className="barre-voile" id="barre-voile">
         <span>

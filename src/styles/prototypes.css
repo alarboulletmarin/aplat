@@ -171,3 +171,33 @@
   flex-direction: column;
   gap: 3px;
 }
+
+/* --- La puce de synthèse de la variante trio ---------------------------------
+   À la place de la ligne du voile : la phrase dit le fichier que le primaire
+   produira, et un tap ouvre le studio qui la change. */
+.synthese-sortie {
+  min-height: 44px;
+  padding: 0 12px;
+  cursor: pointer;
+  border-radius: 16px 16px 5px 5px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.synthese-sortie .synthese-texte {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.synthese-sortie[aria-expanded='true'] .ico-chevron {
+  transform: rotate(180deg);
+}

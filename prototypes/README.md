@@ -30,7 +30,7 @@ Quatre variantes derrière le commutateur du haut :
 | Témoin | disclosure dans la barre (actuel, plus fermeture au tap extérieur) | la référence à battre |
 | Feuille basse | bottom sheet modale, sorties seules | le plan isolé : scrim, poignée, renvoi au geste |
 | Studio | bottom sheet modale, toute la configuration d'export | le scénario complet sans quitter la feuille |
-| Studio seul | barre à trois boutons, la feuille porte l'appel primaire | l'épure maximale, au prix du PNG courant à 2 gestes |
+| Studio seul | trois boutons, puce de synthèse tappable sous le primaire | le pattern des applis vidéo : Télécharger télécharge, la puce dit le fichier et ouvre le studio |
 | Menu | menu ancré au déclencheur, sans scrim | la sémantique menu, au doigt et au clavier |
 
 Le panneau « Scénarios » force les états non nominaux (SVG ou WebP
@@ -45,8 +45,8 @@ un paramètre d'adresse lu au chargement et jamais partagé dans les liens :
 
 - `/app?proto=feuille` : la feuille basse modale, sorties seules.
 - `/app?proto=studio` : le studio d'export complet, derrière le chevron.
-- `/app?proto=trio` : la barre à trois boutons, le studio comme unique porte
-  de sortie et appel primaire.
+- `/app?proto=trio` : la barre à trois boutons ; Télécharger télécharge, et
+  la puce de synthèse sous lui dit le fichier à venir et ouvre le studio.
 - `/app` sans paramètre : le comportement actuel, strictement inchangé.
 
 Là, tout est réel : moteur, encodage, téléchargements, feuille de partage

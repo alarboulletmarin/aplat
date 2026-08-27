@@ -552,24 +552,26 @@ body {
 }
 .ico-encore {
   position: relative;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
 .ico-encore i {
   position: absolute;
-  inset: 0;
-  border: 2.5px solid currentColor;
-  border-radius: 50%;
-  border-top-color: transparent;
+  inset: 0.5px;
+  border: 2px solid currentColor;
+  border-radius: 5px 5px 2.5px 2.5px;
+  transform: rotate(-9deg);
 }
 .ico-encore b {
   position: absolute;
-  top: -1px;
-  right: -2px;
-  width: 7px;
-  height: 7px;
+  top: 4.6px;
+  left: 4.2px;
+  width: 3.1px;
+  height: 3.1px;
+  border-radius: 50%;
   background: currentColor;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  box-shadow: 5px 4.4px 0 0 currentColor;
+  transform: rotate(-9deg);
 }
 .ico-descendre {
   position: relative;
@@ -621,6 +623,31 @@ body {
 .btn-double { display: grid; place-items: center; }
 .btn-double > span { grid-area: 1 / 1; white-space: nowrap; }
 .btn-double > span[data-actif='non'] { visibility: hidden; }
+
+/* La puce de synthèse de Studio seul : la phrase dit le fichier que le
+   primaire produira, un tap ouvre le studio qui la change. */
+.synthese-sortie {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 16px 16px 5px 5px;
+  border: 1.5px solid var(--filet-franc);
+  background: transparent;
+  color: var(--encre);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.synthese-sortie .synthese-texte {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.synthese-sortie[aria-expanded='true'] .ico-chevron { transform: rotate(180deg); }
 
 /* --- Les notes de résultat ------------------------------------------------- */
 .note {
@@ -916,7 +943,7 @@ body {
   </div>
   <h2>Missions à chronométrer</h2>
   <ol>
-    <li>Le PNG tel quel. Attendu : 1 geste partout, 2 en Studio seul.</li>
+    <li>Le PNG tel quel. Attendu partout : 1 geste.</li>
     <li>Un WebP. Attendu : 2 gestes (3 au Studio et en Studio seul).</li>
     <li>Le scénario complet : sur mesure 1600 par 2560, version sombre, sans voile, PNG. C’est lui que les variantes se disputent.</li>
     <li>Les trois appareils. Attendu : 2 gestes.</li>
@@ -1003,6 +1030,10 @@ body {
           </button>
         </div>
       </div>
+      <button type="button" class="synthese-sortie" id="synthese-sortie" hidden aria-expanded="false">
+        <span class="synthese-texte" id="synthese-texte"></span>
+        <span class="ico-chevron" aria-hidden="true"></span>
+      </button>
       <p class="barre-voile">
         <span id="voile-phrase"></span>
         <button type="button" class="btn-voile" id="btn-voile" data-voile="oui">
@@ -1101,7 +1132,7 @@ const HYPOTHESES = {
   temoin: 'Témoin : le dépli actuel, plus la fermeture au tap extérieur et une ombre. C’est la référence, toute variante doit faire mieux que lui.',
   feuille: 'Feuille basse : le plan modal de la proposition UX. Un voile grise l’arrière, une poignée, un renvoi au geste ou au tap sur le voile. La question : le plan isolé vaut-il le poids du rituel ?',
   studio: 'Studio : tout ce qui décide du fichier dans une seule feuille sous le pouce, format, taille, version, voile, puis Exporter. Le scénario complet sans jamais remonter la page.',
-  trio: 'Studio seul : plus de bouton Télécharger. La barre n’a que trois boutons, la feuille porte l’appel primaire et fait tout. Le PNG courant passe à 2 gestes : ce que le scénario complet gagne, le cas courant le paie. À mesurer.',
+  trio: 'Studio seul : trois boutons, et Télécharger télécharge, en un geste. La ligne du voile devient une puce de synthèse, comme les exports des applis vidéo : elle dit le fichier à venir, un tap dessus ouvre le studio qui le règle. Aucun bouton ne ment sur son geste.',
   menu: 'Menu : la même liste, en menu ancré au déclencheur, sans voile. Ce que le clavier y gagne, le doigt le sent-il ?',
 }
 
@@ -1295,19 +1326,32 @@ function copierImage() {
 
 function peindreCTA() {
   const calcul = etat.phase === 'calcul'
-  const repos = etat.variante === 'trio' ? 'Exporter' : 'Télécharger'
-  $('cta-libelle').textContent = calcul ? 'Rendu en cours' : repos
+  $('cta-libelle').textContent = calcul ? 'Rendu en cours' : 'Télécharger'
   $('btn-export').setAttribute('aria-busy', calcul ? 'true' : 'false')
   $('btn-export').disabled = resolutionVide()
 }
 
-/* La variante Studio seul retire le chevron et la ligne du voile : la barre
-   n'a que trois boutons, la feuille fait le reste. */
+/* La variante Studio seul retire le chevron, et la ligne du voile cède sa
+   place à la puce de synthèse : le primaire télécharge, la puce dit le
+   fichier à venir et ouvre le studio qui le règle. */
 function peindreBarre() {
   const trio = etat.variante === 'trio'
   $('btn-formats').hidden = trio
   document.querySelector('.barre-voile').hidden = trio
+  $('synthese-sortie').hidden = !trio
+  peindreSyntheseSortie()
   peindreCTA()
+}
+
+function peindreSyntheseSortie() {
+  const { l, h } = resolution()
+  const morceaux = [
+    l && h ? fr(l) + ' × ' + fr(h) + ' px' : 'taille à choisir',
+    'PNG',
+  ]
+  if (etat.sombre) morceaux.push('version sombre')
+  morceaux.push(etat.sombre ? 'voile sans objet' : etat.voile ? 'voile inclus' : 'sans voile')
+  $('synthese-texte').textContent = morceaux.join(', ')
 }
 
 /* --- Ouvertures et fermetures ---------------------------------------------- */
@@ -1318,6 +1362,7 @@ function fermerTout(rendreFocus) {
   const lequel = ouvert
   ouvert = null
   $('btn-formats').setAttribute('aria-expanded', 'false')
+  $('synthese-sortie').setAttribute('aria-expanded', 'false')
   if (lequel === 'temoin') $('feuille-inline').hidden = true
   if (lequel === 'menu') $('menu').hidden = true
   if (lequel === 'feuille' || lequel === 'studio') {
@@ -1356,6 +1401,7 @@ function remplirListe(conteneur, roleItem) {
 
 function ouvrir() {
   $('btn-formats').setAttribute('aria-expanded', 'true')
+  $('synthese-sortie').setAttribute('aria-expanded', 'true')
   if (etat.variante === 'trio') {
     peindreStudio()
     ouvrirFeuille('studio')
@@ -1601,6 +1647,7 @@ function peindreSelect(select, editeur, champL, champH) {
 function peindreEntete() {
   const { l, h } = resolution()
   $('entete-res').textContent = resolutionVide() ? 'taille à choisir' : fr(l) + ' × ' + fr(h) + ' px'
+  peindreSyntheseSortie()
 }
 function peindreTelephone() {
   const p = PALETTES[etat.palette]
@@ -1623,6 +1670,7 @@ function peindrePanneau() {
       ? 'Le voile de lisibilité est inclus dans le fichier.'
       : 'Le voile de lisibilité est retiré du fichier.'
   $('voile-phrase').textContent = phrase
+  peindreSyntheseSortie()
   peindreTelephone()
 }
 function peindreTout() {
@@ -1691,13 +1739,10 @@ $('choix-version').addEventListener('click', (e) => {
   if (o) { etat.sombre = o.dataset.sombre === 'oui'; peindrePanneau() }
 })
 $('btn-voile').addEventListener('click', () => { etat.voile = !etat.voile; peindrePanneau() })
-$('btn-export').addEventListener('click', () => {
-  if (etat.variante === 'trio') {
-    if (ouvert) fermerTout()
-    else ouvrir()
-    return
-  }
-  exporter('png')
+$('btn-export').addEventListener('click', () => exporter('png'))
+$('synthese-sortie').addEventListener('click', () => {
+  if (ouvert) fermerTout()
+  else ouvrir()
 })
 $('btn-surprise').addEventListener('click', () => {
   const teintes = Object.keys(PALETTES)
