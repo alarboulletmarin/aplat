@@ -541,6 +541,7 @@ export const fr = {
      regard, dans la puce comme au-dessus du bouton qui produit le fichier. */
   studio: {
     titre: 'Exporter',
+    fermer: 'Fermer la feuille',
     format: 'Le format',
     taille: 'La taille',
     exporter: 'Exporter',

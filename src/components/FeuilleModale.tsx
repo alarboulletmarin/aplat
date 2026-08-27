@@ -25,6 +25,7 @@ export function FeuilleModale({
   id,
   titreId,
   titre,
+  fermer,
   ouverte,
   grande = false,
   onFermer,
@@ -34,6 +35,8 @@ export function FeuilleModale({
   id: string
   titreId: string
   titre: string
+  /** Le nom accessible de la croix, en toutes lettres. */
+  fermer: string
   ouverte: boolean
   /** Le studio est plus haut que la liste des sorties. */
   grande?: boolean
@@ -147,9 +150,26 @@ export function FeuilleModale({
         >
           <i aria-hidden="true" />
         </div>
-        <h2 className="feuille-titre" id={titreId}>
-          {titre}
-        </h2>
+        {/* La croix : la sortie qui se voit. Le voile, la poignée et Échap
+            sont des chemins appris ; elle est celui qu'on n'a pas à
+            apprendre, et le premier arrêt de tabulation de la feuille. */}
+        <div className="feuille-tete">
+          <h2 className="feuille-titre" id={titreId}>
+            {titre}
+          </h2>
+          <button
+            type="button"
+            className="feuille-fermer"
+            title={fermer}
+            aria-label={fermer}
+            onClick={onFermer}
+          >
+            <span className="ico-croix" aria-hidden="true">
+              <i />
+              <b />
+            </span>
+          </button>
+        </div>
         <div className="feuille-modale-corps">{children}</div>
       </div>
     </>,

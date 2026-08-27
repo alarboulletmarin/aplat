@@ -1219,14 +1219,60 @@
   border-radius: 3px;
   background: var(--filet-franc);
 }
-.feuille-titre {
+/* Le titre et la croix se partagent la tête de feuille : le titre nomme la
+   question, la croix est la sortie qui se voit, au costume complet d'un
+   bouton comme les actions du studio. */
+.feuille-tete {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.feuille-titre {
   font-family: var(--display);
   font-weight: 400;
   font-size: 19px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  padding-bottom: 10px;
+}
+.feuille-fermer {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  border: 1.5px solid var(--filet-franc);
+  border-radius: 14px 14px 4px 4px;
+  background: transparent;
+  color: var(--encre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feuille-fermer:hover {
+  background: var(--surface-2);
+}
+.ico-croix {
+  position: relative;
+  width: 13px;
+  height: 13px;
+}
+.ico-croix i,
+.ico-croix b {
+  position: absolute;
+  left: 0;
+  top: 5.25px;
+  width: 13px;
+  height: 2.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.ico-croix i {
+  transform: rotate(45deg);
+}
+.ico-croix b {
+  transform: rotate(-45deg);
 }
 .feuille-modale-corps {
   flex: 1 1 auto;

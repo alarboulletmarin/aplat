@@ -23,10 +23,10 @@ d'écran derrière mes icônes ?**
   complet, sur mesure, sombre, sans voile, se règle sous le pouce sans jamais
   remonter la page. Les trois appareils et le presse-papiers y sont devenus de
   vrais boutons, trait et coins compris.
-- **La feuille se ferme comme elle s'ouvre.** Tap sur le voile grisé,
-  glissement de la poignée, Échap, ou la sortie choisie. Le focus y est
-  bouclé, le reste de l'écran est retiré pendant l'ouverture, et il revient à
-  la puce en sortant.
+- **La feuille se ferme comme elle s'ouvre.** Une croix en tête de feuille,
+  le tap sur le voile grisé, le glissement de la poignée, Échap, ou la sortie
+  choisie. Le focus y est bouclé, le reste de l'écran est retiré pendant
+  l'ouverture, et il revient à la puce en sortant.
 - **Le format choisi tient pour la session.** Un WebP choisi au studio reste
   le format de Télécharger, et la puce l'écrit sous le bouton : le bouton
   produit toujours exactement ce qu'elle dit. Un rechargement repart sur le

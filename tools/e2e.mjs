@@ -1384,6 +1384,16 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(ouvert.actions.length === 2, 'studio : deux actions de plus', ouvert.actions.join(', '));
     t(ouvert.svgActif, 'studio : le SVG est offert pour une famille géométrique calme');
 
+    /* La croix : la sortie qui se voit. Elle ferme la feuille et rend le
+       focus à la puce, comme Échap et le voile. */
+    await fp.evaluate(() => document.querySelector('.feuille-fermer').click());
+    await fp.waitForTimeout(300);
+    t(await fp.evaluate(() => !document.getElementById('feuille-modale')),
+      'studio : la croix referme la feuille');
+    t(await fp.evaluate(() => document.activeElement?.id === 'synthese-sortie'),
+      'studio : et rend le focus à la puce');
+    await ouvrirStudio();
+
     /* La note du format choisi se lit au moment du choix, avant l'appui. */
     await fp.$eval('#studio-format-svg', e => e.click());
     await fp.waitForTimeout(200);

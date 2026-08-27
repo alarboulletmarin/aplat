@@ -321,6 +321,7 @@ export function BarreAction({
         id="feuille-modale"
         titreId="feuille-modale-titre"
         titre={textes.studio.titre}
+        fermer={textes.studio.fermer}
         ouverte={formats}
         grande
         onFermer={onFormats}

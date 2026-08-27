@@ -707,8 +707,9 @@ teinte seule ne suffit jamais.
   l'adresse ni sur l'appareil : une visite fraîche repart sur le PNG.
 - **La feuille d'export** est la seule modale du produit, l'exception encadrée
   de la section 13. Un voile grise l'arrière-plan, la feuille part du bord bas,
-  une poignée la renvoie ; Échap, le tap sur le voile et la sortie choisie la
-  ferment aussi. Le focus y est bouclé, le reste du document est retiré
+  et une croix en tête de feuille, au costume complet d'un bouton, est la
+  sortie qui se voit ; la poignée la renvoie, Échap, le tap sur le voile et la
+  sortie choisie la ferment aussi. Le focus y est bouclé, le reste du document est retiré
   (`inert`), et le focus revient à la puce en sortant : autant de chemins de
   sortie que d'entrées. Dedans, le studio : les formats en puces avec la note
   du format choisi, la taille et ses préréglages, la version, le voile, la

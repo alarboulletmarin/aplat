@@ -398,6 +398,7 @@ export const en: Textes = {
   },
   studio: {
     titre: 'Export',
+    fermer: 'Close the sheet',
     format: 'The format',
     taille: 'The size',
     exporter: 'Export',
