@@ -26,6 +26,9 @@
  * donner un aurait demandé au vectoriel d'embarquer une police. La fonte est
  * donc dessinée, trois cases sur cinq, en rectangles pleins. Elle ne sait que
  * des chiffres et un degré, ce qui est exactement ce qu'un instrument écrit.
+ * Elle a été écrite ici et vit maintenant dans `trace.ts` : le dossard s'est mis
+ * à écrire des nombres lui aussi, et une table que deux gestes partagent
+ * n'appartient plus à l'un des deux.
  *
  * Chaque famille peint son propre fond, et c'est le seul geste du catalogue à
  * le faire pour toutes les siennes. Un tapis de coupe est sombre, du papier
@@ -35,7 +38,8 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
-  arcEpais, duClairAuSombre, hacher, melangeHex, pointille, ruban, type Point,
+  arcEpais, duClairAuSombre, ecrire, hacher, melangeHex, pointille, ruban,
+  type Point,
 } from './trace'
 
 export const IDS_MESURES = ['tapis', 'millimetre', 'rapporteur', 'mire'] as const
@@ -62,77 +66,6 @@ function arc(
   if (!(rayon > epaisseur)) return
   arcEpais(ctx, cx, cy, rayon, depart, fin, epaisseur)
   ctx.fill()
-}
-
-/* ---------- les chiffres ----------------------------------------------------- */
-
-/**
- * La fonte : trois cases de large, cinq de haut, et rien de plus.
- *
- * C'est la plus petite grille où dix chiffres restent distincts les uns des
- * autres, et c'est ce qui compte : sur un fond d'écran, un nombre de
- * graduation fait quelques dizaines de pixels et doit rester lisible sans
- * jamais attirer l'oeil. Un `1` sans son empattement se confondrait avec un
- * trait de graduation ; il en a donc un.
- *
- * Elle vit ici et non dans `trace.ts` parce qu'elle n'est partagée par rien :
- * seul un instrument écrit des nombres. Elle est publiée pour une seule
- * raison : c'est une table écrite à la main, le seul endroit du moteur où une
- * donnée saisie caractère par caractère devient un dessin. Une case oubliée
- * ne lève rien et fait afficher `20` à la place de `26` ; un test la relit.
- */
-export const GLYPHES: Readonly<Record<string, readonly string[]>> = {
-  '0': ['111', '101', '101', '101', '111'],
-  '1': ['010', '110', '010', '010', '111'],
-  '2': ['111', '001', '111', '100', '111'],
-  '3': ['111', '001', '111', '001', '111'],
-  '4': ['101', '101', '111', '001', '001'],
-  '5': ['111', '100', '111', '001', '111'],
-  '6': ['111', '100', '111', '101', '111'],
-  '7': ['111', '001', '010', '010', '010'],
-  '8': ['111', '101', '111', '101', '111'],
-  '9': ['111', '101', '111', '001', '111'],
-  '°': ['111', '101', '111', '000', '000'],
-}
-
-/** La largeur d'un texte, en cases : trois par glyphe, une de chasse. */
-function largeurTexte(texte: string): number {
-  return texte.length * 4 - 1
-}
-
-/**
- * Le nombre, posé en rectangles pleins.
- *
- * Les cases allumées d'une même rangée sont fusionnées en un seul rectangle :
- * un `8` passe de onze rectangles à sept, et une graduation qui en écrirait
- * quarante en économise des centaines sur le fichier vectoriel.
- *
- * `ancrage` place le texte par son coin haut gauche, son centre, ou son coin
- * haut droit, parce qu'une graduation s'écrit à gauche d'un axe vertical, au
- * centre d'un axe horizontal, et rarement au même endroit deux fois.
- */
-function ecrire(
-  ctx: Pinceau, texte: string, x: number, y: number, module: number,
-  ancrage: 'gauche' | 'centre' | 'droite' = 'gauche',
-): void {
-  const largeur = largeurTexte(texte) * module
-  const depart = ancrage === 'centre' ? x - largeur / 2 : ancrage === 'droite' ? x - largeur : x
-  for (const [rang, caractere] of [...texte].entries()) {
-    const glyphe = GLYPHES[caractere]
-    if (!glyphe) continue
-    const gx = depart + rang * 4 * module
-    for (const [r, rangee] of glyphe.entries()) {
-      let debut = -1
-      for (let c = 0; c <= 3; c += 1) {
-        const plein = c < 3 && rangee[c] === '1'
-        if (plein && debut < 0) debut = c
-        if (!plein && debut >= 0) {
-          ctx.fillRect(gx + debut * module, y + r * module, (c - debut) * module, module)
-          debut = -1
-        }
-      }
-    }
-  }
 }
 
 /* ---------- les teintes ------------------------------------------------------ */

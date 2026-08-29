@@ -21,6 +21,11 @@
  * deux tons, un papier et une encre, et sème sur son damier des pièces
  * frappées, anneaux, rouages, hexagones.
  *
+ * Couloirs sort de la grille carrée et garde tout le reste : ce sont des
+ * flotteurs enfilés le long de câbles, une maille qui revient et que l'oeil
+ * suit du doigt, ce qui est exactement le critère du groupe. Ses rangées se
+ * décalent l'une sur l'autre, comme celles de la panoplie.
+ *
  * Le tirage ne se fait jamais dans la boucle des cases, dont le compte dépend
  * du format : la graine sert à fabriquer une clé, et chaque case interroge
  * cette clé par ses propres coordonnées. C'est la discipline des lieux et de
@@ -29,10 +34,13 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
-  duClairAuSombre, hachurer, hacher, tracerCercle, tracerPolygone, type Point,
+  duClairAuSombre, hachurer, hacher, luminanceHex, tracerCercle, tracerPolygone,
+  type Point,
 } from './trace'
 
-export const IDS_CARREAUX = ['bauhaus', 'carreaux', 'demilunes', 'jetons'] as const
+export const IDS_CARREAUX = [
+  'bauhaus', 'carreaux', 'demilunes', 'jetons', 'couloirs',
+] as const
 
 export type IdCarreau = (typeof IDS_CARREAUX)[number]
 
@@ -571,6 +579,83 @@ function jetons(
   }
 }
 
+/* ---------- couloirs --------------------------------------------------------- */
+
+/**
+ * Les couloirs : les lignes d'eau d'un bassin, vues du dessus.
+ *
+ * C'est le pavage le plus littéral du geste : une ligne d'eau est déjà une
+ * maille qui revient, des flotteurs enfilés sur un câble, et il n'y a rien à
+ * inventer pour en faire un motif. Ce qu'il faut, c'est ne pas la lisser.
+ *
+ * Trois choses font qu'on reconnaît un bassin plutôt qu'une rangée de pastilles,
+ * et les trois ont été apprises en regardant le motif rater sans elles. Le câble
+ * doit se voir, sinon les flotteurs flottent chacun pour soi et l'image devient
+ * des confettis. Les flotteurs doivent se chevaucher, parce qu'ils sont enfilés
+ * serré et qu'un jour entre deux disques n'existe pas dans un bassin. Et surtout
+ * la couleur ne change pas au hasard : une ligne d'eau est d'une seule teinte
+ * sur presque toute sa longueur, et ce sont les cinq derniers mètres qui
+ * passent au rouge. C'est ce contraste rare, une couleur qui revient de loin en
+ * loin, qui dit la distance ; une couleur par paquet tiré au sort ne dit rien.
+ *
+ * Les paquets se lisent par leur rang le long du câble, jamais par flotteur :
+ * `hacher` est interrogé sur le numéro du paquet, si bien qu'un cadre plus large
+ * allonge les câbles sans recolorer ce qui était déjà posé.
+ */
+function couloirs(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const cle = Math.floor(rnd() * 0x7fffffff)
+  const teintes = duClairAuSombre(C)
+  const cable = teintes[teintes.length - 1]
+  const rayon = unite / [16, 24, 34][densite]
+  /* Le pas laisse voir le câble entre deux flotteurs, et l'eau entre deux
+     câbles. Serrés à se toucher, les flotteurs couvraient l'image entière : le
+     fond de la palette ne passait plus, le câble non plus, et il ne restait
+     qu'un tapis de pastilles. Ce qui fait la ligne d'eau, c'est justement
+     qu'elle est une ligne posée sur de l'eau. */
+  const pas = rayon * 2.15
+  const ecart = rayon * 3.1
+  const cables = Math.ceil(H / ecart) + 1
+  const flotteurs = Math.ceil(W / pas) + 3
+  /* Un paquet fait cinq flotteurs, comme les cinq mètres qu'il marque. */
+  const paquet = 5
+
+  for (let l = 0; l < cables; l += 1) {
+    const y = (l + 0.5) * ecart
+    /* Chaque câble démarre ailleurs que son voisin : un demi-flotteur de
+       décalage d'une ligne à l'autre, plus un jeu tiré de la graine. Alignés
+       au cordeau, les flotteurs font des colonnes verticales que l'oeil suit
+       à la place des lignes, et le bassin se lit comme un damier. */
+    const decale = (l % 2 === 0 ? 0 : pas / 2) + (hacher(l, 733, cle) - 0.5) * pas * 0.5
+    /* La teinte de la ligne, et celle de ses bouts. Deux teintes par câble, pas
+       davantage : c'est ce qui fait qu'on suit une ligne d'un bord à l'autre. */
+    const base = C[Math.floor(hacher(l, 401, cle) * C.length)]
+    let accent = base
+    for (let k = 1; k < C.length; k += 1) {
+      accent = C[(Math.floor(hacher(l, 401, cle) * C.length) + k) % C.length]
+      if (Math.abs(luminanceHex(accent) - luminanceHex(base)) > 0.1) break
+    }
+    const phase = Math.floor(hacher(l, 991, cle) * paquet)
+
+    ctx.fillStyle = cable
+    ctx.fillRect(0, y - rayon * 0.09, W, rayon * 0.18)
+
+    for (let i = 0; i < flotteurs; i += 1) {
+      const rang = i + phase
+      const bloc = Math.floor(rang / paquet)
+      /* Un paquet sur quatre environ passe à l'accent, et jamais deux de
+         suite : c'est la cadence d'un balisage, pas une alternance. */
+      const marque = hacher(bloc, l, cle) > 0.76
+      ctx.fillStyle = marque ? accent : base
+      ctx.beginPath()
+      tracerCercle(ctx, (i - 0.5) * pas + decale, y, rang % 2 === 0 ? rayon * 0.95 : rayon * 0.78)
+      ctx.fill()
+    }
+  }
+}
+
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreCarreau(
@@ -580,5 +665,6 @@ export function peindreCarreau(
   if (id === 'bauhaus') bauhaus(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'carreaux') carreaux(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'demilunes') demilunes(ctx, W, H, C, densite, rnd, unite)
-  else jetons(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'jetons') jetons(ctx, W, H, C, densite, rnd, unite)
+  else couloirs(ctx, W, H, C, densite, rnd, unite)
 }

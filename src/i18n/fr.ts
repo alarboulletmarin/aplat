@@ -125,7 +125,7 @@ export const fr = {
     document: {
       titre: 'Comment Aplat dessine',
       description:
-        'Quatre réglages, quatorze mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
+        'Quatre réglages, quinze mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
     },
     heros: {
       surtitre: 'Le mécanisme',
@@ -151,7 +151,7 @@ export const fr = {
         'Les mêmes quatre réglages rendent toujours la même image, à n’importe quelle taille. Le hasard n’entre qu’une fois, au tirage de la graine.',
       troisTitre: 'Quatorze façons de poser la couleur',
       troisNote:
-        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît quatorze, et toutes les familles en sortent.',
+        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît quinze, et toutes les familles en sortent.',
       quatreTitre: 'Quatre couches, dans cet ordre',
       quatreNote:
         'L’image se peint par-dessus elle-même, et l’ordre n’est pas un détail\u00a0: le voile est dosé pour ce qu’il couvre, le grain passe après lui.',
@@ -162,7 +162,7 @@ export const fr = {
       sixNote:
         'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
     },
-    /* Étape 01. Les cinq groupes plutôt que les soixante-seize familles : une
+    /* Étape 01. Les cinq groupes plutôt que les quatre-vingt-une familles : une
        liste complète referait le panneau de l'application dans un autre
        document, et « une autre famille » donne accès au reste sans ça. */
     reglages: {
@@ -184,7 +184,7 @@ export const fr = {
       sourdes:
         'Quatre familles ignorent leur graine\u00a0: ce sont des pavages entièrement réguliers, sans un seul tirage.',
     },
-    /* Étape 03. Les quatorze fiches. Les familles de chacune ne sont pas écrites
+    /* Étape 03. Les quinze fiches. Les familles de chacune ne sont pas écrites
        ici : elles sont lues dans les listes que les modules publient. */
     mecaniques: {
       familles: 'Familles\u00a0: {liste}',
@@ -233,6 +233,9 @@ export const fr = {
       mesuresNom: 'La mesure',
       mesuresNote:
         'Le motif est un instrument\u00a0: tapis de coupe, papier millimétré, rapporteur, mire de réglage. Fait de graduations plutôt que de formes, et le seul geste qui écrive des nombres.',
+      panopliesNom: 'La panoplie',
+      panopliesNote:
+        'Une grille décalée, un objet par case, et un angle tiré de ses coordonnées. Les creux, encolure et trous d’épingle, entrent dans le même chemin que la forme, et le fond s’y voit.',
     },
     /* Étape 04. Les noms des couches viennent d'ici, mais leur ordre vient du
        moteur (`COUCHES`) : une couche ajoutée là-bas manque ici, et la
@@ -243,7 +246,7 @@ export const fr = {
       fondNote: 'La couleur de fond de la palette, d’un bord à l’autre.',
       formesNom: 'Les formes',
       formesNote:
-        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les quatorze gestes qui la peignent sont juste au-dessus.',
+        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les quinze gestes qui la peignent sont juste au-dessus.',
       ombreNom: 'L’ombre',
       ombreNote:
         'La version sombre\u00a0: un aplat noir dosé pour amener n’importe quel motif à la même obscurité.',

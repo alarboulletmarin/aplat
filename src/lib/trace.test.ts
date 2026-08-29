@@ -20,10 +20,16 @@
  * et rien dans le dessin ne le signale : c'est la monotonie qu'il faut tenir,
  * et le fait que les deux bouts restent hors de la palette, sans quoi une
  * teinte déjà claire ne s'éclaircirait plus.
+ *
+ * Et la fonte, enfin, venue de la mesure le jour où le dossard s'est mis à
+ * écrire des nombres lui aussi. C'est le seul endroit du moteur où une donnée
+ * saisie à la main devient un dessin : une case oubliée ne lève rien et fait
+ * afficher `20` à la place de `26`.
  */
 import { describe, expect, it } from 'vitest'
 import {
-  couperDemiPlan, eclairage, hachurer, luminanceHex, polygone, tracerCercle, type Point,
+  couperDemiPlan, eclairage, GLYPHES, hachurer, luminanceHex, polygone, tracerCercle,
+  type Point,
 } from './trace'
 import type { Pinceau } from './moteur'
 
@@ -205,5 +211,46 @@ describe('éclairage', () => {
     const eclairer = eclairage(['#4E9B7C'])
     expect(luminanceHex(eclairer('#4E9B7C', 0.6)))
       .toBeGreaterThan(luminanceHex(eclairer('#4E9B7C', -0.6)))
+  })
+})
+
+describe('la fonte des chiffres', () => {
+  /* La table est relue case par case. C'est le seul endroit du moteur où une
+     donnée saisie à la main devient un dessin, et une rangée trop courte, un
+     caractère de trop ou deux chiffres au même dessin ne lèvent rien : ils
+     font seulement afficher un autre nombre que celui qui est demandé. */
+  it('donne à chaque glyphe cinq rangées de trois cases, pleines ou vides', () => {
+    for (const [caractere, glyphe] of Object.entries(GLYPHES)) {
+      expect(glyphe, caractere).toHaveLength(5)
+      for (const [rang, rangee] of glyphe.entries()) {
+        expect(rangee, `${caractere} rangée ${rang}`).toMatch(/^[01]{3}$/)
+      }
+    }
+  })
+
+  it('sait les dix chiffres, et leur donne dix dessins différents', () => {
+    for (const chiffre of '0123456789') {
+      expect(Object.keys(GLYPHES), chiffre).toContain(chiffre)
+    }
+    const dessins = [...'0123456789'].map((c) => GLYPHES[c].join('/'))
+    expect(new Set(dessins).size, 'deux chiffres au même dessin').toBe(10)
+  })
+
+  it('ne laisse aucun glyphe vide, ni aucun tout plein', () => {
+    /* Un glyphe vide s'efface, un glyphe plein fait un pavé : dans les deux
+       cas la graduation perd son nombre sans que rien ne le signale. */
+    for (const [caractere, glyphe] of Object.entries(GLYPHES)) {
+      const cases = glyphe.join('')
+      expect(cases.includes('1'), caractere).toBe(true)
+      expect(cases.includes('0'), caractere).toBe(true)
+    }
+  })
+
+  it('garde le degré au-dessus de la ligne des chiffres', () => {
+    /* Le degré est un exposant : il occupe les rangées hautes et laisse les
+       deux dernières vides, sans quoi il se lirait comme un zéro. */
+    const degre = GLYPHES['°']
+    expect(degre).toBeDefined()
+    expect(degre.slice(3).join('')).toBe('000000')
   })
 })

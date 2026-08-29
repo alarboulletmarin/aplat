@@ -17,6 +17,7 @@ import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estLieu, peindreLieu, type IdLieu } from './lieux'
 import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
+import { estPanoplie, peindrePanoplie, type IdPanoplie } from './panoplies'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
@@ -84,9 +85,10 @@ export type IdFamille =
   | 'palmes'
   | 'vases'
   | 'poissons'
-  /* figures venues des nouveaux gestes : le réseau, la grammaire */
+  /* figures venues des nouveaux gestes : le réseau, la grammaire, la panoplie */
   | IdReseau
   | IdGrammaire
+  | IdPanoplie
 
 export type IdPalette =
   | 'lime'
@@ -146,11 +148,17 @@ export interface Palette {
  * reconnaît, `pay` ce qui a un haut et un bas, `lieu` des gravures tramées,
  * `fig` des objets reconnaissables un par un.
  *
+ * Un groupe « sport » a été essayé et retiré : un thème n'est pas un critère, et
+ * la liste y mêlait une grille de maillots, un pavage de lignes d'eau et une
+ * gravure de col, trois choses qui n'ont en commun que le sujet. Chacune est
+ * rangée là où sa phrase l'attendait déjà.
+ *
  * Ils sont devenus des onglets dans le panneau, et le type est donc nommé :
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
+export type Groupe =
+  | 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -208,7 +216,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-seize familles, dans l'ordre de la liste : les quatre groupes
+ * Les quatre-vingt-une familles, dans l'ordre de la liste : les quatre groupes
  * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
  * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
@@ -250,6 +258,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
   { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
   { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
+  { id: 'couloirs', groupe: 'pav', fr: 'Couloirs', en: 'Lane lines' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
@@ -283,6 +292,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
   { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
   { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
+  { id: 'col', groupe: 'lieu', fr: 'Col', en: 'Mountain pass' },
   /* figures : des objets posés sur un fond, reconnaissables un par un */
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
@@ -299,6 +309,9 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'herbier', groupe: 'fig', fr: 'Herbier', en: 'Herbarium' },
   { id: 'metro', groupe: 'fig', fr: 'Métro', en: 'Transit map' },
   { id: 'constellations', groupe: 'fig', fr: 'Constellations', en: 'Constellations' },
+  { id: 'maillots', groupe: 'fig', fr: 'Maillots', en: 'Jerseys' },
+  { id: 'dossards', groupe: 'fig', fr: 'Dossards', en: 'Bibs' },
+  { id: 'bonnets', groupe: 'fig', fr: 'Bonnets', en: 'Swim caps' },
 ]
 
 /** Les arrondis des fausses icônes de la maquette : jamais deux fois le même. */
@@ -720,7 +733,8 @@ export function formes(
      interférer des grilles, la grammaire fait pousser des plantes, le carreau
      remplit une grille d'un alphabet de signes, la coulée fait serpenter des
      rubans larges, le relief fait dire l'orientation à la teinte, et la
-     mesure dessine des instruments gradués. */
+     mesure dessine des instruments gradués, et la panoplie sème des objets
+     qu'on enfile. */
   if (estNiveau(id)) {
     peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -767,6 +781,10 @@ export function formes(
   }
   if (estMesure(id)) {
     peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estPanoplie(id)) {
+    peindrePanoplie(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 

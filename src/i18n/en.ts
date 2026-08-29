@@ -82,7 +82,7 @@ export const en: Textes = {
     document: {
       titre: 'How Aplat draws',
       description:
-        'Four settings, fourteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
+        'Four settings, fifteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
     },
     heros: {
       surtitre: 'The mechanism',
@@ -102,7 +102,7 @@ export const en: Textes = {
         'The same four settings always render the same image, at any size. Chance enters once, when the seed is drawn.',
       troisTitre: 'Fourteen ways to lay down colour',
       troisNote:
-        'A family does not pick a drawing, it picks a mechanic. The engine knows fourteen of them, and every family comes out of one.',
+        'A family does not pick a drawing, it picks a mechanic. The engine knows fifteen of them, and every family comes out of one.',
       quatreTitre: 'Four layers, in this order',
       quatreNote:
         'The image is painted over itself, and the order is not a detail: the scrim is dosed for what it covers, the grain comes after it.',
@@ -176,6 +176,9 @@ export const en: Textes = {
       mesuresNom: 'Instruments',
       mesuresNote:
         'The pattern is a tool: cutting mat, graph paper, protractor, test chart. Made of graduations rather than shapes, and the only gesture that writes numbers.',
+      panopliesNom: 'Kit',
+      panopliesNote:
+        'An offset grid, one object per cell, tilted by an angle drawn from its coordinates. The hollows, neckline and pin holes, join the same path as the shape, and the ground shows through them.',
     },
     couches: {
       arreter: 'Stop the drawing after {couche}',
@@ -183,7 +186,7 @@ export const en: Textes = {
       fondNote: 'The palette’s background colour, edge to edge.',
       formesNom: 'The shapes',
       formesNote:
-        'The family itself. It is the only layer that changes from one family to the next, and the fourteen gestures that paint it are just above.',
+        'The family itself. It is the only layer that changes from one family to the next, and the fifteen gestures that paint it are just above.',
       ombreNom: 'The shade',
       ombreNote:
         'The dark version: a black flat dosed to bring any pattern to the same darkness.',

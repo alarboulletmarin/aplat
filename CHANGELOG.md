@@ -9,6 +9,28 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : cinq motifs d'endurance, et le catalogue passe à quatre-vingt-une
+
+- **Courir, rouler, nager.** Cinq familles nouvelles, chacune rangée dans le
+  groupe dont elle satisfaisait déjà la phrase, jamais dans un groupe « sport »
+  qui n'en est pas une : un thème n'est pas un critère de classement, et la
+  règle qui tient les onglets depuis le début ne se plie pas pour un sujet.
+- **Couloirs**, chez les pavages : les lignes d'eau d'un bassin, des flotteurs
+  enfilés serré sur leur câble, avec les paquets de couleur qui marquent les
+  cinq derniers mètres. Ses rangées se décalent l'une sur l'autre, sans quoi les
+  flotteurs font des colonnes verticales et le bassin se lit comme un damier.
+- **Maillots**, **Dossards** et **Bonnets**, chez les figures. La grille des
+  couleurs qu'on a portées, les dossards à quatre trous d'épingle avec leur
+  numéro, et les nageurs de face, bonnet et lunettes. Le fond de la palette se
+  voit au creux d'une encolure et au travers d'un trou d'épingle : ce sont de
+  vrais creux, pas une teinte devinée.
+- **Col**, chez les lieux. Deux sommets, l'échancrure entre les deux, et la
+  route qui y monte en lacets, gravée en deux tons comme le Torii et le Phare.
+- **Le moteur sait écrire ailleurs que sur un instrument.** La fonte des
+  graduations, dix chiffres de trois cases sur cinq, a quitté la mesure pour
+  l'outillage commun : le dossard en avait besoin, et une table que deux gestes
+  partagent n'appartient plus à l'un des deux.
+
 ### Changé : passer d'une page à l'autre ne recharge plus rien
 
 - **Le battement entre les trois pages a disparu.** Ouvrir l'application

@@ -37,7 +37,9 @@
 import type { Alea, Densite, Pinceau } from './moteur'
 import { bruiteur, hacher, lisse, luminanceHex } from './trace'
 
-export const IDS_LIEUX = ['acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins'] as const
+export const IDS_LIEUX = [
+  'acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins', 'col',
+] as const
 
 export type IdLieu = (typeof IDS_LIEUX)[number]
 
@@ -630,8 +632,128 @@ const moulins: Scene = (rnd, rapport) => {
   }
 }
 
+/**
+ * Le col : deux sommets, l'échancrure entre les deux, et la route qui y monte.
+ *
+ * Les six autres lieux sont des monuments ; celui-ci est un endroit où l'on
+ * passe. Il tient le critère du groupe mot pour mot, deux tons et une trame, et
+ * il joue sur ce que la gravure sait faire de mieux, un paysage à contre-jour.
+ *
+ * Ce qui fait un col plutôt qu'une montagne, c'est l'échancrure, et elle tient à
+ * un seul mot : la crête est **la plus haute** des deux pentes, donc le plus
+ * petit des deux `t`. Prendre la plus basse donne le point où les deux droites
+ * se croisent, c'est-à-dire une pyramide unique, et la route n'a plus nulle part
+ * où aller. C'est l'erreur qu'on fait une fois.
+ *
+ * La route est en réserve, claire sur la roche, parce que c'est ainsi qu'on la
+ * voit de loin. Elle est écrite dans le repère du massif et non dans celui de
+ * l'image : à l'altitude `t`, la montagne va du flanc gauche au flanc droit, et
+ * l'étage `n` de la route traverse cette largeur-là. Les épingles tombent donc
+ * exactement sur les flancs, et rien ne dépasse dans le ciel. Écrite en
+ * coordonnées d'image, la même route sortait du massif et rayait le cadre.
+ *
+ * Un étage sur deux traverse dans l'autre sens, et comme chacun part où le
+ * précédent est arrivé, les virages se referment tout seuls sans qu'aucun n'ait
+ * été placé. Trois étages sont interrogés en chaque point, celui du dessous, le
+ * sien et celui du dessus : c'est ce qui garde le champ pur, et donc la gravure
+ * identique à toute résolution.
+ */
+const col: Scene = (rnd, rapport) => {
+  const roche = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const ciel = bruiteur(Math.floor(rnd() * 0xffffffff))
+  const herbe = bruiteur(Math.floor(rnd() * 0xffffffff))
+
+  const gaucheX = rapport * (0.16 + 0.08 * rnd())
+  const droiteX = rapport * (0.76 + 0.08 * rnd())
+  const gaucheT = 0.24 + 0.06 * rnd()
+  const droiteT = 0.2 + 0.06 * rnd()
+  const pente = 0.85 + 0.35 * rnd()
+
+  const astreX = rapport * (0.08 + 0.24 * rnd())
+  const astreT = 0.07 + 0.05 * rnd()
+  const astreR = 0.04 + 0.022 * rnd()
+
+  const cretes = 0.52 + 0.06 * rnd()
+  const etages = 5 + Math.floor(rnd() * 3)
+  const epaisseur = 0.0042 + 0.0012 * rnd()
+  const versLaGauche = rnd() < 0.5
+
+  /* L'échancrure : là où les deux pentes se croisent, donc le point le plus bas
+     de la crête entre les deux sommets. */
+  const creuxX = (gaucheX + droiteX) / 2 + (droiteT - gaucheT) / (2 * pente)
+  const creuxT = gaucheT + Math.abs(creuxX - gaucheX) * pente
+
+  return (u, t) => {
+    const x = u * rapport
+
+    let c = 0.28 - 0.18 * t + (ciel(x * 2.6, t * 2.6) - 0.5) * 0.07
+    const astre = reserve(x, t, astreX, astreT, astreR)
+    if (astre >= 0) c = astre
+    else if (Math.hypot(x - astreX, t - astreT) < astreR * 1.7) c *= 0.55
+
+    /* Les crêtes lointaines : elles donnent la distance et disparaissent
+       derrière le massif dès qu'il monte devant elles. */
+    const lointain = cretes + (roche(x * 1.9 + 60, 3) - 0.5) * 0.08
+    if (t > lointain) c = 0.38 + (roche(x * 9, t * 9) - 0.5) * 0.12
+
+    const versantG = gaucheT + Math.abs(x - gaucheX) * pente
+    const versantD = droiteT + Math.abs(x - droiteX) * pente
+    const profil = Math.min(versantG, versantD) + (roche(x * 7, 11) - 0.5) * 0.012
+
+    if (t > profil) {
+      /* La roche reste en demi-teinte : poussée au noir, la trame se bouche et
+         le massif devient une découpe de papier noir, où plus rien de la
+         gravure ne se lit. */
+      c = 0.52 + (roche(x * 13, t * 13) - 0.5) * 0.2 + (t - profil) * 0.1
+      /* Le flanc tourné vers l'astre reste plus clair : c'est le volume, sans
+         une seule ligne de contour. */
+      const face = Math.max(-1, Math.min(1, (x - creuxX) / (rapport * 0.42)))
+      c -= face * 0.13
+      if (t - profil < 0.009) c = 0.96
+
+      /* La route monte dans un cône qui se resserre vers l'échancrure : large
+         en bas, étroit en haut. C'est ce resserrement qui fait les lacets ;
+         étalée sur toute la largeur du massif, la route devient une suite de
+         lignes de niveau.
+         Deux essais ratés tiennent dans le mélange ci-dessous. Une montée
+         répartie également sur la traversée donne une scie, un éclair qui
+         descend le versant. Toute la montée mise dans l'épingle donne un
+         escalier, des barreaux posés les uns sur les autres. Une route est
+         entre les deux : elle monte doucement en traversant, et prend le reste
+         dans le virage. */
+      const bas = 0.95
+      const haut = creuxT + 0.02
+      if (t > haut && t < bas) {
+        const monte = (t - haut) / (bas - haut)
+        const demi = rapport * (0.1 + 0.2 * monte)
+        const pas = (bas - haut) / etages
+        const n0 = Math.floor((bas - t) / pas)
+        for (let n = n0 - 1; n <= n0 + 1; n += 1) {
+          if (n < 0 || n >= etages) continue
+          /* Chaque étage a sa propre longueur : des épingles alignées au
+             cordeau se lisent comme un dessin technique. */
+          const large = demi * (0.78 + 0.44 * roche(n * 5.1, 31))
+          if (x < creuxX - large || x > creuxX + large) continue
+          const part = (x - (creuxX - large)) / (2 * large)
+          const sur = (n % 2 === 0) === versLaGauche ? part : 1 - part
+          const q = Math.max(0, Math.min(1, (sur - 0.72) / 0.28))
+          const sens = 0.34 * sur + 0.66 * (q * q * (3 - 2 * q))
+          const jeu = (roche(n * 3.7, 77) - 0.5) * pas * 0.34
+          if (Math.abs(t - (bas - (n + sens) * pas + jeu)) < epaisseur) c = 0.08
+        }
+      }
+    }
+
+    /* Le pré du premier plan, plus clair que la roche. */
+    const pre = 0.94 + (herbe(x * 4 + 20, 5) - 0.5) * 0.025
+    if (t > pre) c = 0.42 + (herbe(x * 20, t * 20) - 0.5) * 0.26
+
+    return borner(c)
+  }
+}
+
 const SCENES: Readonly<Record<IdLieu, Scene>> = {
-  acropole, phare, pyramides, torii, aqueduc, moulins,
+  acropole, phare, pyramides, torii, aqueduc, moulins, col,
 }
 
 /* ---------- la trame --------------------------------------------------------- */

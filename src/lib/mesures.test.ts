@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Ce que ces tests protègent : la fonte, et ce qu'un instrument promet.
+ * Ce que ces tests protègent : ce qu'un instrument promet.
  *
- * La fonte est le seul endroit du moteur où une donnée écrite à la main se
- * transforme en dessin. Une case oubliée dans un glyphe ne lève rien, ne
- * change rien à la compilation, et fait qu'un tapis de coupe affiche `20` là
- * où il devrait afficher `26`. Personne ne relit un nombre de graduation sur
- * un fond d'écran ; il faut donc que le test le fasse.
+ * La table des glyphes est relue dans `trace.test.ts`, où la fonte a émigré le
+ * jour où le dossard s'est mis à écrire des nombres lui aussi. Reste ici ce qui
+ * ne regarde que l'instrument : que la fonte serve vraiment, et qu'un tapis deux
+ * fois plus haut écrive deux fois plus de graduations le long de sa réglette.
  *
  * Le reste est ce que toute famille de grille doit tenir, et que le carreau et
  * le relief éprouvent déjà pour les leurs : la même image pour une même
@@ -20,7 +19,7 @@
  * par la palette.
  */
 import { describe, expect, it } from 'vitest'
-import { estMesure, GLYPHES, IDS_MESURES } from './mesures'
+import { estMesure, IDS_MESURES } from './mesures'
 import { FAMILLES, PALETTES, ORDRE_PALETTES, type Densite, type IdFamille } from './moteur'
 import { luminanceHex } from './trace'
 import { svgDuMotif } from './svg'
@@ -58,45 +57,6 @@ describe('liste des mesures', () => {
 })
 
 describe('la fonte des graduations', () => {
-  /* La table est relue case par case. C'est le seul endroit du moteur où une
-     donnée saisie à la main devient un dessin, et une rangée trop courte, un
-     caractère de trop ou deux chiffres au même dessin ne lèvent rien : ils
-     font seulement afficher un autre nombre que celui qui est demandé. */
-  it('donne à chaque glyphe cinq rangées de trois cases, pleines ou vides', () => {
-    for (const [caractere, glyphe] of Object.entries(GLYPHES)) {
-      expect(glyphe, caractere).toHaveLength(5)
-      for (const [rang, rangee] of glyphe.entries()) {
-        expect(rangee, `${caractere} rangée ${rang}`).toMatch(/^[01]{3}$/)
-      }
-    }
-  })
-
-  it('sait les dix chiffres, et leur donne dix dessins différents', () => {
-    for (const chiffre of '0123456789') {
-      expect(Object.keys(GLYPHES), chiffre).toContain(chiffre)
-    }
-    const dessins = [...'0123456789'].map((c) => GLYPHES[c].join('/'))
-    expect(new Set(dessins).size, 'deux chiffres au même dessin').toBe(10)
-  })
-
-  it('ne laisse aucun glyphe vide, ni aucun tout plein', () => {
-    /* Un glyphe vide s'efface, un glyphe plein fait un pavé : dans les deux
-       cas la graduation perd son nombre sans que rien ne le signale. */
-    for (const [caractere, glyphe] of Object.entries(GLYPHES)) {
-      const cases = glyphe.join('')
-      expect(cases.includes('1'), caractere).toBe(true)
-      expect(cases.includes('0'), caractere).toBe(true)
-    }
-  })
-
-  it('garde le degré au-dessus de la ligne des chiffres', () => {
-    /* Le degré est un exposant : il occupe les rangées hautes et laisse les
-       deux dernières vides, sans quoi il se lirait comme un zéro. */
-    const degre = GLYPHES['°']
-    expect(degre).toBeDefined()
-    expect(degre.slice(3).join('')).toBe('000000')
-  })
-
   it('écrit vraiment ses graduations sur le motif', () => {
     /* Et la table sert : un tapis deux fois plus haut écrit deux fois plus de
        nombres le long de sa réglette, donc pose plus de formes. Si la fonte ne

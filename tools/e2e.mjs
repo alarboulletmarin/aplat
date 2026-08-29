@@ -269,8 +269,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
-    'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 81,
+    'onglets : les huit couvrent les quatre-vingt-une familles', onglets.comptes.join(' + '));
   /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
      quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
      et la première vignette de famille en fait 86 : on ferait défiler un mur de
