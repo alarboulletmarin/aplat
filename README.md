@@ -41,7 +41,7 @@ fully usable offline.
 - **Exact resolution.** Your screen size is detected; any resolution can be
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
-- **81 pattern families** in eight groups (abstract, tilings, volumes,
+- **82 pattern families** in eight groups (abstract, tilings, volumes,
   instruments, materials, landscapes, landmarks, figures), **11 hand-tuned
   palettes**, three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces
@@ -57,7 +57,7 @@ fully usable offline.
 
 ## Gallery
 
-Ten of the eighty-one families. Every image in this README comes out of the
+Ten of the eighty-two families. Every image in this README comes out of the
 engine itself, with a fixed seed, and is regenerated identically by
 `node tools/vitrine.mjs`: none of them can promise a render the app would not
 produce.

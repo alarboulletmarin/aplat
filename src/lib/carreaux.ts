@@ -39,7 +39,7 @@ import {
 } from './trace'
 
 export const IDS_CARREAUX = [
-  'bauhaus', 'carreaux', 'demilunes', 'jetons', 'couloirs',
+  'bauhaus', 'carreaux', 'demilunes', 'jetons', 'couloirs', 'dalles',
 ] as const
 
 export type IdCarreau = (typeof IDS_CARREAUX)[number]
@@ -656,6 +656,101 @@ function couloirs(
   }
 }
 
+/* ---------- dalles ----------------------------------------------------------- */
+
+/**
+ * Les dalles : de gros pavés penchés, en rangées décalées.
+ *
+ * Toutes les dalles penchent du même angle, et c'est tout le motif. Une
+ * inclinaison qui alternerait d'une rangée à l'autre ferait des losanges, un
+ * treillis, quelque chose qu'on regarde comme une grille ; un seul sens fait un
+ * mouvement, et l'oeil descend l'image en biais sans qu'on lui ait rien demandé.
+ * C'est le geste des affiches de forme des années soixante, et il ne tient qu'à
+ * cette constance.
+ *
+ * Deux choses de plus le font tenir. Les dalles sont **grandes**, quelques-unes
+ * par largeur d'écran et non quelques dizaines : c'est ce qui sépare une affiche
+ * d'un papier peint. Et une teinte domine largement, les autres ne ponctuent
+ * que : quatre couleurs à parts égales redonnent un damier bariolé, où la forme
+ * de la dalle disparaît derrière son coloriage.
+ *
+ * Une dalle sur quatre environ porte une marche, un cran taillé dans son coin
+ * haut. Elle ne change pas la lecture de loin et elle la change de près, ce qui
+ * est exactement ce qu'on demande à un fond d'écran qu'on voit vingt fois par
+ * jour.
+ *
+ * Les rangées sont décalées d'un demi-pas plus un jeu tiré de la graine, comme
+ * la panoplie : alignées, les dalles font des colonnes verticales qui coupent
+ * le biais au lieu de le porter.
+ */
+function dalles(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const cle = Math.floor(rnd() * 0x7fffffff)
+  const pas = unite / [2.6, 3.6, 5.2][densite]
+  const hauteur = pas * 0.92
+  /* Le cisaillement, en fraction de la demi-hauteur. Tiré une fois : c'est la
+     constance de l'angle qui fait le motif. */
+  const penche = (rnd() < 0.5 ? 1 : -1) * (0.62 + 0.32 * rnd())
+  /* La dominante ne peut pas être la teinte la plus claire de la palette :
+     c'est presque toujours celle qui ressemble au fond, et une dalle de la
+     couleur du fond sur les deux tiers de l'image efface le motif. Elle reste
+     disponible pour la ponctuation, où elle ne couvre qu'un sixième. */
+  const clair = duClairAuSombre(C)[0]
+  const franches = C.filter((teinte) => teinte !== clair)
+  const dominante = (franches.length > 0 ? franches : C)[
+    Math.floor(rnd() * (franches.length > 0 ? franches.length : C.length))
+  ]
+
+  const colonnes = Math.ceil(W / pas) + 3
+  const rangees = Math.ceil(H / hauteur) + 3
+
+  /* Les dalles se touchent presque : c'est le serrage qui fait la chaîne
+     diagonale, et la chaîne qui fait le mouvement. Espacées, elles flottent
+     chacune dans son coin de fond et l'affiche redevient un semis. */
+  const l = pas * 0.72
+  const h = hauteur * 0.86
+  const d = penche * h * 0.55
+
+  for (let r = -1; r < rangees - 1; r += 1) {
+    const decale = (r % 2 === 0 ? 0 : pas / 2) + (hacher(r, 313, cle) - 0.5) * pas * 0.3
+    const y = r * hauteur + hauteur / 2
+    for (let c = -2; c < colonnes - 1; c += 1) {
+      const x = c * pas + decale + pas / 2
+      /* Deux dalles sur trois portent la dominante ; le reste ponctue. */
+      const tirage = hacher(c, r, cle)
+      ctx.fillStyle = tirage < 0.66
+        ? dominante
+        : C[Math.floor(hacher(c, r + 911, cle) * C.length)]
+
+      const hg: Point = [x - l / 2 + d, y - h / 2]
+      const hd: Point = [x + l / 2 + d, y - h / 2]
+      const bd: Point = [x + l / 2 - d, y + h / 2]
+      const bg: Point = [x - l / 2 - d, y + h / 2]
+
+      ctx.beginPath()
+      if (hacher(c + 57, r, cle) > 0.74) {
+        /* La marche : un cran taillé dans le coin haut, du côté où la dalle
+           penche. Elle suit le cisaillement, sinon elle se lit comme un
+           accident de tracé plutôt que comme une découpe. */
+        const cran = l * 0.4
+        const marche = h * 0.3
+        ctx.moveTo(hg[0], hg[1])
+        ctx.lineTo(hd[0] - cran, hd[1])
+        ctx.lineTo(hd[0] - cran - d * 0.6 * (marche / h) * 2, hd[1] + marche)
+        ctx.lineTo(hd[0] - d * (marche / h) * 2, hd[1] + marche)
+        ctx.lineTo(bd[0], bd[1])
+        ctx.lineTo(bg[0], bg[1])
+        ctx.closePath()
+      } else {
+        tracerPolygone(ctx, [hg, hd, bd, bg])
+      }
+      ctx.fill()
+    }
+  }
+}
+
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreCarreau(
@@ -666,5 +761,6 @@ export function peindreCarreau(
   else if (id === 'carreaux') carreaux(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'demilunes') demilunes(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'jetons') jetons(ctx, W, H, C, densite, rnd, unite)
-  else couloirs(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'couloirs') couloirs(ctx, W, H, C, densite, rnd, unite)
+  else dalles(ctx, W, H, C, densite, rnd, unite)
 }

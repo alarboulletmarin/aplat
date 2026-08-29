@@ -216,7 +216,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quatre-vingt-une familles, dans l'ordre de la liste : les quatre groupes
+ * Les quatre-vingt-deux familles, dans l'ordre de la liste : les quatre groupes
  * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
  * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
@@ -259,6 +259,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
   { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
   { id: 'couloirs', groupe: 'pav', fr: 'Couloirs', en: 'Lane lines' },
+  { id: 'dalles', groupe: 'pav', fr: 'Dalles', en: 'Slabs' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },

@@ -9,6 +9,14 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : Dalles, une affiche de forme
+
+- **De gros pavés penchés, en rangées décalées.** Toutes les dalles penchent du
+  même angle, et c'est tout le motif : une inclinaison qui alternerait ferait un
+  treillis, un seul sens fait un mouvement, et l'oeil descend l'image en biais.
+  Une teinte domine largement, les autres ne ponctuent que, et une dalle sur
+  quatre porte une marche taillée dans son coin haut.
+
 ### Ajouté : cinq motifs d'endurance, et le catalogue passe à quatre-vingt-une
 
 - **Courir, rouler, nager.** Cinq familles nouvelles, chacune rangée dans le
