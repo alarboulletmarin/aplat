@@ -14,10 +14,10 @@ est installable et pleinement utilisable hors ligne.
 
 <p align="center">
   <img src="docs/vitrine/vagues.png" alt="Motif Vagues, palette Lime et crème" width="140">
-  <img src="docs/vitrine/demilunes.png" alt="Motif Demi-lunes, palette Soleil" width="140">
+  <img src="docs/vitrine/eventails.png" alt="Motif Éventails, palette Soleil" width="140">
   <img src="docs/vitrine/cubes.png" alt="Motif Cubes, palette Ardoise" width="140">
   <img src="docs/vitrine/torii.png" alt="Motif Torii, palette Nuit" width="140">
-  <img src="docs/vitrine/constellations.png" alt="Motif Constellations, palette Orage" width="140">
+  <img src="docs/vitrine/bonnets.png" alt="Motif Bonnets, palette Orage" width="140">
 </p>
 
 ## Sommaire
@@ -69,10 +69,10 @@ ne donnerait pas.
 
 | | | | | |
 |:---:|:---:|:---:|:---:|:---:|
-| <img src="docs/vitrine/vagues.png" alt="Vagues" width="150"> | <img src="docs/vitrine/demilunes.png" alt="Demi-lunes" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Cubes" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
-| Vagues | Demi-lunes | Penrose | Cubes | Kintsugi |
-| <img src="docs/vitrine/cernes.png" alt="Cernes" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
-| Cernes | Moiré | Dunes | Torii | Constellations |
+| <img src="docs/vitrine/vagues.png" alt="Vagues" width="150"> | <img src="docs/vitrine/eventails.png" alt="Éventails" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Cubes" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
+| Vagues | Éventails | Penrose | Cubes | Kintsugi |
+| <img src="docs/vitrine/dalles.png" alt="Dalles" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/bonnets.png" alt="Bonnets" width="150"> |
+| Dalles | Moiré | Dunes | Torii | Bonnets |
 
 ## Un motif, plusieurs formats
 

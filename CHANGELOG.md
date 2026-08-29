@@ -9,6 +9,14 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Corrigé : la page ne se défile plus en travers sur un petit téléphone
+
+- **Dix-sept pixels de trop à 320 px.** Les mentions du pied de page portent une
+  adresse postale et un nom de société, c'est-à-dire les seuls mots que la
+  traduction ne raccourcit pas et que la césure ne connaît pas. Un mot plus long
+  que la colonne poussait la page entière ; il se coupe désormais. Le défaut
+  était là avant les motifs de cette version.
+
 ### Ajouté : quatre motifs géométriques, et un neuvième groupe
 
 - **Dalles.** De gros pavés penchés, en rangées décalées. Toutes penchent du même

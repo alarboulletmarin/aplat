@@ -14,10 +14,10 @@ fully usable offline.
 
 <p align="center">
   <img src="docs/vitrine/vagues.png" alt="Waves pattern, Lime and cream palette" width="140">
-  <img src="docs/vitrine/demilunes.png" alt="Half-moons pattern, Sun palette" width="140">
+  <img src="docs/vitrine/eventails.png" alt="Fans pattern, Sun palette" width="140">
   <img src="docs/vitrine/cubes.png" alt="Blocks pattern, Slate palette" width="140">
   <img src="docs/vitrine/torii.png" alt="Torii pattern, Night palette" width="140">
-  <img src="docs/vitrine/constellations.png" alt="Constellations pattern, Storm palette" width="140">
+  <img src="docs/vitrine/bonnets.png" alt="Swim caps pattern, Storm palette" width="140">
 </p>
 
 ## Table of contents
@@ -64,10 +64,10 @@ produce.
 
 | | | | | |
 |:---:|:---:|:---:|:---:|:---:|
-| <img src="docs/vitrine/vagues.png" alt="Waves" width="150"> | <img src="docs/vitrine/demilunes.png" alt="Half-moons" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Blocks" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
-| Waves | Half-moons | Penrose | Blocks | Kintsugi |
-| <img src="docs/vitrine/cernes.png" alt="Growth rings" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
-| Growth rings | Moiré | Dunes | Torii | Constellations |
+| <img src="docs/vitrine/vagues.png" alt="Waves" width="150"> | <img src="docs/vitrine/eventails.png" alt="Fans" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Blocks" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
+| Waves | Fans | Penrose | Blocks | Kintsugi |
+| <img src="docs/vitrine/dalles.png" alt="Slabs" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/bonnets.png" alt="Swim caps" width="150"> |
+| Slabs | Moiré | Dunes | Torii | Swim caps |
 
 ## One pattern, several formats
 

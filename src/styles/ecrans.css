@@ -1232,6 +1232,13 @@
   font-size: 12.5px;
   line-height: 1.5;
   max-width: 68ch;
+  /* Un mot plus long que la colonne se coupe plutôt que de pousser la page.
+     C'est le seul paragraphe du portage où le cas se présente : il porte une
+     adresse postale et un nom de société, c'est-à-dire les seuls mots que la
+     traduction ne raccourcit pas et que la césure ne connaît pas. À 320 px il
+     débordait de dix-sept pixels, et un fond d'écran qui se défile en travers
+     est le premier défaut qu'on voit. */
+  overflow-wrap: anywhere;
 }
 
 /* --- Le panneau dans une colonne étroite -------------------------------------

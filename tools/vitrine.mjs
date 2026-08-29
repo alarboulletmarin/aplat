@@ -25,21 +25,27 @@ const OUT = path.resolve(ICI, '../docs/vitrine')
 /* La graine de toujours, celle de la planche-contact et des maquettes. */
 const GRAINE = 7314
 
-/* La galerie : dix familles, les cinq groupes représentés, une palette
+/* La galerie : dix familles, huit des neuf groupes représentés, une palette
    différente à chaque fois. Le format est celui d'un téléphone (1179 × 2556),
    rendu directement à la taille du thumbnail : le motif ne dépend pas de la
-   résolution, il n'y a rien à réduire. */
+   résolution, il n'y a rien à réduire.
+
+   Trois échanges à l'arrivée des motifs de forme et d'endurance, et chacun se
+   fait à groupe constant : Éventails prend la place de Demi-lunes chez les
+   signes, Bonnets celle de Constellations chez les figures, Dalles celle de
+   Cernes. La vitrine montre ce que le catalogue a de plus récent sans cesser
+   de montrer ce qu'il a de plus varié. */
 const GALERIE = [
   { famille: 'vagues', palette: 'lime' },
-  { famille: 'demilunes', palette: 'soleil' },
+  { famille: 'eventails', palette: 'soleil' },
   { famille: 'penrose', palette: 'menthe' },
   { famille: 'cubes', palette: 'ardoise' },
   { famille: 'kintsugi', palette: 'argile' },
-  { famille: 'cernes', palette: 'corail' },
+  { famille: 'dalles', palette: 'corail' },
   { famille: 'moire', palette: 'encre' },
   { famille: 'dunes', palette: 'ciel' },
   { famille: 'torii', palette: 'nuit' },
-  { famille: 'constellations', palette: 'orage' },
+  { famille: 'bonnets', palette: 'orage' },
 ]
 
 /* Les deux motifs mis en avant : l'un pour les formats, l'autre pour la
