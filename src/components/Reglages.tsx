@@ -18,10 +18,11 @@ import { EditeurPalette } from './EditeurPalette'
  * modifiable si besoin.
  */
 
-/** Les huit groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
+/** Les neuf groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
 const GROUPES = [
   { id: 'abs', cle: 'groupeAbstraits' },
   { id: 'pav', cle: 'groupePavages' },
+  { id: 'sig', cle: 'groupeSignes' },
   { id: 'vol', cle: 'groupeVolumes' },
   { id: 'ins', cle: 'groupeInstruments' },
   { id: 'mat', cle: 'groupeMatieres' },

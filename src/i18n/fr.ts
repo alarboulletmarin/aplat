@@ -162,7 +162,7 @@ export const fr = {
       sixNote:
         'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
     },
-    /* Étape 01. Les cinq groupes plutôt que les quatre-vingt-deux familles : une
+    /* Étape 01. Les cinq groupes plutôt que les quatre-vingt-cinq familles : une
        liste complète referait le panneau de l'application dans un autre
        document, et « une autre famille » donne accès au reste sans ça. */
     reglages: {
@@ -358,6 +358,10 @@ export const fr = {
        pour autant : c'est le même classement, montré autrement. */
     groupeAbstraits: 'Abstraits',
     groupePavages: 'Pavages',
+    /* Une grille de cases, et dans chacune un signe. La neuvième phrase, née
+       du plafond : les pavages ont passé vingt familles, et c'est la coupe
+       qu'ils demandaient. */
+    groupeSignes: 'Signes',
     groupeVolumes: 'Volumes',
     groupeInstruments: 'Instruments',
     /* Bois, peau, tissu, interférence : ce que la main reconnaît avant

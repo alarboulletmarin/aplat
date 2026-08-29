@@ -34,12 +34,13 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
-  duClairAuSombre, hachurer, hacher, luminanceHex, tracerCercle, tracerPolygone,
-  type Point,
+  arcEpais, duClairAuSombre, hachurer, hacher, luminanceHex, tracerCercle,
+  tracerPolygone, type Point,
 } from './trace'
 
 export const IDS_CARREAUX = [
-  'bauhaus', 'carreaux', 'demilunes', 'jetons', 'couloirs', 'dalles',
+  'bauhaus', 'carreaux', 'demilunes', 'jetons', 'couloirs', 'dalles', 'fuseaux',
+  'noeuds', 'eventails',
 ] as const
 
 export type IdCarreau = (typeof IDS_CARREAUX)[number]
@@ -751,6 +752,260 @@ function dalles(
   }
 }
 
+/* ---------- fuseaux ---------------------------------------------------------- */
+
+/**
+ * Les fuseaux : des colonnes qui ondulent, et se renversent d'une case à l'autre.
+ *
+ * Une écaille regarde toujours dans le même sens, et c'est ce qui en fait une
+ * matière tranquille. Ici le sens s'inverse à chaque case : le fuseau penche à
+ * droite, celui du dessous penche à gauche, et la colonne serpente. C'est de ce
+ * renversement, et de lui seul, que vient l'effet optique ; une colonne dont
+ * toutes les cases pencheraient du même côté ne serait qu'une bande courbe.
+ *
+ * Le fuseau porte son nom : étranglé aux deux bouts, ventru au milieu. C'est
+ * l'étranglement qui fait tout. Une bande à largeur constante dont les deux
+ * bords bombent du même côté donne un ruban qui serpente, c'est-à-dire du papier
+ * peint ondulé, sans une seule arête où l'oeil accroche. Le pincement, lui, pose
+ * une pointe à chaque jonction, et c'est de ces pointes que vient le claquement
+ * optique.
+ *
+ * Le ventre est dissymétrique : un côté bombe trois fois plus que l'autre, et
+ * c'est ce côté qui change d'une case à la suivante. Un fuseau symétrique se
+ * contenterait de battre sur place ; celui-ci penche, et la colonne zigzague
+ * d'un étranglement au suivant.
+ *
+ * **Ce qui ondule le plus n'est pas peint.** Entre deux colonnes, le fond de la
+ * palette dessine son propre fuseau, en négatif, et il se tord en sens inverse
+ * puisqu'il est pris entre deux voisins qui se renversent ensemble. C'est le
+ * procédé des affiches d'art optique : le vide y travaille autant que le plein,
+ * et c'est pour cela que la colonne peinte ne remplit qu'un peu plus de la
+ * moitié du pas.
+ *
+ * Les colonnes voisines se renversent en même temps plutôt qu'en alternance :
+ * décalées d'une case, elles feraient des losanges là où elles doivent faire des
+ * ondes, et la trame se lirait comme un grillage.
+ */
+function fuseaux(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const cle = Math.floor(rnd() * 0x7fffffff)
+  const pas = unite / [5.5, 8.5, 13][densite]
+  const haut = pas * 1.5
+  /* L'étranglement, et le ventre. Le ventre porte le fuseau jusqu'à frôler la
+     colonne voisine ; l'étranglement laisse passer le fond en travers, et c'est
+     lui qui découpe la colonne en fuseaux au lieu d'en faire un ruban. */
+  const col = pas * 0.055
+  const gros = pas * (0.46 + 0.1 * rnd())
+  const maigre = gros * 0.3
+
+  const clair = duClairAuSombre(C)[0]
+  const franches = C.filter((teinte) => teinte !== clair)
+  const jeu = franches.length > 0 ? franches : C
+  const dominante = jeu[Math.floor(rnd() * jeu.length)]
+
+  const colonnes = Math.ceil(W / pas) + 2
+  const rangees = Math.ceil(H / haut) + 2
+
+  /* Rangée par rangée, et non colonne par colonne. L'image serait la même, mais
+     la liste des formes ne le serait pas : un cadre plus haut allongerait chaque
+     colonne, et tout ce qui suit la première glisserait dans la liste. Rangée
+     par rangée, un cadre plus haut ne fait qu'ajouter à la fin. */
+  for (let r = -1; r < rangees - 1; r += 1) {
+    for (let c = -1; c < colonnes - 1; c += 1) {
+      /* La teinte se tire par colonne, jamais par case : c'est la colonne qui
+         est l'objet, et la recolorier case par case la couperait en morceaux. */
+      ctx.fillStyle = hacher(c, 71, cle) < 0.72
+        ? dominante
+        : C[Math.floor(hacher(c, 809, cle) * C.length)]
+
+      const xc = c * pas + pas / 2
+      const yh = r * haut
+      const yb = yh + haut
+      const ym = (yh + yb) / 2
+      /* Le côté qui porte le gros ventre, renversé d'une case à l'autre. Il se
+         lit par le rang, jamais par un compteur qui avancerait avec la boucle :
+         un cadre plus haut ne doit pas retourner ce qui est déjà en haut. */
+      const versLaDroite = r % 2 === 0
+      const bg = versLaDroite ? maigre : gros
+      const bd = versLaDroite ? gros : maigre
+
+      ctx.beginPath()
+      ctx.moveTo(xc - col, yh)
+      ctx.quadraticCurveTo(xc - col - bg * 2, ym, xc - col, yb)
+      ctx.lineTo(xc + col, yb)
+      ctx.quadraticCurveTo(xc + col + bd * 2, ym, xc + col, yh)
+      ctx.closePath()
+      ctx.fill()
+    }
+  }
+}
+
+/* ---------- noeuds ----------------------------------------------------------- */
+
+/**
+ * Les noeuds : un lacis qui se referme, et une pastille dans chaque maille.
+ *
+ * Le tracé est celui de la coulée, deux quarts d'arc par tuile qui se raccordent
+ * par le milieu des côtés, et les rubans s'y bouclent tout seuls. Ce qui en fait
+ * une autre famille tient à deux partis pris, et ils vont ensemble.
+ *
+ * D'abord tout est peint, d'une seule teinte. La coulée tire une couleur par
+ * ruban et en laisse un sur quatre en réserve : on y suit un ruban rouge sur un
+ * mètre de mur, et c'est son sujet. Ici il n'y a plus de rubans à suivre, il y a
+ * un lacis, une seule chose continue qui occupe la page. C'est la différence
+ * entre une nappe de cordes de couleur et un grillage.
+ *
+ * Ensuite les mailles sont ponctuées. Le lacis enferme des trous, et chacun
+ * reçoit une pastille en son centre. C'est le geste des planches de motifs des
+ * années soixante : le vide n'y est jamais laissé vide, on y pose un point qui
+ * le nomme. Sans les pastilles, le motif retombe sur un entrelacs ; avec elles,
+ * chaque maille devient une figure qu'on regarde une par une.
+ *
+ * Le tirage ne se fait jamais dans la boucle des tuiles, dont le compte dépend
+ * du format : la graine fabrique une clé, et chaque tuile interroge cette clé
+ * par ses propres coordonnées.
+ */
+function noeuds(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const cle = Math.floor(rnd() * 0x7fffffff)
+  const pas = unite / [3.4, 5, 7.5][densite]
+  const epaisseur = pas * 0.34
+  const rayon = pas * 0.5
+
+  const clair = duClairAuSombre(C)[0]
+  const franches = C.filter((teinte) => teinte !== clair)
+  const jeu = franches.length > 0 ? franches : C
+  const lacis = jeu[Math.floor(rnd() * jeu.length)]
+  /* La pastille prend la teinte la plus éloignée du lacis en clarté : deux
+     valeurs voisines et le point disparaît dans son trou. */
+  let pastille = C[0]
+  let ecart = -1
+  for (const teinte of C) {
+    const d = Math.abs(luminanceHex(teinte) - luminanceHex(lacis))
+    if (d > ecart) {
+      ecart = d
+      pastille = teinte
+    }
+  }
+
+  const colonnes = Math.ceil(W / pas) + 1
+  const rangees = Math.ceil(H / pas) + 1
+  const penche = (c: number, r: number) => hacher(c, r, cle) < 0.5
+
+  ctx.fillStyle = lacis
+  for (let r = -1; r < rangees; r += 1) {
+    for (let c = -1; c < colonnes; c += 1) {
+      const x = c * pas
+      const y = r * pas
+      /* Les deux arcs de la tuile, centrés sur deux coins opposés : chacun entre
+         et sort par le milieu d'un côté, et c'est ce qui les raccorde d'une
+         tuile à l'autre sans qu'aucune couture ne se voie. */
+      const arcs = penche(c, r)
+        ? [[x, y, 0, Math.PI / 2], [x + pas, y + pas, Math.PI, Math.PI * 1.5]]
+        : [[x + pas, y, Math.PI / 2, Math.PI], [x, y + pas, Math.PI * 1.5, Math.PI * 2]]
+      for (const [cx, cy, de, a] of arcs) {
+        arcEpais(ctx, cx, cy, rayon, de, a, epaisseur)
+        ctx.fill()
+      }
+    }
+  }
+
+  /* Les pastilles, au centre des tuiles : c'est là que le lacis laisse son trou,
+     puisque ses arcs contournent les coins. */
+  ctx.fillStyle = pastille
+  for (let r = -1; r < rangees; r += 1) {
+    for (let c = -1; c < colonnes; c += 1) {
+      ctx.beginPath()
+      tracerCercle(ctx, c * pas + pas / 2, r * pas + pas / 2, pas * 0.13)
+      ctx.fill()
+    }
+  }
+}
+
+/* ---------- eventails -------------------------------------------------------- */
+
+/**
+ * Les éventails : des quarts d'anneaux emboîtés, un coin par case.
+ *
+ * Chaque case choisit un de ses quatre coins et y plante un faisceau d'anneaux
+ * concentriques. C'est le seul choix qu'elle fait, et il suffit : d'une case à
+ * l'autre les faisceaux se tournent le dos ou se répondent, et les anneaux
+ * traversent la limite des cases comme si elle n'existait pas.
+ *
+ * Ce n'est ni l'arcade ni l'écaille, et il vaut de dire pourquoi. L'arcade
+ * dessine des arches posées debout, un objet par case, avec un haut et un bas ;
+ * l'écaille couvre la page de demi-disques qui regardent tous dans le même sens.
+ * Ici il n'y a pas d'objet : il y a des bandes courbes qui ne s'arrêtent nulle
+ * part, et l'oeil suit un anneau d'une case à sa voisine.
+ *
+ * Les anneaux sont peints du plus grand au plus petit, chacun couvrant le
+ * précédent, plutôt que découpés en couronnes. Le pinceau ne sait pas détourer,
+ * et une pile de quarts de disque coûte moitié moins de formes qu'une pile de
+ * couronnes pour exactement la même image.
+ *
+ * Une case sur six reste pleine, sans faisceau. Sans ces repos, la page entière
+ * bat au même rythme et le motif devient une texture ; avec eux, les faisceaux
+ * se regroupent et l'oeil trouve où se poser.
+ */
+function eventails(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const cle = Math.floor(rnd() * 0x7fffffff)
+  const pas = unite / [3, 4.5, 7][densite]
+  const anneaux = [5, 4, 3][densite]
+  const decalage = Math.floor(rnd() * C.length)
+
+  const colonnes = Math.ceil(W / pas) + 1
+  const rangees = Math.ceil(H / pas) + 1
+
+  for (let r = -1; r < rangees; r += 1) {
+    for (let c = -1; c < colonnes; c += 1) {
+      const x = c * pas
+      const y = r * pas
+      const tirage = hacher(c, r, cle)
+      /* Les deux teintes de la case, prises côte à côte dans la palette : deux
+         teintes tirées au hasard chacune de son côté donnent des accords que
+         rien ne tient d'une case à l'autre. */
+      const i = (decalage + Math.floor(tirage * C.length)) % C.length
+      const a = C[i]
+      const b = C[(i + 1 + Math.floor(hacher(c, r + 313, cle) * (C.length - 1))) % C.length]
+
+      if (hacher(c + 61, r, cle) > 0.84) {
+        /* Le repos : la case pleine, sans faisceau. */
+        ctx.fillStyle = a
+        /* Le recouvrement se mesure en fraction du pas, jamais en pixels : un
+           demi-pixel en dur ne double pas quand l'image double, et le motif
+           cesse d'être le même à deux résolutions. */
+        ctx.fillRect(x, y, pas * 1.004, pas * 1.004)
+        continue
+      }
+
+      /* Le coin qui porte le faisceau, et l'angle de départ qui va avec. */
+      const coin = Math.floor(hacher(c, r + 977, cle) * 4)
+      const cx = coin === 1 || coin === 2 ? x + pas : x
+      const cy = coin >= 2 ? y + pas : y
+      const depart = [0, Math.PI / 2, Math.PI, Math.PI * 1.5][coin]
+
+      /* Du plus grand au plus petit : le fond de la case est le premier anneau,
+         et chaque suivant vient par-dessus. */
+      for (let k = anneaux; k >= 1; k -= 1) {
+        ctx.fillStyle = k % 2 === anneaux % 2 ? a : b
+        const rayon = (pas * k) / anneaux
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.arc(cx, cy, rayon, depart, depart + Math.PI / 2)
+        ctx.closePath()
+        ctx.fill()
+      }
+    }
+  }
+}
+
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreCarreau(
@@ -762,5 +1017,8 @@ export function peindreCarreau(
   else if (id === 'demilunes') demilunes(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'jetons') jetons(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'couloirs') couloirs(ctx, W, H, C, densite, rnd, unite)
-  else dalles(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'dalles') dalles(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'fuseaux') fuseaux(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'noeuds') noeuds(ctx, W, H, C, densite, rnd, unite)
+  else eventails(ctx, W, H, C, densite, rnd, unite)
 }

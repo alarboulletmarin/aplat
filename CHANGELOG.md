@@ -9,15 +9,39 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
-### Ajouté : Dalles, une affiche de forme
+### Ajouté : quatre motifs géométriques, et un neuvième groupe
 
-- **De gros pavés penchés, en rangées décalées.** Toutes les dalles penchent du
-  même angle, et c'est tout le motif : une inclinaison qui alternerait ferait un
+- **Dalles.** De gros pavés penchés, en rangées décalées. Toutes penchent du même
+  angle, et c'est tout le motif : une inclinaison qui alternerait ferait un
   treillis, un seul sens fait un mouvement, et l'oeil descend l'image en biais.
   Une teinte domine largement, les autres ne ponctuent que, et une dalle sur
   quatre porte une marche taillée dans son coin haut.
+- **Fuseaux.** Des colonnes qui ondulent et se renversent d'une case à l'autre.
+  Le fuseau est étranglé aux deux bouts et ventru au milieu : c'est le pincement
+  qui pose une pointe à chaque jonction, et de ces pointes que vient le
+  claquement optique. Entre deux colonnes, le fond dessine son propre fuseau en
+  négatif, et se tord en sens inverse.
+- **Noeuds.** Un lacis qui se referme, et une pastille dans chaque maille. Tout
+  y est peint d'une seule teinte, là où la coulée tire une couleur par ruban :
+  ce n'est plus une nappe de cordes de couleur, c'est un grillage. Et le vide
+  n'est jamais laissé vide, chaque trou reçoit un point qui le nomme.
+- **Éventails.** Des quarts d'anneaux emboîtés, un coin par case. D'une case à
+  l'autre les faisceaux se tournent le dos ou se répondent, et les anneaux
+  traversent la limite des cases comme si elle n'existait pas. Une case sur six
+  reste pleine, sans quoi la page entière bat au même rythme.
 
-### Ajouté : cinq motifs d'endurance, et le catalogue passe à quatre-vingt-une
+### Changé : les pavages se coupent en deux, et un neuvième onglet apparaît
+
+- **Signes rejoint le classement**, avec sa phrase : une grille de cases, et dans
+  chacune un signe. Y vont Truchet, Azulejos, Bauhaus, Carreaux, Demi-lunes,
+  Jetons, Noeuds et Éventails ; Pavages garde ce qui revient sans case, une
+  maille qu'aucune grille ne découpe.
+- **C'est le plafond qui l'a demandé, et c'est ainsi que la règle doit
+  marcher.** Les pavages ont passé vingt familles, et la réponse n'a pas été de
+  relever le plafond mais de chercher la phrase qui les coupe. Elle était déjà
+  écrite dans le moteur.
+
+### Ajouté : cinq motifs d'endurance
 
 - **Courir, rouler, nager.** Cinq familles nouvelles, chacune rangée dans le
   groupe dont elle satisfaisait déjà la phrase, jamais dans un groupe « sport »

@@ -266,6 +266,7 @@ export const en: Textes = {
     famille: 'Pattern family',
     groupeAbstraits: 'Abstract',
     groupePavages: 'Tilings',
+    groupeSignes: 'Signs',
     groupeVolumes: 'Volumes',
     groupeInstruments: 'Instruments',
     groupeMatieres: 'Materials',

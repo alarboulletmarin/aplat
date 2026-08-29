@@ -89,11 +89,13 @@ describe('données', () => {
   })
 
   /* Le panneau construit ses grilles en filtrant `FAMILLES` sur le groupe :
-     une famille dont le groupe ne serait aucun des huit disparaîtrait de
+     une famille dont le groupe ne serait aucun des neuf disparaîtrait de
      l'interface sans erreur, et personne ne s'en apercevrait avant de la
-     chercher. Les huit grilles doivent couvrir la liste entière. */
-  it('range chaque famille dans l’un des huit groupes, et aucun n’est vide', () => {
-    const groupes = ['abs', 'pav', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig'] as const
+     chercher. Les neuf grilles doivent couvrir la liste entière. */
+  it('range chaque famille dans l’un des neuf groupes, et aucun n’est vide', () => {
+    const groupes = [
+      'abs', 'pav', 'sig', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig',
+    ] as const
     const comptes = groupes.map((g) => FAMILLES.filter((f) => f.groupe === g).length)
     expect(comptes.reduce((somme, n) => somme + n, 0)).toBe(FAMILLES.length)
     for (const [indice, compte] of comptes.entries()) {
@@ -101,7 +103,7 @@ describe('données', () => {
     }
   })
 
-  /* Les huit grilles se suivent dans le panneau, dans cet ordre. Une famille
+  /* Les neuf grilles se suivent dans le panneau, dans cet ordre. Une famille
      rangée hors de son bloc sauterait de place à l'écran sans que rien ne le
      signale : le parcours clavier d'un groupe passerait par une vignette
      affichée dans un autre.
@@ -110,9 +112,9 @@ describe('données', () => {
      cette liste, `pav` écrit `pay` : les deux existent, le compilateur laisse
      passer, et la famille se retrouverait dans les paysages. Hors de son bloc,
      donc ici. */
-  it('garde les huit groupes d’un seul tenant, dans l’ordre du panneau', () => {
+  it('garde les neuf groupes d’un seul tenant, dans l’ordre du panneau', () => {
     const ordre = FAMILLES.map((f) => f.groupe)
-    const rang = ['abs', 'pav', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig']
+    const rang = ['abs', 'pav', 'sig', 'vol', 'ins', 'mat', 'pay', 'lieu', 'fig']
     expect(ordre).toEqual([...ordre].sort(
       (a, b) => rang.indexOf(a) - rang.indexOf(b),
     ))

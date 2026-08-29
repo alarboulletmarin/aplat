@@ -55,8 +55,14 @@ describe('liste des familles neuves', () => {
     /* Les deux gestes ne rangent pas au même endroit, et c'est le sens même
        des groupes : le carreau pose une maille qui revient, la coulée fait
        serpenter des rubans dont rien ne se répète. */
+    /* Le geste et le groupe ne se recouvrent plus depuis que les pavages ont
+       été coupés : le carreau sert les signes, qui portent une grille de
+       cases, et les pavages, dont la maille n'a pas de case. C'est le
+       classement qui décide, jamais le module. */
+    const SIGNES = ['bauhaus', 'carreaux', 'demilunes', 'jetons', 'noeuds', 'eventails']
     for (const id of IDS_CARREAUX) {
-      expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('pav')
+      expect(FAMILLES.find((f) => f.id === id)?.groupe, id)
+        .toBe(SIGNES.includes(id) ? 'sig' : 'pav')
     }
     for (const id of IDS_COULEES) {
       expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('abs')

@@ -135,7 +135,7 @@ export interface Palette {
 }
 
 /**
- * Les huit groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
+ * Les neuf groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
  *
  * Un groupe n'existe que si son critère tient en une phrase. C'est la règle du
  * système de design, et elle sert à quelque chose : « abstraits » n'en avait
@@ -143,10 +143,18 @@ export interface Palette {
  * porter quarante et une familles sur soixante-seize. Les onglets avaient été
  * inventés contre exactement ça.
  *
- * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `vol` du
- * volume en aplats, `ins` des instruments gradués, `mat` ce que la main
- * reconnaît, `pay` ce qui a un haut et un bas, `lieu` des gravures tramées,
- * `fig` des objets reconnaissables un par un.
+ * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `sig` une
+ * grille de cases portant chacune un signe, `vol` du volume en aplats, `ins`
+ * des instruments gradués, `mat` ce que la main reconnaît, `pay` ce qui a un
+ * haut et un bas, `lieu` des gravures tramées, `fig` des objets reconnaissables
+ * un par un.
+ *
+ * Le neuvième est né du plafond, et c'est ainsi que la règle est censée
+ * marcher : les pavages ont passé vingt familles, et la réponse n'a pas été de
+ * relever le plafond mais de chercher la phrase qui les coupe. Elle était déjà
+ * écrite dans `carreaux.ts` : une grille de cases carrées, et dans chacune un
+ * signe pris dans un jeu fini. Ce qui reste aux pavages est ce qui revient sans
+ * case, une maille qu'aucune grille ne découpe.
  *
  * Un groupe « sport » a été essayé et retiré : un thème n'est pas un critère, et
  * la liste y mêlait une grille de maillots, un pavage de lignes d'eau et une
@@ -158,7 +166,7 @@ export interface Palette {
  * passer un groupe qui n'existe pas.
  */
 export type Groupe =
-  | 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
+  | 'abs' | 'pav' | 'sig' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -216,9 +224,9 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quatre-vingt-deux familles, dans l'ordre de la liste : les quatre groupes
- * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
- * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
+ * Les quatre-vingt-cinq familles, dans l'ordre de la liste : les cinq groupes
+ * géométriques d'abord, abstraits, pavages, signes, volumes, instruments ; puis
+ * les matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
  * plus figuratif, et le premier de chaque groupe en donne le ton.
  */
@@ -247,19 +255,23 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'trame', groupe: 'pav', fr: 'Trame', en: 'Dither' },
   { id: 'ecailles', groupe: 'pav', fr: 'Écailles', en: 'Scales' },
   { id: 'arcade', groupe: 'pav', fr: 'Arcade', en: 'Arcade' },
-  { id: 'truchet', groupe: 'pav', fr: 'Truchet', en: 'Truchet' },
-  { id: 'azulejos', groupe: 'pav', fr: 'Azulejos', en: 'Azulejos' },
   { id: 'mosaique', groupe: 'pav', fr: 'Mosaïque', en: 'Mosaic' },
   { id: 'tresse', groupe: 'pav', fr: 'Tresse', en: 'Weave' },
   { id: 'claustra', groupe: 'pav', fr: 'Claustra', en: 'Breeze block' },
   { id: 'papel', groupe: 'pav', fr: 'Papel picado', en: 'Papel picado' },
   { id: 'penrose', groupe: 'pav', fr: 'Penrose', en: 'Penrose' },
-  { id: 'bauhaus', groupe: 'pav', fr: 'Bauhaus', en: 'Bauhaus' },
-  { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
-  { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
-  { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
   { id: 'couloirs', groupe: 'pav', fr: 'Couloirs', en: 'Lane lines' },
   { id: 'dalles', groupe: 'pav', fr: 'Dalles', en: 'Slabs' },
+  { id: 'fuseaux', groupe: 'pav', fr: 'Fuseaux', en: 'Spindles' },
+  /* signes : une grille de cases, et dans chacune un signe */
+  { id: 'truchet', groupe: 'sig', fr: 'Truchet', en: 'Truchet' },
+  { id: 'azulejos', groupe: 'sig', fr: 'Azulejos', en: 'Azulejos' },
+  { id: 'bauhaus', groupe: 'sig', fr: 'Bauhaus', en: 'Bauhaus' },
+  { id: 'carreaux', groupe: 'sig', fr: 'Carreaux', en: 'Tiles' },
+  { id: 'demilunes', groupe: 'sig', fr: 'Demi-lunes', en: 'Half-moons' },
+  { id: 'jetons', groupe: 'sig', fr: 'Jetons', en: 'Tokens' },
+  { id: 'noeuds', groupe: 'sig', fr: 'Noeuds', en: 'Knots' },
+  { id: 'eventails', groupe: 'sig', fr: 'Éventails', en: 'Fans' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
