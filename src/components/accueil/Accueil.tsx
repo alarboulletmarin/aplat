@@ -7,7 +7,7 @@ import {
   adresseNettoyee, lireAffichage, retenirLangue, retenirTheme,
   type Affichage, type Theme,
 } from '../../lib/affichage'
-import { lienAccueil, lienApp, lienMoteur } from '../../lib/route'
+import { lienAccueil, lienApp, lienMoteur, remplacerAdresse } from '../../lib/route'
 import { textes as dictionnaire } from '../../i18n'
 import { useThemeResolu } from '../../hooks/useThemeResolu'
 import { Enseigne } from './Enseigne'
@@ -66,12 +66,7 @@ export function Accueil() {
      d'historique. Elle ne porte plus l'affichage, qui vit sur l'appareil. */
   useEffect(() => {
     const propre = adresseNettoyee(window.location.pathname, window.location.search)
-    if (propre === null) return
-    try {
-      window.history.replaceState(null, '', propre)
-    } catch {
-      /* certaines ouvertures locales refusent replaceState : sans conséquence */
-    }
+    if (propre !== null) remplacerAdresse(propre)
   }, [])
 
   /* Les trois liens internes sont nus : le choix fait ici attend déjà sur

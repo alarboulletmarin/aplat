@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { famille, palette, type Langue } from '../../lib/moteur'
 import { tirerGraine } from '../../lib/tirage'
 import { remplir, type Textes } from '../../i18n'
+import { Lien } from '../Lien'
 import { Frise } from './Frise'
 import { Toile } from './Toile'
 import { GALERIE, TELEPHONE } from './choix'
@@ -86,13 +87,13 @@ export function Galerie({
         })}
 
         <li className="tuile-porte-cadre">
-          <a className="tuile-porte" href={moteur}>
+          <Lien className="tuile-porte" vers={moteur}>
             <span className="tuile-porte-arche" aria-hidden="true" />
             <span className="tuile-pied">
               <span className="tuile-nom">{textes.accueil.galerie.moteurTitre}</span>
               <span className="tuile-palette">{textes.accueil.galerie.moteurNote}</span>
             </span>
-          </a>
+          </Lien>
         </li>
       </ul>
     </section>

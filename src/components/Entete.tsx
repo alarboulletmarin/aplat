@@ -2,6 +2,7 @@
 
 import type { Textes } from '../i18n'
 import { Frise } from './accueil/Frise'
+import { Lien } from './Lien'
 
 /**
  * L'en-tête : DESIGN_SYSTEM.md, section 2 (le parti visuel) et section 6
@@ -45,14 +46,14 @@ export function Entete({
         <div className="entete-haut">
           {/* Le mot du titre nomme déjà le lien ; la mention cachée dit où il
               mène, parce que « Aplat » tout seul ne l'annonce pas. */}
-          <a className="entete-marque" href={accueil}>
+          <Lien className="entete-marque" vers={accueil}>
             <span className="marque" aria-hidden="true">
               <i />
               <b />
             </span>
             <h1 className="titre">{textes.entete.titre}</h1>
             <span className="vh">{textes.entete.accueil}</span>
-          </a>
+          </Lien>
           <p className="entete-res" id="entete-res">
             {resolution}
           </p>

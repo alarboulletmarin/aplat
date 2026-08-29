@@ -5,6 +5,7 @@ import {
   type Langue, type Motif,
 } from '../../lib/moteur'
 import { lienAppDuMotif } from '../../lib/url'
+import { Lien } from '../Lien'
 import { remplir, type Textes } from '../../i18n'
 
 /**
@@ -51,13 +52,13 @@ export function Sortie({
           <code>{lien}</code>
         </p>
       </div>
-      <a className="appel-primaire appel-primaire-inverse" href={lien}>
+      <Lien className="appel-primaire appel-primaire-inverse" vers={lien}>
         <span className="ico-descendre" aria-hidden="true">
           <i />
           <b />
         </span>
         <span>{A.primaire}</span>
-      </a>
+      </Lien>
     </section>
   )
 }

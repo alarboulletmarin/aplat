@@ -136,7 +136,8 @@ index.html                    le document, et le thème résolu avant la peintur
 vite.config.ts                build, PWA, politique de sécurité
 eslint.config.js              les règles des hooks React, que tsc ne voit pas
 vercel.json                   les en-têtes de cache qui décident des mises à jour
-src/main.tsx                  point d'entrée, et le choix des trois pages
+src/main.tsx                  point d'entrée, et la table des trois adresses
+src/pages.ts                  les trois documents en morceaux, et leur préchargement
 src/App.tsx                   l'état, l'URL, l'export
 src/lib/moteur.ts             le moteur génératif : palettes, familles, rendu
 src/lib/lieux.ts              les lieux : scènes en champ d’encre, trame de gravure
@@ -149,6 +150,8 @@ src/lib/svg.ts                le même motif en vectoriel, par un pinceau qui no
 src/lib/route.ts              « / », « /app » ou « /moteur », et les liens d'avant
 src/lib/{affichage,historique,resolution,url,export,geometrie,format,tirage,build}.ts
 src/components/               l'interface, un fichier par pièce
+src/components/{Lien,Arrivee,Repli}.tsx
+                              le passage d'un document à l'autre, sans rechargement
 src/components/accueil/       la page d'accueil, un fichier par section
 src/components/moteur/        la page du mécanisme, un fichier par étape
 src/hooks/                    horloge, tailles, focus, ajustement, économie
@@ -225,6 +228,33 @@ sont reconduits vers `/app` avec leur requête intacte, avant le moindre rendu :
 la promesse « copier le lien suffit à retrouver exactement la même image » ne
 s'annule pas parce que le produit s'est doté d'une porte d'entrée. Une adresse
 nue, ou qui ne porte que la langue et le thème, reste sur l'accueil.
+
+**Le passage de l'un à l'autre ne recharge pas la page.** Il l'a fait
+longtemps, et cela se voyait : chaque porte était une ancre nue, donc un
+chargement de document, donc React qui redémarre à zéro avant d'aller chercher
+le morceau de la page visée. Deux attentes en file, et entre les deux un écran
+qui n'avait plus rien à montrer. React Router remplace maintenant la page dans
+le document déjà chargé : la feuille de style est en place, les deux polices
+sont posées, il ne reste que le morceau, et les liens le demandent d'avance
+dès qu'on les survole ou qu'on les atteint au clavier. Dès la deuxième visite,
+le service worker le sert sans réseau.
+
+C'est la seule chose qui change. Une seule page reste montée à la fois, et
+l'application reste l'écran unique décrit plus haut : la navigation est entre
+les documents, jamais à l'intérieur de l'outil. Ce que le chargement de
+document faisait gratuitement, en revanche, est désormais à faire soi-même, et
+c'est tout `components/Arrivee.tsx` : la page arrivée s'ouvre en haut, le
+focus quitte le lien cliqué pour entrer dans le `<main>`, et le titre du
+document est annoncé, faute de quoi un lecteur d'écran ne saurait pas qu'on a
+changé de page. Le retour arrière fait exception au défilement, parce que le
+navigateur rend lui-même la position qu'on avait quittée.
+
+L'adresse de l'application, elle, ne passe pas par le routeur. Elle est
+réécrite à chaque réglage pour que le lien qu'on copie soit celui de l'image
+affichée, et la faire traverser React Router rendrait toute la page à chaque
+tirage. Elle passe donc directement par l'historique (`remplacerAdresse()`),
+en lui repassant son état intact, sans quoi le routeur perdrait le fil du
+retour arrière.
 
 ### La page du mécanisme
 

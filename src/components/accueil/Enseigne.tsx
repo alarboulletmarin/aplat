@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { Langue } from '../../lib/moteur'
+import { Lien } from '../Lien'
 import type { Theme } from '../../lib/url'
 import type { Textes } from '../../i18n'
 import { Bascules } from './Bascules'
@@ -38,13 +39,13 @@ export function Enseigne({
 }) {
   return (
     <header className="enseigne">
-      <a className="enseigne-marque" href={accueil}>
+      <Lien className="enseigne-marque" vers={accueil}>
         <span className="marque" aria-hidden="true">
           <i />
           <b />
         </span>
         <span className="enseigne-mot">{textes.entete.titre}</span>
-      </a>
+      </Lien>
 
       <div className="enseigne-droite">
         <Bascules
@@ -54,9 +55,9 @@ export function Enseigne({
           onLangue={onLangue}
           onTheme={onTheme}
         />
-        <a className="enseigne-app" href={lien}>
+        <Lien className="enseigne-app" vers={lien}>
           {textes.accueil.enseigne.ouvrir}
-        </a>
+        </Lien>
       </div>
     </header>
   )

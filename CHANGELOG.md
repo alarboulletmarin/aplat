@@ -9,6 +9,26 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : passer d'une page à l'autre ne recharge plus rien
+
+- **Le battement entre les trois pages a disparu.** Ouvrir l'application
+  depuis la présentation, revenir par la marque, aller voir comment c'est
+  fait : chacun de ces gestes rechargeait la page entière, avec son écran vide
+  au milieu. La page est maintenant remplacée dans le document déjà ouvert,
+  et il n'y a plus rien à attendre entre les deux.
+- **Les liens préparent la page qu'ils désignent.** Le survol, ou la simple
+  arrivée au clavier, suffit à demander ce qu'il faut : au clic, il est déjà
+  là. Rien de plus n'est téléchargé pour autant, c'est le même morceau,
+  demandé plus tôt.
+- **Ce que le navigateur faisait tout seul est refait à la main.** La page
+  arrivée s'ouvre en haut, le focus y entre plutôt que de rester sur le lien
+  cliqué, et son titre est annoncé aux lecteurs d'écran, qui n'avaient
+  jusqu'ici aucun moyen de savoir qu'on avait changé de page. Le retour
+  arrière retrouve la position qu'on avait quittée.
+- **Rien d'autre ne bouge.** Une seule page est montée à la fois, comme avant :
+  l'application reste l'écran unique, et les liens partagés d'hier ouvrent
+  toujours exactement la même image.
+
 ### Changé : l'export tient dans un studio
 
 - **Télécharger télécharge, et la barre tient en trois boutons.**

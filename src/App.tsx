@@ -15,7 +15,7 @@ import {
 import { ecrireUrl, lireUrl, type Reglages, type Theme } from './lib/url'
 import { tirer, tirerGraine } from './lib/tirage'
 import { lireAffichage, retenirLangue, retenirTheme } from './lib/affichage'
-import { lienAccueil } from './lib/route'
+import { lienAccueil, remplacerAdresse } from './lib/route'
 import {
   copierImage, encoderImage, encoderSVG, ErreurExport, facteur,
   fichierPartageable, nomFichier, telecharger, webpDisponible, type Format,
@@ -286,11 +286,7 @@ export function App() {
 
   useEffect(() => {
     if (window.location.search.slice(1) === requete) return
-    try {
-      window.history.replaceState(null, '', `${window.location.pathname}?${requete}`)
-    } catch {
-      /* certaines ouvertures locales refusent replaceState : sans conséquence */
-    }
+    remplacerAdresse(`${window.location.pathname}?${requete}`)
   }, [requete])
 
   useEffect(() => () => clearTimeout(minuterieCopie.current), [])
@@ -641,7 +637,10 @@ export function App() {
       <div className="page">
         <Entete cadre={entete} textes={T} accueil={retour} resolution={etiquetteResolution} />
 
-        <main className="colonnes">
+        {/* `tabIndex` négatif : le passage d'un document à l'autre ne
+            recharge plus la page, et c'est ici que le focus est reposé en
+            arrivant (`components/Arrivee.tsx`). */}
+        <main className="colonnes" tabIndex={-1}>
           <Scene
             cadre={scene}
             motif={motif}

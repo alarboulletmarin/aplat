@@ -7,7 +7,7 @@ import {
   adresseNettoyee, lireAffichage, retenirLangue, retenirTheme,
   type Affichage, type Theme,
 } from '../../lib/affichage'
-import { lienAccueil, lienApp } from '../../lib/route'
+import { lienAccueil, lienApp, remplacerAdresse } from '../../lib/route'
 import { textes as dictionnaire } from '../../i18n'
 import { useThemeResolu } from '../../hooks/useThemeResolu'
 import { Enseigne } from '../accueil/Enseigne'
@@ -99,12 +99,7 @@ export function Moteur() {
      d'historique. */
   useEffect(() => {
     const propre = adresseNettoyee(window.location.pathname, window.location.search)
-    if (propre === null) return
-    try {
-      window.history.replaceState(null, '', propre)
-    } catch {
-      /* certaines ouvertures locales refusent replaceState : sans conséquence */
-    }
+    if (propre !== null) remplacerAdresse(propre)
   }, [])
 
   const lien = lienApp()
