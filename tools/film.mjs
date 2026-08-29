@@ -1,25 +1,29 @@
-/* Le film des réseaux : une story ou un reel de vingt secondes.
+/* Le film des réseaux : « De 2,8 à 4,7 ».
  *
- * 1080 sur 1920, trente images par seconde, muet. Le son se pose dans
- * l'application de publication, qui propose son catalogue de musique : un
- * fichier livré avec une bande-son ne passerait pas leurs droits.
+ * Vingt secondes, 1080 sur 1920, trente images par seconde, muet. Le montage
+ * est calé sur 120 battements par minute : quinze images par temps.
  *
- * Pourquoi pas Remotion. Le dépôt sait déjà peindre le produit : Playwright
- * ouvre la page, le banc y pose le moteur, et la feuille de style est celle
- * qui est livrée. Un second moteur de rendu voudrait dire une seconde copie
- * des cartes, une seconde copie des jetons, et deux vérités à tenir
- * ensemble. Ici, chaque image du film sort du produit, comme chaque image
- * des cartes.
+ * L'IDÉE. Une presse fabrique un fond d'écran couche par couche, une grille
+ * d'icônes lui tombe dessus et noie les libellés, puis le voile monte force
+ * par force jusqu'à ce que le rapport mesuré franchisse le seuil AA deux
+ * images avant la fin de la rampe. Le film ne montre que ça, parce que doser
+ * exactement ce qu'il faut est la seule chose qu'aucun autre générateur ne
+ * sait faire.
  *
- * Rien ne bouge tout seul. Il n'y a ni transition CSS ni animation : `etat(i)`
- * calcule ce qu'il faut voir à l'image `i`, et la même image rend deux fois
- * le même pixel. Le film ne court donc pas après une horloge, il s'encode
- * image par image, et deux exports sont le même fichier.
+ * CE QUI N'EST PAS SAISI À LA MAIN. Le motif héros et les cinq plaques sont
+ * trouvés par balayage de graine sur ce que la sonde AFFICHE, pas sur une
+ * luminance visée. Les couleurs des aplats sortent des palettes du moteur.
+ * Le seuil vient de SEUIL_AA. Les libellés d'icône viennent de la maquette du
+ * produit. Le film n'écrit que quatre nombres, et aucun n'est écrit ici.
+ *
+ * QUATRE VITESSES, ET PAS UNE DE PLUS. La presse linéaire ; la rampe de voile
+ * linéaire ; la coupe d'une seule image pour tout ce que la machine décide ;
+ * la sortie cubique de cinq images pour ce qu'une main pose, et elle n'existe
+ * que dans deux plans.
  *
  * Usage : npm run build, puis `node tools/film.mjs [adresse]`.
- * `CHROMIUM_EXE` désigne un Chromium déjà présent, `FFMPEG_EXE` un encodeur
- * H.264. Sans le second, l'outil dit ce qui manque plutôt que de produire un
- * fichier qu'Instagram refuserait.
+ * `CHROMIUM_EXE` désigne un Chromium présent, `FFMPEG_EXE` un encodeur H.264 :
+ * celui que Playwright embarque est réduit au WebM, qu'Instagram refuse.
  */
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
@@ -35,86 +39,35 @@ const SORTIE = path.resolve(RACINE, '.social')
 
 const ARGS = process.argv.slice(2)
 const ADRESSE = ARGS.find((a) => !a.startsWith('--')) || 'aplat.vercel.app'
-/* Une story coupe à quinze secondes et publie le reste en deuxième carte ;
-   un reel prend les vingt. Deux montages, donc, et non un fichier rogné :
-   c'est le plan du milieu qui rend les cinq secondes, parce qu'il bat deux
-   fois moins souvent qu'on ne le croit nécessaire. */
+
+/* Une story coupe a quinze secondes, un reel non. La version courte n'est pas
+   un fichier rogne ni un second montage : c'est le meme conducteur, dont on
+   retire les quatre plaques d'essai et le plan des graines. La couture tombe
+   entre l'image 149, qui montre le fichier et sa grille sans verdict, et
+   l'image 285, qui montre le meme cadre avec le verdict : rien ne bouge a la
+   jointure, et les deux arguments restants tiennent entiers. */
 const COURT = ARGS.includes('--story')
 
 const LARGEUR = 1080
 const HAUTEUR = 1920
 const IPS = 30
+const TOTAL = 600
+const IMAGES = COURT
+  ? [...Array.from({ length: 150 }, (_, k) => k), ...Array.from({ length: 300 }, (_, k) => 285 + k)]
+  : Array.from({ length: TOTAL }, (_, k) => k)
 
-/* Le montage est calé sur 120 battements par minute : quinze images par
-   temps, soixante par mesure. Tout ce qui apparaît, tout ce qui coupe, tombe
-   sur cette grille. N'importe quelle musique à 120 se pose dessus sans qu'on
-   recoupe quoi que ce soit, et c'est ce qui fait qu'un film paraît monté
-   plutôt que déroulé. */
-const TEMPS = 15
-
-/* Les trois plans, en secondes. Vingt en tout : au-dessus, une story se
-   coupe en deux ; en dessous, le voile n'a pas le temps de se démontrer. */
-/* Quatre plans, en mesures de deux secondes. Le reel en prend dix, la story
-   sept et demie : c'est le défilé qui rend la différence, parce que c'est le
-   seul plan qu'on peut raccourcir sans perdre un argument. */
-const PLANS = COURT
-  ? [{ cle: 'ouverture', duree: 3 }, { cle: 'fond', duree: 5 }, { cle: 'voile', duree: 3.5 }, { cle: 'appel', duree: 3.5 }]
-  : [{ cle: 'ouverture', duree: 4 }, { cle: 'fond', duree: 8 }, { cle: 'voile', duree: 4 }, { cle: 'appel', duree: 4 }]
-const TOTAL = PLANS.reduce((somme, p) => somme + p.duree, 0) * IPS
-
-/* Le défilé du premier plan. Vingt motifs, choisis dans les huit groupes du
-   moteur et dans les onze palettes : ce qui change à l'écran est la variété
-   du catalogue, pas un effet. */
-const DEFILE = [
-  { famille: 'arcade', palette: 'nuit', densite: 1, graine: 7314 },
-  { famille: 'truchet', palette: 'lime', densite: 1, graine: 2790 },
-  { famille: 'sommets', palette: 'ciel', densite: 1, graine: 815 },
-  { famille: 'azulejos', palette: 'corail', densite: 1, graine: 3311 },
-  { famille: 'plis', palette: 'ardoise', densite: 1, graine: 4102 },
-  { famille: 'vitrail', palette: 'encre', densite: 1, graine: 6402 },
-  { famille: 'agrumes', palette: 'menthe', densite: 1, graine: 7726 },
-  { famille: 'kintsugi', palette: 'argile', densite: 1, graine: 941 },
-  { famille: 'persiennes', palette: 'orage', densite: 1, graine: 3095 },
-  { famille: 'drape', palette: 'prune', densite: 1, graine: 1663 },
-  { famille: 'horizon', palette: 'soleil', densite: 1, graine: 5518 },
-  { famille: 'ecailles', palette: 'nuit', densite: 1, graine: 4870 },
-  { famille: 'torii', palette: 'ciel', densite: 1, graine: 2231 },
-  { famille: 'mire', palette: 'ardoise', densite: 1, graine: 1204 },
-  { famille: 'vagues', palette: 'corail', densite: 1, graine: 6180 },
-  { famille: 'mosaique', palette: 'lime', densite: 1, graine: 2048 },
-  { famille: 'nuages', palette: 'ciel', densite: 1, graine: 3771 },
-  { famille: 'tresse', palette: 'prune', densite: 1, graine: 5309 },
-  { famille: 'bauhaus', palette: 'soleil', densite: 1, graine: 8821 },
-  { famille: 'cubes', palette: 'encre', densite: 1, graine: 4407 },
-]
-
-/* Le motif du second plan : la sonde y pose le voile le plus fort qu'elle
-   sache poser, et le rapport passe malgré tout le seuil AA. C'est le même
-   que celui des cartes, pour la même raison. */
-const VOILE = { famille: 'vagues', palette: 'soleil', densite: 1, graine: 7314 }
-const CLOTURE = { famille: 'truchet', palette: 'lime', densite: 1, graine: 2790 }
-
-/* Les libellés de la maquette du produit, dans son ordre. */
+/* Les seize premiers libellés de la maquette du produit, dans son ordre. */
 const APPLICATIONS = [
   'Appareil', 'Notes', 'Cartes', 'Musique', 'Météo', 'Horloge', 'Photos', 'Agenda',
-  'Fichiers', 'Réglages', 'Podcasts', 'Rappels',
+  'Fichiers', 'Réglages', 'Podcasts', 'Rappels', 'Livres', 'Santé', 'Courrier', 'Radio',
 ]
 
 const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-const HAUTEURS = ['100%', '62%', '86%', '50%', '74%']
-const COULEURS = [
-  'var(--encre)', 'var(--encre)', 'var(--lime)', 'var(--encre)',
-  'var(--deco-1)', 'var(--encre)', 'var(--deco-2)',
-]
 
 function document_(feuille, styles) {
   const icones = APPLICATIONS.map(
     (nom, i) => `<span class="fi-app"><i data-rayon="${i}"></i><span>${nom}</span></span>`,
   ).join('')
-  const lettres = [...'Aplat'].map((c) => `<b>${c}</b>`).join('')
-  const barres = Array.from({ length: 20 }, (_, i) =>
-    `<i style="height:${HAUTEURS[i % 5]};background:${COULEURS[i % 7]}"></i>`).join('')
 
   return `<!doctype html>
 <html lang="fr" data-theme="clair">
@@ -126,247 +79,391 @@ function document_(feuille, styles) {
 </head>
 <body>
 <div class="fi">
-
-  <div class="fi-plan fi-ouverture" id="plan-ouverture">
-    <p class="fi-sur fi-volet" id="o-sur">Fonds d’écran génératifs</p>
-    <div class="fi-lockup">
-      <span class="marque fi-volet" id="o-marque"><i></i><b></b></span>
-      <span class="fi-nom" id="o-nom">${lettres}</span>
-    </div>
-    <p class="fi-accroche fi-volet" id="o-accroche">Un motif, une palette, une densité. Calculé dans ton navigateur.</p>
-    <div class="fi-frise" id="o-frise">${barres}</div>
+  <canvas id="scene" width="${LARGEUR}" height="${HAUTEUR}"></canvas>
+  <div class="fi-grille" id="grille" hidden>${icones}</div>
+  <div class="fi-machine" id="machine" hidden>
+    <hr>
+    <p id="m1"></p><p id="m2"></p><p id="m3"></p><p id="m4"></p>
   </div>
-
-  <div class="fi-plan" id="plan-fond" hidden>
-    <canvas class="fi-toile" id="toile-fond"></canvas>
-    <div class="fi-grille fi-volet" id="grille">${icones}</div>
-    <p class="fi-legende"><span class="fi-volet" id="legende"></span></p>
-    <p class="fi-compteur"><b id="compteur">1</b><span id="compteur-mot">motifs</span></p>
-  </div>
-
-  <div class="fi-plan" id="plan-voile" hidden>
-    <div class="fi-couche"><canvas class="fi-toile" id="toile-sans"></canvas></div>
-    <div class="fi-couche" id="couche-avec"><canvas class="fi-toile" id="toile-avec"></canvas></div>
-    <div class="fi-grille" id="grille-voile">${icones}</div>
-    <p class="fi-etiquette fi-etiquette-sans fi-volet" id="v-sans">sans voile</p>
-    <p class="fi-etiquette fi-etiquette-avec fi-volet" id="v-avec">voile automatique</p>
-    <p class="fi-verdict fi-volet" id="v-verdict"><i></i><span id="v-mesure"></span></p>
-  </div>
-
-  <div class="fi-plan fi-appel" id="plan-appel" hidden>
-    <p class="fi-sur fi-volet" id="a-sur">En 15 secondes</p>
-    <h2 class="fi-titre"><b class="fi-volet" id="a-t1">Prends</b><b class="fi-volet" id="a-t2">une graine</b></h2>
-    <p class="fi-accroche fi-volet" id="a-accroche">3 choix, un clic, un PNG à la taille exacte de ton écran.</p>
-    <div class="fi-bande fi-volet" id="a-bande"><canvas id="toile-cloture"></canvas></div>
-    <span class="fi-bouton" id="a-bouton">Générer mon fond d’écran</span>
-    <p class="fi-adresse fi-volet" id="a-adresse">${e(ADRESSE)}</p>
-  </div>
-
+  <div class="fi-anton" id="anton" hidden></div>
+  <p class="fi-pied" id="pied" hidden></p>
 </div>
 </body>
 </html>`
 }
 
+/* --- La préparation, faite une fois -------------------------------------- */
+
 /**
- * Ce qui ne dépend pas du numéro d'image : les arrondis d'icône, les deux
- * toiles du voile, la bande de clôture, et les jetons de libellé.
+ * Cherche, par balayage de graine, un motif dont la sonde AFFICHE ce qu'on
+ * veut. Le critère porte sur la chaîne rendue et non sur une luminance visée :
+ * c'est le film qui suit le moteur, jamais l'inverse.
  */
-function preparer({ defile, voile, cloture }) {
+function preparer({ applications }) {
   const M = window.MOTEUR
-  window.__film = { defile, voile, cloture, dernier: null, changement: 0 }
+  const F = {}
+  window.__f = F
+
+  const decimal = (n) => n.toFixed(1).replace('.', ',')
+  F.decimal = decimal
+
+  /* La seule formule que le film copie au moteur. Il publie les deux bouts,
+     `sansVoile()` pour la force nulle et `mesure.contraste` pour la force
+     posée, mais rien pour le milieu, et la rampe vit précisément dans le
+     milieu. La copie est donc vérifiée contre ses deux bouts au démarrage :
+     si le moteur change sa formule, le film s'arrête au lieu d'annoncer un
+     chiffre faux. */
+  const contrasteA = (mesure, force) => {
+    const L = mesure.luminance
+    const apres = mesure.libelles === 'clair'
+      ? L * (1 - force) + 0.018 * force
+      : L * (1 - force) + 0.95 * force
+    return mesure.libelles === 'clair' ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068
+  }
+  F.contrasteA = contrasteA
+
+  const trouver = (famille, palette, densite, test, plage = 400) => {
+    for (let graine = 1; graine <= plage; graine += 1) {
+      const m = M.mesurer(famille, palette, densite, graine, 1080, 1920)
+      if (test(m)) return { motif: { famille, palette, densite, graine }, mesure: m }
+    }
+    return null
+  }
+
+  /* Le critère du film, et il ne porte que sur ce que la sonde AFFICHE : un
+     fichier que le voile fait passer d'insuffisante à bonne. C'est
+     exactement l'argument, et rien ne peut le satisfaire par hasard. */
+  const repare = (m) => M.niveau(m) === 'bonne' && M.niveau(M.sansVoile(m)) === 'insuffisante'
+
+  /* Le héros : parmi quelques candidats, celui dont l'écart mesuré est le plus
+     grand. Les deux chiffres du titre du film sortent donc de cette mesure et
+     ne sont écrits nulle part : si le moteur change, le titre change. */
+  const CANDIDATS = [
+    ['vagues', 'corail', 1], ['truchet', 'menthe', 2], ['ecailles', 'ciel', 2],
+    ['azulejos', 'corail', 2], ['arcade', 'soleil', 2], ['mosaique', 'lime', 2],
+  ]
+  F.heros = CANDIDATS
+    .map(([f, p, d]) => trouver(f, p, d, repare))
+    .filter(Boolean)
+    .sort((a, b) => (b.mesure.contraste - M.sansVoile(b.mesure).contraste)
+      - (a.mesure.contraste - M.sansVoile(a.mesure).contraste))[0]
+  if (!F.heros) throw new Error('aucun héros trouvé')
+
+  /* Vérification de la copie contre le moteur, à ses deux bouts. */
+  const h = F.heros.mesure
+  const ecart0 = Math.abs(contrasteA(h, 0) - M.sansVoile(h).contraste)
+  const ecart1 = Math.abs(contrasteA(h, h.voile) - h.contraste)
+  if (ecart0 > 1e-9 || ecart1 > 1e-9) {
+    throw new Error(`la formule de contraste du film ne suit plus le moteur (${ecart0}, ${ecart1})`)
+  }
+
+  /* Les cinq plaques : des fichiers que le produit sait réparer et qu'il n'a
+     pas encore réparés. Le critère est le verdict affiché, aux deux états. */
+  const PLAQUES = [
+    ['horizon', 'nuit', 2], ['dunes', 'soleil', 2], ['azulejos', 'corail', 2],
+    ['sommets', 'argile', 2], ['persiennes', 'prune', 2],
+  ]
+  F.plaques = PLAQUES.map(([f, p, d]) =>
+    trouver(f, p, d, repare) || trouver(f, p, d, () => true, 1))
+
+  /* La feuille que la presse tire à la fin, et qui reboucle sur le début. */
+  F.cloture = { famille: 'sommets', palette: 'argile', densite: 2, graine: 4870 }
+
+  /* Les six aplats du volet de couleur, toutes tirées du moteur. Clair,
+     sombre, clair, sombre, clair, moyen : jamais deux valeurs voisines. */
+  const P = M.PALETTES
+  F.aplats = [
+    P.lime.couleurs[0], P.nuit.fond, P.corail.couleurs[0],
+    P.encre.fond, P.soleil.couleurs[0], P.ciel.fond,
+  ]
+
+  /* Les rendus, préparés une fois : chaque image du film n'est plus qu'un
+     report de pixels et, pour la rampe, une couche de voile posée dessus. */
+  const toile = (peintre) => {
+    const c = new OffscreenCanvas(1080, 1920)
+    peintre(c.getContext('2d', { alpha: false }))
+    return c
+  }
+  const rendu = (motif, options) => toile((ctx) => M.dessiner(ctx, 1080, 1920, motif, options))
+
+  F.presse = M.COUCHES.filter((c) => c !== 'ombre').map((arret) => rendu(F.heros.motif, { arret }))
+  F.herosNu = rendu(F.heros.motif, { voile: false })
+  F.herosPlein = rendu(F.heros.motif, {})
+  F.plaquesNu = F.plaques.map((p) => rendu(p.motif, { voile: false }))
+  F.plaquesPlein = F.plaques.map((p) => rendu(p.motif, {}))
+  F.presseFin = M.COUCHES.filter((c) => c !== 'ombre').map((arret) => rendu(F.cloture, { arret }))
+
+  /* Douze graines, prises à intervalle régulier sur toute la plage du
+     produit : la famille, la palette et la densité ne bougent pas d'un cran,
+     seule la graine change. */
+  const pas = Math.floor(99999 / 12)
+  F.graines = Array.from({ length: 12 }, (_, k) => rendu(
+    { ...F.heros.motif, graine: 1 + k * pas }, {}))
+
+  F.applications = applications
+  F.jetons = (motif) => {
+    const m = M.mesurer(motif.famille, motif.palette, motif.densite, motif.graine, 1080, 1920)
+    const base = m.libelles === 'clair' ? '247,243,230' : '23,36,63'
+    const fi = document.querySelector('.fi')
+    fi.style.setProperty('--libelle', m.libelles === 'clair' ? '#F7F3E6' : '#17243F')
+    for (const o of [14, 15, 16, 20, 24, 26, 28, 90]) {
+      fi.style.setProperty(`--l${o}`, `rgba(${base},${o / 100})`)
+    }
+    return m
+  }
 
   document.querySelectorAll('[data-rayon]').forEach((icone) => {
     icone.style.borderRadius = M.RAYONS[Number(icone.dataset.rayon) % M.RAYONS.length]
   })
 
-  const toile = (id) => {
-    const c = document.getElementById(id)
-    c.width = 1080
-    c.height = 1920
-    return c.getContext('2d', { alpha: false })
+  return {
+    heros: { ...F.heros.motif, contraste: decimal(F.heros.mesure.contraste),
+      sans: decimal(M.sansVoile(F.heros.mesure).contraste),
+      voile: Math.round(F.heros.mesure.voile * 100) },
+    plaques: F.plaques.map((p) => `${p.motif.famille}/${p.motif.palette}/${p.motif.graine}`),
+    seuil: M.SEUIL_AA,
   }
-  toile('toile-fond')
-  /* Les deux états du voile sont peints une fois pour toutes et superposés :
-     le volet qui les découvre coûte alors une découpe, pas un rendu. */
-  M.dessiner(toile('toile-sans'), 1080, 1920, voile, { voile: false })
-  const mesure = M.dessiner(toile('toile-avec'), 1080, 1920, voile, { voile: true })
-  document.getElementById('v-mesure').textContent =
-    `Lisibilité ${M.niveau(mesure)}, ${mesure.contraste.toFixed(1).replace('.', ',')}:1`
-
-  /* Les jetons de libellé, posés par la sonde, comme dans l'application. */
-  window.__jetons = (boite, motif) => {
-    const m = M.mesurer(motif.famille, motif.palette, motif.densite, motif.graine, 1080, 1920)
-    const base = m.libelles === 'clair' ? '247,243,230' : '23,36,63'
-    boite.style.setProperty('--libelle', m.libelles === 'clair' ? '#F7F3E6' : '#17243F')
-    for (const o of [14, 15, 16, 20, 24, 26, 28, 90]) {
-      boite.style.setProperty(`--l${o}`, `rgba(${base},${o / 100})`)
-    }
-    return m
-  }
-  window.__jetons(document.getElementById('plan-voile'), voile)
-
-  const plan = document.getElementById('plan-appel')
-  plan.hidden = false
-  const fin = document.getElementById('toile-cloture')
-  const boite = fin.getBoundingClientRect()
-  fin.width = Math.max(2, Math.round(boite.width))
-  fin.height = Math.max(2, Math.round(boite.height))
-  M.dessiner(fin.getContext('2d', { alpha: false }), fin.width, fin.height, cloture, {
-    mesureW: 2560, mesureH: 1440,
-  })
-  plan.hidden = true
 }
 
-/**
- * L'état de l'image `i`. Aucune horloge, aucune transition : tout ce qui
- * bouge est une propriété posée ici, calculée à partir du numéro.
- */
-function etat({ i, ips, plans, temps, familles }) {
+/* --- L'état de l'image ---------------------------------------------------- */
+
+function etat({ i, adresse, seuil }) {
   const M = window.MOTEUR
-  const f = window.__film
+  const F = window.__f
+  const scene = document.getElementById('scene')
+  const ctx = scene.getContext('2d', { alpha: false })
+  const grille = document.getElementById('grille')
+  const machine = document.getElementById('machine')
+  const anton = document.getElementById('anton')
+  const pied = document.getElementById('pied')
 
-  let depart = 0
-  let plan = plans[plans.length - 1]
-  for (const p of plans) {
-    if (i < (depart + p.duree) * ips) { plan = p; break }
-    depart += p.duree
-  }
-  const local = i - depart * ips
-  const fin = plan.duree * ips
-  for (const p of plans) {
-    document.getElementById(`plan-${p.cle}`).hidden = p.cle !== plan.cle
-  }
+  grille.hidden = true
+  machine.hidden = true
+  anton.hidden = true
+  pied.hidden = true
 
-  /* Les deux seules courbes du film. La sortie freine, l'entrée pousse : au
-     delà, une image par image se remarque plus que le mouvement. */
-  const sortie = (t) => 1 - Math.pow(1 - t, 3)
-  const av = (debut, duree) => Math.max(0, Math.min(1, (local - debut) / duree))
+  const lineaire = (a, b) => Math.max(0, Math.min(1, (i - a) / (b - a)))
+  const cubique = (t) => 1 - Math.pow(1 - t, 3)
 
-  /* Le volet : le bord franc qui découvre, et le pas de côté qui l'accompagne.
-     Rien n'apparaît en fondu, la direction artistique n'a pas de fondu. */
-  const monte = (id, t, course = 30) => {
-    const el = document.getElementById(id)
-    const e = sortie(t)
-    el.style.clipPath = `inset(${(1 - e) * 102}% 0 0 0)`
-    el.style.transform = `translateY(${(1 - e) * course}px)`
-  }
-  const glisse = (id, t, course = 60) => {
-    const el = document.getElementById(id)
-    const e = sortie(t)
-    el.style.clipPath = `inset(0 ${(1 - e) * 102}% 0 0)`
-    el.style.transform = `translateX(${(1 - e) * -course}px)`
-  }
-
-  if (plan.cle === 'ouverture') {
-    monte('o-sur', av(0, 10), 18)
-    const marque = document.getElementById('o-marque')
-    const m = sortie(av(6, 12))
-    marque.style.clipPath = `inset(${(1 - m) * 102}% 0 0 0)`
-    marque.style.transform = `translateY(${(1 - m) * 40}px)`
-    /* Les cinq lettres, une par demi-temps : le nom s'écrit au lieu de
-       s'afficher. */
-    document.querySelectorAll('#o-nom b').forEach((lettre, k) => {
-      const t = sortie(av(14 + k * (temps / 2), 11))
-      lettre.style.clipPath = `inset(${(1 - t) * 104}% 0 0 0)`
-      lettre.style.transform = `translateY(${(1 - t) * 48}px)`
-    })
-    monte('o-accroche', av(14 + 5 * (temps / 2) + 6, 14), 26)
-    /* La frise se lève barre par barre, deux images d'écart : c'est le seul
-       endroit du film où le décor bouge, et il se monte comme une palissade. */
-    document.querySelectorAll('#o-frise i').forEach((barre, k) => {
-      const t = sortie(av(2 * temps + k * 2, 9))
-      barre.style.transform = `scaleY(${t})`
-    })
-  }
-
-  if (plan.cle === 'fond') {
-    /* Le défilé accélère puis se pose : un motif par temps, puis deux, puis
-       un. C'est la façon dont on essaie vraiment les motifs, vite d'abord,
-       puis on s'arrête sur celui qu'on garde. */
-    const bornes = []
-    let t0 = 0
-    for (let k = 0; t0 < fin; k += 1) {
-      bornes.push(t0)
-      t0 += t0 < 4 * temps ? temps : t0 < 10 * temps ? temps / 2 : temps
+  /* La presse : quatre lames à bord franc, chacune posant une couche de plus.
+     Elles traversent toujours le cadre entier, et rien n'est figé au départ. */
+  const presse = (couches, depart, duree, ecart) => {
+    ctx.drawImage(couches[0], 0, 0)
+    for (let k = 0; k < couches.length; k += 1) {
+      const a = depart + k * (duree + ecart)
+      const t = lineaire(a, a + duree)
+      if (t <= 0) continue
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(0, 0, 1080 * t, 1920)
+      ctx.clip()
+      ctx.drawImage(couches[k], 0, 0)
+      ctx.restore()
     }
-    let index = 0
-    for (let k = 0; k < bornes.length; k += 1) if (local >= bornes[k]) index = k
-    if (index !== f.dernier) {
-      f.dernier = index
-      f.changement = bornes[index]
-      const motif = f.defile[index % f.defile.length]
-      const c = document.getElementById('toile-fond')
-      M.dessiner(c.getContext('2d', { alpha: false }), 1080, 1920, motif)
-      window.__jetons(document.getElementById('plan-fond'), motif)
-      const famille = M.FAMILLES.find((x) => x.id === motif.famille)
-      document.getElementById('legende').innerHTML =
-        `${famille ? famille.fr : motif.famille} <span>/ ${motif.palette} / graine ${motif.graine}</span>`
-    }
-    monte('grille', av(0, 14), 46)
-    /* La légende se relève à chaque motif : le nom suit l'image au lieu de
-       rester posé dessus. */
-    monte('legende', Math.max(0, Math.min(1, (local - f.changement) / 8)), 22)
-
-    /* Le compteur monte de 1 au nombre de familles pendant que les motifs
-       passent. Il n'est pas décoratif : c'est ce que le défilé démontre. */
-    const t = sortie(local / fin)
-    const compte = Math.max(1, Math.round(1 + (familles - 1) * t))
-    document.getElementById('compteur').textContent = String(compte)
-    document.getElementById('compteur-mot').textContent = compte > 1 ? 'motifs' : 'motif'
-
-    /* Une poussée très lente sur tout le plan : la caméra avance, rien ne
-       tourne. */
-    document.getElementById('plan-fond').style.transform =
-      `scale(${(1 + 0.05 * (local / fin)).toFixed(4)})`
   }
 
-  if (plan.cle === 'voile') {
-    /* Le volet en diagonale, celui de la planche, mis en mouvement. Il passe
-       sur un temps, revient sur un autre, et la différence saute aux yeux
-       parce qu'elle bat. */
-    const battements = [
-      { a: 1.5 * temps, b: 1.5 * temps + 14, vers: 1 },
-      { a: 5 * temps, b: 5 * temps + 12, vers: 0 },
-      { a: 7 * temps, b: 7 * temps + 12, vers: 1 },
+  /* Le mot troué : dehors le fichier livré, dedans le même motif arrêté à la
+     couche formes. C'est le même tampon aux deux bouts du film, et il se lit
+     comme une démonstration parce que la presse a posé les deux états sous
+     les yeux au début. */
+  const troue = (fond, dedans, ligne) => {
+    ctx.drawImage(fond, 0, 0)
+    const masque = new OffscreenCanvas(1080, 1920)
+    const mc = masque.getContext('2d')
+    mc.drawImage(dedans, 0, 0)
+    mc.globalCompositeOperation = 'destination-in'
+    let corps = 430
+    mc.font = `${corps}px Anton`
+    const large = mc.measureText('APLAT').width
+    corps = Math.floor(corps * (888 / large))
+    mc.font = `${corps}px Anton`
+    mc.textBaseline = 'alphabetic'
+    mc.fillText('APLAT', 96, ligne)
+    ctx.drawImage(masque, 0, 0)
+  }
+
+  /* La voix de la machine : Archivo 30, sous l'unique filet du film, toujours
+     au même endroit. Elle coupe, elle ne balaie jamais. */
+  const dire = (lignes) => {
+    machine.hidden = false
+    for (let k = 0; k < 4; k += 1) {
+      const p = document.getElementById(`m${k + 1}`)
+      const l = lignes[k]
+      p.hidden = !l
+      p.innerHTML = l || ''
+    }
+  }
+  const verdict = (mesure, force) => {
+    const c = force === undefined ? mesure.contraste : F.contrasteA(mesure, force)
+    const n = c >= 4.5 ? 'bonne' : c >= 3 ? 'juste' : 'insuffisante'
+    return `<i class="fi-repere fi-repere-${n}"></i>Lisibilité ${n}, ${F.decimal(c)}:1`
+  }
+
+  /* La voix du film : Anton, posée par une main, donc par un volet. Chaque
+     ligne est mise à l'échelle pour aller d'une marge à l'autre : c'est la
+     longueur du mot qui décide de son corps. */
+  const poser = (lignes, hautDepart) => {
+    anton.hidden = false
+    if (anton.dataset.cle !== lignes.map((l) => l.mot).join('|')) {
+      anton.dataset.cle = lignes.map((l) => l.mot).join('|')
+      anton.innerHTML = lignes.map((l) => `<b>${l.mot}</b>`).join('')
+      anton.style.top = `${hautDepart}px`
+      anton.querySelectorAll('b').forEach((b, k) => {
+        b.style.fontSize = '100px'
+        const portee = document.createRange()
+        portee.selectNodeContents(b)
+        const large = portee.getBoundingClientRect().width
+        b.style.fontSize = `${Math.floor((100 * (lignes[k].large || 888)) / large)}px`
+        b.style.marginTop = `${lignes[k].saut || 0}px`
+      })
+    }
+    anton.querySelectorAll('b').forEach((b, k) => {
+      const t = cubique(lineaire(lignes[k].a, lignes[k].a + 5))
+      b.style.clipPath = `inset(0 ${(1 - t) * 100}% 0 0)`
+      b.style.color = lignes[k].encre || '#17243F'
+    })
+  }
+
+  const H = F.heros
+
+  /* ---- 0 à 44 : la presse ------------------------------------------------ */
+  if (i < 45) {
+    presse(F.presse, 0, 7, 2)
+    if (i >= 34) {
+      troue(F.presse[3], F.presse[0], 1250)
+      pied.hidden = false
+      pied.style.top = '1300px'
+      pied.style.color = '#F7F3E6'
+      pied.textContent = adresse
+    }
+    return
+  }
+
+  /* ---- 45 à 74 : le volet de couleur ------------------------------------- */
+  if (i < 75) {
+    const k = Math.min(5, Math.floor((i - 45) / 5))
+    ctx.fillStyle = F.aplats[k]
+    ctx.fillRect(0, 0, 1080, 1920)
+    M.peindreGrain(ctx, 1080, 1920)
+    return
+  }
+
+  /* ---- 75 à 119 : la thèse ----------------------------------------------- */
+  if (i < 120) {
+    ctx.fillStyle = F.aplats[5]
+    ctx.fillRect(0, 0, 1080, 1920)
+    M.peindreGrain(ctx, 1080, 1920)
+    poser([
+      { mot: 'Ton fond', a: 75, large: 420, saut: 0 },
+      { mot: 'd’écran,', a: 75, large: 420, saut: 12 },
+      { mot: 'Tu lis', a: 90, large: 888, saut: 46 },
+      { mot: 'Dessus.', a: 105, large: 888, saut: 8 },
+    ], 380)
+    return
+  }
+
+  /* ---- 120 à 164 : la grille tombe --------------------------------------- */
+  if (i < 165) {
+    ctx.drawImage(F.herosNu, 0, 0)
+    F.jetons(H.motif)
+    if (i >= 135) grille.hidden = false
+    if (i >= 150) {
+      dire([verdict(M.sansVoile(H.mesure)), `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`])
+    }
+    return
+  }
+
+  /* ---- 165 à 284 : les cinq plaques -------------------------------------- */
+  if (i < 285) {
+    const PLAQUES = [
+      { a: 165, aplat: 3, nu: 12, grille: 15 },
+      { a: 195, aplat: 3, nu: 9, grille: 12 },
+      { a: 219, aplat: 3, nu: 9, grille: 12 },
+      { a: 243, aplat: 3, nu: 6, grille: 9 },
+      { a: 261, aplat: 3, nu: 6, grille: 15 },
     ]
-    let x = 0
-    for (const bat of battements) {
-      if (local >= bat.a) {
-        const t = sortie(Math.max(0, Math.min(1, (local - bat.a) / (bat.b - bat.a))))
-        x = bat.vers === 1 ? t : 1 - t
-      }
+    let k = 0
+    for (let n = 0; n < PLAQUES.length; n += 1) if (i >= PLAQUES[n].a) k = n
+    const p = PLAQUES[k]
+    const local = i - p.a
+    const plaque = F.plaques[k]
+    if (local < p.aplat) {
+      ctx.fillStyle = M.palette(plaque.motif.palette).fond
+      ctx.fillRect(0, 0, 1080, 1920)
+      M.peindreGrain(ctx, 1080, 1920)
+      return
     }
-    const bord = 8 + x * 118
-    document.getElementById('couche-avec').style.clipPath =
-      `polygon(0 0, ${bord}% 0, ${bord - 14}% 100%, 0 100%)`
-
-    /* L'étiquette « sans voile » se retire quand le volet a fini de passer :
-       elle ne désigne plus rien une fois l'image entière voilée. */
-    const reste = x > 0.85 ? Math.max(0, 1 - (x - 0.85) / 0.12) : 1
-    monte('v-sans', Math.min(av(0, 12), reste), 20)
-    monte('v-avec', av(1.5 * temps + 6, 12), 20)
-    monte('v-verdict', av(2.5 * temps, 12), 20)
-    document.getElementById('plan-voile').style.transform =
-      `scale(${(1 + 0.04 * (local / fin)).toFixed(4)})`
+    ctx.drawImage(F.plaquesNu[k], 0, 0)
+    F.jetons(plaque.motif)
+    if (local >= p.aplat + p.nu) {
+      grille.hidden = false
+      dire([verdict(M.sansVoile(plaque.mesure))])
+    }
+    return
   }
 
-  if (plan.cle === 'appel') {
-    monte('a-sur', av(0, 10), 16)
-    monte('a-t1', av(4, 12), 46)
-    monte('a-t2', av(4 + temps / 2, 12), 46)
-    monte('a-accroche', av(temps + 6, 12), 26)
-    monte('a-bande', av(2 * temps, 16), 40)
-    /* Le bouton entre par la gauche, puis se pose : une seule pulsation, sur
-       un temps, et c'est le dernier geste du film. */
-    glisse('a-bouton', av(3 * temps, 12), 70)
-    const pouls = av(4 * temps, 10)
-    const echelle = pouls > 0 && pouls < 1 ? 1 + 0.05 * Math.sin(Math.PI * pouls) : 1
-    const bouton = document.getElementById('a-bouton')
-    bouton.style.transform =
-      `translateX(${(1 - sortie(av(3 * temps, 12))) * -70}px) scale(${echelle.toFixed(4)})`
-    monte('a-adresse', av(4 * temps + 8, 12), 18)
+  /* ---- 285 à 374 : le dosage, puis l'arrêt -------------------------------- */
+  if (i < 375) {
+    const force = i < 300 ? 0 : Math.min(H.mesure.voile, (i - 300) * (H.mesure.voile / 44))
+    ctx.drawImage(F.herosNu, 0, 0)
+    if (force > 0) {
+      M.peindreVoile(ctx, 1080, 1920, { ...H.mesure, voile: force })
+      M.peindreGrain(ctx, 1080, 1920)
+    }
+    F.jetons(H.motif)
+    grille.hidden = false
+    const lignes = [
+      verdict(H.mesure, force),
+      `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`,
+    ]
+    if (i >= 300) lignes.push(`Voile ${Math.round(force * 100)}&nbsp;%`)
+    if (i >= 345) lignes.push('<span>Le voile est dans le fichier, pas dans l’aperçu.</span>')
+    dire(lignes)
+    return
   }
+
+  /* ---- 375 à 434 : la graine --------------------------------------------- */
+  if (i < 435) {
+    ctx.drawImage(F.graines[Math.min(11, Math.floor((i - 375) / 5))], 0, 0)
+    F.jetons(H.motif)
+    dire([`<span>99 999 graines. Seule la graine change.</span>`])
+    return
+  }
+
+  /* ---- 435 à 464 : le prix ------------------------------------------------ */
+  if (i < 465) {
+    ctx.fillStyle = M.PALETTES.lime.couleurs[0]
+    ctx.fillRect(0, 0, 1080, 1920)
+    M.peindreGrain(ctx, 1080, 1920)
+    poser([
+      { mot: 'Gratuit', a: 435, large: 888, saut: 0 },
+      { mot: 'Sans compte', a: 435, large: 888, saut: 10 },
+      { mot: 'Hors ligne', a: 435, large: 888, saut: 10 },
+    ], 640)
+    return
+  }
+
+  /* ---- 465 à 539 : la signature ------------------------------------------ */
+  if (i < 540) {
+    troue(F.herosPlein, F.presse[0], 1180)
+    if (i >= 495) {
+      pied.hidden = false
+      pied.style.top = '1250px'
+      pied.style.color = '#F7F3E6'
+      const t1 = cubique(lineaire(495, 500))
+      const t2 = cubique(lineaire(510, 515))
+      pied.innerHTML =
+        `<span style="display:block;clip-path:inset(0 ${(1 - t1) * 100}% 0 0)">Prends-en un.</span>` +
+        `<span style="display:block;margin-top:44px;clip-path:inset(0 ${(1 - t2) * 100}% 0 0)">${adresse}</span>`
+    }
+    return
+  }
+
+  /* ---- 540 à 599 : la presse repart -------------------------------------- */
+  presse(F.presseFin, 540, 12, 4)
 }
+
+/* --- Le rendu -------------------------------------------------------------- */
 
 ;(async () => {
   fs.mkdirSync(SORTIE, { recursive: true })
@@ -376,9 +473,8 @@ function etat({ i, ips, plans, temps, familles }) {
   ].join('\n')
 
   const encodeur = process.env.FFMPEG_EXE || 'ffmpeg'
-
-  const document_html = fs.readFileSync(path.join(RACINE, 'dist', 'index.html'), 'utf8')
-  const declaree = document_html.match(/href="([^"]+\.css)"/)
+  const html = fs.readFileSync(path.join(RACINE, 'dist', 'index.html'), 'utf8')
+  const declaree = html.match(/href="([^"]+\.css)"/)
   if (!declaree) throw new Error('aucune feuille de style déclarée dans dist/index.html')
 
   const { srv, port } = await ouvrir()
@@ -405,21 +501,18 @@ function etat({ i, ips, plans, temps, familles }) {
   await poser(page)
   await page.evaluate(() => document.fonts.ready)
 
-  const familles = await page.evaluate(() => window.MOTEUR.FAMILLES.length)
-  await page.evaluate(preparer, { defile: DEFILE, voile: VOILE, cloture: CLOTURE })
+  const releve = await page.evaluate(preparer, { applications: APPLICATIONS })
+  console.log(
+    `héros : ${releve.heros.famille}/${releve.heros.palette}/graine ${releve.heros.graine}, ` +
+    `${releve.heros.sans}:1 sans voile, ${releve.heros.contraste}:1 avec, voile ${releve.heros.voile} %`,
+  )
+  console.log(`plaques : ${releve.plaques.join(', ')}`)
 
   const fichier = path.join(SORTIE, COURT ? 'aplat-film-story-15s.mp4' : 'aplat-film-reel-20s.mp4')
   const ff = spawn(encodeur, [
-    '-y',
-    '-f', 'image2pipe',
-    '-framerate', String(IPS),
-    '-i', '-',
-    '-c:v', 'libx264',
-    '-preset', 'slow',
-    '-crf', '19',
-    '-pix_fmt', 'yuv420p',
-    '-movflags', '+faststart',
-    fichier,
+    '-y', '-f', 'image2pipe', '-framerate', String(IPS), '-i', '-',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '19',
+    '-pix_fmt', 'yuv420p', '-movflags', '+faststart', fichier,
   ], { stdio: ['pipe', 'ignore', 'pipe'] })
 
   let plainte = ''
@@ -433,26 +526,20 @@ function etat({ i, ips, plans, temps, familles }) {
     process.exit(1)
   })
 
-  const ecrire = (buffer) =>
-    new Promise((resolve) => (ff.stdin.write(buffer) ? resolve() : ff.stdin.once('drain', resolve)))
+  const ecrire = (b) =>
+    new Promise((r) => (ff.stdin.write(b) ? r() : ff.stdin.once('drain', r)))
 
   const depart = Date.now()
-  for (let i = 0; i < TOTAL; i += 1) {
-    await page.evaluate(etat, { i, ips: IPS, plans: PLANS, temps: TEMPS, familles })
-    const image = await page.screenshot({
-      type: 'jpeg',
-      quality: 96,
+  for (let k = 0; k < IMAGES.length; k += 1) {
+    await page.evaluate(etat, { i: IMAGES[k], adresse: ADRESSE, seuil: releve.seuil })
+    await ecrire(await page.screenshot({
+      type: 'jpeg', quality: 96,
       clip: { x: 0, y: 0, width: LARGEUR, height: HAUTEUR },
-    })
-    await ecrire(image)
-    if (i % 60 === 0) {
-      const part = Math.round((i / TOTAL) * 100)
-      process.stdout.write(`\r  ${part} %  (image ${i} sur ${TOTAL})   `)
-    }
+    }))
+    if (k % 60 === 0) process.stdout.write(`\r  ${Math.round((k / IMAGES.length) * 100)} %   `)
   }
   ff.stdin.end()
-  await new Promise((resolve) => ff.on('close', resolve))
-
+  await new Promise((r) => ff.on('close', r))
   await browser.close()
   srv.close()
 
@@ -461,9 +548,9 @@ function etat({ i, ips, plans, temps, familles }) {
     console.error('\nl’encodage a échoué :\n' + plainte.split('\n').slice(-12).join('\n'))
     process.exit(1)
   }
-  const poids = (fs.statSync(fichier).size / 1048576).toFixed(1)
   console.log(
-    `\n${path.relative(RACINE, fichier)} : ${TOTAL} images, ${(TOTAL / IPS).toFixed(0)} s, ` +
-    `${LARGEUR} × ${HAUTEUR}, ${poids} Mo, en ${Math.round((Date.now() - depart) / 1000)} s`,
+    `\n${path.relative(RACINE, fichier)} : ${IMAGES.length} images, ${(IMAGES.length / IPS).toFixed(0)} s, ` +
+    `${(fs.statSync(fichier).size / 1048576).toFixed(1)} Mo, ` +
+    `en ${Math.round((Date.now() - depart) / 1000)} s`,
   )
 })()
