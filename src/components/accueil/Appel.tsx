@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { Textes } from '../../i18n'
+import { Lien } from '../Lien'
 import { PiedDocument } from './PiedDocument'
 
 /**
@@ -36,13 +37,13 @@ export function Appel({
           </h2>
           <p className="appel-p">{A.appel.corps}</p>
         </div>
-        <a className="appel-primaire appel-primaire-inverse" href={lien}>
+        <Lien className="appel-primaire appel-primaire-inverse" vers={lien}>
           <span className="ico-descendre" aria-hidden="true">
             <i />
             <b />
           </span>
           <span>{A.heros.primaire}</span>
-        </a>
+        </Lien>
       </section>
 
       <PiedDocument textes={textes} mention={A.pied.mention} moteur={moteur} />

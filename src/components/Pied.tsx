@@ -2,6 +2,7 @@
 
 import { etiquetteVersion, lienLicence, lienSource } from '../lib/build'
 import { lienMoteur } from '../lib/route'
+import { Lien } from './Lien'
 import type { Langue } from '../lib/moteur'
 import type { Theme } from '../lib/url'
 import type { Textes } from '../i18n'
@@ -98,7 +99,7 @@ export function Pied({
         {/* Interne, donc sans nouvel onglet : c'est le même produit, une porte
             et non une sortie. Pour qui vient de télécharger et se demande ce
             qui s'est passé. */}
-        <a href={lienMoteur()}>{textes.pied.moteur}</a>
+        <Lien vers={lienMoteur()}>{textes.pied.moteur}</Lien>
         <a href={lienSource()} rel="noopener noreferrer" target="_blank">
           {textes.pied.source}
         </a>

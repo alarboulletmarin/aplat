@@ -9,10 +9,16 @@
  * (docs/notes-de-conception.md), et les deux autres pages
  * sont ce qu'on voit avant d'y entrer, ou après en être sorti.
  *
- * Pas de bibliothèque de routage pour trois adresses. Le chemin est lu une
- * fois au démarrage, et rien ne le change ensuite : passer de l'une à l'autre
- * est un lien, pas une transition. C'est aussi ce qui garde l'application
- * entière à l'abri du rendu des deux autres, et réciproquement.
+ * Ce fichier dit ce qu'un chemin désigne, et rien de plus. Le passage d'un
+ * document à l'autre est tenu par React Router (`main.tsx`), qui remplace la
+ * page sans recharger le document : c'était auparavant un lien nu, donc un
+ * démarrage complet, un écran vide et le morceau de la page visée à aller
+ * chercher ensuite. Le morceau reste, la file d'attente non.
+ *
+ * Ce que la bibliothèque ne change pas : une seule page est montée à la fois,
+ * et l'application reste à l'abri du rendu des deux autres, comme elles du
+ * sien. La navigation est entre les documents, jamais dans l'application, qui
+ * demeure l'écran unique des notes de conception.
  */
 
 export type Route = 'accueil' | 'app' | 'moteur'
@@ -122,4 +128,34 @@ export function lienMoteur(): string {
  */
 export function lienAccueil(): string {
   return CHEMIN_ACCUEIL
+}
+
+/**
+ * Réécrit l'adresse courante sans quitter la page ni empiler d'entrée.
+ *
+ * Les trois documents corrigent leur propre adresse : l'accueil et le moteur
+ * ôtent les `l` et `t` des liens d'avant, une fois, au montage ;
+ * l'application y réécrit ses réglages à chaque tirage, pour que le lien
+ * qu'on copie soit toujours celui de l'image affichée. Aucun de ces trois
+ * n'est une navigation : le chemin ne bouge pas, la page non plus.
+ *
+ * D'où le passage direct par l'historique plutôt que par `useNavigate()`.
+ * Une adresse poussée par React Router traverse son état, et donc rend tout
+ * ce qui est sous le routeur : l'application le paierait à chaque réglage,
+ * en doublant ses rendus pour une adresse que personne ne relit.
+ *
+ * L'état de l'historique est **repassé tel quel**, et c'est la seule
+ * subtilité de cette fonction. React Router y range de quoi se retrouver
+ * dans la pile (la clé de l'entrée, son rang) ; l'écraser avec `null`, ce que
+ * fait un `replaceState` naïf, lui fait perdre le fil du retour arrière.
+ * Il est ici relu et reposé, si bien que l'adresse change et que rien
+ * d'autre ne bouge.
+ */
+export function remplacerAdresse(adresse: string): void {
+  try {
+    window.history.replaceState(window.history.state, '', adresse)
+  } catch {
+    /* certaines ouvertures locales refusent replaceState : sans conséquence,
+       l'adresse restera celle du chargement et la page fonctionne pareil */
+  }
 }

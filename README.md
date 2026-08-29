@@ -49,8 +49,8 @@ fully usable offline.
 - **Several outputs**: PNG, PNG 2x, WebP, SVG, clipboard copy, and a
   phone-tablet-desktop batch from the same seed.
 - **Light and dark variants**, baked into the exported file, not simulated.
-- **Installable PWA**, fully functional offline, with React as the only
-  runtime dependency.
+- **Installable PWA**, fully functional offline, with React and React Router
+  as the only runtime dependencies.
 - **Accessibility as a floor**: WCAG contrasts computed on the real DOM, full
   keyboard support, visible focus, 44 px touch targets and reduced motion,
   all enforced by the repository's own tooling.
@@ -174,8 +174,9 @@ reason.
 
 ## Development
 
-Requires **Node 22**. The stack is React 19, TypeScript and Vite; React is
-the only runtime dependency.
+Requires **Node 22**. The stack is React 19, TypeScript and Vite. The runtime
+dependencies are React and React Router, the latter for moving between the
+three documents without reloading the page.
 
 ```bash
 npm install

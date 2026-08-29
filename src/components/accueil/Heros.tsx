@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { famille, FAMILLES, ORDRE_PALETTES, palette, type Langue } from '../../lib/moteur'
+import { Lien } from '../Lien'
 import { GRAINE_MAX } from '../../lib/tirage'
 import { nombre } from '../../lib/format'
 import { remplir, type Textes } from '../../i18n'
@@ -64,13 +65,13 @@ export function Heros({
           <p className="heros-accroche">{A.heros.accroche}</p>
 
           <div className="heros-appels">
-            <a className="appel-primaire" href={lien}>
+            <Lien className="appel-primaire" vers={lien}>
               <span className="ico-descendre" aria-hidden="true">
                 <i />
                 <b />
               </span>
               <span>{A.heros.primaire}</span>
-            </a>
+            </Lien>
             <a className="appel-second" href="#galerie">
               {A.heros.secondaire}
             </a>

@@ -129,6 +129,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      La région qui annonce les changements de page.
+
+      Elle est ici, et non dans React, parce qu'une région vivante doit être
+      posée dans le document *avant* le texte qu'elle porte : montée et
+      remplie dans le même souffle, elle est muette chez plusieurs lecteurs
+      d'écran. Celle-ci existe donc dès le premier octet, et ne bouge plus.
+      `components/Arrivee.tsx` y écrit le titre de la page arrivée, à chaque
+      passage d'un document à l'autre, ce qu'un chargement de document
+      annonçait tout seul et qu'il n'annonce plus.
+    -->
+    <p class="vh" id="annonce" role="status"></p>
     <noscript>
       <p style="margin: 22px 16px; max-width: 46ch; line-height: 1.45">
         Aplat calcule les motifs avec JavaScript, dans ton navigateur. Active

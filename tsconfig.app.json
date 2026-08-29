@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "types": ["vite/client", "vite-plugin-pwa/react"]
+    "types": ["vite/client", "vite-plugin-pwa/vanillajs"]
   },
   "include": ["src"]
 }

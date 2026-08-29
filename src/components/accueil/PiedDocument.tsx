@@ -2,6 +2,7 @@
 
 import { etiquetteVersion, lienLicence, lienSource } from '../../lib/build'
 import type { Textes } from '../../i18n'
+import { Lien } from '../Lien'
 import { Soutien } from '../Soutien'
 
 /**
@@ -35,7 +36,7 @@ export function PiedDocument({
       <span>{textes.entete.mention}</span>
       <span className="accueil-pied-meta">
         <span>{etiquetteVersion()}</span>
-        {moteur && <a href={moteur}>{textes.pied.moteur}</a>}
+        {moteur && <Lien vers={moteur}>{textes.pied.moteur}</Lien>}
         <a href={lienSource()} rel="noopener noreferrer" target="_blank">
           {textes.pied.source}
         </a>

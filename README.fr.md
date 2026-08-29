@@ -54,8 +54,8 @@ est installable et pleinement utilisable hors ligne.
   depuis la même graine.
 - **Version claire et version sombre**, brûlées dans le fichier exporté, pas
   simulées.
-- **PWA installable**, pleinement fonctionnelle hors ligne, avec React pour
-  seule dépendance d'exécution.
+- **PWA installable**, pleinement fonctionnelle hors ligne, avec React et
+  React Router pour seules dépendances d'exécution.
 - **L'accessibilité comme plancher** : contrastes WCAG calculés sur le vrai
   DOM, clavier complet, focus visible, cibles tactiles de 44 px et mouvement
   réduit, le tout tenu par l'outillage du dépôt.
@@ -181,8 +181,9 @@ pour la même raison.
 
 ## Développement
 
-Demande **Node 22**. La pile est React 19, TypeScript et Vite ; React est la
-seule dépendance d'exécution.
+Demande **Node 22**. La pile est React 19, TypeScript et Vite. Les
+dépendances d'exécution sont React et React Router, ce dernier pour le passage
+d'un des trois documents à l'autre sans recharger la page.
 
 ```bash
 npm install
