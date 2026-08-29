@@ -69,6 +69,7 @@ export type IdFamille =
   | 'dunes'
   | 'falaises'
   | 'archipel'
+  | 'nappes'
   /* la ligne de niveau : reliefs, cernes, estran, empreinte (lib/niveaux.ts) */
   | IdNiveau
   /* lieux : les gravures tramées de lib/lieux.ts */
@@ -250,7 +251,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quatre-vingt-cinq familles, dans l'ordre de la liste : les cinq groupes
+ * Les quatre-vingt-six familles, dans l'ordre de la liste : les cinq groupes
  * géométriques d'abord, abstraits, pavages, signes, volumes, instruments ; puis
  * les matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
@@ -322,6 +323,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'dunes', groupe: 'pay', fr: 'Dunes', en: 'Dunes' },
   { id: 'falaises', groupe: 'pay', fr: 'Falaises', en: 'Cliffs' },
   { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
+  { id: 'nappes', groupe: 'pay', fr: 'Nappes', en: 'Drifts' },
   { id: 'relief', groupe: 'pay', fr: 'Relief', en: 'Contours' },
   { id: 'maree', groupe: 'pay', fr: 'Marée', en: 'Tideline' },
   /* lieux : des gravures tramées, deux tons seulement */
@@ -1674,6 +1676,95 @@ export function formes(
         ctx.arc(lx, cy + R * 0.22 - lr * 0.52, lr, 0, Math.PI * 2)
         ctx.fill()
       }
+    }
+    return
+  }
+
+  /**
+   * Les nappes : de grandes masses molles empilées, et des creux où celle du
+   * dessus retombe par-dessus celle du dessous.
+   *
+   * Vagues empile des sinusoïdes d'un à quatre pour cent de hauteur : des
+   * bandes parallèles qui ne se recouvrent jamais. Ici le bord d'une couche
+   * n'est pas une ondulation, c'est l'enveloppe de quelques dômes larges qui se
+   * chevauchent. Deux dômes voisins se rejoignent en un pincement, et c'est ce
+   * pincement, plutôt que le creux régulier d'une sinusoïde, qui donne
+   * l'impression d'une matière versée.
+   *
+   * Le repli est le second parti, et c'est lui qui sépare vraiment les deux
+   * familles. Chaque couche porte aussi des creux, et un creux ne coupe pas la
+   * couche : il laisse voir plus bas celle qui est derrière. L'oeil lit donc
+   * une masse claire qui déborde et retombe sur la masse sombre, alors qu'on
+   * n'a peint que des aplats empilés du fond vers l'avant.
+   *
+   * La première couche commence au quart de la hauteur, et le fond de la palette
+   * occupe tout ce qui est au-dessus. Ce n'est pas une composition
+   * pensée pour l'heure d'un écran verrouillé, ce que le moteur ne saurait pas
+   * faire sans se lier à un rapport d'aspect : c'est seulement qu'une pile a un
+   * sommet, et que le ciel est ce qu'on voit au-dessus.
+   *
+   * Les dômes sont tirés à la construction, un nombre fixe de fois par couche.
+   * L'échantillonnage qui suit dépend de la largeur, et ne tire rien.
+   */
+  if (id === 'nappes') {
+    const n = [3, 4, 6][densite]
+    const pas = Math.max(0.75, W / 2400)
+
+    /** Une bosse centrée sur `c`, de demi-largeur `r`, en coordonnées rapportées
+        à la largeur : zéro en dehors, un au sommet.
+
+        C'est un cosinus surélevé et non un demi-cercle, et la raison est une
+        tangente. Un demi-cercle arrive au sol à la verticale : là où il rejoint
+        la partie plate du bord, l'oeil voit un angle, et une couche en porte
+        deux par bosse. Le cosinus arrive à zéro avec une pente nulle, donc sans
+        couture. Le même argument vaut là où deux bosses se croisent.
+
+        `s` la rend dissymétrique, un flanc raide et l'autre étalé. C'est ce qui
+        distingue une masse versée d'une colline : un flanc raide et une longue
+        traîne se lisent comme quelque chose qui a coulé et s'est arrêté là. */
+    const dome = (u: number, c: number, r: number, s: number): number => {
+      const brut = (u - c) / r
+      const d = brut < 0 ? brut / (1 - s) : brut / (1 + s)
+      return Math.abs(d) >= 1 ? 0 : 0.5 * (1 + Math.cos(Math.PI * d))
+    }
+
+    for (let i = 0; i < n; i += 1) {
+      /* La pile commence au quart de la hauteur : ce qui est au-dessus reste le
+         fond de la palette, et c'est le calme dont la première couche a besoin
+         pour se détacher. Plus haut, ses dômes sortaient du cadre et le ciel
+         disparaissait. */
+      const base = H * (0.26 + (0.78 * i) / n)
+      const ampleur = H * (0.1 + 0.08 * rnd())
+      const bosses = Array.from({ length: 4 }, () => ({
+        c: rnd() * 1.2 - 0.1, r: 0.2 + 0.3 * rnd(), h: 0.45 + 0.55 * rnd(),
+        s: (rnd() - 0.5) * 0.9,
+      }))
+      /* Le repli est large et peu profond. Étroit et creusé, il ne se lit plus
+         comme un bord qui revient sur lui-même mais comme une goutte qui pend,
+         et c'était le premier défaut de cette famille. */
+      const creux = Array.from({ length: 2 }, () => ({
+        c: rnd() * 1.2 - 0.1, r: 0.16 + 0.16 * rnd(),
+        h: rnd() < 0.45 ? 0 : 0.55 + 0.45 * rnd(), s: (rnd() - 0.5) * 0.9,
+      }))
+
+      const bord = (x: number): number => {
+        const u = x / W
+        let haut = 0
+        for (const b of bosses) haut = Math.max(haut, b.h * dome(u, b.c, b.r, b.s))
+        let bas = 0
+        for (const c of creux) bas = Math.max(bas, c.h * dome(u, c.c, c.r, c.s))
+        return base - ampleur * haut + ampleur * 0.38 * bas
+      }
+
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.moveTo(0, bord(0))
+      for (let x = pas; x <= W; x += pas) ctx.lineTo(x, bord(x))
+      ctx.lineTo(W, bord(W))
+      ctx.lineTo(W, H)
+      ctx.lineTo(0, H)
+      ctx.closePath()
+      ctx.fill()
     }
     return
   }

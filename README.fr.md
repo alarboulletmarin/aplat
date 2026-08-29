@@ -42,7 +42,7 @@ est installable et pleinement utilisable hors ligne.
 - **La résolution exacte.** La taille de l'écran est détectée ; n'importe
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
-- **85 familles de motifs** en neuf groupes (abstraits, pavages, signes, volumes,
+- **86 familles de motifs** en neuf groupes (abstraits, pavages, signes, volumes,
   instruments, matières, paysages, lieux, figures), **13 palettes composées à
   la main**, trois densités, et des palettes personnelles de trois à six
   couleurs.
@@ -62,7 +62,7 @@ est installable et pleinement utilisable hors ligne.
 
 ## Galerie
 
-Dix familles parmi les quatre-vingt-cinq. Chaque image de ce README sort du
+Dix familles parmi les quatre-vingt-six. Chaque image de ce README sort du
 moteur lui-même, graine fixe, et se régénère à l'identique avec
 `node tools/vitrine.mjs` : aucune ne peut promettre un rendu que l'application
 ne donnerait pas.

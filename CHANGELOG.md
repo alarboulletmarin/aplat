@@ -9,6 +9,17 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : Nappes, de grandes masses molles empilées
+
+- **Là où Vagues empile des sinusoïdes d'un à quatre pour cent de hauteur**,
+  Nappes empile des masses. Le bord d'une couche n'est pas une ondulation mais
+  l'enveloppe de quelques bosses larges et dissymétriques, un flanc raide et une
+  longue traîne : ce qui se lit comme une matière versée plutôt que comme une
+  colline. Des creux laissent voir plus bas la couche de derrière, et l'oeil y
+  lit un débordement.
+- **La pile commence au quart de la hauteur**, et le fond de la palette occupe
+  tout ce qui est au-dessus.
+
 ### Ajouté : deux camaïeux, Cendre et Graphite
 
 - **Une seule teinte, quatre valeurs.** Les onze palettes livrées opposent leurs
