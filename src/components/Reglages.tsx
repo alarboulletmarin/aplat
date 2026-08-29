@@ -192,7 +192,7 @@ function Echantillon({ id }: { id: IdPaletteQuelconque }) {
 }
 
 /**
- * Les onze palettes livrées, puis celles qu'on a composées.
+ * Les treize palettes livrées, puis celles qu'on a composées.
  *
  * Les composées sont des palettes, pas un autre réglage : elles vivent dans la
  * même carte, sous le même titre, et se choisissent avec la même puce. Ce qui

@@ -56,7 +56,7 @@ export const VOILE: Motif = { famille: 'vagues', palette: 'lime', densite: 1, gr
 
 /**
  * Les douze de la galerie : les couples famille et palette de la maquette,
- * dans son ordre. Les quatre groupes du moteur y passent, et les onze palettes
+ * dans son ordre. Les quatre groupes du moteur y passent, et les treize palettes
  * sont toutes représentées au moins une fois.
  */
 /**

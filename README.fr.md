@@ -43,7 +43,7 @@ est installable et pleinement utilisable hors ligne.
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
 - **85 familles de motifs** en neuf groupes (abstraits, pavages, signes, volumes,
-  instruments, matières, paysages, lieux, figures), **11 palettes composées à
+  instruments, matières, paysages, lieux, figures), **13 palettes composées à
   la main**, trois densités, et des palettes personnelles de trois à six
   couleurs.
 - **Un moteur déterministe.** `(famille, palette, densité, graine)` donne

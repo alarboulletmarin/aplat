@@ -97,10 +97,12 @@ export type IdPalette =
   | 'corail'
   | 'menthe'
   | 'ciel'
+  | 'cendre'
   | 'ardoise'
   | 'prune'
   | 'nuit'
   | 'orage'
+  | 'graphite'
   | 'encre'
 
 /**
@@ -111,7 +113,7 @@ export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
 
 /**
  * Une palette quelconque, livrée ou composée. C'est lui que l'adresse, les
- * réglages et l'historique portent : `IdPalette` ne nomme que les onze
+ * réglages et l'historique portent : `IdPalette` ne nomme que les treize
  * livrées, et le dire dans le type évite de le rattraper par des assertions.
  */
 export type IdPaletteQuelconque = IdPalette | IdPalettePerso
@@ -126,7 +128,7 @@ export interface Palette {
   en: string
   fond: string
   /**
-   * Deux à cinq teintes posées sur le fond. Les onze palettes livrées en
+   * Deux à cinq teintes posées sur le fond. Les treize palettes livrées en
    * comptent quatre ; une palette personnalisée en compte ce que la personne a
    * choisi, et `formes()` les prend par un modulo, ce qui n'a jamais demandé
    * un nombre fixe.
@@ -211,16 +213,40 @@ export const PALETTES: Readonly<Record<IdPalette, Palette>> = {
   corail: { fr: 'Corail', en: 'Coral', fond: '#F7F3E6', couleurs: ['#FF6648', '#17243F', '#DFF478', '#788CE3'] },
   menthe: { fr: 'Menthe', en: 'Mint', fond: '#E2EFE4', couleurs: ['#4E9B7C', '#17243F', '#DFF478', '#92BAD5'] },
   ciel: { fr: 'Ciel', en: 'Sky', fond: '#92BAD5', couleurs: ['#F7F3E6', '#788CE3', '#17243F', '#DFF478'] },
+  /* Les deux camaïeux. Ils rompent avec les onze autres sur un point, et un
+     seul : leurs quatre teintes ne s'opposent pas, elles se suivent. Une
+     palette ordinaire donne à chaque famille de quoi séparer ses formes par la
+     couleur ; un camaïeu la force à les séparer par la valeur, ce qui est une
+     autre image du même dessin. Les valeurs sont donc espacées largement, à
+     peu près en progression géométrique : deux gris voisins ne feraient qu'une
+     bouillie, et c'est le seul piège du procédé.
+
+     L'ordre des teintes va du clair au sombre, ce qu'aucune autre palette ne
+     fait. Les familles qui prennent leurs couleurs dans l'ordre y gagnent une
+     descente, du haut clair vers le bas sombre, et c'est exactement ce qu'on
+     demande à un camaïeu.
+
+     La teinte la plus claire de Cendre reste proche de son fond, et ce n'est pas
+     une négligence : la mesure éclaircit la teinte la plus claire de la palette
+     de soixante pour cent vers le blanc pour faire son papier, et cette formule
+     suppose que ladite teinte est déjà claire. Un camaïeu qui partirait d'un
+     gris moyen rendrait du papier millimétré gris, ce que le geste des
+     instruments promet de ne jamais faire. Lime porte déjà une teinte aussi
+     proche de son fond ; la contrainte n'est donc pas nouvelle, elle ne s'était
+     simplement jamais vue. */
+  cendre: { fr: 'Cendre', en: 'Ash', fond: '#E8E4DC', couleurs: ['#D8D2C6', '#9A9184', '#5C5548', '#241F19'] },
   ardoise: { fr: 'Ardoise', en: 'Slate', fond: '#DFE2E6', couleurs: ['#4A5773', '#92BAD5', '#DFF478', '#17243F'] },
   prune: { fr: 'Prune', en: 'Plum', fond: '#EEE0EA', couleurs: ['#6E3B63', '#788CE3', '#DFF478', '#F7F3E6'] },
   nuit: { fr: 'Nuit', en: 'Night', fond: '#17243F', couleurs: ['#788CE3', '#DFF478', '#92BAD5', '#F7F3E6'] },
   orage: { fr: 'Orage', en: 'Storm', fond: '#1D2140', couleurs: ['#788CE3', '#FF6648', '#92BAD5', '#F7F3E6'] },
+  graphite: { fr: 'Graphite', en: 'Graphite', fond: '#17181B', couleurs: ['#33353A', '#5A5D65', '#8C8F98', '#C7C9CF'] },
   encre: { fr: 'Encre', en: 'Ink', fond: '#101A2E', couleurs: ['#F7F3E6', '#92BAD5', '#DFF478', '#FF6648'] },
 }
 
 /** L'ordre d'affichage, du plus clair au plus sombre. */
 export const ORDRE_PALETTES: readonly IdPalette[] = [
-  'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'ardoise', 'prune', 'nuit', 'orage', 'encre',
+  'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'cendre', 'ardoise',
+  'prune', 'nuit', 'orage', 'graphite', 'encre',
 ]
 
 /**
@@ -401,13 +427,13 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
-/** Vrai pour les onze palettes livrées, et pour elles seules. */
+/** Vrai pour les treize palettes livrées, et pour elles seules. */
 export function estPaletteLivree(valeur: unknown): valeur is IdPalette {
   return ORDRE_PALETTES.includes(valeur as IdPalette)
 }
 
 /**
- * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
+ * Vrai pour les treize palettes livrées et pour celles qui sont enregistrées.
  *
  * Le registre fait donc partie de la liste blanche : une adresse qui nomme une
  * palette composée que cet appareil ne connaît pas retombe sur la valeur par

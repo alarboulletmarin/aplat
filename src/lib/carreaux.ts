@@ -467,7 +467,7 @@ function demilunes(
  * Deux tons, un damier lâche, et des pièces frappées.
  *
  * La page reste celle de la palette : le geste ne peint aucun papier, il pose
- * son encre dessus. C'est ce qui lui permet de rester juste sur les onze
+ * son encre dessus. C'est ce qui lui permet de rester juste sur les treize
  * palettes sans jamais connaître leur fond, qu'il ne reçoit pas, et c'est
  * aussi ce qui lui donne son air de planche imprimée. L'encre est la plus
  * sombre des teintes, la réserve la plus claire ; il n'en faut pas plus.

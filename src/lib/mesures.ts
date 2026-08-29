@@ -34,7 +34,7 @@
  * le faire pour toutes les siennes. Un tapis de coupe est sombre, du papier
  * millimétré est clair : ce n'est pas une préférence, c'est ce que sont ces
  * objets. La palette ne choisit donc pas la clarté du fond, elle le teinte, et
- * onze palettes donnent onze tapis qui restent des tapis.
+ * treize palettes donnent treize tapis qui restent des tapis.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
@@ -75,7 +75,7 @@ function arc(
  *
  * Le fond ne se prend pas dans la palette, il s'y teinte : un tapis de coupe
  * part du noir, du papier millimétré part du blanc, et la palette ne fait que
- * les colorer. C'est ce qui permet aux onze palettes de donner onze tapis
+ * les colorer. C'est ce qui permet aux treize palettes de donner treize tapis
  * plutôt que sept tapis et quatre feuilles de papier.
  *
  * L'encre principale est la teinte de la palette la plus éloignée du fond,

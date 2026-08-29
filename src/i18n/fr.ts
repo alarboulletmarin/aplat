@@ -390,7 +390,7 @@ export const fr = {
     versionTitreSombre: 'Le même motif, assombri dans le fichier téléchargé',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
-     les onze livrées, parce que ce sont des palettes et non un autre réglage. */
+     les treize livrées, parce que ce sont des palettes et non un autre réglage. */
   palettes: {
     miennes: 'Mes palettes',
     composer: 'Composer une palette',

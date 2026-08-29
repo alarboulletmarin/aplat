@@ -42,7 +42,7 @@ fully usable offline.
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
 - **85 pattern families** in nine groups (abstract, tilings, signs, volumes,
-  instruments, materials, landscapes, landmarks, figures), **11 hand-tuned
+  instruments, materials, landscapes, landmarks, figures), **13 hand-tuned
   palettes**, three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces
   the same image, at any resolution. Sharing a link is sharing the image.

@@ -9,6 +9,19 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : deux camaïeux, Cendre et Graphite
+
+- **Une seule teinte, quatre valeurs.** Les onze palettes livrées opposent leurs
+  couleurs ; ces deux-là les font se suivre. Le motif ne sépare plus ses formes
+  par la teinte mais par la valeur, ce qui est une autre image du même dessin,
+  et elles changent donc les quatre-vingt-cinq familles d'un coup plutôt qu'une
+  seule. Cendre est claire, Graphite est sombre.
+- **Les valeurs sont espacées largement**, à peu près en progression
+  géométrique : deux gris voisins ne feraient qu'une bouillie, et c'est le seul
+  piège du procédé. Leurs teintes vont du clair au sombre, ce qu'aucune autre
+  palette ne fait : les familles qui les prennent dans l'ordre y gagnent une
+  descente du haut clair vers le bas sombre.
+
 ### Corrigé : la page ne se défile plus en travers sur un petit téléphone
 
 - **Dix-sept pixels de trop à 320 px.** Les mentions du pied de page portent une
