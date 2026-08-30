@@ -628,7 +628,7 @@ jamais demandé un nombre fixe.
 ### Poids et netteté des images produites
 
 Mesuré sur les **2 508 combinaisons** (76 familles × 11 palettes × 3 densités)
-en 1179 × 2556, soit 3,0 Mpx. Le catalogue en compte quatre-vingt-six depuis,
+en 1179 × 2556, soit 3,0 Mpx. Le catalogue en compte cent depuis,
 et ces chiffres n'ont pas été remesurés :
 
 | | avant | après |

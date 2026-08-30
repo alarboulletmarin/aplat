@@ -269,11 +269,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 86,
-    'onglets : les neuf couvrent les quatre-vingt-six familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 100,
+    'onglets : les neuf couvrent les cent familles', onglets.comptes.join(' + '));
   /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
      cinq rangées de 44 px. Une colonne unique en ferait neuf, soit 451 px, et la
-     première vignette de famille en fait 86 : on ferait défiler un mur de
+     première vignette de famille en fait 100 : on ferait défiler un mur de
      navigation avant de voir un seul motif. Le plafond est donc la mesure de ce
      mur, pas un nombre choisi.
 

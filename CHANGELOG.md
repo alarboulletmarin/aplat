@@ -9,6 +9,48 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : quatorze motifs, et le catalogue passe à cent
+
+Le catalogue comptait quatre-vingt-six familles pour neuf groupes très inégaux :
+dix-sept abstraits et dix-huit figures d'un côté, quatre volumes et quatre
+instruments de l'autre. Ce sont pourtant les deux gestes les plus particuliers du
+moteur, l'éclairage qui fait un cube de trois aplats et les graduations qui
+savent écrire des chiffres. Les quatorze nouveaux motifs vont donc là où il n'y
+avait presque rien, et aucun groupe n'a été créé : la barre d'onglets ne bouge
+pas.
+
+**Cinq volumes.** **Escaliers**, un champ de marches isométriques, une teinte
+par volée. **Torsades**, un cordon enroulé autour de son fût, dont l'éclairage
+appartient au fût et non au cordon, ce qui est ce qui rend la colonne ronde.
+**Casiers**, le seul volume du catalogue qui montre un dedans : un plateau de
+cases creusées, chacune à sa profondeur, que l'ombre de son fond trahit.
+**Soufflet**, un pli d'accordéon régulier, quatre orientations qui reviennent en
+damier, exactement le contraire du froissement de Plis. **Treillis**, une
+charpente de barres et le vide entre elles, le seul volume qu'on traverse du
+regard.
+
+**Quatre instruments.** **Règle à calcul**, les seules graduations du catalogue
+qui se resserrent : de un à deux, la décade prend le tiers de la longueur ; de
+cinq à dix, un septième. **Charte**, le nuancier d'atelier, qui montre la palette
+comme une échelle du très pâle au très sourd plutôt que comme une poignée de
+teintes ; un camaïeu y donne un portrait juste. **Gabarit**, la plaque du
+dessinateur, le seul instrument qui travaille en enlevant : on ne voit d'elle que
+ce qu'elle laisse voir du papier au travers de ses trous. **Thermomètres**, un
+mur de colonnes graduées remplies à leur hauteur, la silhouette debout qui
+manquait au geste.
+
+**Trois matières.** **Tricot**, le point jersey, opaque comme doit l'être un
+jersey : la rangée pose d'abord son ombre, les mailles ensuite. **Cannage**, le
+rotin des chaises de Vienne, six brins sous trois directions, ajouré là où la
+tresse ne laisse rien passer. **Craquelé**, la glaçure fendillée d'un céladon,
+deux cent cinquante éclats d'un même bain que rien ne sépare qu'un cheveu.
+
+**Deux lieux.** **Rizières**, un flanc découpé en bassins dont un sur trois est
+en eau et renvoie le ciel : c'est ce damier de valeurs, et non le dessin des
+courbes, qu'on reconnaît d'une rizière. **Volcan**, un cône, ses coulées
+épargnées comme l'astre, et un panache aux bords rongés, ce que la gravure
+tramée sait faire de mieux.
+
 ### Ajouté : Nappes, de grandes masses molles empilées
 
 - **Là où Vagues empile des sinusoïdes d'un à quatre pour cent de hauteur**,

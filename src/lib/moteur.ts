@@ -22,6 +22,7 @@ import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
+import { estTissu, peindreTissu, type IdTissu } from './tissus'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
 
 export type IdFamille =
@@ -59,9 +60,10 @@ export type IdFamille =
   | IdRelief
   | IdMesure
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
-     déformée et l'interférence y mettent tout le reste */
+     déformée, l'interférence et le fil y mettent tout le reste */
   | IdChimie
   | IdTrame
+  | IdTissu
   /* paysages */
   | 'sommets'
   | 'horizon'
@@ -251,7 +253,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les quatre-vingt-six familles, dans l'ordre de la liste : les cinq groupes
+ * Les cent familles, dans l'ordre de la liste : les cinq groupes
  * géométriques d'abord, abstraits, pavages, signes, volumes, instruments ; puis
  * les matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
@@ -304,11 +306,20 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
   { id: 'bossage', groupe: 'vol', fr: 'Bossage', en: 'Bosses' },
   { id: 'tuyaux', groupe: 'vol', fr: 'Tuyaux', en: 'Pipes' },
+  { id: 'escaliers', groupe: 'vol', fr: 'Escaliers', en: 'Stairs' },
+  { id: 'torsades', groupe: 'vol', fr: 'Torsades', en: 'Twists' },
+  { id: 'casiers', groupe: 'vol', fr: 'Casiers', en: 'Pigeonholes' },
+  { id: 'soufflet', groupe: 'vol', fr: 'Soufflet', en: 'Bellows' },
+  { id: 'treillis', groupe: 'vol', fr: 'Treillis', en: 'Space frame' },
   /* instruments : le motif est gradué, il mesure */
   { id: 'tapis', groupe: 'ins', fr: 'Tapis de coupe', en: 'Cutting mat' },
   { id: 'millimetre', groupe: 'ins', fr: 'Millimétré', en: 'Graph paper' },
   { id: 'rapporteur', groupe: 'ins', fr: 'Rapporteur', en: 'Protractor' },
   { id: 'mire', groupe: 'ins', fr: 'Mire', en: 'Test chart' },
+  { id: 'reglette', groupe: 'ins', fr: 'Règle à calcul', en: 'Slide rule' },
+  { id: 'charte', groupe: 'ins', fr: 'Charte', en: 'Colour chart' },
+  { id: 'gabarit', groupe: 'ins', fr: 'Gabarit', en: 'Drawing template' },
+  { id: 'thermometres', groupe: 'ins', fr: 'Thermomètres', en: 'Thermometers' },
   /* matières : la main les reconnaît avant l'oeil */
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
@@ -316,6 +327,9 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'drape', groupe: 'mat', fr: 'Drapé', en: 'Drape' },
   { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
   { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
+  { id: 'tricot', groupe: 'mat', fr: 'Tricot', en: 'Knit' },
+  { id: 'cannage', groupe: 'mat', fr: 'Cannage', en: 'Caning' },
+  { id: 'craquele', groupe: 'mat', fr: 'Craquelé', en: 'Crackle glaze' },
   /* paysages : ils ont un haut et un bas */
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
@@ -334,6 +348,8 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
   { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
   { id: 'col', groupe: 'lieu', fr: 'Col', en: 'Mountain pass' },
+  { id: 'rizieres', groupe: 'lieu', fr: 'Rizières', en: 'Rice terraces' },
+  { id: 'volcan', groupe: 'lieu', fr: 'Volcan', en: 'Volcano' },
   /* figures : des objets posés sur un fond, reconnaissables un par un */
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
@@ -800,6 +816,11 @@ export function formes(
     peindrePavage(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
+  if (estTissu(id)) {
+    peindreTissu(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+
   if (estTrame(id)) {
     peindreTrame(ctx, W, H, id, C, densite, rnd, unite)
     return

@@ -140,7 +140,7 @@ Le titre : `25px`, interligne `1`, interlettrage `-.03em`, en capitales. Presque
 collé. C'est le seul geste typographique de la page, et il ne se répète nulle
 part ailleurs. Il ne prend plus toute la largeur comme la version d'avant
 (`clamp(56px, 15.5vw, 98px)`) : l'en-tête est devenu collant, et une capitale de
-quatre-vingt-dix-huit pixels ne peut pas rester à l'écran en permanence. Ce
+cent-huit pixels ne peut pas rester à l'écran en permanence. Ce
 qu'il perd en taille, il le gagne en présence.
 
 C'est aussi, au pixel près, le mot de l'enseigne de la présentation, et les deux
@@ -290,7 +290,7 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi quatre-vingt-six familles et treize
+restait presque rien pour choisir parmi cent familles et treize
 palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
