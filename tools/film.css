@@ -7,12 +7,17 @@
  * Aucune transition CSS, aucune animation CSS : `etat(i)` pose ce qu'il faut
  * voir à l'image `i`, et la même image rend deux fois le même pixel.
  *
- * Cinq vitesses en tout, et pas une de plus : la presse linéaire, la rampe de
- * voile linéaire, la lame lissée de douze images qui pose un fichier sur son
- * aplat, la coupe d'une seule image pour tout ce que la machine décide, et la
- * sortie cubique de cinq images pour ce qu'une main pose. Rien ne change deux
- * fois par seconde : au-delà, une alternance clair-sombre devient un
- * stroboscope, et un film qui fait mal aux yeux n'est pas un film rythmé.
+ * Quatre vitesses en tout, et pas une de plus : la lame linéaire, la rampe de
+ * voile linéaire, la coupe d'une seule image pour tout ce que la machine
+ * décide, et la sortie cubique de cinq images pour ce qu'une main pose.
+ *
+ * Aucune échelle, aucune poussée, aucun zoom : `#scene` n'a pas de `transform`.
+ * Mettre à l'échelle un motif géométrique le rééchantillonne, et le produit
+ * vend un rendu exact à la résolution de l'appareil.
+ *
+ * Rien ne change deux fois par seconde : au-delà, une alternance clair-sombre
+ * devient un stroboscope, et un film qui fait mal aux yeux n'est pas un film
+ * rythmé.
  */
 .fi {
   position: relative;
