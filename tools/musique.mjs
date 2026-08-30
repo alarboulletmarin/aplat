@@ -17,11 +17,17 @@
  * la force du voile image par image : la rampe du film, qui est son argument,
  * est aussi ce qu'on entend s'ouvrir.
  *
- * SIX SONS, ET PAS UN DE PLUS. Le battement, sur le temps. La lame, un
- * balayage de bruit filtré panoramiqué de gauche à droite, exactement comme la
- * lame de l'image. Le clic, quatre fois, quand la grille tombe rang par rang.
- * Le bourdon, dont le filtre s'ouvre avec le voile. La cloche, une par fichier.
+ * CINQ SONS, ET PAS UN DE PLUS, TOUS TENUS. Le battement, sur le temps. Le
+ * clic, quatre fois, quand la grille tombe rang par rang. Le bourdon, dont le
+ * filtre s'ouvre avec le voile. La cloche, une par fichier de galerie.
  * L'accord, deux fois, sur les deux seules coupes franches du film.
+ *
+ * Il y en avait un sixième, la lame : un balayage de bruit filtré panoramiqué
+ * de gauche à droite, qui suivait la lame de l'image. Supprimé. L'idée se
+ * défendait sur le papier, le son ne se défendait pas à l'oreille, et huit
+ * balayages en huit secondes n'ont aucune chance de passer pour une texture.
+ * Rien ne le remplace : la bande est maintenant entièrement tenue, sans une
+ * seule source de bruit sauf les six millisecondes d'attaque du battement.
  *
  * DÉTERMINISTE. Le bruit sort d'un générateur à graine fixe, pas de
  * `Math.random()` : deux exports donnent le même fichier, comme pour l'image.
@@ -105,38 +111,6 @@ function battement(force = 1) {
       attaque += pole(1400) * (alea() - attaque)
       const v = Math.sin(phase) * Math.exp(-t / 0.09) + attaque * 0.55 * Math.exp(-t / 0.006)
       mettre(k, v * 0.5 * force)
-    }
-  }
-}
-
-/* La lame : du bruit passé dans une bande qui monte, et panoramiqué de gauche
-   à droite pendant sa course. C'est le seul son du film qui se déplace, comme
-   la lame est le seul geste de l'image qui se déplace. */
-function lame(images, force = 1) {
-  return (mettre) => {
-    const n = Math.round((images / C.ips) * TAUX)
-    /* Trois pôles et non un seul. Un passe-bas à un pôle ne descend que de six
-       décibels par octave : la lame passait alors sur tout le spectre jusqu'à
-       vingt kilohertz, c'est-à-dire un souffle blanc, et huit souffles blancs
-       en huit secondes couvraient le reste de la bande. */
-    const bas = [0, 0, 0]
-    let tres = 0
-    for (let k = 0; k < n; k += 1) {
-      const t = k / TAUX
-      const u = k / n
-      const c = pole(900 + 5400 * u)
-      let v = alea()
-      for (let j = 0; j < bas.length; j += 1) {
-        bas[j] += c * (v - bas[j])
-        v = bas[j]
-      }
-      tres += pole(320) * (v - tres)
-      /* La chute est proportionnelle à la course, et non fixe : avec une
-         constante unique, le son était fini avant que le panoramique ait
-         atteint la droite, si bien que la lame de l'oreille ne traversait pas
-         quand la lame de l'image traversait. */
-      const s = (v - tres) * Math.min(1, t / 0.006) * Math.exp(-t / ((n / TAUX) * 0.45)) * 3.5 * force
-      mettre(k, s * Math.sqrt(1 - u), s * Math.sqrt(u))
     }
   }
 }
@@ -230,12 +204,15 @@ function bourdon(images, hauteur, forceA, secondes) {
 
    L'ÉQUILIBRE EST MESURÉ, PAS RÉGLÉ À L'OREILLE. Chaque élément a été relevé
    seul, en niveau efficace sur une fenêtre de quatre dixièmes de seconde, et
-   les gains ci-dessus viennent de ces relevés : la lame passait six décibels
-   au-dessus de la galerie et le bourdon neuf au-dessus de tout le reste, si
-   bien que la normalisation en crête était tenue par le seul gonflement du
-   voile. Cible : le battement et la lame vers -16 dBFS, la cloche un peu
-   au-dessus puisque c'est elle qui porte la mélodie, le bourdon à -13 à son
-   plus ouvert, les deux accords à -13 puisque ce sont les deux tournants. */
+   les gains ci-dessus viennent de ces relevés. Une fenêtre prise sur le premier
+   temps d'une carte de galerie contient le battement et la cloche à la fois :
+   elle ne dit rien de l'équilibre entre les deux, et un gain réglé dessus est
+   réglé faux.
+
+   Cible, en niveau efficace isolé : le battement à -14, la cloche un peu
+   au-dessus puisque c'est elle qui porte la mélodie, le bourdon cinq à six
+   décibels au-dessus du battement à son plus ouvert parce que c'est le centre
+   du film, et les deux accords entre les deux. */
 
 const TEMPS = C.imagesParTemps
 
@@ -275,13 +252,11 @@ function partition(segments) {
      deux fichiers proches en clarté donnent deux notes proches. */
   const note = (l) => GAMME[Math.round(((l - bas) / (haut - bas)) * (GAMME.length - 1))]
 
-  /* La presse : trois lames sur trois temps, et le battement une fois sur deux
-     pendant qu'elle travaille. */
-  for (let k = 0; k < C.presse.lames; k += 1) {
-    a(C.presse.depart + k * C.presse.pas, lame(C.presse.duree, 0.9))
-  }
-  a(0, battement(0.9))
-  a(2 * TEMPS, battement(0.9))
+  /* La presse : la pulsation seule, un peu en retrait. Les trois lames avaient
+     leur son, un balayage de bruit ; il est supprimé, et rien ne le remplace.
+     Deux battements en deux secondes laissaient une ouverture vide à sa place,
+     alors la pulsation court maintenant sur les quatre temps de la presse. */
+  battre(C.presse.depart, C.nom, 0.9)
 
   /* Le nom troué : le battement s'installe, la basse entre sous lui. */
   battre(C.nom, C.these)
@@ -291,11 +266,10 @@ function partition(segments) {
   a(C.these, accord([LA2, 164.81, 261.63], 2.2))
   battre(C.these, C.demo, 0.85)
 
-  /* La démonstration. La lame amène le fichier, la grille tombe rang par rang,
-     puis le battement se retire : pendant les quatre temps de la rampe, il ne
-     reste que le bourdon qui s'ouvre. C'est le centre du film, et c'est le seul
-     endroit où la pulsation le laisse seul. */
-  a(C.demo, lame(C.lameDemo))
+  /* La démonstration. La grille tombe rang par rang, puis le battement se
+     retire : pendant les quatre temps de la rampe, il ne reste que le bourdon
+     qui s'ouvre. C'est le centre du film, et c'est le seul endroit où la
+     pulsation le laisse seul. */
   const hauteurs = [2100, 1850, 1620, 1420]
   C.grille.forEach((im, k) => a(im, clic(hauteurs[k], 1 - k * 0.1)))
   battre(C.demo, C.rampe[0], 0.85)
@@ -309,14 +283,13 @@ function partition(segments) {
      et le battement revient avec elle. */
   a(rampeB, cloche(880, 1.6, 1.1))
 
-  /* La galerie : une cloche par fichier, une lame par changement, le battement
-     sur chaque temps et la basse dessous. */
+  /* La galerie : une cloche par fichier, le battement sur chaque temps et la
+     basse dessous. La cloche tombe sur l'image exacte où le fichier change, si
+     bien que chaque changement reste marqué sans qu'aucun bruit s'en mêle. */
   battre(rampeB, C.prix)
   a(rampeB, tenue(LA2, (C.prix - rampeB) / C.ips, 0.7))
   fichiers.forEach((f, k) => {
-    const im = G.depart + k * G.pas
-    a(im, lame(G.lame, 0.85))
-    a(im, cloche(note(f.luminance), 1.4))
+    a(G.depart + k * G.pas, cloche(note(f.luminance), 1.4))
   })
 
   /* Le prix : la seconde coupe franche, le second accord, et plus de battement.
