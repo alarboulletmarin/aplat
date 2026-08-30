@@ -644,15 +644,69 @@ function etat({ i, adresse, seuil, C }) {
   console.log('galerie : ' + releve.galerie
     .map((g) => `${g.famille}/${g.palette} ${g.carton.toFixed(1).replace('.', ',')}:1`).join(', '))
 
-  /* Le conducteur publié. La bande son se construit là-dessus : elle lit les
-     images où tombent les plans et les luminances mesurées de la galerie, si
-     bien qu'aucun de ses nombres n'est saisi une deuxième fois. */
+  /* Le conducteur publié, partition comprise. La bande son se construit
+     là-dessus : elle lit les images où tombent les plans, les luminances
+     mesurées de la galerie, et la liste des coups à jouer. Aucun de ses
+     nombres n'est saisi une deuxième fois, et déplacer un plan déplace la
+     note qui tombe dessus. */
+  const C = CONDUCTEUR
+  const T = C.imagesParTemps
+  const LA1 = 55
+  const LA2 = 110
+  /* La pulsation alterne un temps fort et un temps faible : à force égale sur
+     chaque temps, vingt secondes de battement deviennent une mitraille. */
+  const battre = (debut, fin, force = 1) =>
+    Array.from({ length: Math.ceil((fin - debut) / T) }, (_, k) => ({
+      son: 'battement', image: debut + k * T, force: force * (k % 2 === 0 ? 1 : 0.58),
+    }))
+  const [rampeA, rampeB] = C.rampe
+  const G = C.galerie
+  const lum = releve.galerie.map((g) => g.luminance)
+  const [bas, haut] = [Math.min(...lum), Math.max(...lum)]
+  /* La gamme : pentatonique mineure de la. La hauteur de chaque cloche sort de
+     la luminance mesurée du fichier, et non de son rang : deux fichiers
+     proches en clarté donnent deux notes proches. */
+  const GAMME = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.26, 784, 880]
+  const note = (l) => GAMME[Math.round(((l - bas) / (haut - bas)) * (GAMME.length - 1))]
+
+  const partition = [
+    ...battre(C.presse.depart, C.nom, 0.9),
+    ...battre(C.nom, C.these),
+    { son: 'tenue', image: C.nom, hauteur: LA2, duree: (C.these - C.nom) / IPS + 0.6, force: 0.8 },
+    { son: 'accord', image: C.these, hauteurs: [LA2, 164.81, 261.63], duree: 2.2, force: 1 },
+    ...battre(C.these, C.demo, 0.85),
+    ...battre(C.demo, rampeA, 0.85),
+    ...C.grille.map((im, k) => ({
+      son: 'clic', image: im, hauteur: [2100, 1850, 1620, 1420][k], force: 1 - k * 0.1,
+    })),
+    { son: 'clic', image: C.verdict, hauteur: 880, force: 0.7 },
+    /* Le bourdon suit la force du voile image par image : la rampe du film,
+       qui est son argument, est aussi ce qu'on entend s'ouvrir. */
+    {
+      son: 'bourdon', image: C.demo, hauteur: LA1, duree: (G.depart - C.demo) / IPS,
+      points: [[0, 0], [rampeA - C.demo, 0], [rampeB - C.demo, 1], [G.depart - C.demo, 1]],
+    },
+    { son: 'cloche', image: rampeB, hauteur: 880, duree: 1.6, force: 1.1 },
+    ...battre(rampeB, C.prix),
+    { son: 'tenue', image: rampeB, hauteur: LA2, duree: (C.prix - rampeB) / IPS, force: 0.7 },
+    ...releve.galerie.map((g, k) => ({
+      son: 'cloche', image: G.depart + k * G.pas, hauteur: note(g.luminance), duree: 1.4, force: 1,
+    })),
+    { son: 'accord', image: C.prix, hauteurs: [LA2, 164.81, 220, 329.63], duree: 1.5, force: 1.15 },
+    { son: 'tenue', image: C.prix, hauteur: LA1, duree: (C.total - C.prix) / IPS, force: 0.9 },
+  ]
+
   fs.writeFileSync(path.join(SORTIE, 'aplat-film.json'), JSON.stringify({
-    ...CONDUCTEUR,
-    segments: SEGMENTS,
-    heros: { ...releve.heros, mesure: releve.heros },
-    galerie: { ...CONDUCTEUR.galerie, fichiers: releve.galerie },
+    ...C,
+    heros: releve.heros,
+    galerie: { ...G, fichiers: releve.galerie },
     seuil: releve.seuil,
+    /* Les deux montages tirés de la même pellicule. */
+    montages: [
+      { nom: 'aplat-film-reel-20s', segments: [[0, C.total]] },
+      { nom: 'aplat-film-story-15s', segments: SEGMENTS },
+    ],
+    partition,
   }, null, 2) + '\n')
 
   const fichier = path.join(SORTIE, COURT ? 'aplat-film-story-15s.mp4' : 'aplat-film-reel-20s.mp4')

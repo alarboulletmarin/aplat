@@ -1,0 +1,66 @@
+/* Les films de plateau : « 76 » et « Sans ».
+ *
+ * Ils partagent le cadre et la typographie du film principal, et n'ajoutent
+ * que ce qui leur est propre : un compteur, et un bloc de mot plein cadre.
+ * Aucune transition, aucune animation : `etat(i)` pose l'image `i`.
+ */
+
+/* Le compteur de « 76 ». Il est le seul texte du film, donc il est posé comme
+   un chiffre de bas de page et non comme un titre : en bas à gauche, sous la
+   zone sûre d'Instagram, dans l'encre que la sonde mesure sous lui. */
+.fx-compteur {
+  position: absolute;
+  left: 96px;
+  bottom: 250px;
+  font-size: 96px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--libelle);
+  line-height: 1;
+}
+.fx-compteur small {
+  font-size: 44px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* Le mot plein cadre de « Sans ». La ligne de rappel est petite et posée
+   au-dessus ; le nom occupe toute la largeur utile, et c'est sa longueur qui
+   décide de son corps. */
+.fx-carte {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  top: 640px;
+}
+.fx-carte em {
+  display: block;
+  font-style: normal;
+  font-family: var(--texte);
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 28px;
+  opacity: 0.72;
+}
+.fx-carte b {
+  display: block;
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  white-space: nowrap;
+}
+
+/* Le filet de « Sans » : un seul trait, toujours au même endroit, qui tient
+   les six cartes ensemble. */
+.fx-filet {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  top: 560px;
+  height: 8px;
+  background: currentColor;
+}

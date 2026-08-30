@@ -1,40 +1,32 @@
-/* La bande son du film : « De 2,8 à 4,8 ».
+/* Les bandes son des films.
  *
- * Elle n'est pas choisie, elle est construite sur le conducteur que le film
- * publie dans `.social/aplat-film.json`. Chaque son tombe sur un plan, et
- * aucun nombre n'est saisi ici une deuxième fois : déplacer une image dans le
- * film déplace la note qui tombe dessus.
+ * Elles ne sont pas choisies, elles sont construites. Chaque film publie son
+ * conducteur dans `.social/*.json`, partition comprise : la liste des coups à
+ * jouer et l'image où chacun tombe. Cet outil ne connaît aucun film, il ne
+ * sait que rendre une partition. Déplacer un plan dans un film déplace donc la
+ * note qui tombe dessus, sans que rien ne soit saisi deux fois.
  *
- * POURQUOI LA FABRIQUER PLUTOT QUE L'ACHETER. Une piste de banque ne tombera
- * jamais sur les images 105, 180, 315 et 555. Celle-ci ne fait que ça. Et
- * comme elle est synthétisée ici, de bout en bout, elle ne peut recevoir
- * aucune revendication de droits sur Instagram.
- *
- * CE QUI EST MESURÉ PLUTOT QUE CHOISI. Les huit notes de la galerie ont leur
- * hauteur tirée de la luminance que la sonde mesure sur chaque fichier. La
- * galerie est rangée du plus clair au plus sombre, donc la mélodie descend, et
- * elle descend exactement comme l'image s'assombrit. Le timbre du bourdon suit
- * la force du voile image par image : la rampe du film, qui est son argument,
- * est aussi ce qu'on entend s'ouvrir.
+ * POURQUOI LES FABRIQUER PLUTOT QUE LES ACHETER. Une piste de banque ne
+ * tombera jamais sur les images qu'un film choisit. Celles-ci ne font que ça.
+ * Et comme elles sont synthétisées ici de bout en bout, elles ne peuvent
+ * recevoir aucune revendication de droits sur Instagram.
  *
  * CINQ SONS, ET PAS UN DE PLUS, TOUS TENUS. Le battement, sur le temps. Le
- * clic, quatre fois, quand la grille tombe rang par rang. Le bourdon, dont le
- * filtre s'ouvre avec le voile. La cloche, une par fichier de galerie.
- * L'accord, deux fois, sur les deux seules coupes franches du film.
+ * clic, bref et haut. Le bourdon, dont le filtre s'ouvre selon une courbe que
+ * la partition donne. La cloche. L'accord.
  *
  * Il y en avait un sixième, la lame : un balayage de bruit filtré panoramiqué
  * de gauche à droite, qui suivait la lame de l'image. Supprimé. L'idée se
- * défendait sur le papier, le son ne se défendait pas à l'oreille, et huit
- * balayages en huit secondes n'ont aucune chance de passer pour une texture.
- * Rien ne le remplace : la bande est maintenant entièrement tenue, sans une
- * seule source de bruit sauf les six millisecondes d'attaque du battement.
+ * défendait sur le papier, le son ne se défendait pas à l'oreille. Rien ne le
+ * remplace : les bandes sont entièrement tenues, sans une seule source de
+ * bruit sauf les six millisecondes d'attaque du battement.
  *
  * DÉTERMINISTE. Le bruit sort d'un générateur à graine fixe, pas de
  * `Math.random()` : deux exports donnent le même fichier, comme pour l'image.
+ * La graine est remise à sa valeur de départ avant chaque montage.
  *
- * Usage : `node tools/film.mjs` d'abord (il écrit le conducteur), puis
- * `node tools/musique.mjs`. Les deux MP4 repartent avec leur son.
- * `FFMPEG_EXE` désigne un encodeur H.264 + AAC.
+ * Usage : les films d'abord, puis `node tools/musique.mjs`. Les MP4 repartent
+ * avec leur son. `FFMPEG_EXE` désigne un encodeur H.264 + AAC.
  */
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -46,15 +38,18 @@ const RACINE = path.resolve(ICI, '..')
 const SORTIE = path.resolve(RACINE, '.social')
 const TAUX = 48000
 
-const conducteur = path.join(SORTIE, 'aplat-film.json')
-if (!fs.existsSync(conducteur)) {
+/* Tous les conducteurs présents. Un film sans conducteur n'a pas été tourné :
+   on le dit, on ne le devine pas. */
+const conducteurs = fs.existsSync(SORTIE)
+  ? fs.readdirSync(SORTIE).filter((f) => f.endsWith('.json')).sort()
+  : []
+if (!conducteurs.length) {
   console.error(
-    'Conducteur introuvable. Lance d’abord `npm run film` : c’est lui qui\n' +
-    'publie .social/aplat-film.json, et la bande son se construit dessus.',
+    'Aucun conducteur dans .social. Lance d’abord les films : ce sont eux qui\n' +
+    'publient leur partition, et la bande son se construit dessus.',
   )
   process.exit(1)
 }
-const C = JSON.parse(fs.readFileSync(conducteur, 'utf8'))
 
 /* --- Les outils du son ------------------------------------------------------
    Rien d'emprunté : quelques oscillateurs, deux filtres à un pôle et des
@@ -63,7 +58,7 @@ const C = JSON.parse(fs.readFileSync(conducteur, 'utf8'))
 
 /* Un générateur à graine fixe : le bruit du film doit être le même à chaque
    export, comme ses pixels. */
-let graine = 0x9e3779b9
+let graine = 0
 const alea = () => {
   graine ^= graine << 13
   graine ^= graine >>> 17
@@ -76,15 +71,16 @@ const TAU = Math.PI * 2
 const pole = (coupure) => 1 - Math.exp((-TAU * coupure) / TAUX)
 
 class Piste {
-  constructor(secondes) {
+  constructor(secondes, ips) {
     this.n = Math.round(secondes * TAUX)
+    this.ips = ips
     this.g = new Float32Array(this.n)
     this.d = new Float32Array(this.n)
   }
 
   /* Poser un son à un instant donné, en images du film. */
   poser(image, rendre) {
-    const depart = Math.round((image / C.ips) * TAUX)
+    const depart = Math.round((image / this.ips) * TAUX)
     rendre((k, gauche, droite) => {
       const i = depart + k
       if (i < 0 || i >= this.n) return
@@ -172,10 +168,11 @@ function accord(hauteurs, secondes, force = 1) {
   }
 }
 
-/* Le bourdon du voile. Sa coupure suit la force du voile image par image :
-   c'est la rampe du film, entendue. Elle part fermée, sur un fichier qu'on ne
-   peut pas lire, et s'ouvre jusqu'à l'arrêt. */
-function bourdon(images, hauteur, forceA, secondes) {
+/* Le bourdon. Sa coupure suit une courbe que la partition donne, entre zéro et
+   un. Dans le film de la démonstration, cette courbe est la rampe de voile :
+   c'est donc l'argument du film qu'on entend s'ouvrir. Cet outil, lui, ne sait
+   pas ce qu'est un voile, et c'est très bien ainsi. */
+function bourdon(hauteur, secondes, ouverture) {
   return (mettre) => {
     const n = Math.round(secondes * TAUX)
     let bas = 0
@@ -183,120 +180,79 @@ function bourdon(images, hauteur, forceA, secondes) {
     let phase2 = 0
     for (let k = 0; k < n; k += 1) {
       const t = k / TAUX
-      const image = images + t * C.ips
-      const f = forceA(image)
+      const f = Math.max(0, Math.min(1, ouverture(t)))
       phase += (TAU * hauteur) / TAUX
       phase2 += (TAU * hauteur * 2.003) / TAUX
       /* Une dent de scie pauvre : trois harmoniques suffisent, le filtre fait
          le reste. */
       const brut =
         (Math.sin(phase) + Math.sin(phase * 2) * 0.5 + Math.sin(phase2 * 1.5) * 0.28) / 1.78
-      bas += pole(170 + 2500 * (f / 0.5)) * (brut - bas)
+      bas += pole(170 + 2500 * f) * (brut - bas)
       const reste = (n - k) / TAUX
-      const a = Math.min(1, t / 0.4) * Math.min(1, reste / 0.6) * (0.11 + 0.28 * (f / 0.5))
+      const a = Math.min(1, t / 0.4) * Math.min(1, reste / 0.6) * (0.11 + 0.28 * f)
       mettre(k, bas * a)
     }
   }
 }
 
-/* --- La partition -----------------------------------------------------------
-   Elle se lit dans le conducteur, plan par plan.
+/* --- Le rendu d'une partition -----------------------------------------------
 
-   L'ÉQUILIBRE EST MESURÉ, PAS RÉGLÉ À L'OREILLE. Chaque élément a été relevé
-   seul, en niveau efficace sur une fenêtre de quatre dixièmes de seconde, et
-   les gains ci-dessus viennent de ces relevés. Une fenêtre prise sur le premier
-   temps d'une carte de galerie contient le battement et la cloche à la fois :
-   elle ne dit rien de l'équilibre entre les deux, et un gain réglé dessus est
-   réglé faux.
+   L'ÉQUILIBRE EST MESURÉ, PAS RÉGLÉ À L'OREILLE. Chaque son a été relevé seul,
+   en niveau efficace sur une fenêtre de quatre dixièmes de seconde, et les
+   gains ci-dessus viennent de ces relevés. Une fenêtre prise sur un temps où
+   deux sons tombent ensemble ne dit rien de l'équilibre entre les deux, et un
+   gain réglé dessus est réglé faux.
 
    Cible, en niveau efficace isolé : le battement à -14, la cloche un peu
    au-dessus puisque c'est elle qui porte la mélodie, le bourdon cinq à six
-   décibels au-dessus du battement à son plus ouvert parce que c'est le centre
-   du film, et les deux accords entre les deux. */
+   décibels au-dessus du battement à son plus ouvert, les accords entre les
+   deux. */
 
-const TEMPS = C.imagesParTemps
+const GRAINE = 0x9e3779b9
+graine = GRAINE
 
-/* La gamme : pentatonique mineure de la, de la3 à la5. Onze notes, aucune
-   d'elles ne peut heurter les autres, ce qui est exactement ce qu'on demande à
-   une gamme quand les hauteurs viennent d'une mesure et non d'une oreille. */
-const GAMME = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.26, 784, 880]
-const LA1 = 55
-const LA2 = 110
-
-function partition(segments) {
-  /* Les images retenues par ce montage, dans l'ordre de sortie. */
-  const images = segments.flatMap(([a, b]) => Array.from({ length: b - a }, (_, k) => a + k))
-  const rang = new Map(images.map((im, k) => [im, k]))
-  const piste = new Piste(images.length / C.ips)
-  /* Un événement placé à l'image `im` du film ne sonne que si ce montage la
-     garde, et il sonne à sa place de sortie. */
-  const a = (im, son) => {
-    const k = rang.get(im)
-    if (k !== undefined) piste.poser(k, son)
-  }
-
-  /* La pulsation alterne un temps fort et un temps faible : à force égale sur
-     chaque temps, vingt secondes de battement deviennent une mitraille, et les
-     cartes de la galerie durent justement deux temps. */
-  const battre = (debut, fin, force = 1) => {
-    for (let t = debut; t < fin; t += TEMPS) {
-      a(t, battement(force * (((t - debut) / TEMPS) % 2 === 0 ? 1 : 0.58)))
+/* Une courbe affine par morceaux, donnée en points [image, valeur]. C'est
+   ainsi que la partition décrit l'ouverture du bourdon, sans que cet outil ait
+   à connaître ce qu'est un voile. */
+const courbe = (points, x) => {
+  if (!points || !points.length) return 1
+  if (x <= points[0][0]) return points[0][1]
+  for (let k = 1; k < points.length; k += 1) {
+    if (x <= points[k][0]) {
+      const [x0, y0] = points[k - 1]
+      const [x1, y1] = points[k]
+      return x1 === x0 ? y1 : y0 + ((y1 - y0) * (x - x0)) / (x1 - x0)
     }
   }
+  return points[points.length - 1][1]
+}
 
-  const G = C.galerie
-  const fichiers = G.fichiers
-  const lum = fichiers.map((f) => f.luminance)
-  const [bas, haut] = [Math.min(...lum), Math.max(...lum)]
-  /* La hauteur de chaque note sort de la luminance mesurée, et non de son rang :
-     deux fichiers proches en clarté donnent deux notes proches. */
-  const note = (l) => GAMME[Math.round(((l - bas) / (haut - bas)) * (GAMME.length - 1))]
+function fabriquer(m, ips) {
+  switch (m.son) {
+    case 'battement': return battement(m.force ?? 1)
+    case 'clic': return clic(m.hauteur, m.force ?? 1)
+    case 'cloche': return cloche(m.hauteur, m.duree ?? 1.4, m.force ?? 1)
+    case 'tenue': return tenue(m.hauteur, m.duree, m.force ?? 1)
+    case 'accord': return accord(m.hauteurs, m.duree ?? 1.5, m.force ?? 1)
+    case 'bourdon': return bourdon(m.hauteur, m.duree, (t) => courbe(m.points, t * ips))
+    default: throw new Error(`son inconnu dans la partition : ${m.son}`)
+  }
+}
 
-  /* La presse : la pulsation seule, un peu en retrait. Les trois lames avaient
-     leur son, un balayage de bruit ; il est supprimé, et rien ne le remplace.
-     Deux battements en deux secondes laissaient une ouverture vide à sa place,
-     alors la pulsation court maintenant sur les quatre temps de la presse. */
-  battre(C.presse.depart, C.nom, 0.9)
-
-  /* Le nom troué : le battement s'installe, la basse entre sous lui. */
-  battre(C.nom, C.these)
-  a(C.nom, tenue(LA2, (C.these - C.nom) / C.ips + 0.6, 0.8))
-
-  /* La thèse : la première des deux coupes franches, donc le premier accord. */
-  a(C.these, accord([LA2, 164.81, 261.63], 2.2))
-  battre(C.these, C.demo, 0.85)
-
-  /* La démonstration. La grille tombe rang par rang, puis le battement se
-     retire : pendant les quatre temps de la rampe, il ne reste que le bourdon
-     qui s'ouvre. C'est le centre du film, et c'est le seul endroit où la
-     pulsation le laisse seul. */
-  const hauteurs = [2100, 1850, 1620, 1420]
-  C.grille.forEach((im, k) => a(im, clic(hauteurs[k], 1 - k * 0.1)))
-  battre(C.demo, C.rampe[0], 0.85)
-  a(C.verdict, clic(880, 0.7))
-
-  const [rampeA, rampeB] = C.rampe
-  const forceVoile = (im) =>
-    im < rampeA ? 0 : Math.min(C.heros.force, (im - rampeA) * (C.heros.force / (rampeB - rampeA - 1)))
-  a(C.demo, bourdon(C.demo, LA1, forceVoile, (G.depart - C.demo) / C.ips))
-  /* L'arrêt de la rampe, quand le verdict passe au vert : une cloche haute,
-     et le battement revient avec elle. */
-  a(rampeB, cloche(880, 1.6, 1.1))
-
-  /* La galerie : une cloche par fichier, le battement sur chaque temps et la
-     basse dessous. La cloche tombe sur l'image exacte où le fichier change, si
-     bien que chaque changement reste marqué sans qu'aucun bruit s'en mêle. */
-  battre(rampeB, C.prix)
-  a(rampeB, tenue(LA2, (C.prix - rampeB) / C.ips, 0.7))
-  fichiers.forEach((f, k) => {
-    a(G.depart + k * G.pas, cloche(note(f.luminance), 1.4))
-  })
-
-  /* Le prix : la seconde coupe franche, le second accord, et plus de battement.
-     Le film se referme sur une résonance, pas sur un coup. */
-  a(C.prix, accord([LA2, 164.81, 220, 329.63], 1.5, 1.15))
-  a(C.prix, tenue(LA1, (images.length - rang.get(C.prix)) / C.ips, 0.9))
-
+/* Rendre un montage. Un événement placé à l'image `im` du film ne sonne que si
+   ce montage garde cette image, et il sonne à sa place DE SORTIE : c'est ce
+   qui permet à une version courte, dont le raccord tombe sur un temps entier
+   des deux côtés, de rester sur sa grille en traversant la coupe. */
+function rendre(C, segments) {
+  graine = GRAINE
+  const images = segments.flatMap(([a, b]) =>
+    Array.from({ length: b - a }, (_, k) => a + k))
+  const rang = new Map(images.map((im, k) => [im, k]))
+  const piste = new Piste(images.length / C.ips, C.ips)
+  for (const m of C.partition) {
+    const k = rang.get(m.image)
+    if (k !== undefined) piste.poser(k, fabriquer(m, C.ips))
+  }
   return piste
 }
 
@@ -354,39 +310,39 @@ function ecrire(piste, fichier) {
 }
 
 const encodeur = process.env.FFMPEG_EXE || 'ffmpeg'
-const MONTAGES = [
-  { nom: 'reel-20s', segments: [[0, C.total]] },
-  { nom: 'story-15s', segments: C.segments },
-]
 
-for (const { nom, segments } of MONTAGES) {
-  const piste = partition(segments)
-  const son = path.join(SORTIE, `aplat-bande-son-${nom}.wav`)
-  const { crete, efficace } = ecrire(piste, son)
+for (const nomJson of conducteurs) {
+  const C = JSON.parse(fs.readFileSync(path.join(SORTIE, nomJson), 'utf8'))
+  if (!C.partition || !C.montages) continue
+  for (const { nom, segments } of C.montages) {
+    const film = path.join(SORTIE, `${nom}.mp4`)
+    if (!fs.existsSync(film)) {
+      console.error(`${path.relative(RACINE, film)} manque. Retourne le film d’abord.`)
+      process.exit(1)
+    }
+    const piste = rendre(C, segments)
+    const son = path.join(SORTIE, `${nom}.wav`)
+    const { crete, efficace } = ecrire(piste, son)
 
-  const film = path.join(SORTIE, `aplat-film-${nom}.mp4`)
-  if (!fs.existsSync(film)) {
-    console.error(`${path.relative(RACINE, film)} manque. Lance d’abord \`npm run film\`.`)
-    process.exit(1)
-  }
-  const provisoire = path.join(SORTIE, `.${nom}.mp4`)
-  const r = spawnSync(encodeur, [
-    '-y', '-i', film, '-i', son,
-    '-map', '0:v:0', '-map', '1:a:0',
-    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
-    '-shortest', '-movflags', '+faststart', provisoire,
-  ], { stdio: ['ignore', 'ignore', 'pipe'] })
-  if (r.status !== 0) {
-    console.error(
-      `\nLe mixage a échoué avec « ${encodeur} ».\n` +
-      (r.stderr ? r.stderr.toString().split('\n').slice(-10).join('\n') : ''),
+    const provisoire = path.join(SORTIE, `.${nom}.mp4`)
+    const r = spawnSync(encodeur, [
+      '-y', '-i', film, '-i', son,
+      '-map', '0:v:0', '-map', '1:a:0',
+      '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
+      '-shortest', '-movflags', '+faststart', provisoire,
+    ], { stdio: ['ignore', 'ignore', 'pipe'] })
+    if (r.status !== 0) {
+      console.error(
+        `\nLe mixage a échoué avec « ${encodeur} ».\n` +
+        (r.stderr ? r.stderr.toString().split('\n').slice(-10).join('\n') : ''),
+      )
+      process.exit(1)
+    }
+    fs.renameSync(provisoire, film)
+    console.log(
+      `${path.relative(RACINE, film)} : ${(piste.n / TAUX).toFixed(0)} s de son, ` +
+      `${C.partition.length} coups, crête avant normalisation ${crete.toFixed(1)} dBFS, ` +
+      `niveau efficace ${efficace.toFixed(1)} dBFS`,
     )
-    process.exit(1)
   }
-  fs.renameSync(provisoire, film)
-  console.log(
-    `${path.relative(RACINE, film)} : ${(piste.n / TAUX).toFixed(0)} s de son, ` +
-    `crête avant normalisation ${crete.toFixed(1)} dBFS, ` +
-    `niveau efficace ${efficace.toFixed(1)} dBFS`,
-  )
 }
