@@ -90,14 +90,42 @@ const LARGEUR = 1080
 const HAUTEUR = 1920
 const IPS = 30
 const TOTAL = 600
+/* LE CONDUCTEUR. Toutes les images du film sont ici, et nulle part ailleurs.
+   `etat()` le reçoit au lieu de porter ses propres nombres, et l'outil le
+   publie dans `.social/aplat-film.json` : la bande son se construit sur ce
+   fichier, si bien qu'elle ne peut pas dériver de l'image. Déplacer un plan,
+   c'est déplacer la note qui tombe dessus.
+
+   Tout est calé sur 15 images, soit un temps à 120 BPM. Les lames de la presse
+   se chevauchent (25 images de course, une nouvelle tous les 15) : c'est une
+   presse à trois stations plutôt que trois passes qui se suivent, et surtout
+   chaque lame part sur un temps, ce qu'aucune ne faisait avant. */
+const CONDUCTEUR = {
+  ips: IPS,
+  total: TOTAL,
+  imagesParTemps: 15,
+  presse: { depart: 0, duree: 25, pas: 15, lames: 3 },
+  nom: 60,
+  these: 105,
+  theseLignes: [105, 120, 135],
+  demo: 165,
+  lameDemo: 14,
+  grille: [180, 184, 188, 192],
+  verdict: 195,
+  rampe: [225, 285],
+  galerie: { depart: 315, pas: 30, lame: 14, cartes: 8 },
+  prix: 555,
+  prixLignes: [555, 565, 575],
+}
+
+/* La version courte n'est pas la longue accélérée : c'est la même pellicule,
+   trois fichiers de galerie en moins. Rien n'est re-cadencé, donc rien n'y va
+   plus vite qu'au cinéma. Le raccord tombe sur un temps entier des deux côtés
+   (image 405 en sortie, image 555 à la source, 10 temps d'écart pile), ce qui
+   laisse la bande son sur sa grille en traversant la coupe. */
+const SEGMENTS = [[0, 405], [555, 600]]
 const IMAGES = COURT
-  ? [
-      /* La version courte n'est pas la longue accélérée : c'est la même
-         pellicule, trois fichiers de galerie en moins. Rien n'est re-cadencé,
-         donc rien ne va plus vite qu'au cinéma. */
-      ...Array.from({ length: 405 }, (_, k) => k),
-      ...Array.from({ length: 45 }, (_, k) => 555 + k),
-    ]
+  ? SEGMENTS.flatMap(([a, b]) => Array.from({ length: b - a }, (_, k) => a + k))
   : Array.from({ length: TOTAL }, (_, k) => k)
 
 const APPLICATIONS = [
@@ -294,15 +322,20 @@ function preparer({ applications }) {
   return {
     heros: { ...F.heros.motif, contraste: decimal(F.heros.mesure.contraste),
       sans: decimal(M.sansVoile(F.heros.mesure).contraste),
-      voile: Math.round(F.heros.mesure.voile * 100) },
-    galerie: F.galerieMotifs.map((m, k) => `${m.famille}/${m.palette} ${decimal(F.galerieEncres[k].contraste)}:1`),
+      voile: Math.round(F.heros.mesure.voile * 100),
+      force: F.heros.mesure.voile, luminance: F.heros.mesure.luminance },
+    galerie: F.galerieMotifs.map((m, k) => ({
+      ...m,
+      luminance: M.mesurer(m.famille, m.palette, m.densite, m.graine, 1080, 1920).luminance,
+      carton: F.galerieEncres[k].contraste,
+    })),
     seuil: M.SEUIL_AA,
   }
 }
 
 /* --- L'état de l'image ---------------------------------------------------- */
 
-function etat({ i, adresse, seuil }) {
+function etat({ i, adresse, seuil, C }) {
   const M = window.MOTEUR
   const F = window.__f
   const scene = document.getElementById('scene')
@@ -323,10 +356,10 @@ function etat({ i, adresse, seuil }) {
 
   /* La presse : trois lames à bord franc, chacune posant une couche de plus
      sur le socle. Elles traversent toujours le cadre entier. */
-  const presse = (depart, duree, ecart) => {
+  const presse = (depart, duree, pas) => {
     ctx.drawImage(F.socle, 0, 0)
     for (let k = 0; k < F.presse.length; k += 1) {
-      const a = depart + k * (duree + ecart)
+      const a = depart + k * pas
       const t = lineaire(a, a + duree)
       if (t <= 0) continue
       ctx.save()
@@ -435,15 +468,15 @@ function etat({ i, adresse, seuil }) {
   /* ---- 0 à 59 : la presse ------------------------------------------------
      Trois lames de 16 images, deux arrêts de 6 : deux secondes pour poser le
      fichier. Chaque lame montre déjà du motif, dès la première image. */
-  if (i < 60) {
-    presse(0, 16, 6)
+  if (i < C.nom) {
+    presse(C.presse.depart, C.presse.duree, C.presse.pas)
     return
   }
 
   /* ---- 60 à 104 : le mot troué -------------------------------------------
      Dehors le fichier livré, dedans le même fichier arrêté à l'aplat. Le nom
      du produit est découpé dans ce qu'il fabrique. */
-  if (i < 105) {
+  if (i < C.these) {
     troue(F.presse[F.presse.length - 1], F.socle, 1250)
     pied.hidden = false
     pied.style.top = '1310px'
@@ -456,13 +489,13 @@ function etat({ i, adresse, seuil }) {
      Un seul aplat, tenu deux secondes. Le volet de six couleurs a sauté : six
      coupes par seconde en alternant clair et sombre est un stroboscope, et un
      film qui fait mal aux yeux n'est pas un film rythmé. */
-  if (i < 165) {
+  if (i < C.demo) {
     ctx.drawImage(F.plaqueThese, 0, 0)
     poser([
-      { mot: 'Ton fond', a: 105, large: 420, saut: 0 },
-      { mot: 'd’écran,', a: 105, large: 420, saut: 12 },
-      { mot: 'Tu lis', a: 120, large: 888, saut: 46 },
-      { mot: 'Dessus.', a: 135, large: 888, saut: 8 },
+      { mot: 'Ton fond', a: C.theseLignes[0], large: 420, saut: 0 },
+      { mot: 'd’écran,', a: C.theseLignes[0], large: 420, saut: 12 },
+      { mot: 'Tu lis', a: C.theseLignes[1], large: 888, saut: 46 },
+      { mot: 'Dessus.', a: C.theseLignes[2], large: 888, saut: 8 },
     ], 380)
     return
   }
@@ -472,10 +505,13 @@ function etat({ i, adresse, seuil }) {
      la grille tombe rang par rang, le verdict s'affiche, puis le voile monte
      force par force jusqu'à son arrêt. Il s'y passe donc quelque chose du
      début à la fin, et c'est pour ça qu'aucune caméra n'a besoin d'y bouger. */
-  if (i < 315) {
-    const force = i < 225 ? 0 : Math.min(H.mesure.voile, (i - 225) * (H.mesure.voile / 59))
-    if (i < 179) {
-      lame(F.plaqueThese, F.herosNu, 165, 14)
+  if (i < C.galerie.depart) {
+    const [rampeA, rampeB] = C.rampe
+    const force = i < rampeA
+      ? 0
+      : Math.min(H.mesure.voile, (i - rampeA) * (H.mesure.voile / (rampeB - rampeA - 1)))
+    if (i < C.demo + C.lameDemo) {
+      lame(F.plaqueThese, F.herosNu, C.demo, C.lameDemo)
     } else {
       ctx.drawImage(F.herosNu, 0, 0)
     }
@@ -489,19 +525,19 @@ function etat({ i, adresse, seuil }) {
        d'écart, du haut vers le bas. Elle apparaissait d'un bloc en une image,
        ce qui est une apparition et non une chute, et c'est le moment où le
        film pose son problème. */
-    if (i >= 180) {
+    if (i >= C.grille[0]) {
       grille.hidden = false
-      const rangs = Math.min(4, Math.floor((i - 180) / 4) + 1)
+      const rangs = C.grille.filter((d) => i >= d).length
       grille.querySelectorAll('.fi-app').forEach((a, n) => {
         a.style.visibility = Math.floor(n / 4) < rangs ? 'visible' : 'hidden'
       })
     }
-    if (i >= 195) {
+    if (i >= C.verdict) {
       const lignes = [verdict(H.mesure, force), `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`]
-      if (i >= 225) lignes.push(`Voile ${Math.round(force * 100)}&nbsp;%`)
+      if (i >= rampeA) lignes.push(`Voile ${Math.round(force * 100)}&nbsp;%`)
       dire(lignes)
     }
-    if (i >= 285) {
+    if (i >= rampeB) {
       pied.hidden = false
       pied.className = 'fi-pied fi-pied-note'
       pied.style.top = '1740px'
@@ -517,15 +553,16 @@ function etat({ i, adresse, seuil }) {
      seconde au plus, et pas une seule coupe franche : chaque fichier arrive par
      la lame, sur celui d'avant, puis se laisse regarder une demi-seconde
      entière. Aucune image de la galerie n'est vide. */
-  if (i < 555) {
-    const k = Math.min(F.galerie.length - 1, Math.floor((i - 315) / 30))
-    const depart = 315 + k * 30
+  if (i < C.prix) {
+    const G = C.galerie
+    const k = Math.min(F.galerie.length - 1, Math.floor((i - G.depart) / G.pas))
+    const depart = G.depart + k * G.pas
     const dessous = k === 0 ? F.herosVoile : F.galerie[k - 1]
-    lame(dessous, F.galerie[k], depart, 14)
+    lame(dessous, F.galerie[k], depart, G.lame)
 
     /* Le carton change une demi-lame après le fichier, jamais avec lui : tant
        que le cadre montre surtout celui d'avant, c'est son nom qui reste. */
-    const j = i >= depart + 7 ? k : k - 1
+    const j = i >= depart + Math.round(G.lame / 2) ? k : k - 1
     if (j >= 0) {
       const nom = M.FAMILLES.find((x) => x.id === F.galerieMotifs[j].famille)
       document.querySelector('.fi').style.setProperty('--libelle', F.galerieEncres[j].couleur)
@@ -550,9 +587,9 @@ function etat({ i, adresse, seuil }) {
   ctx.fillRect(0, 0, 1080, 1920)
   M.peindreGrain(ctx, 1080, 1920)
   poser([
-    { mot: 'Gratuit', a: 555, large: 888, saut: 0 },
-    { mot: 'Sans compte', a: 565, large: 888, saut: 10 },
-    { mot: 'Hors ligne', a: 575, large: 888, saut: 10 },
+    { mot: 'Gratuit', a: C.prixLignes[0], large: 888, saut: 0 },
+    { mot: 'Sans compte', a: C.prixLignes[1], large: 888, saut: 10 },
+    { mot: 'Hors ligne', a: C.prixLignes[2], large: 888, saut: 10 },
   ], 620)
   pied.hidden = false
   pied.className = 'fi-pied'
@@ -604,7 +641,19 @@ function etat({ i, adresse, seuil }) {
     `héros : ${releve.heros.famille}/${releve.heros.palette}/graine ${releve.heros.graine}, ` +
     `${releve.heros.sans}:1 sans voile, ${releve.heros.contraste}:1 avec, voile ${releve.heros.voile} %`,
   )
-  console.log(`galerie : ${releve.galerie.join(', ')}`)
+  console.log('galerie : ' + releve.galerie
+    .map((g) => `${g.famille}/${g.palette} ${g.carton.toFixed(1).replace('.', ',')}:1`).join(', '))
+
+  /* Le conducteur publié. La bande son se construit là-dessus : elle lit les
+     images où tombent les plans et les luminances mesurées de la galerie, si
+     bien qu'aucun de ses nombres n'est saisi une deuxième fois. */
+  fs.writeFileSync(path.join(SORTIE, 'aplat-film.json'), JSON.stringify({
+    ...CONDUCTEUR,
+    segments: SEGMENTS,
+    heros: { ...releve.heros, mesure: releve.heros },
+    galerie: { ...CONDUCTEUR.galerie, fichiers: releve.galerie },
+    seuil: releve.seuil,
+  }, null, 2) + '\n')
 
   const fichier = path.join(SORTIE, COURT ? 'aplat-film-story-15s.mp4' : 'aplat-film-reel-20s.mp4')
   const ff = spawn(encodeur, [
@@ -629,7 +678,7 @@ function etat({ i, adresse, seuil }) {
 
   const depart = Date.now()
   for (let k = 0; k < IMAGES.length; k += 1) {
-    await page.evaluate(etat, { i: IMAGES[k], adresse: ADRESSE, seuil: releve.seuil })
+    await page.evaluate(etat, { i: IMAGES[k], adresse: ADRESSE, seuil: releve.seuil, C: CONDUCTEUR })
     await ecrire(await page.screenshot({
       type: 'jpeg', quality: 96,
       clip: { x: 0, y: 0, width: LARGEUR, height: HAUTEUR },
