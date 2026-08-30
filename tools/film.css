@@ -1,4 +1,4 @@
-/* Le film : « De 2,8 à 4,7 ». 1080 sur 1920, trente images par seconde.
+/* Le film : « De 2,8 à 4,8 ». 1080 sur 1920, trente images par seconde.
  *
  * L'image est peinte dans un seul canevas, image par image, à partir de
  * rendus du moteur préparés une fois. Le texte reste du DOM, parce que la
@@ -7,9 +7,12 @@
  * Aucune transition CSS, aucune animation CSS : `etat(i)` pose ce qu'il faut
  * voir à l'image `i`, et la même image rend deux fois le même pixel.
  *
- * Quatre vitesses en tout, et pas une de plus : la presse linéaire, la rampe
- * de voile linéaire, la coupe d'une seule image pour tout ce que la machine
- * décide, et la sortie cubique de cinq images pour ce qu'une main pose.
+ * Cinq vitesses en tout, et pas une de plus : la presse linéaire, la rampe de
+ * voile linéaire, la lame lissée de douze images qui pose un fichier sur son
+ * aplat, la coupe d'une seule image pour tout ce que la machine décide, et la
+ * sortie cubique de cinq images pour ce qu'une main pose. Rien ne change deux
+ * fois par seconde : au-delà, une alternance clair-sombre devient un
+ * stroboscope, et un film qui fait mal aux yeux n'est pas un film rythmé.
  */
 .fi {
   position: relative;
@@ -137,4 +140,14 @@
   font-size: 46px;
   font-weight: 700;
   letter-spacing: -0.005em;
+}
+/* La note de bas de cadre : plus basse et plus discrète que l'adresse, parce
+   qu'elle précise au lieu d'annoncer. Elle vit sous la grille, jamais dedans :
+   la voix de la machine tient trois lignes au maximum, et la quatrième
+   débordait sur les icônes. */
+.fi-pied-note {
+  font-size: 38px;
+  font-weight: 400;
+  color: var(--libelle);
+  opacity: 0.82;
 }

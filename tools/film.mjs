@@ -1,25 +1,45 @@
-/* Le film des réseaux : « De 2,8 à 4,7 ».
+/* Le film des réseaux : « De 2,8 à 4,8 ».
  *
  * Vingt secondes, 1080 sur 1920, trente images par seconde, muet. Le montage
- * est calé sur 120 battements par minute : quinze images par temps.
+ * est calé sur 120 battements par minute : quinze images par temps, et chaque
+ * plan tombe sur un temps.
  *
  * L'IDÉE. Une presse fabrique un fond d'écran couche par couche, une grille
  * d'icônes lui tombe dessus et noie les libellés, puis le voile monte force
- * par force jusqu'à ce que le rapport mesuré franchisse le seuil AA deux
- * images avant la fin de la rampe. Le film ne montre que ça, parce que doser
- * exactement ce qu'il faut est la seule chose qu'aucun autre générateur ne
- * sait faire.
+ * par force jusqu'à ce que le rapport mesuré franchisse le seuil AA. Le film
+ * ne montre que ça, parce que doser exactement ce qu'il faut est la seule
+ * chose qu'aucun autre générateur ne sait faire. Puis il montre huit autres
+ * fichiers, longuement, parce qu'un argument ne remplace pas la marchandise.
  *
- * CE QUI N'EST PAS SAISI À LA MAIN. Le motif héros et les cinq plaques sont
- * trouvés par balayage de graine sur ce que la sonde AFFICHE, pas sur une
- * luminance visée. Les couleurs des aplats sortent des palettes du moteur.
- * Le seuil vient de SEUIL_AA. Les libellés d'icône viennent de la maquette du
- * produit. Le film n'écrit que quatre nombres, et aucun n'est écrit ici.
+ * LE MINUTAGE, en images :
+ *     0 à  59   4 temps   la presse pose le fichier héros, trois lames
+ *    60 à 104   3 temps   le nom découpé dedans, et l'adresse
+ *   105 à 164   4 temps   la thèse, sur un aplat tenu
+ *   165 à 314  10 temps   la démonstration, un seul plan sans une coupe
+ *   315 à 554  16 temps   la galerie, huit fichiers d'une seconde chacun
+ *   555 à 599   3 temps   le prix, et la boucle se referme sur un aplat clair
  *
- * QUATRE VITESSES, ET PAS UNE DE PLUS. La presse linéaire ; la rampe de voile
- * linéaire ; la coupe d'une seule image pour tout ce que la machine décide ;
- * la sortie cubique de cinq images pour ce qu'une main pose, et elle n'existe
- * que dans deux plans.
+ * Les huit secondes de galerie sont le double de ce que la première version
+ * leur donnait, et ses coupes sont deux fois plus lentes. Rien dans le film ne
+ * change plus d'une fois par seconde : au-delà, une alternance clair-sombre
+ * devient un stroboscope. L'ordre de la galerie n'est même pas choisi : les
+ * fichiers sont rangés par la luminance que la sonde leur mesure, du plus
+ * clair au plus sombre, si bien que la suite descend en fondu.
+ *
+ * CE QUI N'EST PAS SAISI À LA MAIN. Le motif héros est trouvé par balayage de
+ * graine sur ce que la sonde AFFICHE, pas sur une luminance visée : on garde
+ * le fichier que le voile fait passer d'« insuffisante » à « bonne » avec le
+ * plus grand écart. L'ordre de la galerie sort de la mesure. Les couleurs des
+ * aplats sortent des palettes du moteur. Le seuil vient de SEUIL_AA. Les
+ * libellés d'icône viennent de la maquette du produit. Le film n'écrit que
+ * quatre nombres, et aucun n'est écrit ici.
+ *
+ * CINQ VITESSES, ET PAS UNE DE PLUS. La presse linéaire ; la rampe de voile
+ * linéaire ; la lame lissée de douze images qui pose un fichier sur son aplat ;
+ * la coupe d'une seule image pour tout ce que la machine décide ; la sortie
+ * cubique de cinq images pour ce qu'une main pose. À quoi s'ajoute la poussée
+ * lente, qui n'est pas une vitesse mais l'absence d'arrêt : elle empêche un
+ * plan tenu de mourir sans jamais se faire remarquer.
  *
  * Usage : npm run build, puis `node tools/film.mjs [adresse]`.
  * `CHROMIUM_EXE` désigne un Chromium présent, `FFMPEG_EXE` un encodeur H.264 :
@@ -53,10 +73,15 @@ const HAUTEUR = 1920
 const IPS = 30
 const TOTAL = 600
 const IMAGES = COURT
-  ? [...Array.from({ length: 150 }, (_, k) => k), ...Array.from({ length: 300 }, (_, k) => 285 + k)]
+  ? [
+      /* La version courte n'est pas la longue accélérée : c'est la même
+         pellicule, trois fichiers de galerie en moins. Rien n'est re-cadencé,
+         donc rien ne va plus vite qu'au cinéma. */
+      ...Array.from({ length: 405 }, (_, k) => k),
+      ...Array.from({ length: 45 }, (_, k) => 555 + k),
+    ]
   : Array.from({ length: TOTAL }, (_, k) => k)
 
-/* Les seize premiers libellés de la maquette du produit, dans son ordre. */
 const APPLICATIONS = [
   'Appareil', 'Notes', 'Cartes', 'Musique', 'Météo', 'Horloge', 'Photos', 'Agenda',
   'Fichiers', 'Réglages', 'Podcasts', 'Rappels', 'Livres', 'Santé', 'Courrier', 'Radio',
@@ -157,26 +182,6 @@ function preparer({ applications }) {
     throw new Error(`la formule de contraste du film ne suit plus le moteur (${ecart0}, ${ecart1})`)
   }
 
-  /* Les cinq plaques : des fichiers que le produit sait réparer et qu'il n'a
-     pas encore réparés. Le critère est le verdict affiché, aux deux états. */
-  const PLAQUES = [
-    ['horizon', 'nuit', 2], ['dunes', 'soleil', 2], ['azulejos', 'corail', 2],
-    ['sommets', 'argile', 2], ['persiennes', 'prune', 2],
-  ]
-  F.plaques = PLAQUES.map(([f, p, d]) =>
-    trouver(f, p, d, repare) || trouver(f, p, d, () => true, 1))
-
-  /* La feuille que la presse tire à la fin, et qui reboucle sur le début. */
-  F.cloture = { famille: 'sommets', palette: 'argile', densite: 2, graine: 4870 }
-
-  /* Les six aplats du volet de couleur, toutes tirées du moteur. Clair,
-     sombre, clair, sombre, clair, moyen : jamais deux valeurs voisines. */
-  const P = M.PALETTES
-  F.aplats = [
-    P.lime.couleurs[0], P.nuit.fond, P.corail.couleurs[0],
-    P.encre.fond, P.soleil.couleurs[0], P.ciel.fond,
-  ]
-
   /* Les rendus, préparés une fois : chaque image du film n'est plus qu'un
      report de pixels et, pour la rampe, une couche de voile posée dessus. */
   const toile = (peintre) => {
@@ -186,19 +191,66 @@ function preparer({ applications }) {
   }
   const rendu = (motif, options) => toile((ctx) => M.dessiner(ctx, 1080, 1920, motif, options))
 
-  F.presse = M.COUCHES.filter((c) => c !== 'ombre').map((arret) => rendu(F.heros.motif, { arret }))
+  /* La presse : le fond sert de socle, les trois couches suivantes passent
+     dessus. Balayer le fond par-dessus le fond ne montrait rien et coûtait
+     une demi-seconde de cadre vide en ouverture du film. */
+  const couches = M.COUCHES.filter((c) => c !== 'ombre').map((arret) => rendu(F.heros.motif, { arret }))
+  F.socle = couches[0]
+  F.presse = couches.slice(1)
   F.herosNu = rendu(F.heros.motif, { voile: false })
-  F.herosPlein = rendu(F.heros.motif, {})
-  F.plaquesNu = F.plaques.map((p) => rendu(p.motif, { voile: false }))
-  F.plaquesPlein = F.plaques.map((p) => rendu(p.motif, {}))
-  F.presseFin = M.COUCHES.filter((c) => c !== 'ombre').map((arret) => rendu(F.cloture, { arret }))
+  F.herosVoile = rendu(F.heros.motif, {})
+  F.aplatThese = M.PALETTES.ciel.fond
+  F.aplatPrix = M.PALETTES.lime.couleurs[0]
 
-  /* Douze graines, prises à intervalle régulier sur toute la plage du
-     produit : la famille, la palette et la densité ne bougent pas d'un cran,
-     seule la graine change. */
-  const pas = Math.floor(99999 / 12)
-  F.graines = Array.from({ length: 12 }, (_, k) => rendu(
-    { ...F.heros.motif, graine: 1 + k * pas }, {}))
+  /* La galerie : huit fichiers plein cadre, un par groupe du moteur. L'ordre
+     n'est pas choisi à la main : les fichiers sont rangés par la luminance que
+     la sonde leur mesure, du plus clair au plus sombre. La galerie descend donc
+     en fondu au lieu d'alterner clair et sombre, et aucune de ses coupes ne
+     peut clignoter. */
+  const GALERIE = [
+    ['arcade', 'soleil', 1], ['penrose', 'ciel', 1], ['plis', 'ardoise', 1],
+    ['mire', 'encre', 1], ['drape', 'prune', 1], ['sommets', 'nuit', 1],
+    ['torii', 'corail', 1], ['agrumes', 'menthe', 1],
+  ]
+  F.galerieMotifs = GALERIE
+    .map(([f, p, d]) => (trouver(f, p, d, repare) || trouver(f, p, d, () => true, 1)).motif)
+    .map((m) => ({ m, l: M.mesurer(m.famille, m.palette, m.densite, m.graine, 1080, 1920).luminance }))
+    .sort((x, y) => y.l - x.l)
+    .map((x) => x.m)
+
+  /* Deux rendus par fichier : l'aplat seul, puis le fichier entier. La lame
+     passe de l'un à l'autre. Le produit s'appelle Aplat : chaque plan de la
+     galerie commence donc par ce que son nom dit, et le motif arrive dessus. */
+  /* L'encre du carton n'est pas celle que le moteur donne au fichier entier.
+     La sonde répond pour la bande d'icônes ; le carton, lui, est posé en haut
+     du cadre, et un ciel sombre sous un sommet clair renvoie « fichier clair »
+     alors que le texte, là-haut, est sur du sombre. On mesure donc les pixels
+     que le carton recouvre vraiment, et on garde des deux encres du produit
+     celle qui contraste le plus. Un film qui parle de lisibilité ne peut pas
+     avoir un carton illisible. */
+  const CREME = '#F7F3E6'
+  const ENCRE = '#17243F'
+  const canal = (v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))
+  const luminance = (r, g, b) => 0.2126 * canal(r / 255) + 0.7152 * canal(g / 255) + 0.0722 * canal(b / 255)
+  const rapport = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+  const LCREME = luminance(247, 243, 230)
+  const LENCRE = luminance(23, 36, 63)
+  const encreDe = (toile_, x, y, w, h) => {
+    const d = toile_.getContext('2d').getImageData(x, y, w, h).data
+    let somme = 0
+    for (let k = 0; k < d.length; k += 16) somme += luminance(d[k], d[k + 1], d[k + 2])
+    const L = somme / (d.length / 16)
+    const cr = rapport(L, LCREME)
+    const en = rapport(L, LENCRE)
+    return { couleur: cr >= en ? CREME : ENCRE, contraste: Math.max(cr, en) }
+  }
+
+  F.galerieFonds = F.galerieMotifs.map((m) => rendu(m, { arret: 'fond' }))
+  F.galerie = F.galerieMotifs.map((m) => rendu(m, {}))
+  /* Le carton occupe x 96 à 984, y 350 à 570 : c'est cette fenêtre-là qu'on
+     mesure, et pas une autre. */
+  F.galerieEncres = F.galerie.map((c) => encreDe(c, 96, 350, 888, 220))
+  F.familles = M.FAMILLES.length
 
   F.applications = applications
   F.jetons = (motif) => {
@@ -220,7 +272,7 @@ function preparer({ applications }) {
     heros: { ...F.heros.motif, contraste: decimal(F.heros.mesure.contraste),
       sans: decimal(M.sansVoile(F.heros.mesure).contraste),
       voile: Math.round(F.heros.mesure.voile * 100) },
-    plaques: F.plaques.map((p) => `${p.motif.famille}/${p.motif.palette}/${p.motif.graine}`),
+    galerie: F.galerieMotifs.map((m, k) => `${m.famille}/${m.palette} ${decimal(F.galerieEncres[k].contraste)}:1`),
     seuil: M.SEUIL_AA,
   }
 }
@@ -241,15 +293,22 @@ function etat({ i, adresse, seuil }) {
   machine.hidden = true
   anton.hidden = true
   pied.hidden = true
+  pied.className = 'fi-pied'
 
   const lineaire = (a, b) => Math.max(0, Math.min(1, (i - a) / (b - a)))
   const cubique = (t) => 1 - Math.pow(1 - t, 3)
+  /* La lame n'utilise pas la sortie cubique : celle-ci part à trois fois la
+     vitesse moyenne, si bien qu'un fichier sombre remplacé par un clair jetait
+     l'essentiel de son écart de luminance dans deux images, c'est-à-dire un
+     flash. Le lissage symétrique plafonne à une fois et demie, et au milieu de
+     la course : on voit une lame passer, pas une lampe s'allumer. */
+  const lisse = (t) => t * t * (3 - 2 * t)
 
-  /* La presse : quatre lames à bord franc, chacune posant une couche de plus.
-     Elles traversent toujours le cadre entier, et rien n'est figé au départ. */
-  const presse = (couches, depart, duree, ecart) => {
-    ctx.drawImage(couches[0], 0, 0)
-    for (let k = 0; k < couches.length; k += 1) {
+  /* La presse : trois lames à bord franc, chacune posant une couche de plus
+     sur le socle. Elles traversent toujours le cadre entier. */
+  const presse = (depart, duree, ecart) => {
+    ctx.drawImage(F.socle, 0, 0)
+    for (let k = 0; k < F.presse.length; k += 1) {
       const a = depart + k * (duree + ecart)
       const t = lineaire(a, a + duree)
       if (t <= 0) continue
@@ -257,15 +316,43 @@ function etat({ i, adresse, seuil }) {
       ctx.beginPath()
       ctx.rect(0, 0, 1080 * t, 1920)
       ctx.clip()
-      ctx.drawImage(couches[k], 0, 0)
+      ctx.drawImage(F.presse[k], 0, 0)
       ctx.restore()
     }
   }
 
-  /* Le mot troué : dehors le fichier livré, dedans le même motif arrêté à la
-     couche formes. C'est le même tampon aux deux bouts du film, et il se lit
-     comme une démonstration parce que la presse a posé les deux états sous
-     les yeux au début. */
+  /* La lame de la galerie. Elle ne coupe pas et elle ne laisse jamais le cadre
+     vide : elle passe sur le fichier précédent, une bande d'aplat en tête et le
+     motif juste derrière, comme une raclette qui pose l'encre à plat avant que
+     la trame arrive dessus. Le produit s'appelle Aplat, et c'est ce que la
+     lame donne à voir huit fois. Elle change de sens à chaque fichier, pour que
+     huit plans de suite ne deviennent pas un métronome. */
+  const BANDE = 0.25
+  const lame = (dessous, fond, plein, depart, duree, versLaGauche) => {
+    ctx.drawImage(dessous, 0, 0)
+    const t = lisse(lineaire(depart, depart + duree))
+    if (t <= 0) return
+    const bord = (avance) => {
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(versLaGauche ? 1080 * (1 - avance) : 0, 0, 1080 * avance, 1920)
+      ctx.clip()
+      return () => ctx.restore()
+    }
+    let rendre = bord(t)
+    ctx.drawImage(fond, 0, 0)
+    rendre()
+    const suite = Math.max(0, (t - BANDE) / (1 - BANDE))
+    if (suite <= 0) return
+    rendre = bord(suite)
+    ctx.drawImage(plein, 0, 0)
+    rendre()
+  }
+
+  /* Le mot troué : dehors le fichier livré, dedans le même fichier arrêté à
+     l'aplat. C'est le même tampon des deux côtés de la lettre, et il se lit
+     comme une démonstration parce que la presse vient de poser les deux états
+     sous les yeux. */
   const troue = (fond, dedans, ligne) => {
     ctx.drawImage(fond, 0, 0)
     const masque = new OffscreenCanvas(1080, 1920)
@@ -326,141 +413,129 @@ function etat({ i, adresse, seuil }) {
 
   const H = F.heros
 
-  /* ---- 0 à 44 : la presse ------------------------------------------------ */
-  if (i < 45) {
-    presse(F.presse, 0, 7, 2)
-    if (i >= 34) {
-      troue(F.presse[3], F.presse[0], 1250)
-      pied.hidden = false
-      pied.style.top = '1300px'
-      pied.style.color = '#F7F3E6'
-      pied.textContent = adresse
-    }
+  /* La poussée lente : le seul mouvement continu autorisé sur un plan tenu.
+     Elle ne déplace rien, elle empêche une image longue de mourir. */
+  const pousse = (a, b, ampleur = 0.05) => {
+    scene.style.transform = `scale(${(1 + ampleur * lineaire(a, b)).toFixed(4)})`
+  }
+  scene.style.transform = 'none'
+
+  /* ---- 0 à 59 : la presse ------------------------------------------------
+     Trois lames de 16 images, deux arrêts de 6 : deux secondes pour poser le
+     fichier. Chaque lame montre déjà du motif, dès la première image. */
+  if (i < 60) {
+    presse(0, 16, 6)
     return
   }
 
-  /* ---- 45 à 74 : le volet de couleur ------------------------------------- */
-  if (i < 75) {
-    const k = Math.min(5, Math.floor((i - 45) / 5))
-    ctx.fillStyle = F.aplats[k]
-    ctx.fillRect(0, 0, 1080, 1920)
-    M.peindreGrain(ctx, 1080, 1920)
+  /* ---- 60 à 104 : le mot troué -------------------------------------------
+     Dehors le fichier livré, dedans le même fichier arrêté à l'aplat. Le nom
+     du produit est découpé dans ce qu'il fabrique. */
+  if (i < 105) {
+    troue(F.presse[F.presse.length - 1], F.socle, 1250)
+    pousse(60, 105, 0.03)
+    pied.hidden = false
+    pied.style.top = '1310px'
+    pied.style.color = '#F7F3E6'
+    pied.textContent = adresse
     return
   }
 
-  /* ---- 75 à 119 : la thèse ----------------------------------------------- */
-  if (i < 120) {
-    ctx.fillStyle = F.aplats[5]
+  /* ---- 105 à 164 : la thèse -----------------------------------------------
+     Un seul aplat, tenu deux secondes. Le volet de six couleurs a sauté : six
+     coupes par seconde en alternant clair et sombre est un stroboscope, et un
+     film qui fait mal aux yeux n'est pas un film rythmé. */
+  if (i < 165) {
+    ctx.fillStyle = F.aplatThese
     ctx.fillRect(0, 0, 1080, 1920)
     M.peindreGrain(ctx, 1080, 1920)
     poser([
-      { mot: 'Ton fond', a: 75, large: 420, saut: 0 },
-      { mot: 'd’écran,', a: 75, large: 420, saut: 12 },
-      { mot: 'Tu lis', a: 90, large: 888, saut: 46 },
-      { mot: 'Dessus.', a: 105, large: 888, saut: 8 },
+      { mot: 'Ton fond', a: 105, large: 420, saut: 0 },
+      { mot: 'd’écran,', a: 105, large: 420, saut: 12 },
+      { mot: 'Tu lis', a: 120, large: 888, saut: 46 },
+      { mot: 'Dessus.', a: 135, large: 888, saut: 8 },
     ], 380)
     return
   }
 
-  /* ---- 120 à 164 : la grille tombe --------------------------------------- */
-  if (i < 165) {
-    ctx.drawImage(F.herosNu, 0, 0)
-    F.jetons(H.motif)
-    if (i >= 135) grille.hidden = false
-    if (i >= 150) {
-      dire([verdict(M.sansVoile(H.mesure)), `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`])
-    }
-    return
-  }
-
-  /* ---- 165 à 284 : les cinq plaques -------------------------------------- */
-  if (i < 285) {
-    const PLAQUES = [
-      { a: 165, aplat: 3, nu: 12, grille: 15 },
-      { a: 195, aplat: 3, nu: 9, grille: 12 },
-      { a: 219, aplat: 3, nu: 9, grille: 12 },
-      { a: 243, aplat: 3, nu: 6, grille: 9 },
-      { a: 261, aplat: 3, nu: 6, grille: 15 },
-    ]
-    let k = 0
-    for (let n = 0; n < PLAQUES.length; n += 1) if (i >= PLAQUES[n].a) k = n
-    const p = PLAQUES[k]
-    const local = i - p.a
-    const plaque = F.plaques[k]
-    if (local < p.aplat) {
-      ctx.fillStyle = M.palette(plaque.motif.palette).fond
-      ctx.fillRect(0, 0, 1080, 1920)
-      M.peindreGrain(ctx, 1080, 1920)
-      return
-    }
-    ctx.drawImage(F.plaquesNu[k], 0, 0)
-    F.jetons(plaque.motif)
-    if (local >= p.aplat + p.nu) {
-      grille.hidden = false
-      dire([verdict(M.sansVoile(plaque.mesure))])
-    }
-    return
-  }
-
-  /* ---- 285 à 374 : le dosage, puis l'arrêt -------------------------------- */
-  if (i < 375) {
-    const force = i < 300 ? 0 : Math.min(H.mesure.voile, (i - 300) * (H.mesure.voile / 44))
+  /* ---- 165 à 314 : la démonstration ---------------------------------------
+     Un seul plan de cinq secondes, sans une coupe : le fichier nu, la grille
+     qui tombe, le verdict, puis la rampe de voile et son arrêt. C'est le
+     centre du film, et la rampe est la seule chose qui bouge en continu. */
+  if (i < 315) {
+    const force = i < 225 ? 0 : Math.min(H.mesure.voile, (i - 225) * (H.mesure.voile / 59))
     ctx.drawImage(F.herosNu, 0, 0)
     if (force > 0) {
       M.peindreVoile(ctx, 1080, 1920, { ...H.mesure, voile: force })
       M.peindreGrain(ctx, 1080, 1920)
     }
     F.jetons(H.motif)
-    grille.hidden = false
-    const lignes = [
-      verdict(H.mesure, force),
-      `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`,
-    ]
-    if (i >= 300) lignes.push(`Voile ${Math.round(force * 100)}&nbsp;%`)
-    if (i >= 345) lignes.push('<span>Le voile est dans le fichier, pas dans l’aperçu.</span>')
-    dire(lignes)
-    return
-  }
-
-  /* ---- 375 à 434 : la graine --------------------------------------------- */
-  if (i < 435) {
-    ctx.drawImage(F.graines[Math.min(11, Math.floor((i - 375) / 5))], 0, 0)
-    F.jetons(H.motif)
-    dire([`<span>99 999 graines. Seule la graine change.</span>`])
-    return
-  }
-
-  /* ---- 435 à 464 : le prix ------------------------------------------------ */
-  if (i < 465) {
-    ctx.fillStyle = M.PALETTES.lime.couleurs[0]
-    ctx.fillRect(0, 0, 1080, 1920)
-    M.peindreGrain(ctx, 1080, 1920)
-    poser([
-      { mot: 'Gratuit', a: 435, large: 888, saut: 0 },
-      { mot: 'Sans compte', a: 435, large: 888, saut: 10 },
-      { mot: 'Hors ligne', a: 435, large: 888, saut: 10 },
-    ], 640)
-    return
-  }
-
-  /* ---- 465 à 539 : la signature ------------------------------------------ */
-  if (i < 540) {
-    troue(F.herosPlein, F.presse[0], 1180)
-    if (i >= 495) {
+    pousse(165, 315, 0.05)
+    if (i >= 180) grille.hidden = false
+    if (i >= 195) {
+      const lignes = [verdict(H.mesure, force), `Seuil AA&nbsp;: ${F.decimal(seuil)}:1`]
+      if (i >= 225) lignes.push(`Voile ${Math.round(force * 100)}&nbsp;%`)
+      dire(lignes)
+    }
+    if (i >= 285) {
       pied.hidden = false
-      pied.style.top = '1250px'
-      pied.style.color = '#F7F3E6'
-      const t1 = cubique(lineaire(495, 500))
-      const t2 = cubique(lineaire(510, 515))
-      pied.innerHTML =
-        `<span style="display:block;clip-path:inset(0 ${(1 - t1) * 100}% 0 0)">Prends-en un.</span>` +
-        `<span style="display:block;margin-top:44px;clip-path:inset(0 ${(1 - t2) * 100}% 0 0)">${adresse}</span>`
+      pied.className = 'fi-pied fi-pied-note'
+      pied.style.top = '1740px'
+      pied.style.color = ''
+      pied.textContent = 'Le voile est dans le fichier, pas dans l’aperçu.'
     }
     return
   }
 
-  /* ---- 540 à 599 : la presse repart -------------------------------------- */
-  presse(F.presseFin, 540, 12, 4)
+  /* ---- 315 à 554 : la galerie ---------------------------------------------
+     Huit fichiers plein cadre, une seconde chacun, sans une icône : huit
+     secondes, soit deux fois ce que le film leur donnait. Un changement par
+     seconde au plus, et pas une seule coupe franche : chaque fichier arrive par
+     la lame, sur celui d'avant, puis se laisse regarder une demi-seconde
+     entière. Aucune image de la galerie n'est vide. */
+  if (i < 555) {
+    const k = Math.min(F.galerie.length - 1, Math.floor((i - 315) / 30))
+    const depart = 315 + k * 30
+    const dessous = k === 0 ? F.herosVoile : F.galerie[k - 1]
+    lame(dessous, F.galerieFonds[k], F.galerie[k], depart, 12, k % 2 === 1)
+    pousse(depart, depart + 30, 0.04)
+
+    /* Le carton change une demi-lame après le fichier, jamais avec lui : tant
+       que le cadre montre surtout celui d'avant, c'est son nom qui reste. */
+    const j = i >= depart + 6 ? k : k - 1
+    if (j >= 0) {
+      const nom = M.FAMILLES.find((x) => x.id === F.galerieMotifs[j].famille)
+      document.querySelector('.fi').style.setProperty('--libelle', F.galerieEncres[j].couleur)
+      dire([
+        `<span>${nom ? nom.fr : ''}, palette ${F.galerieMotifs[j].palette}</span>`,
+        `<span>${F.familles} motifs, 11 palettes, 99 999 graines.</span>`,
+      ])
+    }
+    return
+  }
+
+  /* ---- 555 à 599 : le prix, et la boucle se referme -----------------------
+     Les trois lignes tombent en un tiers de seconde chacune et la dernière est
+     posée à l'image 580 : la phrase entière tient donc les vingt dernières
+     images, au lieu d'arriver juste à temps pour disparaître.
+
+     Le film finit sur un aplat clair et il recommence sur un aplat clair : la
+     boucle d'Instagram ne passe par aucun trou noir ni par aucun cadre vide.
+     C'est aussi la seule coupe franche clair-sombre de tout le film avec celle
+     de la thèse : deux en vingt secondes. */
+  ctx.fillStyle = F.aplatPrix
+  ctx.fillRect(0, 0, 1080, 1920)
+  M.peindreGrain(ctx, 1080, 1920)
+  poser([
+    { mot: 'Gratuit', a: 555, large: 888, saut: 0 },
+    { mot: 'Sans compte', a: 565, large: 888, saut: 10 },
+    { mot: 'Hors ligne', a: 575, large: 888, saut: 10 },
+  ], 620)
+  pied.hidden = false
+  pied.className = 'fi-pied'
+  pied.style.top = '1560px'
+  pied.style.color = '#17243F'
+  pied.textContent = adresse
 }
 
 /* --- Le rendu -------------------------------------------------------------- */
@@ -506,7 +581,7 @@ function etat({ i, adresse, seuil }) {
     `héros : ${releve.heros.famille}/${releve.heros.palette}/graine ${releve.heros.graine}, ` +
     `${releve.heros.sans}:1 sans voile, ${releve.heros.contraste}:1 avec, voile ${releve.heros.voile} %`,
   )
-  console.log(`plaques : ${releve.plaques.join(', ')}`)
+  console.log(`galerie : ${releve.galerie.join(', ')}`)
 
   const fichier = path.join(SORTIE, COURT ? 'aplat-film-story-15s.mp4' : 'aplat-film-reel-20s.mp4')
   const ff = spawn(encodeur, [
