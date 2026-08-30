@@ -68,6 +68,82 @@ export function houleFermee(rnd: Alea, harmoniques = 4): (angle: number) => numb
     termes.reduce((somme, { rang, phase, poids }) => somme + poids * Math.cos(rang * angle + phase), 0)
 }
 
+/* ---------- les chiffres ----------------------------------------------------- */
+
+/**
+ * La fonte : trois cases de large, cinq de haut, et rien de plus.
+ *
+ * C'est la plus petite grille où dix chiffres restent distincts les uns des
+ * autres, et c'est ce qui compte : sur un fond d'écran, un nombre de
+ * graduation fait quelques dizaines de pixels et doit rester lisible sans
+ * jamais attirer l'oeil. Un `1` sans son empattement se confondrait avec un
+ * trait de graduation ; il en a donc un.
+ *
+ * Elle a vécu dans `mesures.ts`, parce qu'un instrument était seul à écrire
+ * des nombres. Le dossard en écrit aussi, et une table que deux gestes se
+ * partagent vient ici : c'est le chemin qu'a déjà pris la luminance, sortie
+ * des lieux le jour où la gravure a cessé d'en être la seule lectrice.
+ *
+ * Elle est publiée pour une raison qui n'a pas changé : c'est une table
+ * écrite à la main, le seul endroit du moteur où une donnée saisie caractère
+ * par caractère devient un dessin. Une case oubliée ne lève rien et fait
+ * afficher `20` à la place de `26` ; un test la relit.
+ */
+export const GLYPHES: Readonly<Record<string, readonly string[]>> = {
+  '0': ['111', '101', '101', '101', '111'],
+  '1': ['010', '110', '010', '010', '111'],
+  '2': ['111', '001', '111', '100', '111'],
+  '3': ['111', '001', '111', '001', '111'],
+  '4': ['101', '101', '111', '001', '001'],
+  '5': ['111', '100', '111', '001', '111'],
+  '6': ['111', '100', '111', '101', '111'],
+  '7': ['111', '001', '010', '010', '010'],
+  '8': ['111', '101', '111', '101', '111'],
+  '9': ['111', '101', '111', '001', '111'],
+  '°': ['111', '101', '111', '000', '000'],
+}
+
+/** La largeur d'un texte, en cases : trois par glyphe, une de chasse. */
+function largeurTexte(texte: string): number {
+  return texte.length * 4 - 1
+}
+
+/**
+ * Le nombre, posé en rectangles pleins.
+ *
+ * Les cases allumées d'une même rangée sont fusionnées en un seul rectangle :
+ * un `8` passe de onze rectangles à sept, et une graduation qui en écrirait
+ * quarante en économise des centaines sur le fichier vectoriel.
+ *
+ * `ancrage` place le texte par son coin haut gauche, son centre, ou son coin
+ * haut droit, parce qu'une graduation s'écrit à gauche d'un axe vertical, au
+ * centre d'un axe horizontal, et rarement au même endroit deux fois.
+ */
+export function ecrire(
+  ctx: Pinceau, texte: string, x: number, y: number, module: number,
+  ancrage: 'gauche' | 'centre' | 'droite' = 'gauche',
+): void {
+  const largeur = largeurTexte(texte) * module
+  const depart = ancrage === 'centre' ? x - largeur / 2 : ancrage === 'droite' ? x - largeur : x
+  for (const [rang, caractere] of [...texte].entries()) {
+    const glyphe = GLYPHES[caractere]
+    if (!glyphe) continue
+    const gx = depart + rang * 4 * module
+    for (const [r, rangee] of glyphe.entries()) {
+      let debut = -1
+      for (let c = 0; c <= 3; c += 1) {
+        const plein = c < 3 && rangee[c] === '1'
+        if (plein && debut < 0) debut = c
+        if (!plein && debut >= 0) {
+          ctx.fillRect(gx + debut * module, y + r * module, (c - debut) * module, module)
+          debut = -1
+        }
+      }
+    }
+  }
+}
+
+
 /* ---------- teintes ---------------------------------------------------------- */
 
 /**

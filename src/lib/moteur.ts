@@ -17,10 +17,12 @@ import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estLieu, peindreLieu, type IdLieu } from './lieux'
 import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
+import { estPanoplie, peindrePanoplie, type IdPanoplie } from './panoplies'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
+import { estTissu, peindreTissu, type IdTissu } from './tissus'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
 
 export type IdFamille =
@@ -58,9 +60,10 @@ export type IdFamille =
   | IdRelief
   | IdMesure
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
-     déformée et l'interférence y mettent tout le reste */
+     déformée, l'interférence et le fil y mettent tout le reste */
   | IdChimie
   | IdTrame
+  | IdTissu
   /* paysages */
   | 'sommets'
   | 'horizon'
@@ -68,6 +71,7 @@ export type IdFamille =
   | 'dunes'
   | 'falaises'
   | 'archipel'
+  | 'nappes'
   /* la ligne de niveau : reliefs, cernes, estran, empreinte (lib/niveaux.ts) */
   | IdNiveau
   /* lieux : les gravures tramées de lib/lieux.ts */
@@ -84,9 +88,10 @@ export type IdFamille =
   | 'palmes'
   | 'vases'
   | 'poissons'
-  /* figures venues des nouveaux gestes : le réseau, la grammaire */
+  /* figures venues des nouveaux gestes : le réseau, la grammaire, la panoplie */
   | IdReseau
   | IdGrammaire
+  | IdPanoplie
 
 export type IdPalette =
   | 'lime'
@@ -95,10 +100,12 @@ export type IdPalette =
   | 'corail'
   | 'menthe'
   | 'ciel'
+  | 'cendre'
   | 'ardoise'
   | 'prune'
   | 'nuit'
   | 'orage'
+  | 'graphite'
   | 'encre'
 
 /**
@@ -109,7 +116,7 @@ export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
 
 /**
  * Une palette quelconque, livrée ou composée. C'est lui que l'adresse, les
- * réglages et l'historique portent : `IdPalette` ne nomme que les onze
+ * réglages et l'historique portent : `IdPalette` ne nomme que les treize
  * livrées, et le dire dans le type évite de le rattraper par des assertions.
  */
 export type IdPaletteQuelconque = IdPalette | IdPalettePerso
@@ -124,7 +131,7 @@ export interface Palette {
   en: string
   fond: string
   /**
-   * Deux à cinq teintes posées sur le fond. Les onze palettes livrées en
+   * Deux à cinq teintes posées sur le fond. Les treize palettes livrées en
    * comptent quatre ; une palette personnalisée en compte ce que la personne a
    * choisi, et `formes()` les prend par un modulo, ce qui n'a jamais demandé
    * un nombre fixe.
@@ -133,7 +140,7 @@ export interface Palette {
 }
 
 /**
- * Les huit groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
+ * Les neuf groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
  *
  * Un groupe n'existe que si son critère tient en une phrase. C'est la règle du
  * système de design, et elle sert à quelque chose : « abstraits » n'en avait
@@ -141,16 +148,30 @@ export interface Palette {
  * porter quarante et une familles sur soixante-seize. Les onglets avaient été
  * inventés contre exactement ça.
  *
- * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `vol` du
- * volume en aplats, `ins` des instruments gradués, `mat` ce que la main
- * reconnaît, `pay` ce qui a un haut et un bas, `lieu` des gravures tramées,
- * `fig` des objets reconnaissables un par un.
+ * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `sig` une
+ * grille de cases portant chacune un signe, `vol` du volume en aplats, `ins`
+ * des instruments gradués, `mat` ce que la main reconnaît, `pay` ce qui a un
+ * haut et un bas, `lieu` des gravures tramées, `fig` des objets reconnaissables
+ * un par un.
+ *
+ * Le neuvième est né du plafond, et c'est ainsi que la règle est censée
+ * marcher : les pavages ont passé vingt familles, et la réponse n'a pas été de
+ * relever le plafond mais de chercher la phrase qui les coupe. Elle était déjà
+ * écrite dans `carreaux.ts` : une grille de cases carrées, et dans chacune un
+ * signe pris dans un jeu fini. Ce qui reste aux pavages est ce qui revient sans
+ * case, une maille qu'aucune grille ne découpe.
+ *
+ * Un groupe « sport » a été essayé et retiré : un thème n'est pas un critère, et
+ * la liste y mêlait une grille de maillots, un pavage de lignes d'eau et une
+ * gravure de col, trois choses qui n'ont en commun que le sujet. Chacune est
+ * rangée là où sa phrase l'attendait déjà.
  *
  * Ils sont devenus des onglets dans le panneau, et le type est donc nommé :
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
+export type Groupe =
+  | 'abs' | 'pav' | 'sig' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -195,22 +216,46 @@ export const PALETTES: Readonly<Record<IdPalette, Palette>> = {
   corail: { fr: 'Corail', en: 'Coral', fond: '#F7F3E6', couleurs: ['#FF6648', '#17243F', '#DFF478', '#788CE3'] },
   menthe: { fr: 'Menthe', en: 'Mint', fond: '#E2EFE4', couleurs: ['#4E9B7C', '#17243F', '#DFF478', '#92BAD5'] },
   ciel: { fr: 'Ciel', en: 'Sky', fond: '#92BAD5', couleurs: ['#F7F3E6', '#788CE3', '#17243F', '#DFF478'] },
+  /* Les deux camaïeux. Ils rompent avec les onze autres sur un point, et un
+     seul : leurs quatre teintes ne s'opposent pas, elles se suivent. Une
+     palette ordinaire donne à chaque famille de quoi séparer ses formes par la
+     couleur ; un camaïeu la force à les séparer par la valeur, ce qui est une
+     autre image du même dessin. Les valeurs sont donc espacées largement, à
+     peu près en progression géométrique : deux gris voisins ne feraient qu'une
+     bouillie, et c'est le seul piège du procédé.
+
+     L'ordre des teintes va du clair au sombre, ce qu'aucune autre palette ne
+     fait. Les familles qui prennent leurs couleurs dans l'ordre y gagnent une
+     descente, du haut clair vers le bas sombre, et c'est exactement ce qu'on
+     demande à un camaïeu.
+
+     La teinte la plus claire de Cendre reste proche de son fond, et ce n'est pas
+     une négligence : la mesure éclaircit la teinte la plus claire de la palette
+     de soixante pour cent vers le blanc pour faire son papier, et cette formule
+     suppose que ladite teinte est déjà claire. Un camaïeu qui partirait d'un
+     gris moyen rendrait du papier millimétré gris, ce que le geste des
+     instruments promet de ne jamais faire. Lime porte déjà une teinte aussi
+     proche de son fond ; la contrainte n'est donc pas nouvelle, elle ne s'était
+     simplement jamais vue. */
+  cendre: { fr: 'Cendre', en: 'Ash', fond: '#E8E4DC', couleurs: ['#D8D2C6', '#9A9184', '#5C5548', '#241F19'] },
   ardoise: { fr: 'Ardoise', en: 'Slate', fond: '#DFE2E6', couleurs: ['#4A5773', '#92BAD5', '#DFF478', '#17243F'] },
   prune: { fr: 'Prune', en: 'Plum', fond: '#EEE0EA', couleurs: ['#6E3B63', '#788CE3', '#DFF478', '#F7F3E6'] },
   nuit: { fr: 'Nuit', en: 'Night', fond: '#17243F', couleurs: ['#788CE3', '#DFF478', '#92BAD5', '#F7F3E6'] },
   orage: { fr: 'Orage', en: 'Storm', fond: '#1D2140', couleurs: ['#788CE3', '#FF6648', '#92BAD5', '#F7F3E6'] },
+  graphite: { fr: 'Graphite', en: 'Graphite', fond: '#17181B', couleurs: ['#33353A', '#5A5D65', '#8C8F98', '#C7C9CF'] },
   encre: { fr: 'Encre', en: 'Ink', fond: '#101A2E', couleurs: ['#F7F3E6', '#92BAD5', '#DFF478', '#FF6648'] },
 }
 
 /** L'ordre d'affichage, du plus clair au plus sombre. */
 export const ORDRE_PALETTES: readonly IdPalette[] = [
-  'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'ardoise', 'prune', 'nuit', 'orage', 'encre',
+  'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'cendre', 'ardoise',
+  'prune', 'nuit', 'orage', 'graphite', 'encre',
 ]
 
 /**
- * Les soixante-seize familles, dans l'ordre de la liste : les quatre groupes
- * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
- * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
+ * Les cent familles, dans l'ordre de la liste : les cinq groupes
+ * géométriques d'abord, abstraits, pavages, signes, volumes, instruments ; puis
+ * les matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
  * plus figuratif, et le premier de chaque groupe en donne le ton.
  */
@@ -239,27 +284,42 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'trame', groupe: 'pav', fr: 'Trame', en: 'Dither' },
   { id: 'ecailles', groupe: 'pav', fr: 'Écailles', en: 'Scales' },
   { id: 'arcade', groupe: 'pav', fr: 'Arcade', en: 'Arcade' },
-  { id: 'truchet', groupe: 'pav', fr: 'Truchet', en: 'Truchet' },
-  { id: 'azulejos', groupe: 'pav', fr: 'Azulejos', en: 'Azulejos' },
   { id: 'mosaique', groupe: 'pav', fr: 'Mosaïque', en: 'Mosaic' },
   { id: 'tresse', groupe: 'pav', fr: 'Tresse', en: 'Weave' },
   { id: 'claustra', groupe: 'pav', fr: 'Claustra', en: 'Breeze block' },
   { id: 'papel', groupe: 'pav', fr: 'Papel picado', en: 'Papel picado' },
   { id: 'penrose', groupe: 'pav', fr: 'Penrose', en: 'Penrose' },
-  { id: 'bauhaus', groupe: 'pav', fr: 'Bauhaus', en: 'Bauhaus' },
-  { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
-  { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
-  { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
+  { id: 'couloirs', groupe: 'pav', fr: 'Couloirs', en: 'Lane lines' },
+  { id: 'dalles', groupe: 'pav', fr: 'Dalles', en: 'Slabs' },
+  { id: 'fuseaux', groupe: 'pav', fr: 'Fuseaux', en: 'Spindles' },
+  /* signes : une grille de cases, et dans chacune un signe */
+  { id: 'truchet', groupe: 'sig', fr: 'Truchet', en: 'Truchet' },
+  { id: 'azulejos', groupe: 'sig', fr: 'Azulejos', en: 'Azulejos' },
+  { id: 'bauhaus', groupe: 'sig', fr: 'Bauhaus', en: 'Bauhaus' },
+  { id: 'carreaux', groupe: 'sig', fr: 'Carreaux', en: 'Tiles' },
+  { id: 'demilunes', groupe: 'sig', fr: 'Demi-lunes', en: 'Half-moons' },
+  { id: 'jetons', groupe: 'sig', fr: 'Jetons', en: 'Tokens' },
+  { id: 'noeuds', groupe: 'sig', fr: 'Noeuds', en: 'Knots' },
+  { id: 'eventails', groupe: 'sig', fr: 'Éventails', en: 'Fans' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
   { id: 'bossage', groupe: 'vol', fr: 'Bossage', en: 'Bosses' },
   { id: 'tuyaux', groupe: 'vol', fr: 'Tuyaux', en: 'Pipes' },
+  { id: 'escaliers', groupe: 'vol', fr: 'Escaliers', en: 'Stairs' },
+  { id: 'torsades', groupe: 'vol', fr: 'Torsades', en: 'Twists' },
+  { id: 'casiers', groupe: 'vol', fr: 'Casiers', en: 'Pigeonholes' },
+  { id: 'soufflet', groupe: 'vol', fr: 'Soufflet', en: 'Bellows' },
+  { id: 'treillis', groupe: 'vol', fr: 'Treillis', en: 'Space frame' },
   /* instruments : le motif est gradué, il mesure */
   { id: 'tapis', groupe: 'ins', fr: 'Tapis de coupe', en: 'Cutting mat' },
   { id: 'millimetre', groupe: 'ins', fr: 'Millimétré', en: 'Graph paper' },
   { id: 'rapporteur', groupe: 'ins', fr: 'Rapporteur', en: 'Protractor' },
   { id: 'mire', groupe: 'ins', fr: 'Mire', en: 'Test chart' },
+  { id: 'reglette', groupe: 'ins', fr: 'Règle à calcul', en: 'Slide rule' },
+  { id: 'charte', groupe: 'ins', fr: 'Charte', en: 'Colour chart' },
+  { id: 'gabarit', groupe: 'ins', fr: 'Gabarit', en: 'Drawing template' },
+  { id: 'thermometres', groupe: 'ins', fr: 'Thermomètres', en: 'Thermometers' },
   /* matières : la main les reconnaît avant l'oeil */
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
@@ -267,6 +327,9 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'drape', groupe: 'mat', fr: 'Drapé', en: 'Drape' },
   { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
   { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
+  { id: 'tricot', groupe: 'mat', fr: 'Tricot', en: 'Knit' },
+  { id: 'cannage', groupe: 'mat', fr: 'Cannage', en: 'Caning' },
+  { id: 'craquele', groupe: 'mat', fr: 'Craquelé', en: 'Crackle glaze' },
   /* paysages : ils ont un haut et un bas */
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
@@ -274,6 +337,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'dunes', groupe: 'pay', fr: 'Dunes', en: 'Dunes' },
   { id: 'falaises', groupe: 'pay', fr: 'Falaises', en: 'Cliffs' },
   { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
+  { id: 'nappes', groupe: 'pay', fr: 'Nappes', en: 'Drifts' },
   { id: 'relief', groupe: 'pay', fr: 'Relief', en: 'Contours' },
   { id: 'maree', groupe: 'pay', fr: 'Marée', en: 'Tideline' },
   /* lieux : des gravures tramées, deux tons seulement */
@@ -283,6 +347,9 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
   { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
   { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
+  { id: 'col', groupe: 'lieu', fr: 'Col', en: 'Mountain pass' },
+  { id: 'rizieres', groupe: 'lieu', fr: 'Rizières', en: 'Rice terraces' },
+  { id: 'volcan', groupe: 'lieu', fr: 'Volcan', en: 'Volcano' },
   /* figures : des objets posés sur un fond, reconnaissables un par un */
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
@@ -299,6 +366,9 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'herbier', groupe: 'fig', fr: 'Herbier', en: 'Herbarium' },
   { id: 'metro', groupe: 'fig', fr: 'Métro', en: 'Transit map' },
   { id: 'constellations', groupe: 'fig', fr: 'Constellations', en: 'Constellations' },
+  { id: 'maillots', groupe: 'fig', fr: 'Maillots', en: 'Jerseys' },
+  { id: 'dossards', groupe: 'fig', fr: 'Dossards', en: 'Bibs' },
+  { id: 'bonnets', groupe: 'fig', fr: 'Bonnets', en: 'Swim caps' },
 ]
 
 /** Les arrondis des fausses icônes de la maquette : jamais deux fois le même. */
@@ -375,13 +445,13 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
-/** Vrai pour les onze palettes livrées, et pour elles seules. */
+/** Vrai pour les treize palettes livrées, et pour elles seules. */
 export function estPaletteLivree(valeur: unknown): valeur is IdPalette {
   return ORDRE_PALETTES.includes(valeur as IdPalette)
 }
 
 /**
- * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
+ * Vrai pour les treize palettes livrées et pour celles qui sont enregistrées.
  *
  * Le registre fait donc partie de la liste blanche : une adresse qui nomme une
  * palette composée que cet appareil ne connaît pas retombe sur la valeur par
@@ -720,7 +790,8 @@ export function formes(
      interférer des grilles, la grammaire fait pousser des plantes, le carreau
      remplit une grille d'un alphabet de signes, la coulée fait serpenter des
      rubans larges, le relief fait dire l'orientation à la teinte, et la
-     mesure dessine des instruments gradués. */
+     mesure dessine des instruments gradués, et la panoplie sème des objets
+     qu'on enfile. */
   if (estNiveau(id)) {
     peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -745,6 +816,11 @@ export function formes(
     peindrePavage(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
+  if (estTissu(id)) {
+    peindreTissu(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+
   if (estTrame(id)) {
     peindreTrame(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -767,6 +843,10 @@ export function formes(
   }
   if (estMesure(id)) {
     peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estPanoplie(id)) {
+    peindrePanoplie(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 
@@ -1617,6 +1697,95 @@ export function formes(
         ctx.arc(lx, cy + R * 0.22 - lr * 0.52, lr, 0, Math.PI * 2)
         ctx.fill()
       }
+    }
+    return
+  }
+
+  /**
+   * Les nappes : de grandes masses molles empilées, et des creux où celle du
+   * dessus retombe par-dessus celle du dessous.
+   *
+   * Vagues empile des sinusoïdes d'un à quatre pour cent de hauteur : des
+   * bandes parallèles qui ne se recouvrent jamais. Ici le bord d'une couche
+   * n'est pas une ondulation, c'est l'enveloppe de quelques dômes larges qui se
+   * chevauchent. Deux dômes voisins se rejoignent en un pincement, et c'est ce
+   * pincement, plutôt que le creux régulier d'une sinusoïde, qui donne
+   * l'impression d'une matière versée.
+   *
+   * Le repli est le second parti, et c'est lui qui sépare vraiment les deux
+   * familles. Chaque couche porte aussi des creux, et un creux ne coupe pas la
+   * couche : il laisse voir plus bas celle qui est derrière. L'oeil lit donc
+   * une masse claire qui déborde et retombe sur la masse sombre, alors qu'on
+   * n'a peint que des aplats empilés du fond vers l'avant.
+   *
+   * La première couche commence au quart de la hauteur, et le fond de la palette
+   * occupe tout ce qui est au-dessus. Ce n'est pas une composition
+   * pensée pour l'heure d'un écran verrouillé, ce que le moteur ne saurait pas
+   * faire sans se lier à un rapport d'aspect : c'est seulement qu'une pile a un
+   * sommet, et que le ciel est ce qu'on voit au-dessus.
+   *
+   * Les dômes sont tirés à la construction, un nombre fixe de fois par couche.
+   * L'échantillonnage qui suit dépend de la largeur, et ne tire rien.
+   */
+  if (id === 'nappes') {
+    const n = [3, 4, 6][densite]
+    const pas = Math.max(0.75, W / 2400)
+
+    /** Une bosse centrée sur `c`, de demi-largeur `r`, en coordonnées rapportées
+        à la largeur : zéro en dehors, un au sommet.
+
+        C'est un cosinus surélevé et non un demi-cercle, et la raison est une
+        tangente. Un demi-cercle arrive au sol à la verticale : là où il rejoint
+        la partie plate du bord, l'oeil voit un angle, et une couche en porte
+        deux par bosse. Le cosinus arrive à zéro avec une pente nulle, donc sans
+        couture. Le même argument vaut là où deux bosses se croisent.
+
+        `s` la rend dissymétrique, un flanc raide et l'autre étalé. C'est ce qui
+        distingue une masse versée d'une colline : un flanc raide et une longue
+        traîne se lisent comme quelque chose qui a coulé et s'est arrêté là. */
+    const dome = (u: number, c: number, r: number, s: number): number => {
+      const brut = (u - c) / r
+      const d = brut < 0 ? brut / (1 - s) : brut / (1 + s)
+      return Math.abs(d) >= 1 ? 0 : 0.5 * (1 + Math.cos(Math.PI * d))
+    }
+
+    for (let i = 0; i < n; i += 1) {
+      /* La pile commence au quart de la hauteur : ce qui est au-dessus reste le
+         fond de la palette, et c'est le calme dont la première couche a besoin
+         pour se détacher. Plus haut, ses dômes sortaient du cadre et le ciel
+         disparaissait. */
+      const base = H * (0.26 + (0.78 * i) / n)
+      const ampleur = H * (0.1 + 0.08 * rnd())
+      const bosses = Array.from({ length: 4 }, () => ({
+        c: rnd() * 1.2 - 0.1, r: 0.2 + 0.3 * rnd(), h: 0.45 + 0.55 * rnd(),
+        s: (rnd() - 0.5) * 0.9,
+      }))
+      /* Le repli est large et peu profond. Étroit et creusé, il ne se lit plus
+         comme un bord qui revient sur lui-même mais comme une goutte qui pend,
+         et c'était le premier défaut de cette famille. */
+      const creux = Array.from({ length: 2 }, () => ({
+        c: rnd() * 1.2 - 0.1, r: 0.16 + 0.16 * rnd(),
+        h: rnd() < 0.45 ? 0 : 0.55 + 0.45 * rnd(), s: (rnd() - 0.5) * 0.9,
+      }))
+
+      const bord = (x: number): number => {
+        const u = x / W
+        let haut = 0
+        for (const b of bosses) haut = Math.max(haut, b.h * dome(u, b.c, b.r, b.s))
+        let bas = 0
+        for (const c of creux) bas = Math.max(bas, c.h * dome(u, c.c, c.r, c.s))
+        return base - ampleur * haut + ampleur * 0.38 * bas
+      }
+
+      ctx.fillStyle = col(i)
+      ctx.beginPath()
+      ctx.moveTo(0, bord(0))
+      for (let x = pas; x <= W; x += pas) ctx.lineTo(x, bord(x))
+      ctx.lineTo(W, bord(W))
+      ctx.lineTo(W, H)
+      ctx.lineTo(0, H)
+      ctx.closePath()
+      ctx.fill()
     }
     return
   }

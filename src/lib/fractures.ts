@@ -24,7 +24,7 @@
 import type { Alea, Densite, Pinceau } from './moteur'
 import { anneau, capsule, duClairAuSombre, melangeHex, polygone, type Point } from './trace'
 
-export const IDS_FRACTURES = ['kintsugi', 'banquise', 'sashiko'] as const
+export const IDS_FRACTURES = ['kintsugi', 'banquise', 'sashiko', 'craquele'] as const
 
 export type IdFracture = (typeof IDS_FRACTURES)[number]
 
@@ -223,6 +223,69 @@ function sashiko(
   }
 }
 
+/* ---------- craquelé --------------------------------------------------------- */
+
+/**
+ * Le craquelé : la glaçure fendillée d'un céladon.
+ *
+ * La fracture sert déjà deux images dans ce module, et celle-ci n'existe que par
+ * ce qui l'en sépare. Le kintsugi montre huit à dix-neuf morceaux, cousus d'un
+ * or épais : on y regarde les jointures. La banquise montre quarante plaques
+ * aux coins doux séparées par de l'eau : on y regarde les intervalles. Le
+ * craquelé montre deux cent cinquante éclats que rien ne sépare qu'un cheveu :
+ * on n'y regarde ni les fissures ni les morceaux, on y regarde une surface, et
+ * l'on ne voit le réseau qu'ensuite.
+ *
+ * Trois réglages font toute la différence, et aucun n'est un détail. Le nombre
+ * de germes, d'abord, six à sept fois celui de la banquise. Le retrait ensuite,
+ * un tiers de millième du petit côté : une fissure de céramique n'a pas de
+ * largeur, elle a un tracé. La couleur enfin, et c'est la plus décisive : une
+ * seule teinte pour toute la pièce, à peine remuée d'un éclat à l'autre. Une
+ * glaçure est un bain, tous ses éclats sortent du même bain ; distribuer les
+ * teintes de la palette entre les cellules aurait rendu une mosaïque, ce qui est
+ * l'objet contraire, fait de morceaux rapportés.
+ *
+ * Une poignée d'éclats prend malgré tout une seconde teinte, très diluée : c'est
+ * l'irrégularité de cuisson, et sans elle la pièce est trop propre pour être
+ * de la terre.
+ */
+function craquele(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const base = C[Math.floor(rnd() * C.length)]
+  const seconde = C[Math.floor(rnd() * C.length)]
+  /* Le fond n'est jamais repeint : c'est lui qu'on voit dans les fissures. */
+  ctx.fillStyle = melangeHex(base, '#000000', 0.6)
+  ctx.fillRect(0, 0, W, H)
+
+  const [colonnes, rangees] = [[7, 11], [10, 16], [14, 23]][densite]
+  const germes: Point[] = []
+  for (let gy = 0; gy < rangees; gy += 1) {
+    for (let gx = 0; gx < colonnes; gx += 1) {
+      /* La grille est secouée fort : peu remuée, elle rend des éclats tous de
+         la même taille, et la glaçure ressemble à un carrelage. */
+      germes.push([
+        ((gx + 0.08 + 0.84 * rnd()) * W) / colonnes,
+        ((gy + 0.08 + 0.84 * rnd()) * H) / rangees,
+      ])
+    }
+  }
+
+  const cheveu = unite * 0.0034
+  for (let i = 0; i < germes.length; i += 1) {
+    const remue = rnd()
+    const autre = rnd() < 0.09
+    const piece = cellule(germes, i, W, H, cheveu)
+    if (piece.length < 3) continue
+    ctx.fillStyle = melangeHex(
+      autre ? melangeHex(base, seconde, 0.45) : base, '#FFFFFF', 0.04 + remue * 0.2,
+    )
+    polygone(ctx, piece)
+    ctx.fill()
+  }
+}
+
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreFracture(
@@ -231,5 +294,6 @@ export function peindreFracture(
 ): void {
   if (id === 'kintsugi') kintsugi(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'banquise') banquise(ctx, W, H, C, densite, rnd, unite)
-  else sashiko(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'sashiko') sashiko(ctx, W, H, C, densite, rnd, unite)
+  else craquele(ctx, W, H, C, densite, rnd, unite)
 }

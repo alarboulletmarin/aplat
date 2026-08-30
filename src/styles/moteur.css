@@ -174,8 +174,8 @@
   font-size: 14px;
 }
 /* La pastille de palette montre le fond et une teinte : deux couleurs
-   suffisent à reconnaître une palette, et onze pastilles tiennent alors sur
-   une rangée de téléphone. */
+   suffisent à reconnaître une palette, et une pastille de quarante-quatre
+   pixels laisse la rangée s'enrouler sans jamais rogner un rond. */
 .opt-pastille {
   width: 44px;
   height: 44px;
@@ -251,7 +251,7 @@
   color: var(--accent-encre);
 }
 
-/* --- 03, les quatorze gestes ----------------------------------------------------
+/* --- 03, les quinze gestes ----------------------------------------------------
    Les fiches ne suivent pas le motif de la page : chacune garde son exemple,
    et c'est ce qui les rend comparables entre elles. */
 .gestes {

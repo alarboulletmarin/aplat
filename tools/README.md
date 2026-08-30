@@ -69,6 +69,7 @@ demie, en plein balayage.
 | `wide.mjs` | lequel déborde à 320 px, et de combien : ce qu'on ouvre quand `overflow.mjs` vient de dire non |
 | `cadrages.mjs` | neuf cadrages dans la fenêtre : ce qui tient au-dessus de la ligne de flottaison, et ce que recouvrent les deux barres collantes |
 | `planche.mjs` | planche-contact de toutes les familles à la résolution d'un téléphone |
+| `apercu.mjs` | quelques familles en grand, chacune avec sa palette et sa densité |
 | `vitrine.mjs` | les images d'exemple du README, écrites dans `docs/vitrine/` : galerie de familles, le même motif en PNG, WebP et SVG, versions claire et sombre. Graine fixe : chaque image se refait à l'identique |
 | `fidelity.mjs` | chaque déclaration et chaque jeton de la maquette se retrouvent-ils dans le portage |
 | `banc.mjs`, `serveur.mjs`, `pw.mjs` | l'infrastructure : moteur injectable, serveur d'aperçu, Chromium |

@@ -31,7 +31,7 @@ import { Verdict } from './Verdict'
  * vignette et le verdict se condense sur une ligne. À trois, la scène, le
  * verdict et la barre d'action prenaient les deux tiers d'un écran de
  * téléphone, et il ne restait presque rien pour choisir parmi quarante et une
- * familles et onze palettes.
+ * familles et treize palettes.
  *
  * Le repli passe par l'échelle et non par la géométrie : la boîte de
  * l'appareil garde la taille qu'elle aurait dépliée, si bien que le motif

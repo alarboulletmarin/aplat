@@ -9,6 +9,134 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : quatorze motifs, et le catalogue passe à cent
+
+Le catalogue comptait quatre-vingt-six familles pour neuf groupes très inégaux :
+dix-sept abstraits et dix-huit figures d'un côté, quatre volumes et quatre
+instruments de l'autre. Ce sont pourtant les deux gestes les plus particuliers du
+moteur, l'éclairage qui fait un cube de trois aplats et les graduations qui
+savent écrire des chiffres. Les quatorze nouveaux motifs vont donc là où il n'y
+avait presque rien, et aucun groupe n'a été créé : la barre d'onglets ne bouge
+pas.
+
+**Cinq volumes.** **Escaliers**, un champ de marches isométriques, une teinte
+par volée. **Torsades**, un cordon enroulé autour de son fût, dont l'éclairage
+appartient au fût et non au cordon, ce qui est ce qui rend la colonne ronde.
+**Casiers**, le seul volume du catalogue qui montre un dedans : un plateau de
+cases creusées, chacune à sa profondeur, que l'ombre de son fond trahit.
+**Soufflet**, un pli d'accordéon régulier, quatre orientations qui reviennent en
+damier, exactement le contraire du froissement de Plis. **Treillis**, une
+charpente de barres et le vide entre elles, le seul volume qu'on traverse du
+regard.
+
+**Quatre instruments.** **Règle à calcul**, les seules graduations du catalogue
+qui se resserrent : de un à deux, la décade prend le tiers de la longueur ; de
+cinq à dix, un septième. **Charte**, le nuancier d'atelier, qui montre la palette
+comme une échelle du très pâle au très sourd plutôt que comme une poignée de
+teintes ; un camaïeu y donne un portrait juste. **Gabarit**, la plaque du
+dessinateur, le seul instrument qui travaille en enlevant : on ne voit d'elle que
+ce qu'elle laisse voir du papier au travers de ses trous. **Thermomètres**, un
+mur de colonnes graduées remplies à leur hauteur, la silhouette debout qui
+manquait au geste.
+
+**Trois matières.** **Tricot**, le point jersey, opaque comme doit l'être un
+jersey : la rangée pose d'abord son ombre, les mailles ensuite. **Cannage**, le
+rotin des chaises de Vienne, six brins sous trois directions, ajouré là où la
+tresse ne laisse rien passer. **Craquelé**, la glaçure fendillée d'un céladon,
+deux cent cinquante éclats d'un même bain que rien ne sépare qu'un cheveu.
+
+**Deux lieux.** **Rizières**, un flanc découpé en bassins dont un sur trois est
+en eau et renvoie le ciel : c'est ce damier de valeurs, et non le dessin des
+courbes, qu'on reconnaît d'une rizière. **Volcan**, un cône, ses coulées
+épargnées comme l'astre, et un panache aux bords rongés, ce que la gravure
+tramée sait faire de mieux.
+
+### Ajouté : Nappes, de grandes masses molles empilées
+
+- **Là où Vagues empile des sinusoïdes d'un à quatre pour cent de hauteur**,
+  Nappes empile des masses. Le bord d'une couche n'est pas une ondulation mais
+  l'enveloppe de quelques bosses larges et dissymétriques, un flanc raide et une
+  longue traîne : ce qui se lit comme une matière versée plutôt que comme une
+  colline. Des creux laissent voir plus bas la couche de derrière, et l'oeil y
+  lit un débordement.
+- **La pile commence au quart de la hauteur**, et le fond de la palette occupe
+  tout ce qui est au-dessus.
+
+### Ajouté : deux camaïeux, Cendre et Graphite
+
+- **Une seule teinte, quatre valeurs.** Les onze palettes livrées opposent leurs
+  couleurs ; ces deux-là les font se suivre. Le motif ne sépare plus ses formes
+  par la teinte mais par la valeur, ce qui est une autre image du même dessin,
+  et elles changent donc les quatre-vingt-cinq familles d'un coup plutôt qu'une
+  seule. Cendre est claire, Graphite est sombre.
+- **Les valeurs sont espacées largement**, à peu près en progression
+  géométrique : deux gris voisins ne feraient qu'une bouillie, et c'est le seul
+  piège du procédé. Leurs teintes vont du clair au sombre, ce qu'aucune autre
+  palette ne fait : les familles qui les prennent dans l'ordre y gagnent une
+  descente du haut clair vers le bas sombre.
+
+### Corrigé : la page ne se défile plus en travers sur un petit téléphone
+
+- **Dix-sept pixels de trop à 320 px.** Les mentions du pied de page portent une
+  adresse postale et un nom de société, c'est-à-dire les seuls mots que la
+  traduction ne raccourcit pas et que la césure ne connaît pas. Un mot plus long
+  que la colonne poussait la page entière ; il se coupe désormais. Le défaut
+  était là avant les motifs de cette version.
+
+### Ajouté : quatre motifs géométriques, et un neuvième groupe
+
+- **Dalles.** De gros pavés penchés, en rangées décalées. Toutes penchent du même
+  angle, et c'est tout le motif : une inclinaison qui alternerait ferait un
+  treillis, un seul sens fait un mouvement, et l'oeil descend l'image en biais.
+  Une teinte domine largement, les autres ne ponctuent que, et une dalle sur
+  quatre porte une marche taillée dans son coin haut.
+- **Fuseaux.** Des colonnes qui ondulent et se renversent d'une case à l'autre.
+  Le fuseau est étranglé aux deux bouts et ventru au milieu : c'est le pincement
+  qui pose une pointe à chaque jonction, et de ces pointes que vient le
+  claquement optique. Entre deux colonnes, le fond dessine son propre fuseau en
+  négatif, et se tord en sens inverse.
+- **Noeuds.** Un lacis qui se referme, et une pastille dans chaque maille. Tout
+  y est peint d'une seule teinte, là où la coulée tire une couleur par ruban :
+  ce n'est plus une nappe de cordes de couleur, c'est un grillage. Et le vide
+  n'est jamais laissé vide, chaque trou reçoit un point qui le nomme.
+- **Éventails.** Des quarts d'anneaux emboîtés, un coin par case. D'une case à
+  l'autre les faisceaux se tournent le dos ou se répondent, et les anneaux
+  traversent la limite des cases comme si elle n'existait pas. Une case sur six
+  reste pleine, sans quoi la page entière bat au même rythme.
+
+### Changé : les pavages se coupent en deux, et un neuvième onglet apparaît
+
+- **Signes rejoint le classement**, avec sa phrase : une grille de cases, et dans
+  chacune un signe. Y vont Truchet, Azulejos, Bauhaus, Carreaux, Demi-lunes,
+  Jetons, Noeuds et Éventails ; Pavages garde ce qui revient sans case, une
+  maille qu'aucune grille ne découpe.
+- **C'est le plafond qui l'a demandé, et c'est ainsi que la règle doit
+  marcher.** Les pavages ont passé vingt familles, et la réponse n'a pas été de
+  relever le plafond mais de chercher la phrase qui les coupe. Elle était déjà
+  écrite dans le moteur.
+
+### Ajouté : cinq motifs d'endurance
+
+- **Courir, rouler, nager.** Cinq familles nouvelles, chacune rangée dans le
+  groupe dont elle satisfaisait déjà la phrase, jamais dans un groupe « sport »
+  qui n'en est pas une : un thème n'est pas un critère de classement, et la
+  règle qui tient les onglets depuis le début ne se plie pas pour un sujet.
+- **Couloirs**, chez les pavages : les lignes d'eau d'un bassin, des flotteurs
+  enfilés serré sur leur câble, avec les paquets de couleur qui marquent les
+  cinq derniers mètres. Ses rangées se décalent l'une sur l'autre, sans quoi les
+  flotteurs font des colonnes verticales et le bassin se lit comme un damier.
+- **Maillots**, **Dossards** et **Bonnets**, chez les figures. La grille des
+  couleurs qu'on a portées, les dossards à quatre trous d'épingle avec leur
+  numéro, et les nageurs de face, bonnet et lunettes. Le fond de la palette se
+  voit au creux d'une encolure et au travers d'un trou d'épingle : ce sont de
+  vrais creux, pas une teinte devinée.
+- **Col**, chez les lieux. Deux sommets, l'échancrure entre les deux, et la
+  route qui y monte en lacets, gravée en deux tons comme le Torii et le Phare.
+- **Le moteur sait écrire ailleurs que sur un instrument.** La fonte des
+  graduations, dix chiffres de trois cases sur cinq, a quitté la mesure pour
+  l'outillage commun : le dossard en avait besoin, et une table que deux gestes
+  partagent n'appartient plus à l'un des deux.
+
 ### Changé : passer d'une page à l'autre ne recharge plus rien
 
 - **Le battement entre les trois pages a disparu.** Ouvrir l'application

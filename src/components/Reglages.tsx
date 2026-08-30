@@ -18,10 +18,11 @@ import { EditeurPalette } from './EditeurPalette'
  * modifiable si besoin.
  */
 
-/** Les huit groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
+/** Les neuf groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
 const GROUPES = [
   { id: 'abs', cle: 'groupeAbstraits' },
   { id: 'pav', cle: 'groupePavages' },
+  { id: 'sig', cle: 'groupeSignes' },
   { id: 'vol', cle: 'groupeVolumes' },
   { id: 'ins', cle: 'groupeInstruments' },
   { id: 'mat', cle: 'groupeMatieres' },
@@ -191,7 +192,7 @@ function Echantillon({ id }: { id: IdPaletteQuelconque }) {
 }
 
 /**
- * Les onze palettes livrées, puis celles qu'on a composées.
+ * Les treize palettes livrées, puis celles qu'on a composées.
  *
  * Les composées sont des palettes, pas un autre réglage : elles vivent dans la
  * même carte, sous le même titre, et se choisissent avec la même puce. Ce qui

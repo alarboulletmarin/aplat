@@ -269,15 +269,22 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
-    'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === 100,
+    'onglets : les neuf couvrent les cent familles', onglets.comptes.join(' + '));
   /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
-     quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
-     et la première vignette de famille en fait 86 : on ferait défiler un mur de
+     cinq rangées de 44 px. Une colonne unique en ferait neuf, soit 451 px, et la
+     première vignette de famille en fait 100 : on ferait défiler un mur de
      navigation avant de voir un seul motif. Le plafond est donc la mesure de ce
-     mur, pas un nombre choisi. */
-  t(onglets.hauteur <= 4 * 44 + 3 * 3,
-    'onglets : la barre tient en quatre rangées sur un téléphone', onglets.hauteur + ' px');
+     mur, pas un nombre choisi.
+
+     Il était de quatre rangées quand les groupes étaient huit, et la barre y
+     tenait à 185 px. Le neuvième, Signes, l'a fait passer à 232 px sur les
+     panneaux les plus étroits : c'est quarante-sept pixels de plus, et c'est la
+     moitié du mur contre lequel la règle avait été écrite. Le plafond suit donc
+     le nombre de groupes plutôt que de faire renoncer à un classement juste.
+     À 430 px la barre tient toujours en quatre. */
+  t(onglets.hauteur <= 5 * 44 + 4 * 3,
+    'onglets : la barre tient en cinq rangées sur un téléphone', onglets.hauteur + ' px');
   /* Le titre, les onglets et les vignettes se suivent dans la même carte : ils
      commencent sur la même verticale, ou l'oeil voit une marche. La barre a
      débordé sa carte une fois pour se loger, et c'est ce contrôle qui manquait. */
@@ -323,8 +330,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }).map(o => o.dataset.groupe)
     };
   });
-  t(ongletsEn.hauteur <= 4 * 44 + 3 * 3 && ongletsEn.coupes.length === 0,
-    'onglets : quatre rangées et aucun libellé abrégé en anglais aussi',
+  t(ongletsEn.hauteur <= 5 * 44 + 4 * 3 && ongletsEn.coupes.length === 0,
+    'onglets : cinq rangées et aucun libellé abrégé en anglais aussi',
     ongletsEn.hauteur + ' px, ' + (ongletsEn.coupes.join(', ') || 'aucun abrégé'));
 
   // --- 14. thème
@@ -520,8 +527,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
           };
         });
         const ou = `${langue} ${largeur}`;
-        t(b.h <= 4 * 44 + 3 * 3 && b.coupes === 0 && b.cible >= 44,
-          `onglets ${ou} : quatre rangées, aucun libellé abrégé, cibles à 44 px`,
+        t(b.h <= 5 * 44 + 4 * 3 && b.coupes === 0 && b.cible >= 44,
+          `onglets ${ou} : cinq rangées, aucun libellé abrégé, cibles à 44 px`,
           `${b.h} px, ${b.coupes} abrégé(s), cible ${b.cible} px`);
         t(new Set(b.marges).size === 1 && b.gouttiere - 2 >= b.ecart,
           `onglets ${ou} : gouttière commune, et jamais sous l'écart des vignettes`,

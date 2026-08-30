@@ -140,7 +140,7 @@ Le titre : `25px`, interligne `1`, interlettrage `-.03em`, en capitales. Presque
 collé. C'est le seul geste typographique de la page, et il ne se répète nulle
 part ailleurs. Il ne prend plus toute la largeur comme la version d'avant
 (`clamp(56px, 15.5vw, 98px)`) : l'en-tête est devenu collant, et une capitale de
-quatre-vingt-dix-huit pixels ne peut pas rester à l'écran en permanence. Ce
+cent-huit pixels ne peut pas rester à l'écran en permanence. Ce
 qu'il perd en taille, il le gagne en présence.
 
 C'est aussi, au pixel près, le mot de l'enseigne de la présentation, et les deux
@@ -290,7 +290,8 @@ du tout.
 **Repli au défilement.** Il ne sert que sur une seule colonne, c'est-à-dire
 sous 360 px, la seule largeur où la scène collante recouvre encore les réglages.
 Là, elle prenait avec le verdict et la barre les deux tiers de l'écran, et il ne
-restait presque rien pour choisir parmi quarante-six familles et onze palettes : dès
+restait presque rien pour choisir parmi cent familles et treize
+palettes : dès
 que la page défile, l'aperçu se replie en vignette et le verdict se condense sur
 une ligne, dépliable au doigt. Dès 360 px l'aperçu est dans sa colonne, à côté
 du panneau et non devant lui, et il n'a plus rien à rendre en se repliant.
@@ -317,11 +318,12 @@ l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les huit groupes de familles, en huit onglets
+### Les neuf groupes de familles, en neuf onglets
 
-La liste des familles est longue, et une liste longue se range. Huit groupes :
-les **abstraits**, les **pavages**, les **volumes**, les **instruments**, les
-**matières**, les **paysages**, les **lieux**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Neuf groupes :
+les **abstraits**, les **pavages**, les **signes**, les **volumes**, les
+**instruments**, les **matières**, les **paysages**, les **lieux**, les
+**figures**.
 
 **Un groupe n'existe que si son critère tient en une phrase.** C'est la règle,
 et elle sert à quelque chose : « abstraits » n'en avait pas, il était le bac de
@@ -333,6 +335,7 @@ familles sur soixante-seize. Les onglets avaient été inventés contre exacteme
 |---|---|
 | Abstraits | des formes libres sur un aplat, rien n'y revient à intervalle régulier |
 | Pavages | une maille revient, et l'oeil la suit du doigt |
+| Signes | une grille de cases, et dans chacune un signe |
 | Volumes | c'est plat, et on y voit pourtant un volume |
 | Instruments | le motif est gradué, il mesure |
 | Matières | la main les reconnaît avant l'oeil |
@@ -366,7 +369,7 @@ qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-huit onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+neuf onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
@@ -400,7 +403,15 @@ ni moins que ce que son mot demande** : sans le plafond, la dernière rangée
 d'un panneau de 430 px ne porte que « Figures », étiré sur toute la largeur,
 un aplat quatre fois plus long que ses voisins qui se lit comme une mise en
 avant alors qu'il n'est que le reste de la division ; sans le plancher, un mot
-plus long que la moitié d'une rangée étroite s'abrégerait en silence. Les deux
+plus long que la moitié d'une rangée étroite s'abrégerait en silence.
+
+**La barre est passée à cinq rangées le jour où les groupes sont devenus
+neuf**, et le plafond du test avec elle. Elle tenait à 185 px sur les panneaux
+les plus étroits ; « Signes » l'a portée à 232 px. Quarante-sept pixels de
+plus, et la moitié du mur de 401 px contre lequel la règle avait été écrite :
+le plafond suit le nombre de groupes plutôt que de faire renoncer à un
+classement juste. À 430 px la barre tient toujours en quatre rangées, et aucun
+mot n'est abrégé nulle part. Les deux
 se contrôlent à chaque passage de `e2e`, dans les deux langues, à 360, 390 et
 430 px : la hauteur, l'absence de mot abrégé, la cible à 44 px, et la gouttière
 commune.
@@ -458,8 +469,8 @@ l'adresse. Les flèches parcourent les onglets sans les ouvrir, sans quoi le
 clavier traverserait un rendu complet de grille par onglet pour atteindre le
 dernier.
 
-Les huit groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
-les quatre géométriques, puis les matières qui sont entre les deux mondes, puis
+Les neuf groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
+les cinq géométriques, puis les matières qui sont entre les deux mondes, puis
 les trois figuratifs. Un test le tient fermé (`src/lib/moteur.test.ts`) : le
 panneau construit ses grilles en filtrant sur le groupe, et une famille rangée
 hors de son bloc sauterait de place à l'écran sans que rien ne le signale.
@@ -572,11 +583,11 @@ et ça cacherait à la lecture ce que la page est censée expliquer. Le rang d'u
 étape est `aria-hidden` et le titre le double toujours, comme partout ailleurs
 où un signe repère sans porter d'information seule.
 
-**Les quatorze fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
+**Les quinze fiches de gestes ne sont pas des écrans du produit.** L'accueil pose
 que chaque écran est un bouton qui tire un autre motif ; ici, l'objet manipulé
 est le motif en cours de construction, et une fiche n'en tire pas un autre :
 elle fait adopter sa mécanique. Son exemple, lui, ne bouge jamais, sans quoi les
-quatorze fiches cesseraient d'être comparables entre elles.
+quinze fiches cesseraient d'être comparables entre elles.
 
 **La treizième tuile de la galerie n'est pas une quatorzième image.** Elle est
 la porte vers ce document, elle ne porte pas de canevas, et elle ne ressemble
