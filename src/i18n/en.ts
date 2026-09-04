@@ -284,6 +284,13 @@ export const en: Textes = {
     versionNote: 'The dark version is dimmed inside the file: that is what you download.',
     versionTitreClaire: 'The pattern as the palette gives it',
     versionTitreSombre: 'The same pattern, dimmed inside the downloaded file',
+    ecran: 'Screen',
+    ecranAccueil: 'Home',
+    ecranVerrou: 'Lock',
+    ecranNote:
+      'Readability is measured under the icon grid, or under the clock: the file’s veil follows whichever you pick.',
+    ecranTitreAccueil: 'Judge the pattern behind a grid of icons',
+    ecranTitreVerrou: 'Judge the pattern behind the lock screen clock',
   },
   palettes: {
     miennes: 'My palettes',

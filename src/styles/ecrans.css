@@ -1349,3 +1349,64 @@
     padding: 9px 13px;
   }
 }
+
+/* maquette de l'écran de verrouillage
+   ------------------------------------------------------------------------
+   Elle réemploie `.maq` pour la barre d'état et la mise en page verticale, et
+   ne redéfinit que ce qui lui est propre. La justification n'est pas la même :
+   l'accueil pousse ses rangées vers le haut et garde son dock en bas, le
+   verrouillage laisse le vide au milieu. C'est ce vide qui fait reconnaître
+   l'écran, et c'est aussi lui qui montre le motif. */
+.maqv {
+  justify-content: flex-start;
+  gap: calc(var(--mu) * 2);
+}
+.maqv-cartouche {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--mu) * 0.5);
+  margin-top: calc(var(--mu) * 2);
+}
+.maqv-date {
+  font-weight: 700;
+  font-size: calc(var(--mu) * 4);
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+/* Les chiffres de l'heure, à la taille qu'un téléphone leur donne : c'est la
+   forme que la sonde mesure, et une heure timide donnerait un verdict faux par
+   optimisme. Le chiffre tabulaire évite que l'heure ne saute de largeur d'une
+   minute à l'autre, ce qui se voyait comme un tremblement sur un aperçu qui ne
+   bouge jamais par ailleurs. */
+.maqv-heure {
+  font-family: var(--display);
+  font-size: calc(var(--mu) * 22);
+  line-height: 0.92;
+  font-variant-numeric: tabular-nums;
+}
+.maqv-pied {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 calc(var(--mu) * 2);
+}
+.maqv-raccourci {
+  width: calc(var(--mu) * 11);
+  height: calc(var(--mu) * 11);
+  border-radius: 50%;
+  background: var(--l15);
+  border: 1px solid var(--l28);
+}
+.maqv-barre {
+  margin: calc(var(--mu) * 4) auto 0;
+  width: 38%;
+  height: calc(var(--mu) * 1.2);
+  border-radius: calc(var(--mu) * 1);
+  background: var(--libelle);
+  opacity: 0.7;
+}

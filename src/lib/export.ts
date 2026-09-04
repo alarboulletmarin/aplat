@@ -20,7 +20,7 @@
  * Ce qui ne change pas : toutes passent par le même moteur, à la même graine,
  * et l'aperçu reste le fichier.
  */
-import { dessiner, type Motif } from './moteur'
+import { dessiner, type Ecran, type Motif } from './moteur'
 import { rendreSVG } from './svg'
 
 export type EchecExport = 'capacite' | 'generale' | 'formatRefuse' | 'presse' | 'svgDense'
@@ -145,6 +145,12 @@ export interface Travail {
   voile: boolean
   /** La version sombre : le motif assombri, dans le fichier lui-même. */
   sombre: boolean
+  /**
+   * L'écran sur lequel la lisibilité a été jugée. Il change la bande que la
+   * sonde mesure, donc le voile qu'elle dose, donc le fichier : il traverse
+   * l'export au même titre que la version.
+   */
+  ecran: Ecran
   format: Format
 }
 
@@ -156,7 +162,7 @@ export interface Travail {
  * c'est lui qui doit vérifier que le résultat tient sous le plafond.
  */
 export function encoderImage(travail: Travail): Promise<Blob> {
-  const { motif, largeur, hauteur, voile, sombre, format } = travail
+  const { motif, largeur, hauteur, voile, sombre, ecran, format } = travail
   return new Promise((resoudre, rejeter) => {
     if (format === 'webp' && !webpDisponible()) {
       rejeter(new ErreurExport('formatRefuse'))
@@ -169,7 +175,7 @@ export function encoderImage(travail: Travail): Promise<Blob> {
       canevas.height = hauteur
       const ctx = canevas.getContext('2d', { alpha: false })
       if (!ctx) throw new Error('pas de contexte 2d')
-      dessiner(ctx, largeur, hauteur, motif, { voile, sombre })
+      dessiner(ctx, largeur, hauteur, motif, { voile, sombre, ecran })
 
       if (canevasNoir(ctx, largeur, hauteur)) {
         relacher(canevas)
@@ -198,8 +204,8 @@ export function encoderImage(travail: Travail): Promise<Blob> {
  * pour que le fichier ait encore un sens.
  */
 export function encoderSVG(travail: Travail): Blob {
-  const { motif, largeur, hauteur, voile, sombre } = travail
-  const rendu = rendreSVG(motif, largeur, hauteur, voile, sombre)
+  const { motif, largeur, hauteur, voile, sombre, ecran } = travail
+  const rendu = rendreSVG(motif, largeur, hauteur, voile, sombre, ecran)
   if (!rendu.elements) throw new ErreurExport('generale')
   return new Blob([rendu.texte], { type: 'image/svg+xml;charset=utf-8' })
 }

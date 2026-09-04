@@ -188,6 +188,12 @@ export interface Mesure {
    * à la même obscurité demande d'assombrir chacune différemment.
    */
   ombre: number
+  /**
+   * L'écran sur lequel la mesure a été prise. Il est ici parce que le voile en
+   * a besoin : sa pente n'est pas la même selon l'écran, et une mesure qui ne
+   * dirait pas d'où elle vient laisserait le voile la répartir au hasard.
+   */
+  ecran: Ecran
 }
 
 /* ---------- données ------------------------------------------------------- */
@@ -2126,6 +2132,41 @@ export function luminanceAssombrie(L: number, force: number): number {
 
 /* ---------- sonde de lisibilité --------------------------------------------- */
 
+/**
+ * L'écran sur lequel on juge le motif, et donc la bande que la sonde regarde.
+ *
+ * L'accueil pose une grille d'icônes sur presque toute la hauteur, et c'est
+ * sous elle que le contraste se joue. L'écran de verrouillage ne pose rien de
+ * tout cela : il porte un cartouche, l'heure et la date, haut placé et large,
+ * et le reste du cadre est nu. Les deux bandes n'ont ni la même hauteur ni la
+ * même place, et un motif qui passe sous l'une échoue régulièrement sous
+ * l'autre : un motif calme en bas et agité en haut est excellent pour des
+ * icônes et illisible pour une heure.
+ *
+ * C'est pour cela que le choix de l'écran est un réglage du fichier et non un
+ * réglage de l'aperçu. La sonde dose le voile sur ce qu'elle mesure, et le
+ * voile est brûlé dans le PNG : deux écrans, deux mesures, donc deux fichiers.
+ * Le lien le porte, au même titre que la version sombre.
+ */
+export type Ecran = 'accueil' | 'verrou'
+
+/**
+ * La bande mesurée, en parts de la hauteur.
+ *
+ * Celle de l'accueil va du haut de la première rangée d'icônes au bas du dock.
+ * Celle du verrouillage tient le cartouche de l'heure, plus la marge que les
+ * systèmes lui laissent : elle est quatre fois plus courte, et c'est ce qui la
+ * rend sévère. Une bande courte ne moyenne presque rien, si bien qu'une seule
+ * forme claire posée derrière les chiffres suffit à faire tomber le verdict,
+ * là où la même forme se serait noyée dans la moyenne d'une grille entière.
+ * C'est le comportement voulu : sur un écran de verrouillage, c'est bien
+ * derrière les chiffres, et nulle part ailleurs, que l'heure doit se lire.
+ */
+const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
+  accueil: [0.24, 0.92],
+  verrou: [0.11, 0.33],
+}
+
 /*
  * On mesure la luminance de la zone des icônes sur une petite sonde, jamais sur
  * l'image finale : mêmes chiffres pour l'aperçu et pour l'export, et aucun
@@ -2157,12 +2198,12 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 
 export function mesurer(
   id: IdFamille, idPalette: IdPaletteQuelconque, densite: Densite, graine: number,
-  largeur: number, hauteur: number, sombre = false,
+  largeur: number, hauteur: number, sombre = false, ecran: Ecran = 'accueil',
 ): Mesure {
   const P = palette(idPalette)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
-  const cle =
-    `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}|${sombre ? 's' : 'c'}`
+  const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
+    + `|${sombre ? 's' : 'c'}|${ecran}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -2178,11 +2219,26 @@ export function mesurer(
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = P.fond
     ctx.fillRect(0, 0, PW, PH)
-    formes(ctx, PW, PH, id, P.couleurs, densite, alea(graineDeDessin(id, densite, graine)), Math.min(PW, PH))
+    /* La sonde compose comme le rendu, dans le même cadre : sur un écran de
+       verrouillage elle ne doit pas trouver le motif sous les chiffres, elle
+       doit trouver ce qui y sera. Sans ce cadre, elle mesurerait une image que
+       le fichier ne porte pas, et doserait un voile contre un motif que la
+       réserve a déjà écarté. */
+    const cadre = cadreDuMotif(PH, ecran)
+    ctx.save()
+    ctx.translate(0, cadre.haut)
+    formes(ctx, PW, cadre.hauteur, id, P.couleurs, densite,
+      alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur))
+    ctx.restore()
+    if (cadre.haut > 0) {
+      ctx.fillStyle = P.fond
+      ctx.fillRect(0, 0, PW, cadre.haut)
+    }
 
     try {
-      const y0 = Math.round(PH * 0.24)
-      const y1 = Math.round(PH * 0.92)
+      const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
+      const y0 = Math.round(PH * hautDeBande)
+      const y1 = Math.round(PH * basDeBande)
       const d = ctx.getImageData(0, y0, PW, Math.max(1, y1 - y0)).data
       const pixels = d.length / 4
       const pas = Math.max(1, Math.floor(pixels / 2600)) * 4
@@ -2226,7 +2282,7 @@ export function mesurer(
     : L * (1 - voile) + 0.95 * voile
   const contraste = libelles === 'clair' ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068
 
-  const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre }
+  const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre, ecran }
   memoire.set(cle, mesure)
   /* Plafond simple : on évince la plus ancienne entrée, pas la moins
      utilisée. À quatre cents mesures, raffiner ne changerait rien. */
@@ -2235,6 +2291,66 @@ export function mesurer(
     if (!premiere.done) memoire.delete(premiere.value)
   }
   return mesure
+}
+
+/* ---------- la place de l'heure ---------------------------------------------- */
+
+/**
+ * La place de l'heure : non pas un blanc posé sur le motif, mais un motif
+ * composé pour elle.
+ *
+ * Deux façons de rendre une heure lisible, et la différence entre les deux est
+ * tout le sujet. La première recouvre : on peint le motif d'un bord à l'autre,
+ * puis on pose par dessus un aplat de fond là où les chiffres tombent. Ça
+ * marche, et ça se voit : l'image est coupée, on lit deux morceaux empilés,
+ * l'un raturé et l'autre pas.
+ *
+ * La seconde ne recouvre rien, elle **cadre**. Le moteur ne dit pas au motif
+ * « je vais effacer ton haut », il lui dit « voici ta surface », et le motif la
+ * remplit entière comme il aurait rempli le cadre. Tout le catalogue sait déjà
+ * le faire, parce qu'aucune famille ne connaît sa taille : chacune compose
+ * pour la largeur et la hauteur qu'on lui donne, et ne pose que des longueurs
+ * relatives au petit côté. Lui donner une hauteur plus courte et la descendre
+ * d'autant suffit à ce qu'elle recompose au lieu de se laisser tronquer.
+ *
+ * Une garantie s'ajoute au cadre, et il faut dire pourquoi elle ne le
+ * contredit pas. Trente-cinq familles sur soixante-dix-neuf débordent
+ * volontairement du cadre qu'on leur donne : une onde déborde par le haut, un
+ * relief pousse ses paliers hors champ, une corolle fait sortir ses pétales.
+ * C'est leur droit et c'est souvent leur dessin. Le fond est donc reposé sur
+ * la réserve une fois le motif composé, ce qui ne rogne que ce qui y était
+ * entré par débordement. La différence avec un lavis posé sur un motif entier
+ * est tout sauf cosmétique : là, on effaçait le tiers d'une image dessinée
+ * pour le cadre entier ; ici, on rend nette une bordure que le motif n'a pas
+ * composée pour lui.
+ *
+ * Ce que cela donne, famille par famille, n'est pas uniforme et c'est voulu.
+ * Celles qui ont un haut et un bas y gagnent le plus : les vagues posent leur
+ * première houle sous la réserve et leur ciel devient le sien, sans la moindre
+ * couture ; l'horizon, les dunes, les sommets, les falaises, la marée font de
+ * même. Celles qui n'ont ni haut ni bas, un pavage, une trame, se ramassent
+ * sous la ligne : la maille y est entière, un peu plus serrée, et le fond
+ * reste au dessus. Aucune n'est coupée, et c'est la seule chose qu'on exigeait.
+ *
+ * La sonde mesure ensuite sa bande sur l'image ainsi composée. Elle n'y trouve
+ * que le fond, le voile se dose à zéro, et la version verrouillée d'un motif
+ * n'est donc pas une version voilée : c'en est une autre composition.
+ */
+
+/** Où commence la surface du motif, en parts de la hauteur, sur un verrouillage. */
+const RESERVE = 0.36
+
+/**
+ * Le cadre laissé au motif : l'image entière sur un accueil, ce qui reste sous
+ * la réserve sur un verrouillage.
+ *
+ * Le décalage et la hauteur sont des parts exactes de `H`, jamais des nombres
+ * de pixels arrondis : une image rendue deux fois plus grande donne un cadre
+ * deux fois plus grand, au bit près, et la vignette montre donc le fichier.
+ */
+export function cadreDuMotif(H: number, ecran: Ecran): { haut: number; hauteur: number } {
+  const haut = ecran === 'verrou' ? H * RESERVE : 0
+  return { haut, hauteur: H - haut }
 }
 
 /* ---------- voile de lisibilité ---------------------------------------------- */
@@ -2249,17 +2365,41 @@ export function mesurer(
  * aucune marche ne dépasse un cran sur 255, et le grain se charge de la casser.
  */
 
-const PALIERS: readonly (readonly [number, number])[] = [
-  [0, 0.9], [0.2, 0.78], [0.78, 0.96], [1, 1.14],
-]
+/**
+ * La pente du voile, par écran : à quelle hauteur il appuie et où il lâche.
+ *
+ * La force est un seul nombre, dosé par la sonde sur la bande qu'elle a
+ * mesurée ; ces paliers disent comment ce nombre se répartit du haut au bas de
+ * l'image. C'est ce qui évite un voile uniforme, qui assombrit autant là où
+ * rien ne se lit.
+ *
+ * L'accueil appuie en bas : c'est là que le dock et la dernière rangée de
+ * libellés tombent, et c'est le bas d'un fond d'écran qu'on regarde le moins
+ * pour lui-même.
+ *
+ * Le verrouillage fait l'inverse et s'arrête net. Il tient plein la réserve de
+ * l'heure, puis tombe à rien sous la houle qui la ferme : sous cette ligne il
+ * n'y a plus rien à lire, et un voile qui continuerait ternirait le motif pour
+ * personne. C'est la différence de fond entre les deux écrans. Sur l'accueil,
+ * les libellés sont partout et le voile doit être partout. Sur le
+ * verrouillage, la lisibilité est réglée par la place qu'on a laissée, pas par
+ * la couche qu'on ajoute : le voile n'y est plus qu'un appoint, à l'endroit
+ * exact des chiffres, et le fond d'écran garde ses couleurs sur les deux tiers
+ * qu'on regarde.
+ */
+const PENTES: Readonly<Record<Ecran, readonly (readonly [number, number])[]>> = {
+  accueil: [[0, 0.9], [0.2, 0.78], [0.78, 0.96], [1, 1.14]],
+  verrou: [[0, 1], [0.3, 1], [0.46, 0], [1, 0]],
+}
 const BANDES = 320
 
 /** L'opacité du voile à la hauteur `u`, de 0 en haut à 1 en bas. */
-export function alphaDuVoile(u: number, force: number): number {
+export function alphaDuVoile(u: number, force: number, ecran: Ecran = 'accueil'): number {
+  const paliers = PENTES[ecran]
   let i = 1
-  while (i < PALIERS.length - 1 && u > PALIERS[i][0]) i += 1
-  const p = PALIERS[i - 1]
-  const q = PALIERS[i]
+  while (i < paliers.length - 1 && u > paliers[i][0]) i += 1
+  const p = paliers[i - 1]
+  const q = paliers[i]
   const k = q[0] === p[0] ? 0 : (u - p[0]) / (q[0] - p[0])
   const facteur = p[1] + (q[1] - p[1]) * Math.max(0, Math.min(1, k))
   return Math.min(0.62, force * facteur)
@@ -2289,7 +2429,8 @@ export function peindreVoile(ctx: Pinceau, W: number, H: number, mesure: Mesure)
     const y1 = i === bandes - 1 ? H : Math.round(((i + 1) * H) / bandes)
     if (y1 <= y0) continue
     precedent = y1
-    ctx.fillStyle = `rgba(${rgb},${alphaDuVoile((y0 + y1) / 2 / H, force).toFixed(4)})`
+    ctx.fillStyle =
+      `rgba(${rgb},${alphaDuVoile((y0 + y1) / 2 / H, force, mesure.ecran).toFixed(4)})`
     ctx.fillRect(0, y0, W, y1 - y0)
   }
 }
@@ -2346,6 +2487,13 @@ export interface OptionsRendu {
    * dans la démonstration, et à son rang.
    */
   arret?: Couche
+  /**
+   * L'écran sur lequel on juge la lisibilité, donc la bande que la sonde
+   * regarde et le voile qu'elle dose. L'accueil par défaut, comme depuis
+   * toujours : un lien écrit avant que le verrouillage n'existe rend
+   * exactement le fichier qu'il rendait.
+   */
+  ecran?: Ecran
 }
 
 /**
@@ -2360,10 +2508,13 @@ export interface OptionsRendu {
 export function dessiner(
   ctx: Ctx, W: number, H: number, motif: Motif, options: OptionsRendu = {},
 ): Mesure {
-  const { voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain' } = options
+  const {
+    voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain',
+    ecran = 'accueil',
+  } = options
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
-    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre,
+    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre, ecran,
   )
   rendre(ctx, W, H, motif, mesure, voile, arret)
   /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
@@ -2406,8 +2557,23 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
-      alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
+    /* Le cadre du motif, et non le cadre de l'image : sur un verrouillage, il
+       commence sous la réserve. Le motif n'en sait rien et n'a pas à le savoir,
+       il compose pour la hauteur qu'on lui donne. L'escalier des couches de
+       « /moteur » n'a donc pas de marche de plus à montrer : la place de
+       l'heure se voit dès la deuxième, parce qu'elle est la composition et non
+       une correction posée dessus. */
+    const cadre = cadreDuMotif(H, mesure.ecran)
+    ctx.save()
+    ctx.translate(0, cadre.haut)
+    formes(ctx, W, cadre.hauteur, motif.famille, P.couleurs, motif.densite,
+      alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
+      Math.min(W, cadre.hauteur))
+    ctx.restore()
+    if (cadre.haut > 0) {
+      ctx.fillStyle = P.fond
+      ctx.fillRect(0, 0, W, cadre.haut)
+    }
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)

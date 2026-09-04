@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { useEffect, useRef } from 'react'
-import { dessiner, type Motif } from '../lib/moteur'
+import { dessiner, type Ecran, type Motif } from '../lib/moteur'
 import type { Resolution } from '../lib/resolution'
 
 /**
@@ -17,6 +17,7 @@ export function Apercu({
   resolution,
   voile,
   sombre,
+  ecran,
   largeur,
   hauteur,
   description,
@@ -28,6 +29,11 @@ export function Apercu({
   voile: boolean
   /** La version sombre est-elle demandée. Même règle : l'aperçu est le fichier. */
   sombre: boolean
+  /**
+   * L'écran sur lequel la lisibilité est jugée. Même règle encore : il change
+   * la bande mesurée, donc le voile brûlé, donc le fichier.
+   */
+  ecran: Ecran
   /** Taille rendue de la boîte, en pixels CSS. */
   largeur: number
   hauteur: number
@@ -58,6 +64,7 @@ export function Apercu({
     dessiner(ctx, pw, ph, motif, {
       voile,
       sombre,
+      ecran,
       mesureW: resolution.largeur,
       mesureH: resolution.hauteur,
     })
@@ -67,7 +74,8 @@ export function Apercu({
        fenêtre a bougé : sur téléphone, le repli de la barre d'URL pendant le
        défilement faisait clignoter l'aperçu. */
     const signature =
-      [motif.famille, motif.palette, motif.densite, motif.graine, voile, sombre].join('|')
+      [motif.famille, motif.palette, motif.densite, motif.graine, voile, sombre, ecran]
+        .join('|')
     const change = precedent.current !== null && precedent.current !== signature
     precedent.current = signature
     if (change && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -78,7 +86,8 @@ export function Apercu({
         noeud.style.opacity = '1'
       })
     }
-  }, [motif, resolution.largeur, resolution.hauteur, voile, sombre, largeur, hauteur, revision])
+  }, [motif, resolution.largeur, resolution.hauteur, voile, sombre, ecran, largeur, hauteur,
+    revision])
 
   return (
     <canvas

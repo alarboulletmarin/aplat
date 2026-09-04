@@ -141,6 +141,41 @@ describe('voile de lisibilité', () => {
 })
 
 /**
+ * L'écran sur lequel on juge est un fichier lui aussi, et c'est pour cela qu'il
+ * voyage. La sonde ne mesure pas la même bande selon l'écran, elle dose donc un
+ * autre voile, et ce voile est brûlé dans le PNG : un lien qui ne le porterait
+ * pas rendrait chez le destinataire une image plus claire ou plus foncée que
+ * celle qu'on lui a envoyée.
+ */
+describe('écran de jugement', () => {
+  it('vaut l’accueil par défaut, et ne s’écrit qu’au verrouillage', () => {
+    expect(lireUrl('', DETECTE).ecran).toBe('accueil')
+    const accueil = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(accueil).not.toContain('e=')
+    const verrou = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, ecran: 'verrou' }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(verrou).toContain('e=1')
+    expect(lireUrl(verrou, DETECTE).ecran).toBe('verrou')
+  })
+
+  it('ne bascule que sur « 1 », jamais sur une valeur abîmée', () => {
+    /* Même prudence que le voile et la version, et pour la même raison : une
+       adresse abîmée doit rendre ce que le produit a toujours rendu, jamais
+       une image dosée pour une bande que personne n'a demandée. */
+    for (const brut of ['e=', 'e=0', 'e=verrou', 'e=true', 'e=01']) {
+      expect(lireUrl(`?${brut}`, DETECTE).ecran, brut).toBe('accueil')
+    }
+  })
+
+  it('n’a jamais existé avant, donc un vieux lien ouvre l’accueil', () => {
+    /* La garantie de compatibilité : tous les liens écrits avant ce réglage
+       rendent exactement le fichier qu'ils rendaient. */
+    expect(lireUrl('?m=vagues&p=lime&d=1&s=7314&n=1&v=0', DETECTE).ecran).toBe('accueil')
+  })
+})
+
+/**
  * La version sombre est un fichier, pas un aperçu : elle voyage donc dans
  * l'adresse comme le voile. Elle a remplacé un rideau qu'on tirait sur
  * l'aperçu, qui ne voyageait nulle part parce qu'il ne montrait rien qu'on pût

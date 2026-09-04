@@ -384,6 +384,17 @@ export const fr = {
     versionNote: 'La version sombre est assombrie dans le fichier\u00a0: c’est elle qu’on télécharge.',
     versionTitreClaire: 'Le motif tel que la palette le donne',
     versionTitreSombre: 'Le même motif, assombri dans le fichier téléchargé',
+    /* L'écran est un réglage du fichier, et non de l'aperçu : la sonde ne
+       mesure pas la même bande selon l'écran, elle dose donc un autre voile,
+       et ce voile est brûlé dans le PNG. Le mot « écran » plutôt que
+       « aperçu » pour cette seule raison. */
+    ecran: 'Écran',
+    ecranAccueil: 'Accueil',
+    ecranVerrou: 'Verrouillage',
+    ecranNote:
+      'La lisibilité se mesure sous la grille d’icônes, ou sous l’heure : le voile du fichier suit celui qu’on choisit.',
+    ecranTitreAccueil: 'Juger le motif derrière une grille d’icônes',
+    ecranTitreVerrou: 'Juger le motif derrière l’heure de l’écran de verrouillage',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
      les onze livrées, parce que ce sont des palettes et non un autre réglage. */

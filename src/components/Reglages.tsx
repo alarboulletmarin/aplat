@@ -3,7 +3,8 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 import {
   estPaletteLivree, FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
-  type Densite, type Groupe, type IdFamille, type IdPaletteQuelconque, type Langue,
+  type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
+  type Langue,
 } from '../lib/moteur'
 import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
 import { remplir, type Textes } from '../i18n'
@@ -450,6 +451,64 @@ export function ChoixDensite({
           </OptionRadio>
         ))}
       </GroupeRadio>
+    </div>
+  )
+}
+
+
+/**
+ * Accueil ou verrouillage : sur quel écran on juge le motif.
+ *
+ * Il est ici, avec la version et le voile, et non près de l'aperçu qu'il
+ * change, parce qu'il ne change pas que l'aperçu. La sonde mesure une bande
+ * différente selon l'écran, elle dose donc un autre voile, et ce voile est
+ * brûlé dans le PNG : deux écrans, deux fichiers. Le mettre au dessus de
+ * l'image, à côté du cadre, en aurait fait un bouton d'affichage, ce qu'il
+ * n'est pas.
+ *
+ * Deux puces plutôt qu'une bascule, pour la raison donnée à `ChoixVersion` :
+ * une bascule oblige à lire son état pour savoir ce qu'on regarde.
+ *
+ * Il ne paraît que sur un téléphone ou une tablette. Un ordinateur n'a pas
+ * d'écran de verrouillage à fond d'écran distinct dans cette maquette, et une
+ * puce qui ne changerait rien à ce qu'on voit serait un mensonge poli.
+ */
+export function ChoixEcran({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  valeur: Ecran
+  textes: Textes
+  onChoisir: (ecran: Ecran) => void
+}) {
+  const T = textes.reglages
+  const options: { ecran: Ecran; nom: string; titre: string }[] = [
+    { ecran: 'accueil', nom: T.ecranAccueil, titre: T.ecranTitreAccueil },
+    { ecran: 'verrou', nom: T.ecranVerrou, titre: T.ecranTitreVerrou },
+  ]
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-ecran">
+        <Arche />
+        <span>{T.ecran}</span>
+      </h2>
+      <GroupeRadio id="liste-ecran" etiquettes="h-ecran" className="rangee-densite">
+        {options.map((option) => (
+          <OptionRadio
+            key={option.ecran}
+            choisi={option.ecran === valeur}
+            onChoisir={() => onChoisir(option.ecran)}
+            className="opt opt-densite opt-ecran"
+            titre={option.titre}
+            data-ecran={option.ecran}
+          >
+            <span className="opt-ecran-p" aria-hidden="true" />
+            <span className="opt-densite-t">{option.nom}</span>
+          </OptionRadio>
+        ))}
+      </GroupeRadio>
+      <p className="bento-n">{T.ecranNote}</p>
     </div>
   )
 }
