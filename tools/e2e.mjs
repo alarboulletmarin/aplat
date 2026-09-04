@@ -149,6 +149,45 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(debords.length === 0, 'réserve : aucune famille ne déborde sur la place de l\'heure',
     debords.slice(0, 6).join(', ') || 'les ' + (await page.evaluate(() => window.MOTEUR.FAMILLES.length)) + ' familles, trois densités');
 
+
+  // Et la lisière appartient au geste : deux familles de gestes différents ne
+  // s'arrêtent pas de la même façon. C'est tout l'objet de `lib/lisieres.ts`,
+  // et c'est le genre de chose qui se défait sans bruit, un aiguillage manqué
+  // renvoyant tout le monde sur la crête molle des aplats sans qu'aucune erreur
+  // ne soit levée. On compare donc les lisières deux à deux, sur la même graine
+  // pour que seule la famille change.
+  const lisieres = await page.evaluate(() => {
+    const M = window.MOTEUR, W = 300, H = 650;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
+    const profil = (famille) => {
+      M.dessiner(g, W, H, { famille, palette: 'lime', densite: 1, graine: 7314 },
+        { ecran: 'verrou', voile: false, arret: 'formes' });
+      const px = g.getImageData(0, 0, W, H).data;
+      const [r0, v0, b0] = [px[0], px[1], px[2]];
+      const bas = [];
+      for (let x = 4; x < W; x += 8) {
+        let y = 0;
+        while (y < H) {
+          const i = (y * W + x) * 4;
+          if (Math.abs(px[i] - r0) > 6 || Math.abs(px[i + 1] - v0) > 6
+            || Math.abs(px[i + 2] - b0) > 6) break;
+          y += 1;
+        }
+        bas.push(y);
+      }
+      return bas.join(',');
+    };
+    const temoins = ['vagues', 'banquise', 'carreaux', 'meandres', 'relief', 'cubes', 'tapis'];
+    const vus = new Map();
+    for (const f of temoins) vus.set(f, profil(f));
+    return [...vus.entries()];
+  });
+  const distinctes = new Set(lisieres.map(([, p]) => p));
+  t(distinctes.size === lisieres.length,
+    'lisière : chaque geste s\'arrête à sa façon, pas deux pareilles',
+    distinctes.size + ' profils pour ' + lisieres.length + ' gestes');
+
   const pente = await page.evaluate(() => {
     const M = window.MOTEUR;
     return {

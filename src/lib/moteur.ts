@@ -23,6 +23,7 @@ import {
   estSurimpression, peindreSurimpression, type IdSurimpression,
 } from './surimpression'
 import { CARACTERES } from './alphabet'
+import { HAUTE, lisiereDuGeste } from './lisieres'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -2274,7 +2275,7 @@ export function mesurer(
     formes(ctx, PW, cadre.hauteur, id, P.couleurs, densite,
       alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur), mot)
     ctx.restore()
-    peindrePlaceDeLHeure(ctx, PW, PH, P.fond, ecran, graine)
+    peindrePlaceDeLHeure(ctx, PW, PH, P.fond, ecran, id, graine)
 
     try {
       const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
@@ -2379,83 +2380,61 @@ export function mesurer(
  */
 
 /**
- * La place de l'heure, en parts de la hauteur : sa profondeur moyenne, et de
- * combien sa lisière monte et descend autour.
+ * La place de l'heure : le motif s'arrête, chacun à sa façon.
  *
- * Ce sont deux nombres et non un seul parce que la lisière n'est pas une ligne.
- * Une droite en travers du cadre est un effacement, quoi qu'on ait fait pour
- * l'obtenir : l'oeil y lit une image coupée et un blanc rapporté par-dessus.
- * Une courbe qui monte et descend d'un dixième de la hauteur est une forme, et
- * une forme de plus dans une image qui n'est faite que de formes se lit comme
- * la composition et non comme une rature.
- */
-const RESERVE = 0.36
-const LISIERE = 0.07
-
-/**
- * La lisière de la réserve : jusqu'où le fond descend, à l'abscisse donnée.
+ * Où le motif s'arrête est décidé par `lib/lisieres.ts`, un geste à la fois :
+ * une fracture finit sur une arête de plaque, un carreau sur des cases
+ * entières, une coulée sur ses arcs, une ligne de niveau sur une courbe de
+ * niveau. Le moteur ne connaît ici que les deux bornes entre lesquelles toutes
+ * doivent tenir, et il ne les connaît que pour une raison : la sonde mesure au
+ * dessus de la borne haute, et rien ne doit y monter.
  *
- * Deux harmoniques, pour qu'elle ne se lise pas comme un sinus, et une phase
- * tirée de la graine du motif : deux motifs voisins n'ont pas la même lisière.
- * Elle se mesure en parts de la hauteur, donc elle grandit avec l'image et un
- * rendu deux fois plus grand est le même rendu.
+ * Le cadre du motif commence à cette borne haute, non à la borne basse. C'est
+ * le détail dont tout dépend : le motif monte jusque sous la lisière partout où
+ * elle remonte, et elle mord dedans là où elle redescend, ce qui lui donne son
+ * tracé. Un cadre commencé à la borne basse aurait rendu la lisière invisible,
+ * du fond peint sur du fond, et la ligne droite serait revenue par la porte de
+ * derrière.
  */
-export function lisiereDeReserve(x: number, W: number, H: number, graine: number): number {
-  const rnd = alea(graine ^ 0x5eaf00d)
-  const phase = rnd() * Math.PI * 2
-  const periode = 1 + Math.floor(rnd() * 2)
-  const creux = H * LISIERE
-  return H * RESERVE
-    + Math.sin(phase + (x / W) * Math.PI * 2 * periode) * creux * 0.72
-    + Math.sin(phase * 1.7 + (x / W) * Math.PI * 2 * periode * 2) * creux * 0.28
-}
 
 /**
  * Le cadre laissé au motif : l'image entière sur un accueil, ce qui reste sous
- * le point le plus haut de la lisière sur un verrouillage.
- *
- * Le point le plus haut, et non la profondeur moyenne : le motif doit monter
- * jusque sous la lisière partout où elle remonte, sans quoi la courbe passerait
- * dans du fond nu sur la moitié de sa longueur et ne se verrait pas. Là où elle
- * redescend, elle mord dans le motif, et c'est ce qui lui donne son tracé.
+ * la borne haute des lisières sur un verrouillage.
  *
  * Le décalage et la hauteur sont des parts exactes de `H`, jamais des nombres
  * de pixels arrondis : une image rendue deux fois plus grande donne un cadre
  * deux fois plus grand, au bit près, et la vignette montre donc le fichier.
  */
 export function cadreDuMotif(H: number, ecran: Ecran): { haut: number; hauteur: number } {
-  const haut = ecran === 'verrou' ? H * (RESERVE - LISIERE) : 0
+  const haut = ecran === 'verrou' ? H * HAUTE : 0
   return { haut, hauteur: H - haut }
 }
 
 /**
- * La place de l'heure, peinte : le fond, jusqu'à la lisière.
+ * La place de l'heure, peinte : le fond, jusqu'à la lisière du geste.
  *
  * Le nom est long et le restera : `peindreReserve` est déjà pris par le geste
  * de la réserve, celui du claustra et du papel picado, qui n'a rien à voir.
  *
- * Elle ne rogne que ce que le motif a fait monter au dessus de sa lisière.
- * Pour une famille qui a un haut et un bas, les vagues, les dunes, l'horizon,
- * elle ne rogne rien du tout : leur ciel est déjà là et la courbe passe dans du
- * fond. Pour une famille qui n'a ni haut ni bas, un pavage, une trame, elle
- * devient son bord supérieur, et c'est tout l'objet de la manoeuvre : le motif
- * s'arrête sur une courbe qu'on prend pour une de ses formes plutôt que sur la
- * ligne d'une paire de ciseaux.
+ * La lisière est tirée d'un aléa à part, dérivé de la graine du motif mais
+ * distinct de celui du dessin. Sans cela, elle consommerait les premiers
+ * tirages de la famille et changerait le motif entier au lieu de changer son
+ * seul bord : un fond d'écran d'accueil et son verrouillage ne montreraient
+ * plus la même image, ce qui est exactement ce qu'on ne veut pas.
  */
 export function peindrePlaceDeLHeure(
-  ctx: Pinceau, W: number, H: number, fond: string, ecran: Ecran, graine: number,
+  ctx: Pinceau, W: number, H: number, fond: string, ecran: Ecran,
+  famille: IdFamille, graine: number,
 ): void {
   if (ecran !== 'verrou') return
-  /* Le pas d'échantillonnage suit la largeur : la courbe reste lisse même
-     quand on zoome à cent pour cent dans un fond d'écran 4K. */
-  const pas = Math.max(1, W / 240)
+  const lisiere = lisiereDuGeste(famille, W, H, alea(graine ^ 0x5eaf00d))
+  if (lisiere.length < 2) return
   ctx.fillStyle = fond
   ctx.beginPath()
   ctx.moveTo(0, 0)
   ctx.lineTo(W, 0)
-  ctx.lineTo(W, lisiereDeReserve(W, W, H, graine))
-  for (let x = W - pas; x > 0; x -= pas) ctx.lineTo(x, lisiereDeReserve(x, W, H, graine))
-  ctx.lineTo(0, lisiereDeReserve(0, W, H, graine))
+  for (let i = lisiere.length - 1; i >= 0; i -= 1) ctx.lineTo(lisiere[i][0], lisiere[i][1])
+  ctx.lineTo(0, 0)
   ctx.closePath()
   ctx.fill()
 }
@@ -2685,7 +2664,7 @@ function rendre(
       alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
       Math.min(W, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT)
     ctx.restore()
-    peindrePlaceDeLHeure(ctx, W, H, P.fond, mesure.ecran, motif.graine)
+    peindrePlaceDeLHeure(ctx, W, H, P.fond, mesure.ecran, motif.famille, motif.graine)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)

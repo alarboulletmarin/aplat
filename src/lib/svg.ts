@@ -442,7 +442,7 @@ export function svgDuMotif(
   /* La place de l'heure, dans le même ordre que sur le canevas : elle ne rogne
      que ce que le motif a fait monter au dessus de sa lisière, le cadre l'ayant
      déjà composé plus bas. */
-  peindrePlaceDeLHeure(notaire, largeur, hauteur, P.fond, ecran, motif.graine)
+  peindrePlaceDeLHeure(notaire, largeur, hauteur, P.fond, ecran, motif.famille, motif.graine)
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
      même titre que le voile. Elle reste hors du chemin quand aucune des deux
