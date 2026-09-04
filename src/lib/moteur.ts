@@ -2197,11 +2197,9 @@ export type Ecran = 'accueil' | 'verrou'
  * La bande mesurée, en parts de la hauteur.
  *
  * Celle de l'accueil va du haut de la première rangée d'icônes au bas du dock.
- * Celle du verrouillage tient le cartouche de l'heure, et elle s'arrête au
- * dessus du point le plus haut que la lisière de la réserve puisse atteindre :
- * la sonde ne doit jamais mesurer un morceau de motif qui remonte sous les
- * chiffres. Elle est quatre fois plus courte que celle de l'accueil, et c'est
- * ce qui la rend sévère. Une bande courte ne moyenne presque rien, si bien qu'une seule
+ * Celle du verrouillage tient dans le cartouche, un cheveu en dedans de ses
+ * bords : la sonde y mesure donc l'aplat du cartouche et rien d'autre, ce qui
+ * est exactement ce qu'on veut savoir, les chiffres n'étant posés que là. Une bande courte ne moyenne presque rien, si bien qu'une seule
  * forme claire posée derrière les chiffres suffit à faire tomber le verdict,
  * là où la même forme se serait noyée dans la moyenne d'une grille entière.
  * C'est le comportement voulu : sur un écran de verrouillage, c'est bien
@@ -2209,7 +2207,7 @@ export type Ecran = 'accueil' | 'verrou'
  */
 const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
   accueil: [0.24, 0.92],
-  verrou: [0.12, 0.275],
+  verrou: [0.085, 0.305],
 }
 
 /*

@@ -412,10 +412,14 @@ describe('place de l’heure', () => {
     const nombres = (cartouche.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
     const abscisses = nombres.filter((_, i) => i % 2 === 0)
     const ordonnees = nombres.filter((_, i) => i % 2 === 1)
-    expect(Math.min(...ordonnees)).toBeLessThanOrEqual(900 * 0.12)
-    expect(Math.max(...ordonnees)).toBeGreaterThanOrEqual(900 * 0.275)
-    expect(Math.min(...abscisses)).toBeGreaterThan(0)
-    expect(Math.max(...abscisses)).toBeLessThan(400)
+    expect(Math.min(...ordonnees)).toBeLessThanOrEqual(900 * 0.09)
+    expect(Math.max(...ordonnees)).toBeGreaterThanOrEqual(900 * 0.3)
+    /* Et il garde toujours du motif de chaque côté : un cartouche qui touche
+       un bord redevient une bande, et c'est la seule panne dont ce dessin ne
+       se relève pas. Le quart du retrait est ce que `fermer` garantit, quoi
+       qu'un bout de forme demande. */
+    expect(Math.min(...abscisses)).toBeGreaterThanOrEqual(400 * 0.05 * 0.25)
+    expect(Math.max(...abscisses)).toBeLessThanOrEqual(400 * (1 - 0.05 * 0.25))
   })
 
   it('range le voile du verrouillage dans la réserve, et l’en laisse sortir nul', () => {

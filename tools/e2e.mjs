@@ -138,8 +138,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const M = window.MOTEUR, W = 300, H = 650, mauvaises = [];
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
-    const x0 = Math.round(W * 0.1), x1 = Math.round(W * 0.9);
-    const y0 = Math.round(H * 0.12), y1 = Math.round(H * 0.275);
+    /* Un cheveu en dedans du cartouche, dont les bornes sont dans
+       `lib/lisieres.ts` : cinq centièmes de retrait latéral, et de sept
+       centièmes et demi à trente et un et demi en hauteur. */
+    const x0 = Math.round(W * 0.07), x1 = Math.round(W * 0.93);
+    const y0 = Math.round(H * 0.09), y1 = Math.round(H * 0.3);
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       M.dessiner(g, W, H, { famille: f.id, palette: 'lime', densite: d, graine: 7314 },
         { ecran: 'verrou', voile: false, arret: 'formes' });
@@ -182,7 +185,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
          cartouche élargi jusqu'aux bords ou remonté jusqu'en haut les aurait
          mangés, et c'est cela seul qu'on cherche. */
       const ton = lu(Math.round(W / 2), Math.round(H * 0.2));
-      const coins = [[6, 6], [W - 6, 6], [6, Math.round(H * 0.2)], [W - 6, Math.round(H * 0.2)]];
+      const coins = [[2, 2], [W - 2, 2], [2, Math.round(H * 0.2)], [W - 2, Math.round(H * 0.2)]];
       if (coins.every(([x, y]) => lu(x, y) === ton)) nus.push(f);
     }
     return nus;

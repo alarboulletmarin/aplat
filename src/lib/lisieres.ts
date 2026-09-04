@@ -57,14 +57,36 @@ import { bruiteur, hacher, type Point } from './trace'
  * cartouche qui ne les couvrirait pas laisserait du motif sous l'heure. Le
  * dessin de chaque geste a donc le droit d'aller au delà, jamais en deçà.
  *
- * `RETRAIT` est ce qui fait la différence entre une forme et une bande. À zéro,
- * le cartouche touche les deux bords et redevient une coupure ; à un vingtième
- * de la largeur, on voit le motif passer derrière lui de chaque côté et il se
- * lit comme posé dessus.
+ * Les trois chiffres viennent de ce que les deux systèmes font réellement, et
+ * non d'un coup d'oeil sur une maquette, qui les avait mis trop bas et trop
+ * rentrés.
+ *
+ * En haut, il faut remonter plus qu'on ne croit. iOS pose une ligne de date au
+ * dessus de l'heure, et ses versions récentes savent replier l'heure en petit
+ * dans la rangée du haut ; Android, lui, n'a pas d'horloge fixe du tout :
+ * grande et centrée au repos, elle se réduit et file en haut à gauche dès
+ * qu'une notification arrive. Le cartouche part donc juste sous la barre
+ * d'état.
+ *
+ * En bas, iOS range une rangée de widgets immédiatement sous l'heure depuis la
+ * seizième version. S'arrêter au bas des chiffres la laissait sur le motif nu.
+ *
+ * Sur les côtés, `RETRAIT` est ce qui fait la différence entre une forme et une
+ * bande : à zéro, le cartouche touche les deux bords et redevient une coupure.
+ * Il ne peut pas être large pour autant, l'horloge d'Android venant se ranger
+ * contre la marge gauche, et il vaut donc le vingtième de la largeur, ce qui
+ * laisse voir le motif passer derrière sans découvrir les chiffres.
+ *
+ * Ce qui reste dehors est assumé : l'heure compacte des dernières versions
+ * d'iOS et l'horloge repliée d'Android tombent au dessus du cartouche, dans la
+ * barre d'état. Les couvrir aurait demandé un bandeau plein cadre, c'est-à-dire
+ * précisément ce qu'on a passé trois essais à ne plus faire, et les deux
+ * systèmes posent de toute façon leur propre voile derrière ces deux
+ * affichages.
  */
-export const HAUT = 0.11
-export const BAS = 0.285
-export const RETRAIT = 0.075
+export const HAUT = 0.075
+export const BAS = 0.315
+export const RETRAIT = 0.05
 
 /** Le rectangle que tout cartouche doit couvrir, avec son retrait latéral. */
 function boite(W: number, H: number) {
@@ -92,6 +114,13 @@ function fermer(
 ): Point[] {
   const b = boite(W, H)
   const large = b.x1 - b.x0
+  /* Le débord latéral est borné ici, et non laissé à la conscience de chaque
+     geste. Un bout bien rond demandait plus que le retrait ne pouvait donner, et
+     le cartouche sortait du cadre par la gauche : il touchait le bord, donc il
+     redevenait une bande, et c'est précisément la panne qu'on ne veut plus. La
+     borne garde toujours un quart du retrait en motif visible de chaque côté,
+     quoi qu'un bout demande. */
+  const brider = (x: number) => Math.max(W * RETRAIT * 0.25, Math.min(W * (1 - RETRAIT * 0.25), x))
   const points: Point[] = []
   for (let i = 0; i <= pas; i += 1) {
     const t = i / pas
@@ -100,7 +129,7 @@ function fermer(
   const bouts = 12
   for (let i = 1; i < bouts; i += 1) {
     const s = i / bouts
-    points.push([b.x1 + bout(s) * large, b.y0 + s * (b.y1 - b.y0)])
+    points.push([brider(b.x1 + bout(s) * large), b.y0 + s * (b.y1 - b.y0)])
   }
   for (let i = pas; i >= 0; i -= 1) {
     const t = i / pas
@@ -108,7 +137,7 @@ function fermer(
   }
   for (let i = 1; i < bouts; i += 1) {
     const s = 1 - i / bouts
-    points.push([b.x0 - bout(s) * large, b.y0 + s * (b.y1 - b.y0)])
+    points.push([brider(b.x0 - bout(s) * large), b.y0 + s * (b.y1 - b.y0)])
   }
   return points
 }
