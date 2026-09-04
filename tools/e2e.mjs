@@ -123,12 +123,11 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     'ciel ' + reserve.ciel.contraste.toFixed(1) + ':1');
 
   // Et la garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
-  // familles et les trois densités, la réserve reste d'un seul ton. Le cadre
-  // suffit pour la plupart, mais trente-cinq familles débordent volontairement
-  // de celui qu'on leur donne (une onde par le haut, un relief hors champ, une
-  // corolle qui sort ses pétales) et c'est l'aplat de fond reposé ensuite qui
-  // rend le bord net. Le vérifier famille par famille est le seul moyen : une
-  // seule qui déborde, et l'heure se pose sur un motif.
+  // familles et les trois densités, la place des chiffres reste d'un seul ton.
+  // La bande contrôlée s'arrête au dessus du point le plus haut que la lisière
+  // puisse atteindre : sous ce point, le motif a le droit de remonter, et c'est
+  // même tout l'objet de la courbe. Le vérifier famille par famille est le seul
+  // moyen : une seule qui déborde, et l'heure se pose sur un motif.
   const debords = await page.evaluate(() => {
     const M = window.MOTEUR, W = 300, H = 650, mauvaises = [];
     const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -136,7 +135,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       M.dessiner(g, W, H, { famille: f.id, palette: 'lime', densite: d, graine: 7314 },
         { ecran: 'verrou', voile: false, arret: 'formes' });
-      const px = g.getImageData(0, 0, W, Math.round(H * 0.33)).data;
+      const px = g.getImageData(0, 0, W, Math.round(H * 0.28)).data;
       const [r0, v0, b0] = [px[0], px[1], px[2]];
       let n = 0;
       for (let i = 0; i < px.length; i += 4 * 37) {

@@ -410,16 +410,18 @@ describe('réserve de l’heure', () => {
     expect(motifSeul).toHaveLength(accueil.length)
     expect(motifSeul.some((d, i) => d === accueil[i])).toBe(false)
 
-    /* Et le motif commence bien sous la réserve. `blobs` est le témoin qu'il
-       faut : ses formes sont fermées et tiennent dans leur cadre, si bien que
-       ce contrôle porte sur le cadrage et non sur l'aplat qui rogne. Les
-       familles qui débordent volontairement, elles, sont comptées ailleurs :
-       `tools/e2e.mjs` les rend toutes les trois densités et vérifie qu'aucun
-       pixel de la réserve ne bouge. */
+    /* Et le motif commence bien sous la réserve, au point le plus haut que sa
+       lisière puisse atteindre : c'est là que commence le cadre, et c'est
+       exactement ce qui permet à la courbe de mordre dans le motif là où elle
+       redescend au lieu de passer dans du fond nu. `blobs` est le témoin qu'il
+       faut, ses formes étant fermées et tenant dans leur cadre. Les familles
+       qui débordent volontairement sont comptées ailleurs : `tools/e2e.mjs`
+       les rend toutes les trois densités et vérifie que rien ne monte au
+       dessus de la lisière. */
     const ordonnees = (d: string) =>
       (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number).filter((_, i) => i % 2 === 1)
     const plusHaut = Math.min(...motifSeul.flatMap(ordonnees))
-    expect(plusHaut).toBeGreaterThanOrEqual(900 * 0.36 - 1)
+    expect(plusHaut).toBeGreaterThanOrEqual(900 * (0.36 - 0.07) - 1)
   })
 
   it('range le voile du verrouillage dans la réserve, et l’en laisse sortir nul', () => {

@@ -34,7 +34,7 @@
  */
 import {
   alea, cadreDuMotif, formes, graineDeDessin, mesurer, MOT_PAR_DEFAUT, palette,
-  peindreOmbre, peindreVoile,
+  peindreOmbre, peindrePlaceDeLHeure, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
@@ -439,12 +439,10 @@ export function svgDuMotif(
     Math.min(largeur, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT,
   )
   notaire.restore()
-  /* Le fond reposé sur la réserve : il ne rogne que ce que le motif y a fait
-     déborder, le cadre l'ayant déjà composé plus bas. */
-  if (cadre.haut > 0) {
-    notaire.fillStyle = P.fond
-    notaire.fillRect(0, 0, largeur, cadre.haut)
-  }
+  /* La place de l'heure, dans le même ordre que sur le canevas : elle ne rogne
+     que ce que le motif a fait monter au dessus de sa lisière, le cadre l'ayant
+     déjà composé plus bas. */
+  peindrePlaceDeLHeure(notaire, largeur, hauteur, P.fond, ecran, motif.graine)
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
      même titre que le voile. Elle reste hors du chemin quand aucune des deux

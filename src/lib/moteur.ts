@@ -2195,9 +2195,11 @@ export type Ecran = 'accueil' | 'verrou'
  * La bande mesurée, en parts de la hauteur.
  *
  * Celle de l'accueil va du haut de la première rangée d'icônes au bas du dock.
- * Celle du verrouillage tient le cartouche de l'heure, plus la marge que les
- * systèmes lui laissent : elle est quatre fois plus courte, et c'est ce qui la
- * rend sévère. Une bande courte ne moyenne presque rien, si bien qu'une seule
+ * Celle du verrouillage tient le cartouche de l'heure, et elle s'arrête au
+ * dessus du point le plus haut que la lisière de la réserve puisse atteindre :
+ * la sonde ne doit jamais mesurer un morceau de motif qui remonte sous les
+ * chiffres. Elle est quatre fois plus courte que celle de l'accueil, et c'est
+ * ce qui la rend sévère. Une bande courte ne moyenne presque rien, si bien qu'une seule
  * forme claire posée derrière les chiffres suffit à faire tomber le verdict,
  * là où la même forme se serait noyée dans la moyenne d'une grille entière.
  * C'est le comportement voulu : sur un écran de verrouillage, c'est bien
@@ -2205,7 +2207,7 @@ export type Ecran = 'accueil' | 'verrou'
  */
 const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
   accueil: [0.24, 0.92],
-  verrou: [0.11, 0.33],
+  verrou: [0.1, 0.27],
 }
 
 /*
@@ -2272,10 +2274,7 @@ export function mesurer(
     formes(ctx, PW, cadre.hauteur, id, P.couleurs, densite,
       alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur), mot)
     ctx.restore()
-    if (cadre.haut > 0) {
-      ctx.fillStyle = P.fond
-      ctx.fillRect(0, 0, PW, cadre.haut)
-    }
+    peindrePlaceDeLHeure(ctx, PW, PH, P.fond, ecran, graine)
 
     try {
       const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
@@ -2379,20 +2378,86 @@ export function mesurer(
  * n'est donc pas une version voilée : c'en est une autre composition.
  */
 
-/** Où commence la surface du motif, en parts de la hauteur, sur un verrouillage. */
+/**
+ * La place de l'heure, en parts de la hauteur : sa profondeur moyenne, et de
+ * combien sa lisière monte et descend autour.
+ *
+ * Ce sont deux nombres et non un seul parce que la lisière n'est pas une ligne.
+ * Une droite en travers du cadre est un effacement, quoi qu'on ait fait pour
+ * l'obtenir : l'oeil y lit une image coupée et un blanc rapporté par-dessus.
+ * Une courbe qui monte et descend d'un dixième de la hauteur est une forme, et
+ * une forme de plus dans une image qui n'est faite que de formes se lit comme
+ * la composition et non comme une rature.
+ */
 const RESERVE = 0.36
+const LISIERE = 0.07
+
+/**
+ * La lisière de la réserve : jusqu'où le fond descend, à l'abscisse donnée.
+ *
+ * Deux harmoniques, pour qu'elle ne se lise pas comme un sinus, et une phase
+ * tirée de la graine du motif : deux motifs voisins n'ont pas la même lisière.
+ * Elle se mesure en parts de la hauteur, donc elle grandit avec l'image et un
+ * rendu deux fois plus grand est le même rendu.
+ */
+export function lisiereDeReserve(x: number, W: number, H: number, graine: number): number {
+  const rnd = alea(graine ^ 0x5eaf00d)
+  const phase = rnd() * Math.PI * 2
+  const periode = 1 + Math.floor(rnd() * 2)
+  const creux = H * LISIERE
+  return H * RESERVE
+    + Math.sin(phase + (x / W) * Math.PI * 2 * periode) * creux * 0.72
+    + Math.sin(phase * 1.7 + (x / W) * Math.PI * 2 * periode * 2) * creux * 0.28
+}
 
 /**
  * Le cadre laissé au motif : l'image entière sur un accueil, ce qui reste sous
- * la réserve sur un verrouillage.
+ * le point le plus haut de la lisière sur un verrouillage.
+ *
+ * Le point le plus haut, et non la profondeur moyenne : le motif doit monter
+ * jusque sous la lisière partout où elle remonte, sans quoi la courbe passerait
+ * dans du fond nu sur la moitié de sa longueur et ne se verrait pas. Là où elle
+ * redescend, elle mord dans le motif, et c'est ce qui lui donne son tracé.
  *
  * Le décalage et la hauteur sont des parts exactes de `H`, jamais des nombres
  * de pixels arrondis : une image rendue deux fois plus grande donne un cadre
  * deux fois plus grand, au bit près, et la vignette montre donc le fichier.
  */
 export function cadreDuMotif(H: number, ecran: Ecran): { haut: number; hauteur: number } {
-  const haut = ecran === 'verrou' ? H * RESERVE : 0
+  const haut = ecran === 'verrou' ? H * (RESERVE - LISIERE) : 0
   return { haut, hauteur: H - haut }
+}
+
+/**
+ * La place de l'heure, peinte : le fond, jusqu'à la lisière.
+ *
+ * Le nom est long et le restera : `peindreReserve` est déjà pris par le geste
+ * de la réserve, celui du claustra et du papel picado, qui n'a rien à voir.
+ *
+ * Elle ne rogne que ce que le motif a fait monter au dessus de sa lisière.
+ * Pour une famille qui a un haut et un bas, les vagues, les dunes, l'horizon,
+ * elle ne rogne rien du tout : leur ciel est déjà là et la courbe passe dans du
+ * fond. Pour une famille qui n'a ni haut ni bas, un pavage, une trame, elle
+ * devient son bord supérieur, et c'est tout l'objet de la manoeuvre : le motif
+ * s'arrête sur une courbe qu'on prend pour une de ses formes plutôt que sur la
+ * ligne d'une paire de ciseaux.
+ */
+export function peindrePlaceDeLHeure(
+  ctx: Pinceau, W: number, H: number, fond: string, ecran: Ecran, graine: number,
+): void {
+  if (ecran !== 'verrou') return
+  /* Le pas d'échantillonnage suit la largeur : la courbe reste lisse même
+     quand on zoome à cent pour cent dans un fond d'écran 4K. */
+  const pas = Math.max(1, W / 240)
+  ctx.fillStyle = fond
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(W, 0)
+  ctx.lineTo(W, lisiereDeReserve(W, W, H, graine))
+  for (let x = W - pas; x > 0; x -= pas) ctx.lineTo(x, lisiereDeReserve(x, W, H, graine))
+  ctx.lineTo(0, lisiereDeReserve(0, W, H, graine))
+  ctx.closePath()
+  ctx.fill()
 }
 
 /* ---------- voile de lisibilité ---------------------------------------------- */
@@ -2620,10 +2685,7 @@ function rendre(
       alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
       Math.min(W, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT)
     ctx.restore()
-    if (cadre.haut > 0) {
-      ctx.fillStyle = P.fond
-      ctx.fillRect(0, 0, W, cadre.haut)
-    }
+    peindrePlaceDeLHeure(ctx, W, H, P.fond, mesure.ecran, motif.graine)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)
