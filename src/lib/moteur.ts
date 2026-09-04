@@ -23,7 +23,8 @@ import {
   estSurimpression, peindreSurimpression, type IdSurimpression,
 } from './surimpression'
 import { CARACTERES } from './alphabet'
-import { HAUTE, lisiereDuGeste } from './lisieres'
+import { cartoucheDuGeste } from './lisieres'
+import { luminanceHex } from './trace'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -2208,7 +2209,7 @@ export type Ecran = 'accueil' | 'verrou'
  */
 const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
   accueil: [0.24, 0.92],
-  verrou: [0.1, 0.27],
+  verrou: [0.12, 0.275],
 }
 
 /*
@@ -2264,18 +2265,12 @@ export function mesurer(
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = P.fond
     ctx.fillRect(0, 0, PW, PH)
-    /* La sonde compose comme le rendu, dans le même cadre : sur un écran de
-       verrouillage elle ne doit pas trouver le motif sous les chiffres, elle
-       doit trouver ce qui y sera. Sans ce cadre, elle mesurerait une image que
-       le fichier ne porte pas, et doserait un voile contre un motif que la
-       réserve a déjà écarté. */
-    const cadre = cadreDuMotif(PH, ecran)
-    ctx.save()
-    ctx.translate(0, cadre.haut)
-    formes(ctx, PW, cadre.hauteur, id, P.couleurs, densite,
-      alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur), mot)
-    ctx.restore()
-    peindrePlaceDeLHeure(ctx, PW, PH, P.fond, ecran, id, graine)
+    formes(ctx, PW, PH, id, P.couleurs, densite,
+      alea(graineDeDessin(id, densite, graine)), Math.min(PW, PH), mot)
+    /* La sonde pose le cartouche comme le rendu : sur un écran de verrouillage
+       elle ne doit pas trouver le motif sous les chiffres, elle doit trouver ce
+       qui y sera. */
+    peindrePlaceDeLHeure(ctx, PW, PH, P, ecran, id, graine)
 
     try {
       const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
@@ -2380,61 +2375,80 @@ export function mesurer(
  */
 
 /**
- * La place de l'heure : le motif s'arrête, chacun à sa façon.
+ * La place de l'heure : une forme du motif, pas un trou dans le motif.
  *
- * Où le motif s'arrête est décidé par `lib/lisieres.ts`, un geste à la fois :
- * une fracture finit sur une arête de plaque, un carreau sur des cases
- * entières, une coulée sur ses arcs, une ligne de niveau sur une courbe de
- * niveau. Le moteur ne connaît ici que les deux bornes entre lesquelles toutes
- * doivent tenir, et il ne les connaît que pour une raison : la sonde mesure au
- * dessus de la borne haute, et rien ne doit y monter.
+ * Le motif couvre le cadre entier, comme sur n'importe quel autre écran. Une de
+ * ses formes vient seulement se placer là où tombent les chiffres, dessinée
+ * dans le vocabulaire de son geste : une plaque pour la fracture, un bloc de
+ * cases pour le carreau, une capsule pour la coulée, un palier pour la ligne de
+ * niveau. Le dessin de ces quinze formes est dans `lib/lisieres.ts` ; le moteur
+ * ne décide ici que de leur couleur.
  *
- * Le cadre du motif commence à cette borne haute, non à la borne basse. C'est
- * le détail dont tout dépend : le motif monte jusque sous la lisière partout où
- * elle remonte, et elle mord dedans là où elle redescend, ce qui lui donne son
- * tracé. Un cadre commencé à la borne basse aurait rendu la lisière invisible,
- * du fond peint sur du fond, et la ligne droite serait revenue par la porte de
- * derrière.
+ * Le cadre du motif n'est donc plus raccourci, et `cadreDuMotif` a disparu avec
+ * la raison qui l'avait fait naître. C'est le troisième essai et le seul qui
+ * tienne : recouvrir le haut effaçait, arrêter le motif sur une lisière laissait
+ * un vide, et dans les deux cas le fond d'écran commençait sous l'heure au lieu
+ * de la porter.
  */
 
 /**
- * Le cadre laissé au motif : l'image entière sur un accueil, ce qui reste sous
- * la borne haute des lisières sur un verrouillage.
+ * La teinte du cartouche : une des franches de la palette, tirée au sort.
  *
- * Le décalage et la hauteur sont des parts exactes de `H`, jamais des nombres
- * de pixels arrondis : une image rendue deux fois plus grande donne un cadre
- * deux fois plus grand, au bit près, et la vignette montre donc le fichier.
+ * Deux exigences qui se contredisent, et le tirage est ce qui les concilie.
+ *
+ * Les chiffres ne sont pas dessinés par le produit, c'est le système qui les
+ * pose, et il les pose clairs ou sombres selon ce qu'il trouve : le cartouche
+ * doit donc être franchement d'un côté ou de l'autre de l'échelle, jamais au
+ * milieu, sans quoi ni le blanc ni le noir n'y tiennent. Mais prendre chaque
+ * fois la teinte la plus tranchée donnait à toutes les palettes et à toutes les
+ * familles le même aplat, le marine de la palette sur les onze motifs d'affilée,
+ * et un cartouche qui ne varie jamais cesse d'appartenir au motif : il devient
+ * le bandeau du produit.
+ *
+ * On garde donc toutes les teintes assez franches pour porter des chiffres, le
+ * fond compris, et la graine en choisit une. Quand aucune ne l'est, ce qui
+ * arrive sur une palette entièrement moyenne, on retombe sur la plus tranchée
+ * des mauvaises : mieux vaut un contraste imparfait qu'un contraste nul, et la
+ * sonde le dira de toute façon.
  */
-export function cadreDuMotif(H: number, ecran: Ecran): { haut: number; hauteur: number } {
-  const haut = ecran === 'verrou' ? H * HAUTE : 0
-  return { haut, hauteur: H - haut }
+const FRANCHISE = 0.26
+
+function teinteDuCartouche(P: Palette, rnd: Alea): string {
+  const candidates = [P.fond, ...P.couleurs]
+  const ecart = (teinte: string) => Math.abs(luminanceHex(teinte) - 0.5)
+  const franches = candidates.filter((teinte) => ecart(teinte) >= FRANCHISE)
+  if (franches.length > 0) return franches[Math.floor(rnd() * franches.length)]
+  return candidates.reduce((a, b) => (ecart(b) > ecart(a) ? b : a))
 }
 
 /**
- * La place de l'heure, peinte : le fond, jusqu'à la lisière du geste.
+ * Le cartouche, peint par dessus le motif.
  *
- * Le nom est long et le restera : `peindreReserve` est déjà pris par le geste
- * de la réserve, celui du claustra et du papel picado, qui n'a rien à voir.
+ * Le nom `peindreReserve` étant déjà pris par le geste du claustra, celui-ci
+ * est long et le restera.
  *
- * La lisière est tirée d'un aléa à part, dérivé de la graine du motif mais
- * distinct de celui du dessin. Sans cela, elle consommerait les premiers
- * tirages de la famille et changerait le motif entier au lieu de changer son
- * seul bord : un fond d'écran d'accueil et son verrouillage ne montreraient
- * plus la même image, ce qui est exactement ce qu'on ne veut pas.
+ * La forme est tirée d'un aléa dérivé de la graine du motif mais distinct de
+ * celui du dessin. Sans cette précaution elle consommerait les premiers tirages
+ * de la famille et changerait le motif entier au lieu d'ajouter une forme : un
+ * fond d'écran d'accueil et son verrouillage ne montreraient plus la même
+ * image, ce qui est exactement ce qu'on ne veut pas.
  */
 export function peindrePlaceDeLHeure(
-  ctx: Pinceau, W: number, H: number, fond: string, ecran: Ecran,
+  ctx: Pinceau, W: number, H: number, P: Palette, ecran: Ecran,
   famille: IdFamille, graine: number,
 ): void {
   if (ecran !== 'verrou') return
-  const lisiere = lisiereDuGeste(famille, W, H, alea(graine ^ 0x5eaf00d))
-  if (lisiere.length < 2) return
-  ctx.fillStyle = fond
+  /* L'aléa mêle la famille à la graine, et pas seulement pour la forme : sans
+     elle, un même tirage donnait la même teinte de cartouche aux
+     soixante-dix-neuf familles, et l'aplat se lisait comme le bandeau du
+     produit plutôt que comme une forme du motif. */
+  const rnd = alea((graine ^ 0x5eaf00d) + empreinte(famille) * 7919)
+  const contour = cartoucheDuGeste(famille, W, H, rnd)
+  if (contour.length < 3) return
+  ctx.fillStyle = teinteDuCartouche(P, rnd)
   ctx.beginPath()
-  ctx.moveTo(0, 0)
-  ctx.lineTo(W, 0)
-  for (let i = lisiere.length - 1; i >= 0; i -= 1) ctx.lineTo(lisiere[i][0], lisiere[i][1])
-  ctx.lineTo(0, 0)
+  ctx.moveTo(contour[0][0], contour[0][1])
+  for (const p of contour.slice(1)) ctx.lineTo(p[0], p[1])
   ctx.closePath()
   ctx.fill()
 }
@@ -2651,20 +2665,13 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    /* Le cadre du motif, et non le cadre de l'image : sur un verrouillage, il
-       commence sous la réserve. Le motif n'en sait rien et n'a pas à le savoir,
-       il compose pour la hauteur qu'on lui donne. L'escalier des couches de
-       « /moteur » n'a donc pas de marche de plus à montrer : la place de
-       l'heure se voit dès la deuxième, parce qu'elle est la composition et non
-       une correction posée dessus. */
-    const cadre = cadreDuMotif(H, mesure.ecran)
-    ctx.save()
-    ctx.translate(0, cadre.haut)
-    formes(ctx, W, cadre.hauteur, motif.famille, P.couleurs, motif.densite,
+    formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
       alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-      Math.min(W, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT)
-    ctx.restore()
-    peindrePlaceDeLHeure(ctx, W, H, P.fond, mesure.ecran, motif.famille, motif.graine)
+      Math.min(W, H), motif.mot ?? MOT_PAR_DEFAUT)
+    /* Le cartouche appartient à la couche des formes : c'est une forme du motif
+       et non une correction posée dessus, et l'escalier des couches de
+       « /moteur » n'a donc pas de marche de plus à montrer. */
+    peindrePlaceDeLHeure(ctx, W, H, P, mesure.ecran, motif.famille, motif.graine)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)

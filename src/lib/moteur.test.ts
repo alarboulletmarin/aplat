@@ -375,8 +375,9 @@ describe('voile retiré', () => {
 /**
  * La réserve de l'heure : ce que l'écran de verrouillage change au fichier.
  *
- * Elle n'est pas une couche de plus, elle appartient à celle des formes : le
- * motif laisse une place plutôt qu'on ne pose une correction dessus.
+ * Elle n'est pas une couche de plus, elle appartient à celle des formes : c'est
+ * une forme du motif, dessinée dans le vocabulaire de son geste, et non une
+ * correction posée sur une image finie.
  *
  * Sa conséquence la plus intéressante n'est pas ici et ne peut pas y être : la
  * sonde mesure sa bande après la réserve, n'y trouve que le fond, et le voile
@@ -384,44 +385,37 @@ describe('voile retiré', () => {
  * donc un navigateur ; c'est `tools/e2e.mjs`, section 4 bis, qui s'en charge,
  * comme pour tout ce qui touche à la sonde.
  */
-describe('réserve de l’heure', () => {
-  it('recompose le motif au lieu d’en recouvrir le haut', () => {
-    /* La distinction qui vaut le geste, et la seule qui se mesure de
-       l'extérieur. Recouvrir aurait ajouté un aplat de fond par dessus un
-       motif inchangé : autant de formes qu'avant, plus une. Cadrer n'ajoute
-       rien et déplace tout, le motif étant redessiné pour une surface plus
-       courte. On compte donc les formes et on regarde où elles tombent. */
+describe('place de l’heure', () => {
+  it('ajoute une forme au motif, sans en changer une seule autre', () => {
+    /* Ce que le verrouillage fait au fichier, et ce qu'il ne lui fait pas.
+
+       Il ne recadre plus rien : le motif est peint sur le cadre entier, exactement
+       comme sur l'écran d'accueil, et le fond d'écran est donc le même des deux
+       côtés. Une forme s'y ajoute, une seule, et c'est le cartouche qui porte
+       l'heure. Les deux moitiés de cette phrase se mesurent ici, et il faut les
+       deux : sans la première, le cartouche serait redevenu un recadrage
+       déguisé ; sans la seconde, il aurait pu se dédoubler sans que rien ne le
+       dise. */
     const posees = (ecran: 'accueil' | 'verrou') =>
       [...svgDuMotif({ famille: 'blobs', palette: 'lime', densite: 1, graine: 7314 },
         400, 900, false, false, ecran).texte.matchAll(/<path d="([^"]*)"/g)]
         .map((m) => m[1])
-        /* La première est l'aplat de fond, posé sur toute l'image avant le
-           motif : elle part de l'origine et n'a rien à dire ici. */
-        .slice(1)
     const accueil = posees('accueil')
     const verrou = posees('verrou')
-    /* Un aplat de plus, celui qui rend la réserve nette. S'il était tout ce que
-       le verrouillage ajoutait, les formes du motif seraient les mêmes des deux
-       côtés : ce serait un recouvrement. Elles diffèrent toutes, parce que le
-       motif a été composé pour une autre surface. C'est là, et seulement là,
-       que se lit la différence entre cadrer et recouvrir. */
-    expect(verrou.length).toBe(accueil.length + 1)
-    const motifSeul = verrou.slice(0, -1)
-    expect(motifSeul).toHaveLength(accueil.length)
-    expect(motifSeul.some((d, i) => d === accueil[i])).toBe(false)
+    expect(verrou).toHaveLength(accueil.length + 1)
+    expect(verrou.slice(0, accueil.length)).toEqual(accueil)
 
-    /* Et le motif commence bien sous la réserve, au point le plus haut que sa
-       lisière puisse atteindre : c'est là que commence le cadre, et c'est
-       exactement ce qui permet à la courbe de mordre dans le motif là où elle
-       redescend au lieu de passer dans du fond nu. `blobs` est le témoin qu'il
-       faut, ses formes étant fermées et tenant dans leur cadre. Les familles
-       qui débordent volontairement sont comptées ailleurs : `tools/e2e.mjs`
-       les rend toutes les trois densités et vérifie que rien ne monte au
-       dessus de la lisière. */
-    const ordonnees = (d: string) =>
-      (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number).filter((_, i) => i % 2 === 1)
-    const plusHaut = Math.min(...motifSeul.flatMap(ordonnees))
-    expect(plusHaut).toBeGreaterThanOrEqual(900 * (0.36 - 0.07) - 1)
+    /* Et le cartouche couvre bien la bande des chiffres, sans toucher les bords
+       du cadre : c'est ce retrait latéral qui le fait lire comme une forme
+       posée sur le motif plutôt que comme une bande qui le coupe. */
+    const cartouche = verrou[verrou.length - 1]
+    const nombres = (cartouche.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
+    const abscisses = nombres.filter((_, i) => i % 2 === 0)
+    const ordonnees = nombres.filter((_, i) => i % 2 === 1)
+    expect(Math.min(...ordonnees)).toBeLessThanOrEqual(900 * 0.12)
+    expect(Math.max(...ordonnees)).toBeGreaterThanOrEqual(900 * 0.275)
+    expect(Math.min(...abscisses)).toBeGreaterThan(0)
+    expect(Math.max(...abscisses)).toBeLessThan(400)
   })
 
   it('range le voile du verrouillage dans la réserve, et l’en laisse sortir nul', () => {

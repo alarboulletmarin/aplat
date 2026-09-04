@@ -107,38 +107,46 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   const reserve = await page.evaluate(() => {
     const M = window.MOTEUR;
     const out = {};
-    for (const pal of ['lime', 'soleil', 'encre', 'ciel']) {
+    for (const pal of M.ORDRE_PALETTES) {
       const a = M.mesurer('meandres', pal, 1, 7314, 400, 900, false, 'accueil');
       const v = M.mesurer('meandres', pal, 1, 7314, 400, 900, false, 'verrou');
       out[pal] = { avant: a.voile, apres: v.voile, contraste: v.contraste };
     }
     return out;
   });
-  const eteintes = ['lime', 'soleil', 'encre'];
-  t(eteintes.every(p => reserve[p].avant > 0 && reserve[p].apres === 0),
-    'réserve : le voile tombe à zéro là où le fond suffit',
-    eteintes.map(p => `${p} ${reserve[p].avant.toFixed(2)} -> ${reserve[p].apres.toFixed(2)}`).join(', '));
-  t(reserve.ciel.apres > 0 && reserve.ciel.contraste >= 3,
-    'réserve : un fond moyen garde son appoint, et le contraste tient',
-    'ciel ' + reserve.ciel.contraste.toFixed(1) + ':1');
+  const palettes = Object.keys(reserve);
+  const voilees = palettes.filter(p => reserve[p].apres > 0);
+  t(voilees.length === 0, 'cartouche : le voile n\'a plus rien à corriger sous les chiffres',
+    voilees.join(', ') || palettes.length + ' palettes, voile nul partout');
+  const faibles = palettes.filter(p => reserve[p].contraste < 4.5);
+  t(faibles.length === 0, 'cartouche : le contraste tient sur les onze palettes',
+    faibles.map(p => `${p} ${reserve[p].contraste.toFixed(1)}`).join(', ')
+    || 'le plus faible : ' + Math.min(...palettes.map(p => reserve[p].contraste)).toFixed(1) + ':1');
+  const corriges = palettes.filter(p => reserve[p].avant > 0);
+  t(corriges.length >= 8,
+    'cartouche : et l\'écran d\'accueil, lui, avait bien besoin de son voile',
+    corriges.length + ' palettes sur ' + palettes.length);
 
   // Et la garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
-  // familles et les trois densités, la place des chiffres reste d'un seul ton.
-  // La bande contrôlée s'arrête au dessus du point le plus haut que la lisière
-  // puisse atteindre : sous ce point, le motif a le droit de remonter, et c'est
-  // même tout l'objet de la courbe. Le vérifier famille par famille est le seul
-  // moyen : une seule qui déborde, et l'heure se pose sur un motif.
-  const debords = await page.evaluate(() => {
+  // familles et les trois densités, le cartouche couvre la bande des chiffres
+  // d'un seul aplat. Ce n'est plus un vide qu'on vérifie, c'est une forme : le
+  // motif court partout ailleurs, y compris au dessus et sur les côtés, et
+  // seule la bande où tombe l'heure doit être d'un ton unique. Une forme trop
+  // courte, trop haute ou trop étroite laisserait du motif sous les chiffres,
+  // et rien ne le dirait.
+  const couverture = await page.evaluate(() => {
     const M = window.MOTEUR, W = 300, H = 650, mauvaises = [];
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
+    const x0 = Math.round(W * 0.1), x1 = Math.round(W * 0.9);
+    const y0 = Math.round(H * 0.12), y1 = Math.round(H * 0.275);
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       M.dessiner(g, W, H, { famille: f.id, palette: 'lime', densite: d, graine: 7314 },
         { ecran: 'verrou', voile: false, arret: 'formes' });
-      const px = g.getImageData(0, 0, W, Math.round(H * 0.28)).data;
+      const px = g.getImageData(x0, y0, x1 - x0, y1 - y0).data;
       const [r0, v0, b0] = [px[0], px[1], px[2]];
       let n = 0;
-      for (let i = 0; i < px.length; i += 4 * 37) {
+      for (let i = 0; i < px.length; i += 4 * 29) {
         if (Math.abs(px[i] - r0) > 6 || Math.abs(px[i + 1] - v0) > 6
           || Math.abs(px[i + 2] - b0) > 6) n += 1;
       }
@@ -146,47 +154,76 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     }
     return mauvaises;
   });
-  t(debords.length === 0, 'réserve : aucune famille ne déborde sur la place de l\'heure',
-    debords.slice(0, 6).join(', ') || 'les ' + (await page.evaluate(() => window.MOTEUR.FAMILLES.length)) + ' familles, trois densités');
+  const combien = await page.evaluate(() => window.MOTEUR.FAMILLES.length);
+  t(couverture.length === 0, 'cartouche : la bande des chiffres est d\'un seul aplat',
+    couverture.slice(0, 6).join(', ') || 'les ' + combien + ' familles, trois densités');
 
+  // Le motif, lui, continue de courir au dessus du cartouche et sur ses côtés.
+  // C'est la moitié de l'idée, et celle qui se perd le plus facilement : un
+  // cartouche élargi jusqu'aux bords, ou remonté jusqu'en haut, redeviendrait
+  // le bandeau qu'on a mis trois essais à ne plus faire.
+  const autour = await page.evaluate(() => {
+    const M = window.MOTEUR, W = 300, H = 650, nus = [];
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
+    /* Des familles denses, qui couvrent tout : sur une famille clairsemée, une
+       marge sans motif ne prouverait rien. */
+    for (const f of ['carreaux', 'banquise', 'meandres', 'cubes', 'penrose']) {
+      M.dessiner(g, W, H, { famille: f, palette: 'lime', densite: 2, graine: 7314 },
+        { ecran: 'verrou', voile: false, arret: 'formes' });
+      const lu = (x, y) => {
+        const p = g.getImageData(x, y, 1, 1).data;
+        return p[0] + ',' + p[1] + ',' + p[2];
+      };
+      /* Le ton du cartouche, relevé en son milieu, puis les quatre points qui
+         l'entourent. Ce qu'on veut savoir n'est pas qu'ils soient variés, une
+         grande forme du motif pouvant très bien les couvrir tous les quatre
+         d'un même ton : c'est qu'ils ne soient pas le cartouche lui-même. Un
+         cartouche élargi jusqu'aux bords ou remonté jusqu'en haut les aurait
+         mangés, et c'est cela seul qu'on cherche. */
+      const ton = lu(Math.round(W / 2), Math.round(H * 0.2));
+      const coins = [[6, 6], [W - 6, 6], [6, Math.round(H * 0.2)], [W - 6, Math.round(H * 0.2)]];
+      if (coins.every(([x, y]) => lu(x, y) === ton)) nus.push(f);
+    }
+    return nus;
+  });
+  t(autour.length === 0, 'cartouche : le motif court toujours au dessus et sur les côtés',
+    autour.join(', ') || 'cinq familles denses');
 
-  // Et la lisière appartient au geste : deux familles de gestes différents ne
-  // s'arrêtent pas de la même façon. C'est tout l'objet de `lib/lisieres.ts`,
-  // et c'est le genre de chose qui se défait sans bruit, un aiguillage manqué
-  // renvoyant tout le monde sur la crête molle des aplats sans qu'aucune erreur
-  // ne soit levée. On compare donc les lisières deux à deux, sur la même graine
-  // pour que seule la famille change.
-  const lisieres = await page.evaluate(() => {
+  // Et le cartouche appartient au geste : deux familles de gestes différents
+  // n'ont pas la même forme. C'est tout l'objet de `lib/lisieres.ts`, et c'est
+  // le genre de chose qui se défait sans bruit, un aiguillage manqué renvoyant
+  // tout le monde sur le blob des aplats sans qu'aucune erreur ne soit levée.
+  // On relève donc la silhouette du cartouche, colonne par colonne, sur la même
+  // graine pour que seule la famille change.
+  const silhouettes = await page.evaluate(() => {
     const M = window.MOTEUR, W = 300, H = 650;
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
-    const profil = (famille) => {
+    const releve = (famille) => {
       M.dessiner(g, W, H, { famille, palette: 'lime', densite: 1, graine: 7314 },
         { ecran: 'verrou', voile: false, arret: 'formes' });
       const px = g.getImageData(0, 0, W, H).data;
-      const [r0, v0, b0] = [px[0], px[1], px[2]];
-      const bas = [];
-      for (let x = 4; x < W; x += 8) {
+      const lu = (x, y) => {
+        const i = (y * W + x) * 4;
+        return px[i] + ',' + px[i + 1] + ',' + px[i + 2];
+      };
+      const ton = lu(Math.round(W / 2), Math.round(H * 0.2));
+      const hauts = [];
+      for (let x = 4; x < W; x += 6) {
         let y = 0;
-        while (y < H) {
-          const i = (y * W + x) * 4;
-          if (Math.abs(px[i] - r0) > 6 || Math.abs(px[i + 1] - v0) > 6
-            || Math.abs(px[i + 2] - b0) > 6) break;
-          y += 1;
-        }
-        bas.push(y);
+        while (y < H * 0.4 && lu(x, y) !== ton) y += 1;
+        hauts.push(y);
       }
-      return bas.join(',');
+      return hauts.join(',');
     };
-    const temoins = ['vagues', 'banquise', 'carreaux', 'meandres', 'relief', 'cubes', 'tapis'];
-    const vus = new Map();
-    for (const f of temoins) vus.set(f, profil(f));
-    return [...vus.entries()];
+    return ['vagues', 'banquise', 'carreaux', 'meandres', 'relief', 'cubes', 'tapis']
+      .map((f) => [f, releve(f)]);
   });
-  const distinctes = new Set(lisieres.map(([, p]) => p));
-  t(distinctes.size === lisieres.length,
-    'lisière : chaque geste s\'arrête à sa façon, pas deux pareilles',
-    distinctes.size + ' profils pour ' + lisieres.length + ' gestes');
+  const distinctes = new Set(silhouettes.map(([, p]) => p));
+  t(distinctes.size === silhouettes.length,
+    'cartouche : chaque geste a sa forme, pas deux pareilles',
+    distinctes.size + ' silhouettes pour ' + silhouettes.length + ' gestes');
 
   const pente = await page.evaluate(() => {
     const M = window.MOTEUR;

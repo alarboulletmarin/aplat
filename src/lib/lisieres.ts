@@ -1,35 +1,36 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Les lisières : la façon dont chaque geste s'arrête pour laisser la place de
- * l'heure.
+ * Les cartouches : la forme, propre à chaque geste, qui porte l'heure.
  *
- * Sur un écran de verrouillage, le motif ne monte pas jusqu'en haut du cadre :
- * il laisse le tiers supérieur au fond, et les chiffres s'y posent. Reste à
- * savoir **où il s'arrête**, et c'est toute la question.
+ * Sur un écran de verrouillage, les chiffres sont énormes et haut placés, et il
+ * leur faut un aplat lisible. Trois façons de le leur donner, et les deux
+ * premières ont été essayées et jetées.
  *
- * Une horizontale est un effacement. On y lit une image coupée et un blanc
- * rapporté par-dessus, quel que soit le mécanisme qui l'a produite. Une courbe
- * unique appliquée aux soixante-dix-neuf familles n'est guère mieux : elle
- * devient une signature qui n'appartient à aucune d'elles, la même vague molle
- * posée aussi bien sur un damier que sur une houle, et elle se lit comme un
- * gabarit. C'était le premier essai, et c'était le défaut.
+ * Recouvrir le tiers supérieur d'un aplat de fond : c'est un effacement, on lit
+ * une image coupée et un blanc rapporté par-dessus. Arrêter le motif sur une
+ * lisière, fût-elle propre à chaque geste : c'est mieux dessiné, et c'est
+ * toujours un vide. Le fond d'écran commence sous l'heure au lieu de la porter,
+ * et le tiers de l'image ne montre rien.
  *
- * La lisière appartient donc au geste. Une fracture s'arrête sur une arête de
- * plaque, parce que c'est ce qu'une plaque fait. Un carreau s'arrête sur des
- * cases entières, en marches, parce qu'une grille ne connaît pas le milieu
- * d'une case. Une coulée s'arrête sur ses propres arcs épais, une ligne de
- * niveau sur une courbe de niveau, un relief sur une marche isométrique, un
- * réseau sur des angles droits. Quinze gestes, quinze façons de finir, et
- * chacune tirée de la graine : deux motifs d'un même geste n'ont pas la même
- * lisière.
+ * La troisième est celle-ci. Le motif couvre le cadre entier, comme sur
+ * n'importe quel autre écran, et **une de ses formes vient se placer là où
+ * tombent les chiffres**. Une seule, grande, d'un seul aplat, dessinée dans le
+ * vocabulaire du geste : une plaque pour la fracture, un bloc de cases
+ * entières pour le carreau, une capsule pour la coulée, un palier pour la ligne
+ * de niveau, une dalle isométrique pour le relief, un cartouche de station pour
+ * le réseau, une plaque graduée pour la mesure. Le motif continue au dessus, en
+ * dessous et sur les côtés ; l'heure est posée sur une forme de l'image, pas
+ * dans un trou qu'on lui a creusé.
  *
- * **Le contrat.** Une lisière est une polyligne qui traverse l'image de gauche
- * à droite, et son ordonnée reste entre `HAUTE` et `BASSE`. La borne haute est
- * ce qui garantit la place des chiffres : la sonde mesure au dessus d'elle, et
- * rien ne doit y monter. La borne basse évite qu'un geste bavard ne mange la
- * moitié du fond d'écran. Entre les deux, chaque geste fait ce qu'il veut, y
- * compris des sauts verticaux : c'est une polyligne, pas une fonction.
+ * C'est le coeur de la fleur des images de référence : un aplat franc au milieu
+ * de la composition, qui n'interrompt rien parce qu'il en fait partie.
+ *
+ * **Le contrat.** Un cartouche est un contour fermé qui couvre entièrement la
+ * bande où la sonde mesure, `HAUTE` à `BASSE`, et qui ne touche jamais les
+ * bords gauche et droit du cadre : c'est ce retrait latéral qui le fait lire
+ * comme une forme posée plutôt que comme une bande qui coupe l'image. Entre ces
+ * bornes, chaque geste dessine ce qu'il veut.
  */
 import { estCarreau } from './carreaux'
 import { estChimie } from './chimie'
@@ -49,353 +50,372 @@ import { estTrame } from './trames'
 import { bruiteur, hacher, type Point } from './trace'
 
 /**
- * Les deux bornes, en parts de la hauteur.
+ * La bande que le cartouche doit couvrir, en parts de la hauteur, et le retrait
+ * qu'il garde sur les côtés.
  *
- * `HAUTE` est la seule des deux qui soit un engagement : le cadre du motif
- * commence là, la sonde mesure au dessus, et une lisière qui la franchirait
- * poserait le motif sous les chiffres. `BASSE` n'est qu'une convenance.
+ * `HAUT` et `BAS` encadrent les chiffres : la sonde mesure entre eux, et un
+ * cartouche qui ne les couvrirait pas laisserait du motif sous l'heure. Le
+ * dessin de chaque geste a donc le droit d'aller au delà, jamais en deçà.
+ *
+ * `RETRAIT` est ce qui fait la différence entre une forme et une bande. À zéro,
+ * le cartouche touche les deux bords et redevient une coupure ; à un vingtième
+ * de la largeur, on voit le motif passer derrière lui de chaque côté et il se
+ * lit comme posé dessus.
  */
-export const HAUTE = 0.29
-export const BASSE = 0.47
+export const HAUT = 0.11
+export const BAS = 0.285
+export const RETRAIT = 0.075
 
-/** L'ordonnée ramenée entre les deux bornes. */
-function borner(y: number, H: number): number {
-  return Math.max(H * HAUTE, Math.min(H * BASSE, y))
+/** Le rectangle que tout cartouche doit couvrir, avec son retrait latéral. */
+function boite(W: number, H: number) {
+  const marge = W * RETRAIT
+  return { x0: marge, x1: W - marge, y0: H * HAUT, y1: H * BAS }
 }
 
 /**
- * Une lisière donnée par une fonction de l'abscisse, échantillonnée assez
- * finement pour rester lisse à 4K.
+ * Le contour fermé d'un cartouche, à partir de ses deux bords et de ses deux
+ * bouts.
  *
- * Les gestes qui montent par marches ne passent pas par ici : une marche est
- * un saut vertical, qu'aucune fonction de l'abscisse ne sait rendre.
+ * `haut` et `bas` donnent l'ordonnée des deux bords en fonction de l'abscisse
+ * réduite ; ils sont bridés pour que la bande des chiffres soit couverte quoi
+ * qu'ils racontent, un geste ayant le droit de déborder mais jamais de rogner.
+ * `bout` donne le débord latéral en fonction de la position sur le bout, de
+ * zéro à un : c'est lui qui fait la différence entre un bout carré, un bout
+ * rond et une pointe.
  */
-function echantillonner(W: number, H: number, y: (t: number) => number, pas = 240): Point[] {
+function fermer(
+  W: number, H: number,
+  haut: (t: number) => number,
+  bas: (t: number) => number,
+  bout: (s: number) => number = () => 0,
+  pas = 96,
+): Point[] {
+  const b = boite(W, H)
+  const large = b.x1 - b.x0
   const points: Point[] = []
   for (let i = 0; i <= pas; i += 1) {
     const t = i / pas
-    points.push([t * W, borner(y(t), H)])
+    points.push([b.x0 + t * large, Math.min(b.y0, haut(t))])
+  }
+  const bouts = 12
+  for (let i = 1; i < bouts; i += 1) {
+    const s = i / bouts
+    points.push([b.x1 + bout(s) * large, b.y0 + s * (b.y1 - b.y0)])
+  }
+  for (let i = pas; i >= 0; i -= 1) {
+    const t = i / pas
+    points.push([b.x0 + t * large, Math.max(b.y1, bas(t))])
+  }
+  for (let i = 1; i < bouts; i += 1) {
+    const s = 1 - i / bouts
+    points.push([b.x0 - bout(s) * large, b.y0 + s * (b.y1 - b.y0)])
   }
   return points
 }
 
-/* ---------- les quinze façons de finir --------------------------------------- */
+/** Les trois bouts du répertoire : carré, rond, en pointe. */
+const CARRE = () => 0
+const ROND = (s: number) => Math.sin(s * Math.PI) * 0.075
+const POINTE = (s: number) => (1 - Math.abs(s * 2 - 1)) * 0.06
+
+/* ---------- les quinze formes qui portent l'heure ---------------------------- */
 
 /**
- * Les aplats : une crête molle, celle des formes semées.
+ * Les aplats : un blob, la forme même du geste d'origine.
  *
- * C'est le geste d'origine, celui qui pose des formes libres sur un fond, et sa
- * lisière est la seule qui n'imite rien : deux harmoniques et rien d'autre. Elle
- * fait le ciel des vagues, des dunes et de l'horizon, où elle ne rogne rien
- * parce que ces familles ont déjà un haut vide, et le bord supérieur des
- * autres.
+ * Celui qui sème des formes libres sur un fond n'a pas d'autre vocabulaire que
+ * la tache aux bords mous, et son cartouche en est une : deux harmoniques sur
+ * chaque bord, des bouts bombés, et rien qui rappelle un rectangle.
  */
-function creteMolle(W: number, H: number, rnd: Alea): Point[] {
-  const phase = rnd() * Math.PI * 2
-  const periode = 1 + Math.floor(rnd() * 2)
-  const creux = H * 0.075
-  return echantillonner(W, H, (t) =>
-    H * 0.37
-    + Math.sin(phase + t * Math.PI * 2 * periode) * creux * 0.72
-    + Math.sin(phase * 1.7 + t * Math.PI * 2 * periode * 2) * creux * 0.28)
+function blob(W: number, H: number, rnd: Alea): Point[] {
+  const a = rnd() * Math.PI * 2
+  const b = rnd() * Math.PI * 2
+  const creux = H * 0.035
+  return fermer(W, H,
+    (t) => H * HAUT - creux * (0.6 + 0.4 * Math.sin(a + t * Math.PI * 2)),
+    (t) => H * BAS + creux * (0.6 + 0.4 * Math.sin(b + t * Math.PI * 2.6)),
+    ROND)
 }
 
 /**
- * La fracture : une arête de plaque, faite de segments droits.
+ * La fracture : une plaque.
  *
- * Une plaque ne se termine pas en courbe, elle se termine en cassures : on tire
- * donc quelques sommets et on les joint à la règle. C'est exactement ce que la
- * banquise dessine entre deux plaques, et le kintsugi le long d'une fissure.
+ * Une plaque ne se termine pas en courbe, elle se termine en cassures. Les deux
+ * bords sont donc des files de segments droits joignant quelques sommets tirés,
+ * et les bouts sont francs : c'est exactement ce que la banquise dessine entre
+ * deux plaques.
  */
-function areteBrisee(W: number, H: number, rnd: Alea): Point[] {
+function plaque(W: number, H: number, rnd: Alea): Point[] {
   const sommets = 4 + Math.floor(rnd() * 3)
-  const points: Point[] = []
-  for (let i = 0; i <= sommets; i += 1) {
-    points.push([(i / sommets) * W, borner(H * (0.31 + 0.13 * rnd()), H)])
+  const hauts = Array.from({ length: sommets + 1 }, () => rnd())
+  const bas = Array.from({ length: sommets + 1 }, () => rnd())
+  const brise = (parts: number[]) => (t: number) => {
+    const u = Math.min(sommets - 1e-9, t * sommets)
+    const i = Math.floor(u)
+    return parts[i] + (parts[i + 1] - parts[i]) * (u - i)
   }
-  return points
+  const dessus = brise(hauts)
+  const dessous = brise(bas)
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.05 * dessus(t),
+    (t) => H * BAS + H * 0.05 * dessous(t),
+    CARRE)
 }
 
 /**
- * Le carreau : des cases entières, en marches.
+ * Le carreau : un bloc de cases entières.
  *
- * Une grille ne connaît pas le milieu d'une case, et sa lisière non plus. La
- * hauteur choisie pour une colonne vaut donc un nombre entier de cases, et le
- * passage d'une colonne à l'autre est un saut vertical franc. C'est la seule
- * lisière qui ne soit pas continue, et c'est ce qui la rend reconnaissable.
+ * Une grille ne connaît pas le milieu d'une case, et son cartouche non plus :
+ * ses deux bords montent et descendent par crans d'une case, et les sauts sont
+ * verticaux. C'est la seule des quinze formes dont le contour ait des angles
+ * droits partout.
  */
-function marchesDeCases(W: number, H: number, rnd: Alea): Point[] {
-  const colonnes = 5 + Math.floor(rnd() * 3)
-  const cote = W / colonnes
-  const crans = 3
-  const points: Point[] = []
-  for (let c = 0; c < colonnes; c += 1) {
-    const cran = Math.floor(rnd() * (crans + 1))
-    const y = borner(H * (0.31 + (cran / crans) * 0.13), H)
-    points.push([c * cote, y], [(c + 1) * cote, y])
+function blocDeCases(W: number, H: number, rnd: Alea): Point[] {
+  const colonnes = 4 + Math.floor(rnd() * 3)
+  const crans = 2
+  const cran = (t: number, decalage: number) => {
+    const c = Math.min(colonnes - 1, Math.floor(t * colonnes))
+    return Math.floor(hacher(c, decalage, 1) * (crans + 1)) / crans
   }
-  return points
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.055 * cran(t, 0),
+    (t) => H * BAS + H * 0.055 * cran(t, 1),
+    CARRE, 160)
 }
 
 /**
- * La coulée : une file d'arcs épais, comme ceux du ruban.
+ * La coulée : une capsule.
  *
- * Le geste ne connaît que le demi-cercle, et sa lisière est une suite de
- * demi-cercles alternés : un feston. Deux tuiles voisines s'y raccordent comme
- * elles se raccordent dans le motif.
+ * Le geste ne trace que des rubans à bouts ronds, et son cartouche est un
+ * ruban : deux bords droits et deux demi-disques. C'est la plus simple des
+ * quinze, et c'est juste, un ruban n'ayant rien d'autre à dire.
  */
-function festonDArcs(W: number, H: number, rnd: Alea): Point[] {
-  const arcs = 3 + Math.floor(rnd() * 3)
-  const sens = rnd() < 0.5 ? 1 : -1
-  const rayon = H * 0.055
-  return echantillonner(W, H, (t) => {
-    const u = t * arcs
-    const rang = Math.floor(u)
-    const dedans = (u - rang) * 2 - 1
-    const bombe = Math.sqrt(Math.max(0, 1 - dedans * dedans))
-    return H * 0.37 + bombe * rayon * (rang % 2 === 0 ? sens : -sens)
-  })
+function capsule(W: number, H: number, rnd: Alea): Point[] {
+  void rnd
+  return fermer(W, H, () => H * HAUT, () => H * BAS, (s) => Math.sin(s * Math.PI) * 0.14)
 }
 
 /**
- * La ligne de niveau : une courbe de niveau, et il n'y avait rien d'autre à
- * chercher.
+ * La ligne de niveau : un palier.
  *
- * Le geste découpe un relief en paliers ; sa lisière est un de ces paliers,
- * tiré du même bruit lisse. C'est la seule des quinze qui soit littéralement le
- * motif : si on prolongeait le fond d'écran vers le haut, cette courbe serait
- * l'une de ses lignes.
+ * Le geste découpe un relief en paliers ; son cartouche en est un, ses deux
+ * bords tirés du même bruit lisse. C'est le seul des quinze qui soit
+ * littéralement une forme du motif : si le relief avait un palier de plus, il
+ * aurait cette allure.
  */
-function courbeDeNiveau(W: number, H: number, rnd: Alea): Point[] {
+function palier(W: number, H: number, rnd: Alea): Point[] {
   const cle = Math.floor(rnd() * 0x7fffffff)
   const bruit = bruiteur(cle)
-  const echelle = 2.2 + rnd()
-  return echantillonner(W, H, (t) =>
-    H * 0.31 + bruit(t * echelle, 0.5 + rnd() * 0) * H * 0.14)
+  const echelle = 2.4 + rnd()
+  return fermer(W, H,
+    (t) => H * HAUT - bruit(t * echelle, 0.2) * H * 0.06,
+    (t) => H * BAS + bruit(t * echelle, 3.7) * H * 0.06,
+    ROND)
 }
 
 /**
- * La réserve : un bord percé.
+ * La réserve : un panneau ajouré.
  *
- * Le geste est celui du claustra et du papel picado, un panneau dans lequel on
- * découpe. Sa lisière est donc droite, et mordue de percements ronds à
- * intervalle régulier : le bas d'un panneau ajouré.
+ * Le geste est celui du claustra, un panneau dans lequel on perce. Son
+ * cartouche est donc un panneau franc, mordu de percements ronds à intervalle
+ * régulier sur ses deux bords.
  */
-function bordPerce(W: number, H: number, rnd: Alea): Point[] {
-  const trous = 5 + Math.floor(rnd() * 4)
-  const rayon = H * 0.045
-  const fond = H * 0.34
-  return echantillonner(W, H, (t) => {
+function panneauAjoure(W: number, H: number, rnd: Alea): Point[] {
+  const trous = 4 + Math.floor(rnd() * 3)
+  const dent = (t: number) => {
     const u = t * trous
     const dedans = (u - Math.floor(u)) * 2 - 1
-    const part = Math.max(0, 1 - Math.abs(dedans) * 1.6)
-    return fond + Math.sqrt(Math.max(0, 1 - (1 - part) ** 2)) * rayon
-  })
+    return Math.sqrt(Math.max(0, 1 - dedans * dedans))
+  }
+  return fermer(W, H,
+    (t) => H * HAUT + H * 0.035 * dent(t),
+    (t) => H * BAS - H * 0.035 * dent(t + 0.5),
+    CARRE)
 }
 
 /**
- * La réaction : un front de culture.
+ * La réaction : une colonie.
  *
- * Deux substances qui se consomment ne laissent pas un bord régulier, elles
- * laissent une frontière digitée, molle à grande échelle et frisée à petite.
- * Deux bruits d'échelles différentes suffisent à la dire.
+ * Deux substances qui se consomment ne laissent pas un bord régulier : molle à
+ * grande échelle, frisée à petite. Deux bruits d'échelles différentes suffisent
+ * à le dire, et les bouts sont bombés comme le reste.
  */
-function frontDeCulture(W: number, H: number, rnd: Alea): Point[] {
+function colonie(W: number, H: number, rnd: Alea): Point[] {
   const cle = Math.floor(rnd() * 0x7fffffff)
   const large = bruiteur(cle)
   const fin = bruiteur(cle + 1)
-  return echantillonner(W, H, (t) =>
-    H * 0.33 + large(t * 2.4, 0.3) * H * 0.09 + fin(t * 11, 0.7) * H * 0.035)
+  const bord = (t: number, decalage: number) =>
+    large(t * 2.4, decalage) * H * 0.045 + fin(t * 11, decalage + 0.5) * H * 0.02
+  return fermer(W, H,
+    (t) => H * HAUT - bord(t, 0.3),
+    (t) => H * BAS + bord(t, 5.1),
+    ROND)
 }
 
 /**
- * Le pavage apériodique : un zigzag d'arêtes de triangles.
+ * Le pavage apériodique : une bande de triangles.
  *
- * Des segments droits, mais d'un pas irrégulier et d'angles pris dans un jeu
- * fini : ce n'est ni une brisure au hasard comme la fracture, ni une marche
- * comme le carreau, c'est la ligne que suit le bord d'un pavage de Penrose.
+ * Des segments droits d'un pas irrégulier, et des bouts en pointe : c'est le
+ * bord d'un pavage de Penrose, où tout est triangle d'or et où rien n'est
+ * arrondi.
  */
-function zigzagDOr(W: number, H: number, rnd: Alea): Point[] {
-  const dents = 6 + Math.floor(rnd() * 4)
-  const haut = H * 0.31
-  const bas = H * 0.42
-  const points: Point[] = []
-  for (let i = 0; i <= dents; i += 1) {
-    points.push([(i / dents) * W, borner(i % 2 === 0 ? haut : bas, H)])
+function bandeDeTriangles(W: number, H: number, rnd: Alea): Point[] {
+  const dents = 5 + Math.floor(rnd() * 4)
+  const dent = (t: number, phase: number) => {
+    const u = t * dents + phase
+    return Math.abs((u - Math.floor(u)) * 2 - 1)
   }
-  return points
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.05 * dent(t, 0),
+    (t) => H * BAS + H * 0.05 * dent(t, 0.5),
+    POINTE, 160)
 }
 
 /**
- * La gravure tramée : un bord en demi-teintes.
+ * La gravure tramée : une plaque qui s'effrite.
  *
- * Le geste ne connaît que des points de trame ; son bord n'est donc pas une
- * ligne mais une densité qui tombe. Faute de pouvoir rendre une densité avec
- * une polyligne, la lisière prend des paliers courts et irréguliers, à la
- * hauteur d'un point de trame : de loin, c'est un bord qui s'effrite.
+ * Le geste ne connaît que des points de trame ; son bord n'est pas une ligne
+ * mais une densité qui tombe. Faute de pouvoir rendre une densité par un
+ * contour, les deux bords prennent des paliers courts et irréguliers, à la
+ * hauteur d'un point : de loin, c'est un bord qui s'effrite.
  */
-function bordEffrite(W: number, H: number, rnd: Alea): Point[] {
+function plaqueEffritee(W: number, H: number, rnd: Alea): Point[] {
   const cle = Math.floor(rnd() * 0x7fffffff)
-  const paliers = 22 + Math.floor(rnd() * 10)
-  const points: Point[] = []
-  for (let i = 0; i < paliers; i += 1) {
-    const y = borner(H * (0.32 + hacher(i, 0, cle) * 0.1), H)
-    points.push([(i / paliers) * W, y], [((i + 1) / paliers) * W, y])
-  }
-  return points
+  const paliers = 26
+  const marche = (t: number, decalage: number) =>
+    hacher(Math.min(paliers - 1, Math.floor(t * paliers)), decalage, cle)
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.04 * marche(t, 0),
+    (t) => H * BAS + H * 0.04 * marche(t, 1),
+    CARRE, 160)
 }
 
 /**
- * La trame déformée : une sinusoïde franche.
+ * La trame déformée : une bande ondée.
  *
  * Le geste est celui de l'interférence, et l'interférence est une somme de
- * sinus. Sa lisière en est un seul, d'une période courte et d'une amplitude
- * nette : la seule des quinze qui assume d'être une onde régulière.
+ * sinus. Ses deux bords en sont un seul, de même période et en phase, si bien
+ * que la bande garde une épaisseur constante et ondule tout entière.
  */
-function ondeReguliere(W: number, H: number, rnd: Alea): Point[] {
+function bandeOndee(W: number, H: number, rnd: Alea): Point[] {
   const periode = 2 + Math.floor(rnd() * 3)
   const phase = rnd() * Math.PI * 2
-  return echantillonner(W, H, (t) =>
-    H * 0.37 + Math.sin(phase + t * Math.PI * 2 * periode) * H * 0.07)
+  const onde = (t: number) => Math.sin(phase + t * Math.PI * 2 * periode) * H * 0.04
+  return fermer(W, H, (t) => H * HAUT + onde(t), (t) => H * BAS + onde(t), ROND)
 }
 
 /**
- * Le réseau : des angles droits et des quarante-cinq degrés.
+ * Le réseau : un cartouche de station.
  *
- * Un plan de métro ne tourne qu'à angle fixe, et sa lisière non plus. Elle
- * avance à l'horizontale, monte ou descend en diagonale, repart à
- * l'horizontale : c'est le tracé d'une ligne sur un plan.
+ * Un plan de métro ne tourne qu'à angle droit, et ses libellés sont posés dans
+ * des rectangles à coins vifs. Celui-ci en est un, ses bords absolument droits :
+ * c'est le seul des quinze qui n'ondule pas du tout, et c'est ce qui le rend
+ * reconnaissable au milieu des quatorze autres.
  */
-function traceDeLigne(W: number, H: number, rnd: Alea): Point[] {
-  const segments = 5 + Math.floor(rnd() * 3)
-  const pas = W / segments
-  const points: Point[] = []
-  let y = H * (0.33 + 0.06 * rnd())
-  let x = 0
-  points.push([x, borner(y, H)])
-  for (let i = 0; i < segments; i += 1) {
-    const plat = pas * (0.45 + 0.3 * rnd())
-    x += plat
-    points.push([x, borner(y, H)])
-    const monte = (rnd() < 0.5 ? -1 : 1) * H * 0.045
-    const diagonale = Math.min(pas - plat, Math.abs(monte))
-    y += Math.sign(monte) * diagonale
-    x += diagonale
-    points.push([Math.min(W, x), borner(y, H)])
-  }
-  points.push([W, borner(y, H)])
-  return points
+function cartoucheDeStation(W: number, H: number, rnd: Alea): Point[] {
+  void rnd
+  return fermer(W, H, () => H * HAUT, () => H * BAS, CARRE, 8)
 }
 
 /**
- * La grammaire : un bord folié.
+ * La grammaire : une feuille.
  *
  * Une règle appliquée à son propre résultat donne des folioles le long d'un
- * axe ; la lisière en pose une file, chacune un peu plus courte que sa voisine
- * puis la série repart. C'est le bord d'une fronde.
+ * axe. Les deux bords en posent une file, et les bouts sont en pointe : c'est
+ * une fronde vue de dessus.
  */
-function bordFolie(W: number, H: number, rnd: Alea): Point[] {
-  const folioles = 7 + Math.floor(rnd() * 5)
-  const decalage = rnd()
-  return echantillonner(W, H, (t) => {
-    const u = t * folioles + decalage
-    const rang = Math.floor(u)
-    const dedans = u - rang
-    const taille = 0.55 + 0.45 * ((rang % 3) / 2)
-    return H * 0.33 + Math.sin(dedans * Math.PI) * H * 0.085 * taille
-  })
-}
-
-/**
- * Le relief : une marche isométrique.
- *
- * Le geste montre du volume en aplats, et son bord est celui d'un empilement de
- * cubes vu de trois quarts : des paliers horizontaux joints par des obliques
- * toutes de la même pente. C'est la seule lisière dont l'angle est fixe.
- */
-function marcheIsometrique(W: number, H: number, rnd: Alea): Point[] {
-  const paliers = 4 + Math.floor(rnd() * 3)
-  const pas = W / paliers
-  const pente = H * 0.055
-  const points: Point[] = []
-  let y = H * (0.32 + 0.05 * rnd())
-  let x = 0
-  points.push([0, borner(y, H)])
-  for (let i = 0; i < paliers; i += 1) {
-    x += pas * 0.62
-    points.push([x, borner(y, H)])
-    y += (i % 2 === 0 ? 1 : -1) * pente
-    x += pas * 0.38
-    points.push([Math.min(W, x), borner(y, H)])
+function feuille(W: number, H: number, rnd: Alea): Point[] {
+  const folioles = 6 + Math.floor(rnd() * 4)
+  const decoupe = (t: number) => {
+    const u = t * folioles
+    return Math.sin((u - Math.floor(u)) * Math.PI)
   }
-  points.push([W, borner(y, H)])
-  return points
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.045 * decoupe(t),
+    (t) => H * BAS + H * 0.045 * decoupe(t + 0.5),
+    POINTE)
 }
 
 /**
- * La mesure : une graduation.
+ * Le relief : une dalle isométrique.
  *
- * Un instrument ne s'arrête pas n'importe où, il s'arrête sur un trait. La
- * lisière est donc une règle : un palier long, et de courtes dents à intervalle
- * régulier, une sur cinq plus longue que les autres comme sur toute graduation.
+ * Le geste montre du volume en aplats ; son cartouche est une dalle vue de
+ * trois quarts, ses deux bords en escalier de même pente, et ses bouts coupés
+ * en biseau du même angle. Toutes les obliques du motif ont cet angle.
  */
-function graduation(W: number, H: number, rnd: Alea): Point[] {
-  const traits = 18 + Math.floor(rnd() * 8)
-  const fond = H * (0.33 + 0.04 * rnd())
-  const points: Point[] = []
-  for (let i = 0; i < traits; i += 1) {
-    const longue = i % 5 === 0
-    const y = borner(fond + (longue ? H * 0.07 : H * 0.03), H)
-    const x0 = (i / traits) * W
-    const x1 = ((i + 0.42) / traits) * W
-    const x2 = ((i + 1) / traits) * W
-    points.push([x0, borner(fond, H)], [x0, y], [x1, y], [x1, borner(fond, H)], [x2, borner(fond, H)])
+function dalleIsometrique(W: number, H: number, rnd: Alea): Point[] {
+  const paliers = 3 + Math.floor(rnd() * 2)
+  const escalier = (t: number) => {
+    const u = t * paliers
+    const i = Math.floor(u)
+    const dedans = u - i
+    return (i % 2 === 0 ? dedans : 1 - dedans)
   }
-  return points
+  return fermer(W, H,
+    (t) => H * HAUT - H * 0.05 * escalier(t),
+    (t) => H * BAS + H * 0.05 * escalier(t),
+    POINTE, 120)
 }
 
 /**
- * La surimpression : un arc de boucle.
+ * La mesure : une plaque graduée.
+ *
+ * Un instrument ne s'arrête pas n'importe où, il s'arrête sur un trait. Le bord
+ * inférieur porte donc une graduation, un trait sur cinq plus long, et le bord
+ * supérieur reste droit comme le dos d'une règle.
+ */
+function plaqueGraduee(W: number, H: number, rnd: Alea): Point[] {
+  const traits = 20 + Math.floor(rnd() * 6)
+  const graduation = (t: number) => {
+    const u = t * traits
+    const i = Math.floor(u)
+    const dedans = u - i
+    if (dedans > 0.36) return 0
+    return i % 5 === 0 ? 1 : 0.45
+  }
+  return fermer(W, H,
+    () => H * HAUT,
+    (t) => H * BAS + H * 0.045 * graduation(t),
+    CARRE, 240)
+}
+
+/**
+ * La surimpression : un bandeau d'affiche.
  *
  * L'affiche est faite d'un bloc de titrage et d'une grande boucle qui lui passe
- * dessus ; sa lisière est un morceau de cette boucle. Elle tranche donc la
- * première ligne de lettres, et c'est le geste même des affiches dont la
- * famille est tirée, où une forme passe au travers du mot.
+ * dessus. Son cartouche est un bandeau franc à bouts très ronds, celui qu'un
+ * imprimeur réserve en bas d'une feuille pour y mettre le titre et la date.
  */
-function arcDeBoucle(W: number, H: number, rnd: Alea): Point[] {
-  const centre = 0.2 + 0.6 * rnd()
-  const largeur = 0.5 + 0.5 * rnd()
-  return echantillonner(W, H, (t) => {
-    const u = (t - centre) / largeur
-    return H * 0.44 - Math.max(0, 1 - u * u) * H * 0.13
-  })
+function bandeauDAffiche(W: number, H: number, rnd: Alea): Point[] {
+  void rnd
+  return fermer(W, H, () => H * HAUT, () => H * BAS, (s) => Math.sin(s * Math.PI) * 0.1, 16)
 }
 
 /* ---------- aiguillage -------------------------------------------------------- */
 
 /**
- * La lisière d'une famille : la façon dont son geste s'arrête.
+ * Le cartouche d'une famille : la forme de son geste qui porte l'heure.
  *
  * L'aiguillage suit celui de `formes()`, dans le même ordre et avec les mêmes
- * gardes : une famille rangée dans un module y trouve la lisière de son geste,
- * et ce qui reste, les aplats, prend la crête molle. Un geste ajouté au moteur
- * sans lisière retombe donc sur elle, ce qui n'est pas faux, seulement moins
- * juste, et se rattrape en ajoutant deux lignes ici.
+ * gardes : une famille rangée dans un module y trouve la forme de son geste, et
+ * ce qui reste, les aplats, prend le blob. Un geste ajouté au moteur sans
+ * cartouche retombe donc sur lui, ce qui n'est pas faux, seulement moins juste,
+ * et se rattrape en ajoutant deux lignes ici.
  */
-export function lisiereDuGeste(id: IdFamille, W: number, H: number, rnd: Alea): Point[] {
-  if (estNiveau(id)) return courbeDeNiveau(W, H, rnd)
-  if (estFracture(id)) return areteBrisee(W, H, rnd)
-  if (estReserve(id)) return bordPerce(W, H, rnd)
-  if (estChimie(id)) return frontDeCulture(W, H, rnd)
-  if (estPavage(id)) return zigzagDOr(W, H, rnd)
-  if (estLieu(id)) return bordEffrite(W, H, rnd)
-  if (estTrame(id)) return ondeReguliere(W, H, rnd)
-  if (estReseau(id)) return traceDeLigne(W, H, rnd)
-  if (estGrammaire(id)) return bordFolie(W, H, rnd)
-  if (estCarreau(id)) return marchesDeCases(W, H, rnd)
-  if (estCoulee(id)) return festonDArcs(W, H, rnd)
-  if (estRelief(id)) return marcheIsometrique(W, H, rnd)
-  if (estMesure(id)) return graduation(W, H, rnd)
-  if (estSurimpression(id)) return arcDeBoucle(W, H, rnd)
-  return creteMolle(W, H, rnd)
+export function cartoucheDuGeste(id: IdFamille, W: number, H: number, rnd: Alea): Point[] {
+  if (estNiveau(id)) return palier(W, H, rnd)
+  if (estFracture(id)) return plaque(W, H, rnd)
+  if (estReserve(id)) return panneauAjoure(W, H, rnd)
+  if (estChimie(id)) return colonie(W, H, rnd)
+  if (estPavage(id)) return bandeDeTriangles(W, H, rnd)
+  if (estLieu(id)) return plaqueEffritee(W, H, rnd)
+  if (estTrame(id)) return bandeOndee(W, H, rnd)
+  if (estReseau(id)) return cartoucheDeStation(W, H, rnd)
+  if (estGrammaire(id)) return feuille(W, H, rnd)
+  if (estCarreau(id)) return blocDeCases(W, H, rnd)
+  if (estCoulee(id)) return capsule(W, H, rnd)
+  if (estRelief(id)) return dalleIsometrique(W, H, rnd)
+  if (estMesure(id)) return plaqueGraduee(W, H, rnd)
+  if (estSurimpression(id)) return bandeauDAffiche(W, H, rnd)
+  return blob(W, H, rnd)
 }

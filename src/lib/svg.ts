@@ -33,8 +33,8 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  alea, cadreDuMotif, formes, graineDeDessin, mesurer, MOT_PAR_DEFAUT, palette,
-  peindreOmbre, peindrePlaceDeLHeure, peindreVoile,
+  alea, formes, graineDeDessin, mesurer, MOT_PAR_DEFAUT, palette, peindreOmbre,
+  peindrePlaceDeLHeure, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
@@ -427,22 +427,14 @@ export function svgDuMotif(
 
   notaire.fillStyle = P.fond
   notaire.fillRect(0, 0, largeur, hauteur)
-  /* Le même cadre que le canevas : sur un écran de verrouillage, le motif
-     compose sous la réserve. Un SVG qui l'ignorerait ne serait pas le même
-     fichier dans un autre format. */
-  const cadre = cadreDuMotif(hauteur, ecran)
-  notaire.save()
-  notaire.translate(0, cadre.haut)
   formes(
-    notaire, largeur, cadre.hauteur, motif.famille, P.couleurs, motif.densite,
+    notaire, largeur, hauteur, motif.famille, P.couleurs, motif.densite,
     alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-    Math.min(largeur, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT,
+    Math.min(largeur, hauteur), motif.mot ?? MOT_PAR_DEFAUT,
   )
-  notaire.restore()
-  /* La place de l'heure, dans le même ordre que sur le canevas : elle ne rogne
-     que ce que le motif a fait monter au dessus de sa lisière, le cadre l'ayant
-     déjà composé plus bas. */
-  peindrePlaceDeLHeure(notaire, largeur, hauteur, P.fond, ecran, motif.famille, motif.graine)
+  /* Le cartouche de l'heure, dans le même ordre que sur le canevas : un SVG qui
+     l'ignorerait ne serait pas le même fichier dans un autre format. */
+  peindrePlaceDeLHeure(notaire, largeur, hauteur, P, ecran, motif.famille, motif.graine)
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
      même titre que le voile. Elle reste hors du chemin quand aucune des deux
