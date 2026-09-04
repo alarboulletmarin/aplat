@@ -41,7 +41,7 @@ fully usable offline.
 - **Exact resolution.** Your screen size is detected; any resolution can be
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
-- **78 pattern families** in eight groups (abstract, tilings, volumes,
+- **79 pattern families** in eight groups (abstract, tilings, volumes,
   instruments, materials, landscapes, landmarks, figures), **11 hand-tuned
   palettes**, three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces

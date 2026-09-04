@@ -125,7 +125,7 @@ export const fr = {
     document: {
       titre: 'Comment Aplat dessine',
       description:
-        'Quatre réglages, quatorze mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
+        'Quatre réglages, quinze mécaniques de dessin, quatre couches et une sonde de lisibilité. Le mécanisme d’Aplat, démontré par le moteur lui-même, dans ton navigateur.',
     },
     heros: {
       surtitre: 'Le mécanisme',
@@ -149,9 +149,9 @@ export const fr = {
       deuxTitre: 'La graine est une adresse',
       deuxNote:
         'Les mêmes quatre réglages rendent toujours la même image, à n’importe quelle taille. Le hasard n’entre qu’une fois, au tirage de la graine.',
-      troisTitre: 'Quatorze façons de poser la couleur',
+      troisTitre: 'Quinze façons de poser la couleur',
       troisNote:
-        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît quatorze, et toutes les familles en sortent.',
+        'Une famille ne choisit pas un dessin, elle choisit une mécanique. Le moteur en connaît quinze, et toutes les familles en sortent.',
       quatreTitre: 'Quatre couches, dans cet ordre',
       quatreNote:
         'L’image se peint par-dessus elle-même, et l’ordre n’est pas un détail\u00a0: le voile est dosé pour ce qu’il couvre, le grain passe après lui.',
@@ -184,7 +184,7 @@ export const fr = {
       sourdes:
         'Quatre familles ignorent leur graine\u00a0: ce sont des pavages entièrement réguliers, sans un seul tirage.',
     },
-    /* Étape 03. Les quatorze fiches. Les familles de chacune ne sont pas écrites
+    /* Étape 03. Les quinze fiches. Les familles de chacune ne sont pas écrites
        ici : elles sont lues dans les listes que les modules publient. */
     mecaniques: {
       familles: 'Familles\u00a0: {liste}',
@@ -230,6 +230,9 @@ export const fr = {
       reliefsNom: 'Le relief',
       reliefsNote:
         'La teinte d’une face dit son orientation, sous une lumière qui ne bouge jamais. Trois aplats bien choisis font un cube, sans un seul dégradé.',
+      surimpressionsNom: 'La surimpression',
+      surimpressionsNote:
+        'Deux encres tirées l’une sur l’autre, et une troisième couleur là où elles se croisent, calculée canal par canal. L’intersection est découpée avant d’être peinte : trois aplats opaques, aucun fondu.',
       mesuresNom: 'La mesure',
       mesuresNote:
         'Le motif est un instrument\u00a0: tapis de coupe, papier millimétré, rapporteur, mire de réglage. Fait de graduations plutôt que de formes, et le seul geste qui écrive des nombres.',
@@ -243,7 +246,7 @@ export const fr = {
       fondNote: 'La couleur de fond de la palette, d’un bord à l’autre.',
       formesNom: 'Les formes',
       formesNote:
-        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les quatorze gestes qui la peignent sont juste au-dessus.',
+        'La famille elle-même. C’est la seule couche qui change d’une famille à l’autre, et les quinze gestes qui la peignent sont juste au-dessus.',
       ombreNom: 'L’ombre',
       ombreNote:
         'La version sombre\u00a0: un aplat noir dosé pour amener n’importe quel motif à la même obscurité.',

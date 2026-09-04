@@ -19,6 +19,9 @@ import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
+import {
+  estSurimpression, peindreSurimpression, type IdSurimpression,
+} from './surimpression'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -57,6 +60,7 @@ export type IdFamille =
   | IdCoulee
   | IdRelief
   | IdMesure
+  | IdSurimpression
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
      déformée et l'interférence y mettent tout le reste */
   | IdChimie
@@ -251,6 +255,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
   { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
   { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
+  { id: 'affiche', groupe: 'pav', fr: 'Affiche', en: 'Poster' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
@@ -769,6 +774,10 @@ export function formes(
   }
   if (estMesure(id)) {
     peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estSurimpression(id)) {
+    peindreSurimpression(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
 

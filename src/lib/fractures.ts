@@ -661,7 +661,7 @@ function floraison(
   const cle = Math.floor(rnd() * 0x7fffffff)
   const echelle = duClairAuSombre(C)
   const dominante = echelle.indexOf(dominanteDe(C, rnd))
-  const vise = unite / [1.5, 2.2, 3.2][densite]
+  const vise = unite / [1.5, 2.2, 2.7][densite]
   const colonnes = Math.max(1, Math.round(W / vise))
   const rangees = Math.max(1, Math.round(H / vise))
   const largeur = W / colonnes
@@ -687,7 +687,7 @@ function floraison(
           (gx + 0.34 + 0.32 * de(1)) * largeur,
           (gy + 0.34 + 0.32 * de(2)) * hauteur,
         ] as Point,
-        petales: 7 + Math.floor(de(3) * 2),
+        petales: 6 + Math.floor(de(3) * 3),
         depart: de(4) * Math.PI * 2,
         /* Une teinte domine, les autres ne font que passer. C'est ce qui
            distingue un champ de fleurs d'un catalogue de fleurs : les images de
@@ -744,7 +744,7 @@ function floraison(
 
   for (let i = 0; i < germes.length; i += 1) {
     ctx.fillStyle = echelle[rangs[i]]
-    anneau(ctx, contourPiece(partage, i, chenal / 2, portee, pas, 44, bords[i]))
+    anneau(ctx, contourPiece(partage, i, chenal / 2, portee, pas, 38, bords[i]))
     ctx.fill()
   }
 

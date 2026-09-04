@@ -45,7 +45,7 @@ function autreFamille(groupe: Groupe, courante: string) {
  * Étape 01 : les quatre réglages.
  *
  * Le motif derrière une vraie grille d'icônes, et sous lui les réglages qui le
- * font. C'est l'application en trois rangées, pas en soixante-dix-huit vignettes :
+ * font. C'est l'application en trois rangées, pas en soixante-dix-neuf vignettes :
  * une liste complète des familles referait le panneau de l'outil dans un autre
  * document, ce que le design refuse. Les huit groupes disent le classement, et
  * « une autre famille » donne accès au reste sans construire un second
