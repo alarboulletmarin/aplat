@@ -199,7 +199,7 @@ export const fr = {
         'Un relief est découpé en paliers, et chaque palier devient un aplat fermé. La forme naît des niveaux, jamais d’un trait.',
       fracturesNom: 'La fracture',
       fracturesNote:
-        'Des germes se partagent la surface, chaque pièce découpée par des demi-plans. Les jointures ne sont pas dessinées, elles affleurent.',
+        'Des germes se partagent la surface, chaque pièce découpée par des demi-plans, ou par des frontières courbes quand le plan est gauchi sous eux. Les jointures ne sont pas dessinées, elles affleurent.',
       reservesNom: 'La réserve',
       reservesNote:
         'Le motif est ce qu’on retire\u00a0: le panneau d’abord, les percements ensuite, à la couleur de ce qui se voit au travers.',

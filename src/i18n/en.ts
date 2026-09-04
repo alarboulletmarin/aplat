@@ -142,7 +142,7 @@ export const en: Textes = {
         'A relief is cut into steps, and each step becomes a closed flat. The shape comes out of the levels, never out of a stroke.',
       fracturesNom: 'Fracture',
       fracturesNote:
-        'Seeds share the surface out, each piece clipped by half-planes. The joints are not drawn, they show through.',
+        'Seeds share the surface out, each piece clipped by half-planes, or by curved frontiers when the plane is warped beneath them. The joints are not drawn, they show through.',
       reservesNom: 'Reserve',
       reservesNote:
         'The pattern is what you take away: the panel first, the openings after, in the colour of whatever shows through.',

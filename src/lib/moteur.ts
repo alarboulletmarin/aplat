@@ -233,6 +233,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'kintsugi', groupe: 'abs', fr: 'Kintsugi', en: 'Kintsugi' },
   { id: 'banquise', groupe: 'abs', fr: 'Banquise', en: 'Ice floes' },
   { id: 'meandres', groupe: 'abs', fr: 'Méandres', en: 'Meanders' },
+  { id: 'lagon', groupe: 'abs', fr: 'Lagon', en: 'Lagoon' },
   /* pavages : une maille revient, et l'oeil la suit du doigt */
   { id: 'arches', groupe: 'pav', fr: 'Arches', en: 'Arches' },
   { id: 'pointille', groupe: 'pav', fr: 'Fondu pointillé', en: 'Dotted fade' },
@@ -287,6 +288,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
+  { id: 'floraison', groupe: 'fig', fr: 'Floraison', en: 'Bloom' },
   { id: 'etoiles', groupe: 'fig', fr: 'Étoiles', en: 'Stars' },
   { id: 'rayons', groupe: 'fig', fr: 'Rayons', en: 'Sunbeams' },
   { id: 'lunes', groupe: 'fig', fr: 'Lunes', en: 'Moons' },
