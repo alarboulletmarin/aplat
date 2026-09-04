@@ -33,8 +33,9 @@ import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
 import {
-  ChoixDensite, ChoixEcran, ChoixFamille, ChoixPalette, ChoixVersion,
+  ChoixDensite, ChoixEcran, ChoixFamille, ChoixMot, ChoixPalette, ChoixVersion,
 } from './components/Reglages'
+import { estSurimpression } from './lib/surimpression'
 import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
@@ -188,8 +189,9 @@ export function App() {
       palette: reglages.palette,
       densite: reglages.densite,
       graine: reglages.graine,
+      mot: reglages.mot,
     }),
-    [reglages.famille, reglages.palette, reglages.densite, reglages.graine],
+    [reglages.famille, reglages.palette, reglages.densite, reglages.graine, reglages.mot],
   )
 
   /* La sonde est mémoïsée deux fois : ici pour le rendu, et dans le moteur
@@ -717,6 +719,17 @@ export function App() {
               textes={T}
               onChoisir={(sombre: boolean) => changer({ sombre })}
             />
+            {/* Le mot ne paraît que pour l'affiche : c'est la seule famille qui
+                écrive, et un champ qui ne changerait rien à ce qu'on voit
+                serait un mensonge poli. Le réglage, lui, reste dans l'adresse :
+                revenir sur l'affiche avec le même lien retrouve le mot. */}
+            {estSurimpression(reglages.famille) && (
+              <ChoixMot
+                valeur={reglages.mot}
+                textes={T}
+                onChoisir={(mot: string) => changer({ mot })}
+              />
+            )}
             {/* L'écran ne paraît que sur un téléphone ou une tablette : la
                 maquette d'ordinateur n'a pas de verrouillage à montrer, et une
                 puce qui ne changerait rien à ce qu'on voit serait un mensonge

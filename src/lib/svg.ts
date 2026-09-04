@@ -33,7 +33,8 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  alea, cadreDuMotif, formes, graineDeDessin, mesurer, palette, peindreOmbre, peindreVoile,
+  alea, cadreDuMotif, formes, graineDeDessin, mesurer, MOT_PAR_DEFAUT, palette,
+  peindreOmbre, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
@@ -435,7 +436,7 @@ export function svgDuMotif(
   formes(
     notaire, largeur, cadre.hauteur, motif.famille, P.couleurs, motif.densite,
     alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-    Math.min(largeur, cadre.hauteur),
+    Math.min(largeur, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT,
   )
   notaire.restore()
   /* Le fond reposé sur la réserve : il ne rogne que ce que le motif y a fait
@@ -461,7 +462,7 @@ export function svgDuMotif(
   if (voile || sombre) {
     const mesure: Mesure = mesurer(
       motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
-      ecran,
+      ecran, motif.mot ?? MOT_PAR_DEFAUT,
     )
     peindreOmbre(notaire, largeur, hauteur, mesure)
     if (voile) peindreVoile(notaire, largeur, hauteur, mesure)
@@ -498,7 +499,7 @@ export function rendreSVG(
 ): RenduSVG {
   const cle = [
     motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile, sombre,
-    ecran,
+    ecran, motif.mot ?? MOT_PAR_DEFAUT,
   ].join('|')
   if (dernier && dernier.cle === cle) return dernier.rendu
   const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre, ecran)

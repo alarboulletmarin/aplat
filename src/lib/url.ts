@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import {
-  estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
+  assainirMot, estDensite, estFamille, estPalette, MOT_PAR_DEFAUT, palette, PREFIXE_PERSO,
   type Densite, type Ecran, type IdFamille, type IdPaletteQuelconque, type Langue,
   type Motif,
 } from './moteur'
@@ -63,6 +63,17 @@ export interface Reglages {
    * image qu'avant.
    */
   ecran: Ecran
+  /**
+   * Le mot que l'affiche écrit. Il ne concerne qu'une famille sur
+   * soixante-dix-neuf, et il est ici quand même : c'est un réglage du motif au
+   * même titre que la densité, il change l'image, donc un lien qui ne le
+   * porterait pas ouvrirait une autre affiche chez le destinataire.
+   *
+   * Il est toujours assaini à la lecture comme à l'écriture, `assainirMot`
+   * étant le seul point d'entrée : l'adresse est la seule partie du produit qui
+   * vienne du dehors, et la seule chaîne libre qu'elle porte désormais.
+   */
+  mot: string
   largeurSaisie: string
   hauteurSaisie: string
 }
@@ -77,6 +88,7 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   voile: true,
   sombre: false,
   ecran: 'accueil',
+  mot: MOT_PAR_DEFAUT,
   largeurSaisie: '',
   hauteurSaisie: '',
 }
@@ -141,6 +153,10 @@ export function lireUrl(
        verrouillage, dont la bande est la plus sévère des deux. Une adresse
        abîmée rend l'écran d'accueil, celui que le produit a toujours mesuré. */
     ecran: q.get('e') === '1' ? 'verrou' : 'accueil',
+    /* Assaini, jamais rejeté : une adresse abîmée doit ouvrir une affiche, pas
+       une page vide. Ce qui n'est pas de la fonte tombe, et un mot devenu vide
+       retombe sur celui par défaut. */
+    mot: assainirMot(q.get('t') ?? ''),
     langue: affichage.langue,
     theme: affichage.theme,
     largeurSaisie: String(resolutionValide ? l : detecte.largeur),
@@ -170,6 +186,9 @@ export function ecrireUrl(
   if (!reglages.voile) q.set('v', '0')
   if (reglages.sombre) q.set('n', '1')
   if (reglages.ecran === 'verrou') q.set('e', '1')
+  /* Le mot par défaut ne s'écrit pas : une adresse ne porte que ce qu'on a
+     choisi, comme pour le voile et la version. */
+  if (reglages.mot !== MOT_PAR_DEFAUT) q.set('t', reglages.mot)
   /* Une palette composée à la main n'existe que sur l'appareil qui l'a
      composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre
      motif chez la personne qui le reçoit, ce qui est exactement ce que le

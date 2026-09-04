@@ -1546,3 +1546,15 @@
   outline: 2px solid transparent;
   outline-offset: -4px;
 }
+
+/* Le champ du mot de l'affiche. Il reprend le champ de résolution, à ceci près
+   qu'il est composé dans le caractère de titrage et en capitales : ce qu'on
+   tape et ce que l'affiche écrit doivent se ressembler, sans quoi on compose à
+   l'aveugle et on découvre le résultat dans l'aperçu. */
+.champ-mot {
+  width: 100%;
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

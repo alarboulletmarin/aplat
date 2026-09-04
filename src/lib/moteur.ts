@@ -22,6 +22,7 @@ import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import {
   estSurimpression, peindreSurimpression, type IdSurimpression,
 } from './surimpression'
+import { CARACTERES } from './alphabet'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -117,6 +118,45 @@ export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
  * livrées, et le dire dans le type évite de le rattraper par des assertions.
  */
 export type IdPaletteQuelconque = IdPalette | IdPalettePerso
+
+/**
+ * Le mot de l'affiche, et ce que le moteur en accepte.
+ *
+ * Une seule famille écrit, et elle a besoin de quelque chose à écrire. Le mot
+ * est un réglage du motif au même titre que la densité : il change l'image,
+ * donc il voyage dans l'adresse, donc il arrive d'une saisie et il faut
+ * l'assainir. `assainirMot` est le seul point d'entrée, et il ne laisse passer
+ * que ce que la fonte sait tracer.
+ *
+ * La longueur est bornée à vingt-quatre signes. Ce n'est pas une limite
+ * technique, c'est une limite de composition : au delà, les lignes deviennent
+ * si basses que les lettres ne se lisent plus, et une affiche cesse d'en être
+ * une. Les affiches de référence tiennent toutes en trois mots.
+ */
+export const MOT_MAX = 24
+
+/** Le mot que l'affiche écrit quand personne n'en a choisi. */
+export const MOT_PAR_DEFAUT = 'APLAT'
+
+/**
+ * Le mot ramené à ce que le moteur sait écrire : capitales, chiffres, accents
+ * du français, ponctuation courante, et l'espace qui coupe les lignes.
+ *
+ * Ce qui n'est pas dans la fonte est retiré plutôt que remplacé : un signe
+ * inconnu rendu par un blanc couperait le mot en deux lignes sans qu'on
+ * comprenne pourquoi. Les espaces multiples se réduisent à un, et un mot vide
+ * retombe sur celui par défaut, l'affiche ne pouvant rien composer avec rien.
+ */
+export function assainirMot(brut: string): string {
+  const propre = [...brut.toUpperCase()]
+    .filter((c) => CARACTERES.includes(c))
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MOT_MAX)
+    .trim()
+  return propre.length > 0 ? propre : MOT_PAR_DEFAUT
+}
 
 /** 0 calme, 1 moyen, 2 dense. */
 export type Densite = 0 | 1 | 2
@@ -713,6 +753,7 @@ function palier(C: readonly string[], t: number): string {
 export function formes(
   ctx: Pinceau, W: number, H: number, id: IdFamille,
   C: readonly string[], densite: Densite, rnd: Alea, unite: number,
+  mot: string = MOT_PAR_DEFAUT,
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
 
@@ -783,7 +824,7 @@ export function formes(
     return
   }
   if (estSurimpression(id)) {
-    peindreSurimpression(ctx, W, H, id, C, densite, rnd, unite)
+    peindreSurimpression(ctx, W, H, id, C, densite, rnd, unite, mot)
     return
   }
 
@@ -2199,11 +2240,12 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 export function mesurer(
   id: IdFamille, idPalette: IdPaletteQuelconque, densite: Densite, graine: number,
   largeur: number, hauteur: number, sombre = false, ecran: Ecran = 'accueil',
+  mot: string = MOT_PAR_DEFAUT,
 ): Mesure {
   const P = palette(idPalette)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
   const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
-    + `|${sombre ? 's' : 'c'}|${ecran}`
+    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? mot : ''}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -2228,7 +2270,7 @@ export function mesurer(
     ctx.save()
     ctx.translate(0, cadre.haut)
     formes(ctx, PW, cadre.hauteur, id, P.couleurs, densite,
-      alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur))
+      alea(graineDeDessin(id, densite, graine)), Math.min(PW, cadre.hauteur), mot)
     ctx.restore()
     if (cadre.haut > 0) {
       ctx.fillStyle = P.fond
@@ -2442,6 +2484,13 @@ export interface Motif {
   palette: IdPaletteQuelconque
   densite: Densite
   graine: number
+  /**
+   * Le mot que l'affiche écrit. Absent partout ailleurs, et c'est voulu : une
+   * seule famille sait écrire, et obliger les soixante-dix-huit autres à porter
+   * un champ qu'elles ignorent aurait fait payer à tout le catalogue le prix
+   * d'une famille. Son absence vaut `MOT_PAR_DEFAUT`.
+   */
+  mot?: string
 }
 
 /**
@@ -2515,6 +2564,7 @@ export function dessiner(
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
     mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre, ecran,
+    motif.mot ?? MOT_PAR_DEFAUT,
   )
   rendre(ctx, W, H, motif, mesure, voile, arret)
   /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
@@ -2568,7 +2618,7 @@ function rendre(
     ctx.translate(0, cadre.haut)
     formes(ctx, W, cadre.hauteur, motif.famille, P.couleurs, motif.densite,
       alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-      Math.min(W, cadre.hauteur))
+      Math.min(W, cadre.hauteur), motif.mot ?? MOT_PAR_DEFAUT)
     ctx.restore()
     if (cadre.haut > 0) {
       ctx.fillStyle = P.fond

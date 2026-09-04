@@ -388,6 +388,12 @@ export const fr = {
        mesure pas la même bande selon l'écran, elle dose donc un autre voile,
        et ce voile est brûlé dans le PNG. Le mot « écran » plutôt que
        « aperçu » pour cette seule raison. */
+    /* Le seul champ libre du produit. Le mot est un réglage du motif, et la
+       note dit ce que le champ fait plutôt que ce qu'il attend : on voit
+       aussitôt qu'une lettre inconnue tombe. */
+    mot: 'Le mot',
+    motNote:
+      'L’affiche écrit ce mot, en capitales. Les espaces coupent les lignes, et le mot se répète jusqu’à remplir la page.',
     ecran: 'Écran',
     ecranAccueil: 'Accueil',
     ecranVerrou: 'Verrouillage',

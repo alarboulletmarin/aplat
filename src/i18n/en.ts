@@ -284,6 +284,9 @@ export const en: Textes = {
     versionNote: 'The dark version is dimmed inside the file: that is what you download.',
     versionTitreClaire: 'The pattern as the palette gives it',
     versionTitreSombre: 'The same pattern, dimmed inside the downloaded file',
+    mot: 'The word',
+    motNote:
+      'The poster sets this word, in capitals. Spaces break the lines, and the word repeats until the page is full.',
     ecran: 'Screen',
     ecranAccueil: 'Home',
     ecranVerrou: 'Lock',

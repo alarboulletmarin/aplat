@@ -34,10 +34,9 @@
  * la lettre elle-même, dont le contour ne se réduit pas à des convexes ; le
  * motif pose des signes qui en ont la carrure, et pas un alphabet.
  */
+import { chasseDuMot, contoursDuMot } from './alphabet'
 import type { Alea, Densite, Pinceau } from './moteur'
-import {
-  couperDemiPlan, duClairAuSombre, hacher, houleFermee, polygone, type Point,
-} from './trace'
+import { couperDemiPlan, duClairAuSombre, houleFermee, type Point } from './trace'
 
 export const IDS_SURIMPRESSIONS = ['affiche'] as const
 
@@ -124,99 +123,32 @@ function tronçon(de: Point, vers: Point, epaisseur: number): Point[] {
   ]
 }
 
-/* ---------- les signes ------------------------------------------------------- */
-
-/**
- * Le jeu de signes, et pourquoi il ressemble à des lettres sans en être.
- *
- * Chacun est une liste de convexes, jamais une forme creuse : un compteur de
- * lettre, le blanc au milieu d'un O, se fabrique donc avec quatre fûts posés en
- * cadre plutôt qu'avec un anneau troué. Le dessin y gagne d'ailleurs, un cadre
- * de quatre fûts étant exactement ce qu'une grotesque étroite dessine.
- *
- * Les proportions sont celles d'une grotesque de titre : le fût vaut deux
- * cinquièmes de la chasse, et le cadre est monté sur un fût plus mince que les
- * autres signes. Ce n'est pas une coquetterie : monté sur le fût courant, son
- * compteur se refermait en une fente, et un cadre sans compteur n'est plus un
- * O, c'est un pavé. Le blanc intérieur est ce qui fait lire une lettre.
- *
- * Les signes remplissent la case jusqu'à ses bords, l'approche étant retirée
- * de la case en amont : c'est ce qui fait tenir une ligne serrée, comme sur
- * les affiches où les mots se touchent.
- */
-function signe(x: number, y: number, w: number, h: number, rang: number): Point[][] {
-  const fut = w * 0.42
-  const barre = h * 0.3
-  const rect = (px: number, py: number, pw: number, ph: number): Point[] => [
-    [px, py], [px + pw, py], [px + pw, py + ph], [px, py + ph],
-  ]
-  /* Le demi-disque et le quart de disque sont donnés en sommets, et non par un
-     arc : le pinceau saurait tracer l'arc, la découpe ne saurait pas le
-     couper. */
-  const secteur = (cx: number, cy: number, rayon: number, de: number, a: number): Point[] => {
-    const sommets = 10
-    const points: Point[] = [[cx, cy]]
-    for (let i = 0; i <= sommets; i += 1) {
-      const angle = de + ((a - de) * i) / sommets
-      points.push([cx + Math.cos(angle) * rayon, cy + Math.sin(angle) * rayon])
-    }
-    return points
-  }
-
-  switch (rang) {
-    case 0: /* le fût plein : la haste d'un I, d'un L, d'un H */
-      return [rect(x + (w - fut) / 2, y, fut, h)]
-    case 1: { /* le cadre : quatre fûts, le compteur d'un O ou d'un D */
-      const mince = w * 0.26
-      const traverse = h * 0.2
-      return [
-        rect(x, y, w, traverse),
-        rect(x, y + h - traverse, w, traverse),
-        rect(x, y + traverse, mince, h - traverse * 2),
-        rect(x + w - mince, y + traverse, mince, h - traverse * 2),
-      ]
-    }
-    case 2: /* le bol : la panse d'un P, d'un B, d'un C */
-      return [
-        secteur(x + w / 2, y + h / 2, Math.min(w, h) / 2, -Math.PI / 2, Math.PI / 2),
-        rect(x, y, fut, h),
-      ]
-    case 3: /* les deux barres : la traverse d'un E, d'un F */
-      return [rect(x, y, w, barre * 0.8), rect(x, y + h - barre * 0.8, w, barre * 0.8)]
-    case 4: /* le quart de rond : l'épaule d'un n, la queue d'un a */
-      return [secteur(x, y + h, Math.min(w, h), -Math.PI / 2, 0)]
-    case 5: /* la diagonale : l'oblique d'un V, d'un X */
-      return [[
-        [x, y], [x + w * 0.55, y], [x + w, y + h], [x + w * 0.45, y + h],
-      ]]
-    case 6: /* le pavé : la lettre qu'on ne lit plus, l'aplat qui tient la ligne */
-      return [rect(x, y, w, h)]
-    default: /* la case blanche : l'espace entre deux mots */
-      return []
-  }
-}
-
 /* ---------- l'affiche -------------------------------------------------------- */
 
 /**
- * Des signes serrés en lignes, et deux boucles tirées par dessus.
+ * Un mot composé plein cadre, et deux boucles tirées par dessus.
  *
- * La composition est celle d'une affiche de titrage : des lignes de hauteurs
- * inégales, empilées du haut au bas du cadre, chacune découpée en cases de
- * largeurs inégales. Rien n'y est centré et rien n'y respire, parce que c'est
- * le serrage qui fait lire un titre. Les lignes se comptent sur le format et
- * les cases sur la ligne, donc aucun tirage ne se fait dans ces deux boucles :
- * la clé est interrogée par les coordonnées, comme dans le carreau.
+ * La composition est celle d'une affiche de titrage : le mot est coupé en
+ * lignes, chaque ligne est étirée jusqu'aux deux bords, et les lignes
+ * s'empilent jusqu'à remplir la hauteur. Rien n'y est centré et rien n'y
+ * respire. C'est le procédé le plus simple qui soit et c'est le bon : une ligne
+ * justifiée au fer des deux côtés donne à chaque mot le corps que sa longueur
+ * lui laisse, si bien que YEAH fait des lettres énormes et GOODNESS des lettres
+ * étroites, sans que personne n'ait à régler quoi que ce soit.
  *
- * Les boucles sont l'autre moitié du motif. Elles sont fermées et tirées au
- * gros trait, elles sortent du cadre et y reviennent, et elles ne suivent
- * aucune des lignes de signes : c'est ce désaccord entre la rigueur du bloc de
- * texte et le geste libre qui passe dessus que les affiches de référence
- * emploient toutes.
+ * L'interligne est nul et l'approche minuscule : les lettres se touchent
+ * presque, comme sur les affiches où l'on serre jusqu'à ce que la page tienne
+ * en un bloc. Le blanc du mot n'est pas entre les lettres, il est dans les
+ * compteurs.
+ *
+ * Les boucles sont l'autre moitié du motif, et elles ne suivent aucune ligne :
+ * c'est le désaccord entre la rigueur du bloc de texte et le geste libre qui
+ * passe dessus que les affiches de référence emploient toutes. Aux croisements,
+ * la troisième encre.
  */
 function affiche(
   ctx: Pinceau, W: number, H: number, C: readonly string[],
-  densite: Densite, rnd: Alea, unite: number,
+  densite: Densite, rnd: Alea, unite: number, mot: string,
 ): void {
   /* Les deux encres se prennent au milieu de l'échelle, et c'est la couleur du
      croisement qui l'exige. Le produit de deux canaux ne peut que descendre :
@@ -231,57 +163,76 @@ function affiche(
   const accent = teintes[Math.min(teintes.length - 2, 1)]
   const croisement = surimprimer(encre, accent)
 
-  const cle = Math.floor(rnd() * 0x7fffffff)
-  const lignes = [4, 6, 9][densite]
   const marge = unite * 0.05
-  const approche = unite * 0.014
-  const interligne = unite * 0.016
-  const dedans = { x: marge, y: marge, w: W - marge * 2, h: H - marge * 2 }
+  const utile = { x: marge, y: marge, w: W - marge * 2, h: H - marge * 2 }
+  const approche = 0.02
 
-  /* Les signes, tous posés avant la moindre peinture : la surimpression a
-     besoin de la liste entière pour découper, et un signe peint plus tôt ne
-     se laisserait plus croiser. */
-  const formes: Point[][] = []
-  const hauteurs = Array.from({ length: lignes }, (_, r) => 0.7 + 0.6 * hacher(0, r, cle))
-  const somme = hauteurs.reduce((a, b) => a + b, 0)
-  let y = dedans.y
-  for (let r = 0; r < lignes; r += 1) {
-    const h = (hauteurs[r] / somme) * dedans.h
-    /* Le compte de cases suit la hauteur de la ligne : une ligne haute porte
-       des signes larges, donc peu, ce qui est exactement ce qu'un titrage
-       fait quand un mot court occupe une ligne entière. */
-    const cases = Math.max(2, Math.round(dedans.w / (h * 0.66)))
-    const parts = Array.from({ length: cases }, (_, c) => 0.85 + 0.3 * hacher(c + 1, r, cle))
-    const large = parts.reduce((a, b) => a + b, 0)
-    let x = dedans.x
-    for (let c = 0; c < cases; c += 1) {
-      const w = (parts[c] / large) * dedans.w
-      const tirage = hacher(c + 1, r, cle + 7)
-      /* Une case sur huit reste blanche, et c'est le seul blanc de la
-         composition : sans lui, le bloc devient un mur et cesse de se lire
-         comme des mots. */
-      /* Le tirage n'est pas uniforme : le pavé plein ferme la ligne et le
-         blanc l'ouvre, et il en faut peu des deux. Les cinq signes qui portent
-         un compteur ou une courbe se partagent le reste, parce que ce sont eux
-         qui font lire de la lettre plutôt que de la brique. */
-      const JEU = [0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6]
-      const rang = tirage < 0.1
-        ? 7
-        : JEU[Math.floor(hacher(c + 1, r, cle + 13) * JEU.length) % JEU.length]
-      /* L'approche et l'interligne sont des longueurs fixes, jamais des parts
-         de la case : une chasse étroite et une chasse large doivent laisser le
-         même blanc entre elles, sinon la ligne cesse de se lire comme un mot.
-         C'est l'approche d'un titrage serré, et c'est elle qui fait tout. */
-      for (const piece of signe(x, y, w - approche, h - interligne, rang)) formes.push(piece)
-      x += w
-    }
-    y += h
+  /* Le mot en lignes. Les espaces coupent, et un mot trop long pour tenir seul
+     n'est pas coupé : une césure demanderait un dictionnaire, et une affiche
+     n'en coupe jamais.
+
+     Puis le mot se répète jusqu'à remplir la page. C'est ce que fait l'affiche
+     YEAH des images de référence, qui écrit son mot deux fois de suite parce
+     qu'une fois ne remplissait pas, et c'est la seule façon d'occuper le cadre
+     sans étirer les lettres : le corps d'une ligne est dicté par sa longueur,
+     pas choisi, et un mot court laisse donc une ligne basse. Plutôt qu'un
+     grand vide, une reprise. */
+  const source = mot.split(' ').map((l) => l.trim()).filter((l) => l.length > 0)
+  if (source.length === 0) return
+
+  /* Le corps d'une ligne est celui qui la fait toucher les deux bords : c'est
+     la largeur utile divisée par la chasse du mot. Sa hauteur vaut son corps,
+     la hauteur de capitale étant l'unité de l'alphabet. */
+  const corpsDe = (ligne: string) => utile.w / Math.max(0.001, chasseDuMot(ligne, approche))
+
+  const lignes: string[] = []
+  const corps: number[] = []
+  let demandee = 0
+  /* La borne est une sécurité, pas une intention : un mot dont la chasse serait
+     dérisoire pourrait sinon demander des milliers de lignes. */
+  while (demandee < utile.h && lignes.length < 60) {
+    const ligne = source[lignes.length % source.length]
+    lignes.push(ligne)
+    const c = corpsDe(ligne)
+    corps.push(c)
+    demandee += c
   }
 
+  /* Et tout se ramène à la hauteur qu'on a. Le facteur ne monte jamais au
+     dessus de un : au delà, les lignes déborderaient des deux côtés, chaque
+     ligne étant déjà réglée pour toucher les bords. */
+  const facteur = Math.min(1, utile.h / demandee)
+  const reste = utile.h - demandee * facteur
+
+  const lettres: Point[][][] = []
+  let y = utile.y + reste / 2
+  for (const [i, ligne] of lignes.entries()) {
+    const taille = corps[i] * facteur
+    /* Une ligne réduite ne touche plus les bords : elle se centre, comme le
+       ferait un compositeur, plutôt que de rester ferrée à gauche. */
+    const x = utile.x + (utile.w - chasseDuMot(ligne, approche) * taille) / 2
+    const parLettre = new Map<number, Point[][]>()
+    for (const { rang, points } of contoursDuMot(ligne, x, y, taille, approche)) {
+      const dessin = parLettre.get(rang)
+      if (dessin) dessin.push(points)
+      else parLettre.set(rang, [points])
+    }
+    lettres.push(...parLettre.values())
+    y += taille
+  }
+
+  /* Les lettres, chacune d'un seul chemin : ses contours entrent ensemble et
+     la règle paire et impaire creuse les compteurs. Contour par contour, le
+     compteur d'un O percerait la lettre d'à côté au lieu de percer la sienne. */
   ctx.fillStyle = encre
-  for (const piece of formes) {
-    polygone(ctx, piece)
-    ctx.fill()
+  for (const contours of lettres) {
+    ctx.beginPath()
+    for (const contour of contours) {
+      ctx.moveTo(contour[0][0], contour[0][1])
+      for (const p of contour.slice(1)) ctx.lineTo(p[0], p[1])
+      ctx.closePath()
+    }
+    ctx.fill('evenodd')
   }
 
   /* Les boucles, chacune découpée en tronçons et en disques de raccord : ce
@@ -310,31 +261,44 @@ function affiche(
 
     /* Les pastilles : les points d'une ponctuation qu'aucun texte ne porte.
        Elles sont posées avec la boucle et de la même encre, et croisent les
-       signes comme elle. */
+       lettres comme elle. */
     const pastilles = [3, 5, 7][densite]
     for (let p = 0; p < pastilles; p += 1) {
-      convexes.push(disque(
-        W * rnd(), H * rnd(), epaisseur * (0.5 + 0.5 * rnd()), 16,
-      ))
+      convexes.push(disque(W * rnd(), H * rnd(), epaisseur * (0.5 + 0.5 * rnd()), 16))
     }
 
     ctx.fillStyle = accent
     for (const piece of convexes) {
-      polygone(ctx, piece)
+      ctx.beginPath()
+      ctx.moveTo(piece[0][0], piece[0][1])
+      for (const p of piece.slice(1)) ctx.lineTo(p[0], p[1])
+      ctx.closePath()
       ctx.fill()
     }
 
-    /* Le troisième aplat, posé en dernier : l'intersection de chaque convexe
-       de l'encre claire avec chaque signe de l'encre sombre. C'est le seul
+    /* Le troisième aplat, posé en dernier : l'intersection de chaque convexe de
+       l'encre claire avec chaque lettre de l'encre sombre. C'est le seul
        endroit du moteur où une couleur n'est ni tirée de la palette ni
-       mélangée, mais calculée à partir des deux qui la font. */
+       mélangée, mais calculée à partir des deux qui la font.
+
+       Une lettre se coupe contour par contour, et les morceaux se remplissent
+       ensemble à la règle paire et impaire : couper le dehors et le dedans par
+       le même convexe rend `(dehors ∩ K)` moins `(dedans ∩ K)`, c'est-à-dire la
+       lettre coupée, compteurs compris. */
     ctx.fillStyle = croisement
     for (const piece of convexes) {
-      for (const forme of formes) {
-        const part = couperConvexe(forme, piece)
-        if (part.length < 3) continue
-        polygone(ctx, part)
-        ctx.fill()
+      for (const contours of lettres) {
+        const parts = contours
+          .map((contour) => couperConvexe(contour, piece))
+          .filter((part) => part.length >= 3)
+        if (parts.length === 0) continue
+        ctx.beginPath()
+        for (const part of parts) {
+          ctx.moveTo(part[0][0], part[0][1])
+          for (const p of part.slice(1)) ctx.lineTo(p[0], p[1])
+          ctx.closePath()
+        }
+        ctx.fill('evenodd')
       }
     }
   }
@@ -344,8 +308,8 @@ function affiche(
 
 export function peindreSurimpression(
   ctx: Pinceau, W: number, H: number, id: IdSurimpression,
-  C: readonly string[], densite: Densite, rnd: Alea, unite: number,
+  C: readonly string[], densite: Densite, rnd: Alea, unite: number, mot: string,
 ): void {
   void id
-  affiche(ctx, W, H, C, densite, rnd, unite)
+  affiche(ctx, W, H, C, densite, rnd, unite, mot)
 }

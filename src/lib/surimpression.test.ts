@@ -19,14 +19,16 @@
  */
 import { describe, expect, it } from 'vitest'
 import { estSurimpression, IDS_SURIMPRESSIONS, surimprimer } from './surimpression'
-import { FAMILLES, PALETTES, type Densite } from './moteur'
+import { assainirMot, FAMILLES, MOT_MAX, MOT_PAR_DEFAUT, PALETTES, type Densite } from './moteur'
 import { svgDuMotif } from './svg'
 
 /** Les formes posées, teinte et chemin, dans l'ordre où elles le sont. */
 function formes(
   largeur: number, hauteur: number, densite: Densite = 1, graine = 3120, palette = 'lime' as const,
 ): { fill: string; d: string }[] {
-  const rendu = svgDuMotif({ famille: 'affiche', palette, densite, graine }, largeur, hauteur, false)
+  const rendu = svgDuMotif(
+    { famille: 'affiche', palette, densite, graine, mot: 'OH LA LA' }, largeur, hauteur, false,
+  )
   return [...rendu.texte.matchAll(/<path d="([^"]*)" fill="([^"]*)"/g)]
     .map((trouve) => ({ fill: trouve[2], d: trouve[1] }))
     /* La première est l'aplat de fond, posé par `svgDuMotif` avant le motif. */
@@ -174,6 +176,62 @@ describe('déterminisme et format', () => {
         const teintes = new Set(posees.map((f) => f.fill))
         expect(teintes.size, `${W}x${H} d${densite}`).toBe(3)
       }
+    }
+  })
+})
+
+describe('le mot', () => {
+  it('ne laisse passer que ce que la fonte sait tracer', () => {
+    /* L'adresse est la seule partie du produit qui vienne du dehors, et le mot
+       est la seule chaîne libre qu'elle porte. Ce qui n'est pas de la fonte
+       tombe plutôt que d'être remplacé : un signe rendu par un blanc couperait
+       le mot en deux lignes sans qu'on comprenne pourquoi. */
+    expect(assainirMot('ciao')).toBe('CIAO')
+    expect(assainirMot('voilà !')).toBe('VOILÀ !')
+    expect(assainirMot('<script>')).toBe('SCRIPT')
+    expect(assainirMot('a#b')).toBe('AB')
+    expect(assainirMot('  oh   my  ')).toBe('OH MY')
+    expect(assainirMot('日本')).toBe(MOT_PAR_DEFAUT)
+    expect(assainirMot('')).toBe(MOT_PAR_DEFAUT)
+    expect(assainirMot('   ')).toBe(MOT_PAR_DEFAUT)
+  })
+
+  it('borne la longueur, et ne rend jamais un mot qui finit par un blanc', () => {
+    /* La coupe à vingt-quatre signes peut tomber sur un espace, et une ligne
+       vide en fin de mot demanderait un corps infini : la chasse d'une ligne
+       vide est nulle, et la division qui en tire le corps partirait à
+       l'infini. Le mot est donc retaillé après la coupe. */
+    const long = assainirMot('A'.repeat(40))
+    expect(long).toHaveLength(MOT_MAX)
+    const coupe = assainirMot('AAAAAAAAAAAAAAAAAAAAAAA BBBB')
+    expect(coupe.endsWith(' ')).toBe(false)
+    expect(coupe.length).toBeLessThanOrEqual(MOT_MAX)
+  })
+
+  it('change l’image, et seulement pour l’affiche', () => {
+    const avec = (mot: string) => svgDuMotif(
+      { famille: 'affiche', palette: 'lime', densite: 1, graine: 3120, mot }, 400, 900, false,
+    ).texte
+    expect(avec('CIAO')).not.toBe(avec('YEAH'))
+    const vagues = (mot: string) => svgDuMotif(
+      { famille: 'vagues', palette: 'lime', densite: 1, graine: 3120, mot }, 400, 900, false,
+    ).texte
+    expect(vagues('CIAO')).toBe(vagues('YEAH'))
+  })
+
+  it('remplit la page quel que soit le mot', () => {
+    /* Un mot court donne une ligne basse : sans reprise, l'affiche laisserait
+       les trois quarts du cadre au fond. Le mot se répète donc jusqu'à ce que
+       la page soit pleine, ce que fait l'affiche YEAH des images de référence.
+       On le mesure par le bas de la dernière forme d'encre. */
+    for (const mot of ['OH', 'CIAO', 'OH MY GOODNESS']) {
+      const rendu = svgDuMotif(
+        { famille: 'affiche', palette: 'lime', densite: 0, graine: 3120, mot }, 400, 900, false,
+      ).texte
+      const chemins = [...rendu.matchAll(/<path d="([^"]*)"/g)].map((m) => m[1]).slice(1)
+      const bas = Math.max(...chemins.flatMap((d) =>
+        (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number).filter((_, i) => i % 2 === 1)))
+      expect(bas, mot).toBeGreaterThan(900 * 0.9)
     }
   })
 })

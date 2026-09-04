@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 import {
-  estPaletteLivree, FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
+  assainirMot, estPaletteLivree, FAMILLES, MOT_MAX, ORDRE_PALETTES,
+  palette as resoudrePalette, PALETTES,
   type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
   type Langue,
 } from '../lib/moteur'
@@ -455,6 +456,52 @@ export function ChoixDensite({
   )
 }
 
+
+/**
+ * Le mot de l'affiche.
+ *
+ * Le seul champ libre du panneau, et la seule chaîne du produit qui vienne de
+ * quelqu'un. Il est donc assaini par le moteur à chaque frappe plutôt qu'à la
+ * validation : ce que le champ montre est exactement ce que l'image écrit, et
+ * une lettre que la fonte n'a pas disparaît sous le doigt au lieu d'être
+ * refusée plus tard. C'est plus honnête et ça se voit tout de suite.
+ *
+ * Il n'apparaît que sur l'affiche, la seule famille qui écrive. Le mettre
+ * partout aurait demandé aux soixante-dix-huit autres de porter un réglage
+ * qu'elles ignorent.
+ */
+export function ChoixMot({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  valeur: string
+  textes: Textes
+  onChoisir: (mot: string) => void
+}) {
+  const T = textes.reglages
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-mot">
+        <Arche />
+        <span>{T.mot}</span>
+      </h2>
+      <input
+        id="champ-mot"
+        className="champ champ-mot"
+        type="text"
+        value={valeur}
+        maxLength={MOT_MAX}
+        autoComplete="off"
+        spellCheck={false}
+        aria-labelledby="h-mot"
+        aria-describedby="note-mot"
+        onChange={(e) => onChoisir(assainirMot(e.target.value))}
+      />
+      <p className="bento-n" id="note-mot">{T.motNote}</p>
+    </div>
+  )
+}
 
 /**
  * Accueil ou verrouillage : sur quel écran on juge le motif.
