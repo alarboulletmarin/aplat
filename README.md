@@ -57,7 +57,7 @@ fully usable offline.
 
 ## Gallery
 
-Ten of the seventy-six families. Every image in this README comes out of the
+Ten of the seventy-nine families. Every image in this README comes out of the
 engine itself, with a fixed seed, and is regenerated identically by
 `node tools/vitrine.mjs`: none of them can promise a render the app would not
 produce.
