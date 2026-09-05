@@ -52,7 +52,7 @@ export interface Reglages {
   sombre: boolean
   /**
    * L'écran sur lequel la lisibilité est jugée : l'accueil et sa grille
-   * d'icônes, ou le verrouillage et son cartouche d'heure.
+   * d'icônes, ou le verrouillage et la place laissée à l'heure.
    *
    * Il est ici, avec le voile et la version, et pour exactement la même
    * raison : la sonde ne mesure pas la même bande selon l'écran, elle dose

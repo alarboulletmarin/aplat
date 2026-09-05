@@ -398,7 +398,7 @@ export const fr = {
     ecranAccueil: 'Accueil',
     ecranVerrou: 'Verrouillage',
     ecranNote:
-      'La lisibilité se mesure sous la grille d’icônes, ou sous l’heure : le voile du fichier suit celui qu’on choisit.',
+      'Sur le verrouillage, le motif laisse le tiers haut à l’heure ; la lisibilité se mesure là, ou sous la grille d’icônes de l’accueil.',
     ecranTitreAccueil: 'Juger le motif derrière une grille d’icônes',
     ecranTitreVerrou: 'Juger le motif derrière l’heure de l’écran de verrouillage',
   },

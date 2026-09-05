@@ -148,6 +148,7 @@ appliqué que s'il sert.
 | `r` | résolution, seulement si elle a été saisie à la main |
 | `v=0` | seulement si le voile de lisibilité a été retiré du fichier |
 | `n=1` | seulement si c'est la version sombre qui est exportée |
+| `e=1` | seulement si le fichier est composé pour l'écran de verrouillage, le tiers haut laissé à l'heure |
 | `k` | les teintes d'une palette personnelle, seulement si le motif en porte une |
 
 Copier le lien suffit à retrouver exactement la même image, sur n'importe

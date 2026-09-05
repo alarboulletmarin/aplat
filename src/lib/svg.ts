@@ -33,8 +33,8 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  alea, formes, graineDeDessin, mesurer, MOT_PAR_DEFAUT, palette, peindreOmbre,
-  peindrePlaceDeLHeure, peindreVoile,
+  mesurer, MOT_PAR_DEFAUT, palette, peindreOmbre,
+  peindreFormes, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
@@ -427,14 +427,13 @@ export function svgDuMotif(
 
   notaire.fillStyle = P.fond
   notaire.fillRect(0, 0, largeur, hauteur)
-  formes(
-    notaire, largeur, hauteur, motif.famille, P.couleurs, motif.densite,
-    alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-    Math.min(largeur, hauteur), motif.mot ?? MOT_PAR_DEFAUT,
+  /* Le cadre et l'élagage de la place de l'heure, dans le même ordre que sur le
+     canevas : un SVG qui les ignorerait ne serait pas le même fichier dans un
+     autre format. */
+  peindreFormes(
+    notaire, largeur, hauteur, motif.famille, P, motif.densite, motif.graine,
+    motif.mot ?? MOT_PAR_DEFAUT, ecran,
   )
-  /* Le cartouche de l'heure, dans le même ordre que sur le canevas : un SVG qui
-     l'ignorerait ne serait pas le même fichier dans un autre format. */
-  peindrePlaceDeLHeure(notaire, largeur, hauteur, P, ecran, motif.famille, motif.graine)
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
      même titre que le voile. Elle reste hors du chemin quand aucune des deux

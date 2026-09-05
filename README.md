@@ -141,6 +141,7 @@ contrast ratio is displayed, and the veil is applied only when it helps.
 | `r` | resolution, only when typed in by hand |
 | `v=0` | only when the readability veil was removed from the file |
 | `n=1` | only when the dark variant is exported |
+| `e=1` | only when the file is composed for the lock screen, the top third left to the clock |
 | `k` | the colors of a custom palette, only when the pattern uses one |
 
 Copying the link is enough to get exactly the same image on any device. A

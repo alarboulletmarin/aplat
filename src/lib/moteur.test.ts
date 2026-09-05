@@ -14,7 +14,6 @@
  * canevas, donc un navigateur ; c'est le travail de `tools/`.
  */
 import { describe, expect, it } from 'vitest'
-import { svgDuMotif } from './svg'
 import {
   alea, alphaDuVoile, empreinte, estDensite, estFamille, estPalette,
   CIBLE_SOMBRE, forceSombre, luminanceAssombrie, OMBRE_MAX, sansVoile,
@@ -373,55 +372,12 @@ describe('voile retiré', () => {
 })
 
 /**
- * La réserve de l'heure : ce que l'écran de verrouillage change au fichier.
+ * La place de l'heure : ce que l'écran de verrouillage change au fichier.
  *
- * Elle n'est pas une couche de plus, elle appartient à celle des formes : c'est
- * une forme du motif, dessinée dans le vocabulaire de son geste, et non une
- * correction posée sur une image finie.
- *
- * Sa conséquence la plus intéressante n'est pas ici et ne peut pas y être : la
- * sonde mesure sa bande après la réserve, n'y trouve que le fond, et le voile
- * se dose à zéro. Le vérifier demande de mesurer des pixels, donc un canevas,
- * donc un navigateur ; c'est `tools/e2e.mjs`, section 4 bis, qui s'en charge,
- * comme pour tout ce qui touche à la sonde.
+ * Le cadre et le fondu sont testés dans `place.test.ts`, sur un pinceau qui
+ * note. Ce qui reste ici est la pente du voile, qui est au moteur.
  */
 describe('place de l’heure', () => {
-  it('ajoute une forme au motif, sans en changer une seule autre', () => {
-    /* Ce que le verrouillage fait au fichier, et ce qu'il ne lui fait pas.
-
-       Il ne recadre plus rien : le motif est peint sur le cadre entier, exactement
-       comme sur l'écran d'accueil, et le fond d'écran est donc le même des deux
-       côtés. Une forme s'y ajoute, une seule, et c'est le cartouche qui porte
-       l'heure. Les deux moitiés de cette phrase se mesurent ici, et il faut les
-       deux : sans la première, le cartouche serait redevenu un recadrage
-       déguisé ; sans la seconde, il aurait pu se dédoubler sans que rien ne le
-       dise. */
-    const posees = (ecran: 'accueil' | 'verrou') =>
-      [...svgDuMotif({ famille: 'blobs', palette: 'lime', densite: 1, graine: 7314 },
-        400, 900, false, false, ecran).texte.matchAll(/<path d="([^"]*)"/g)]
-        .map((m) => m[1])
-    const accueil = posees('accueil')
-    const verrou = posees('verrou')
-    expect(verrou).toHaveLength(accueil.length + 1)
-    expect(verrou.slice(0, accueil.length)).toEqual(accueil)
-
-    /* Et le cartouche couvre bien la bande des chiffres, sans toucher les bords
-       du cadre : c'est ce retrait latéral qui le fait lire comme une forme
-       posée sur le motif plutôt que comme une bande qui le coupe. */
-    const cartouche = verrou[verrou.length - 1]
-    const nombres = (cartouche.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
-    const abscisses = nombres.filter((_, i) => i % 2 === 0)
-    const ordonnees = nombres.filter((_, i) => i % 2 === 1)
-    expect(Math.min(...ordonnees)).toBeLessThanOrEqual(900 * 0.09)
-    expect(Math.max(...ordonnees)).toBeGreaterThanOrEqual(900 * 0.3)
-    /* Et il garde toujours du motif de chaque côté : un cartouche qui touche
-       un bord redevient une bande, et c'est la seule panne dont ce dessin ne
-       se relève pas. Le quart du retrait est ce que `fermer` garantit, quoi
-       qu'un bout de forme demande. */
-    expect(Math.min(...abscisses)).toBeGreaterThanOrEqual(400 * 0.05 * 0.25)
-    expect(Math.max(...abscisses)).toBeLessThanOrEqual(400 * (1 - 0.05 * 0.25))
-  })
-
   it('range le voile du verrouillage dans la réserve, et l’en laisse sortir nul', () => {
     /* La pente du voile n'est pas la même selon l'écran, et c'est ce qui
        empêche un fond d'écran de verrouillage d'être terne sur toute sa

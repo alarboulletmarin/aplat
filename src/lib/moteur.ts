@@ -23,8 +23,9 @@ import {
   estSurimpression, peindreSurimpression, type IdSurimpression,
 } from './surimpression'
 import { CARACTERES } from './alphabet'
-import { cartoucheDuGeste } from './lisieres'
-import { luminanceHex } from './trace'
+import {
+  BAS as BAS_DE_L_HEURE, cadreDuMotif, elaguer, HAUT as HAUT_DE_L_HEURE,
+} from './place'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -2180,16 +2181,15 @@ export function luminanceAssombrie(L: number, force: number): number {
  *
  * L'accueil pose une grille d'icônes sur presque toute la hauteur, et c'est
  * sous elle que le contraste se joue. L'écran de verrouillage ne pose rien de
- * tout cela : il porte un cartouche, l'heure et la date, haut placé et large,
- * et le reste du cadre est nu. Les deux bandes n'ont ni la même hauteur ni la
- * même place, et un motif qui passe sous l'une échoue régulièrement sous
- * l'autre : un motif calme en bas et agité en haut est excellent pour des
- * icônes et illisible pour une heure.
+ * tout cela : l'heure et la date, hautes et larges, et le reste du cadre est
+ * nu. Le motif ne compose donc pas de la même façon pour les deux : sur le
+ * verrouillage il laisse le tiers haut à l'heure, et `lib/place.ts` dit
+ * comment.
  *
  * C'est pour cela que le choix de l'écran est un réglage du fichier et non un
- * réglage de l'aperçu. La sonde dose le voile sur ce qu'elle mesure, et le
- * voile est brûlé dans le PNG : deux écrans, deux mesures, donc deux fichiers.
- * Le lien le porte, au même titre que la version sombre.
+ * réglage de l'aperçu. Le cadre du motif change, la sonde dose le voile sur ce
+ * qu'elle mesure, et le voile est brûlé dans le PNG : deux écrans, deux
+ * fichiers. Le lien le porte, au même titre que la version sombre.
  */
 export type Ecran = 'accueil' | 'verrou'
 
@@ -2197,17 +2197,14 @@ export type Ecran = 'accueil' | 'verrou'
  * La bande mesurée, en parts de la hauteur.
  *
  * Celle de l'accueil va du haut de la première rangée d'icônes au bas du dock.
- * Celle du verrouillage tient dans le cartouche, un cheveu en dedans de ses
- * bords : la sonde y mesure donc l'aplat du cartouche et rien d'autre, ce qui
- * est exactement ce qu'on veut savoir, les chiffres n'étant posés que là. Une bande courte ne moyenne presque rien, si bien qu'une seule
- * forme claire posée derrière les chiffres suffit à faire tomber le verdict,
- * là où la même forme se serait noyée dans la moyenne d'une grille entière.
- * C'est le comportement voulu : sur un écran de verrouillage, c'est bien
- * derrière les chiffres, et nulle part ailleurs, que l'heure doit se lire.
+ * Celle du verrouillage est la place de l'heure, un cheveu en dedans de ses
+ * bornes : la sonde y trouve le sol du motif et rien d'autre, ce qui est
+ * exactement ce qu'on veut savoir, les chiffres n'étant posés que là. Le voile
+ * n'y est plus qu'un appoint, pour les palettes dont le fond est moyen.
  */
 const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
   accueil: [0.24, 0.92],
-  verrou: [0.085, 0.305],
+  verrou: [HAUT_DE_L_HEURE + 0.01, BAS_DE_L_HEURE - 0.01],
 }
 
 /*
@@ -2263,12 +2260,7 @@ export function mesurer(
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = P.fond
     ctx.fillRect(0, 0, PW, PH)
-    formes(ctx, PW, PH, id, P.couleurs, densite,
-      alea(graineDeDessin(id, densite, graine)), Math.min(PW, PH), mot)
-    /* La sonde pose le cartouche comme le rendu : sur un écran de verrouillage
-       elle ne doit pas trouver le motif sous les chiffres, elle doit trouver ce
-       qui y sera. */
-    peindrePlaceDeLHeure(ctx, PW, PH, P, ecran, id, graine)
+    peindreFormes(ctx, PW, PH, id, P, densite, graine, mot, ecran)
 
     try {
       const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
@@ -2331,124 +2323,29 @@ export function mesurer(
 /* ---------- la place de l'heure ---------------------------------------------- */
 
 /**
- * La place de l'heure : non pas un blanc posé sur le motif, mais un motif
- * composé pour elle.
+ * Les formes du motif, composées pour l'écran.
  *
- * Deux façons de rendre une heure lisible, et la différence entre les deux est
- * tout le sujet. La première recouvre : on peint le motif d'un bord à l'autre,
- * puis on pose par dessus un aplat de fond là où les chiffres tombent. Ça
- * marche, et ça se voit : l'image est coupée, on lit deux morceaux empilés,
- * l'un raturé et l'autre pas.
+ * Sur l'accueil, le motif reçoit le cadre entier. Sur le verrouillage, il
+ * reçoit ce qui commence sous la place de l'heure, et le pinceau qu'on lui tend
+ * élague ce qui monterait au-dessus : le pourquoi et les bornes sont dans
+ * `lib/place.ts`. Le tirage est le même des deux côtés, si bien qu'un
+ * accueil et son verrouillage montrent le même motif, recadré et non redessiné.
  *
- * La seconde ne recouvre rien, elle **cadre**. Le moteur ne dit pas au motif
- * « je vais effacer ton haut », il lui dit « voici ta surface », et le motif la
- * remplit entière comme il aurait rempli le cadre. Tout le catalogue sait déjà
- * le faire, parce qu'aucune famille ne connaît sa taille : chacune compose
- * pour la largeur et la hauteur qu'on lui donne, et ne pose que des longueurs
- * relatives au petit côté. Lui donner une hauteur plus courte et la descendre
- * d'autant suffit à ce qu'elle recompose au lieu de se laisser tronquer.
- *
- * Une garantie s'ajoute au cadre, et il faut dire pourquoi elle ne le
- * contredit pas. Trente-cinq familles sur soixante-dix-neuf débordent
- * volontairement du cadre qu'on leur donne : une onde déborde par le haut, un
- * relief pousse ses paliers hors champ, une corolle fait sortir ses pétales.
- * C'est leur droit et c'est souvent leur dessin. Le fond est donc reposé sur
- * la réserve une fois le motif composé, ce qui ne rogne que ce qui y était
- * entré par débordement. La différence avec un lavis posé sur un motif entier
- * est tout sauf cosmétique : là, on effaçait le tiers d'une image dessinée
- * pour le cadre entier ; ici, on rend nette une bordure que le motif n'a pas
- * composée pour lui.
- *
- * Ce que cela donne, famille par famille, n'est pas uniforme et c'est voulu.
- * Celles qui ont un haut et un bas y gagnent le plus : les vagues posent leur
- * première houle sous la réserve et leur ciel devient le sien, sans la moindre
- * couture ; l'horizon, les dunes, les sommets, les falaises, la marée font de
- * même. Celles qui n'ont ni haut ni bas, un pavage, une trame, se ramassent
- * sous la ligne : la maille y est entière, un peu plus serrée, et le fond
- * reste au dessus. Aucune n'est coupée, et c'est la seule chose qu'on exigeait.
- *
- * La sonde mesure ensuite sa bande sur l'image ainsi composée. Elle n'y trouve
- * que le fond, le voile se dose à zéro, et la version verrouillée d'un motif
- * n'est donc pas une version voilée : c'en est une autre composition.
+ * C'est le seul endroit où le cadre et l'élagage sont posés : le rendu, le SVG
+ * et la sonde passent tous par ici, et le fichier est donc le même dans les
+ * trois.
  */
-
-/**
- * La place de l'heure : une forme du motif, pas un trou dans le motif.
- *
- * Le motif couvre le cadre entier, comme sur n'importe quel autre écran. Une de
- * ses formes vient seulement se placer là où tombent les chiffres, dessinée
- * dans le vocabulaire de son geste : une plaque pour la fracture, un bloc de
- * cases pour le carreau, une capsule pour la coulée, un palier pour la ligne de
- * niveau. Le dessin de ces quinze formes est dans `lib/lisieres.ts` ; le moteur
- * ne décide ici que de leur couleur.
- *
- * Le cadre du motif n'est donc plus raccourci, et `cadreDuMotif` a disparu avec
- * la raison qui l'avait fait naître. C'est le troisième essai et le seul qui
- * tienne : recouvrir le haut effaçait, arrêter le motif sur une lisière laissait
- * un vide, et dans les deux cas le fond d'écran commençait sous l'heure au lieu
- * de la porter.
- */
-
-/**
- * La teinte du cartouche : une des franches de la palette, tirée au sort.
- *
- * Deux exigences qui se contredisent, et le tirage est ce qui les concilie.
- *
- * Les chiffres ne sont pas dessinés par le produit, c'est le système qui les
- * pose, et il les pose clairs ou sombres selon ce qu'il trouve : le cartouche
- * doit donc être franchement d'un côté ou de l'autre de l'échelle, jamais au
- * milieu, sans quoi ni le blanc ni le noir n'y tiennent. Mais prendre chaque
- * fois la teinte la plus tranchée donnait à toutes les palettes et à toutes les
- * familles le même aplat, le marine de la palette sur les onze motifs d'affilée,
- * et un cartouche qui ne varie jamais cesse d'appartenir au motif : il devient
- * le bandeau du produit.
- *
- * On garde donc toutes les teintes assez franches pour porter des chiffres, le
- * fond compris, et la graine en choisit une. Quand aucune ne l'est, ce qui
- * arrive sur une palette entièrement moyenne, on retombe sur la plus tranchée
- * des mauvaises : mieux vaut un contraste imparfait qu'un contraste nul, et la
- * sonde le dira de toute façon.
- */
-const FRANCHISE = 0.26
-
-function teinteDuCartouche(P: Palette, rnd: Alea): string {
-  const candidates = [P.fond, ...P.couleurs]
-  const ecart = (teinte: string) => Math.abs(luminanceHex(teinte) - 0.5)
-  const franches = candidates.filter((teinte) => ecart(teinte) >= FRANCHISE)
-  if (franches.length > 0) return franches[Math.floor(rnd() * franches.length)]
-  return candidates.reduce((a, b) => (ecart(b) > ecart(a) ? b : a))
-}
-
-/**
- * Le cartouche, peint par dessus le motif.
- *
- * Le nom `peindreReserve` étant déjà pris par le geste du claustra, celui-ci
- * est long et le restera.
- *
- * La forme est tirée d'un aléa dérivé de la graine du motif mais distinct de
- * celui du dessin. Sans cette précaution elle consommerait les premiers tirages
- * de la famille et changerait le motif entier au lieu d'ajouter une forme : un
- * fond d'écran d'accueil et son verrouillage ne montreraient plus la même
- * image, ce qui est exactement ce qu'on ne veut pas.
- */
-export function peindrePlaceDeLHeure(
-  ctx: Pinceau, W: number, H: number, P: Palette, ecran: Ecran,
-  famille: IdFamille, graine: number,
+export function peindreFormes(
+  ctx: Pinceau, W: number, H: number, id: IdFamille, P: Palette, densite: Densite,
+  graine: number, mot: string, ecran: Ecran,
 ): void {
-  if (ecran !== 'verrou') return
-  /* L'aléa mêle la famille à la graine, et pas seulement pour la forme : sans
-     elle, un même tirage donnait la même teinte de cartouche aux
-     soixante-dix-neuf familles, et l'aplat se lisait comme le bandeau du
-     produit plutôt que comme une forme du motif. */
-  const rnd = alea((graine ^ 0x5eaf00d) + empreinte(famille) * 7919)
-  const contour = cartoucheDuGeste(famille, W, H, rnd)
-  if (contour.length < 3) return
-  ctx.fillStyle = teinteDuCartouche(P, rnd)
-  ctx.beginPath()
-  ctx.moveTo(contour[0][0], contour[0][1])
-  for (const p of contour.slice(1)) ctx.lineTo(p[0], p[1])
-  ctx.closePath()
-  ctx.fill()
+  const { haut, hauteur } = cadreDuMotif(H, ecran)
+  const pinceau = ecran === 'verrou' ? elaguer(ctx, W, H) : ctx
+  pinceau.save()
+  pinceau.translate(0, haut)
+  formes(pinceau, W, hauteur, id, P.couleurs, densite,
+    alea(graineDeDessin(id, densite, graine)), Math.min(W, hauteur), mot)
+  pinceau.restore()
 }
 
 /* ---------- voile de lisibilité ---------------------------------------------- */
@@ -2476,7 +2373,7 @@ export function peindrePlaceDeLHeure(
  * pour lui-même.
  *
  * Le verrouillage fait l'inverse et s'arrête net. Il tient plein la réserve de
- * l'heure, puis tombe à rien sous la houle qui la ferme : sous cette ligne il
+ * l'heure, puis tombe à rien sous le haut du cadre du motif : sous cette ligne il
  * n'y a plus rien à lire, et un voile qui continuerait ternirait le motif pour
  * personne. C'est la différence de fond entre les deux écrans. Sur l'accueil,
  * les libellés sont partout et le voile doit être partout. Sur le
@@ -2663,13 +2560,8 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
-      alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-      Math.min(W, H), motif.mot ?? MOT_PAR_DEFAUT)
-    /* Le cartouche appartient à la couche des formes : c'est une forme du motif
-       et non une correction posée dessus, et l'escalier des couches de
-       « /moteur » n'a donc pas de marche de plus à montrer. */
-    peindrePlaceDeLHeure(ctx, W, H, P, mesure.ecran, motif.famille, motif.graine)
+    peindreFormes(ctx, W, H, motif.famille, P, motif.densite, motif.graine,
+      motif.mot ?? MOT_PAR_DEFAUT, mesure.ecran)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)

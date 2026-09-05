@@ -291,7 +291,7 @@ export const en: Textes = {
     ecranAccueil: 'Home',
     ecranVerrou: 'Lock',
     ecranNote:
-      'Readability is measured under the icon grid, or under the clock: the file’s veil follows whichever you pick.',
+      'On the lock screen the pattern leaves the top third to the clock; readability is measured there, or under the home screen’s icon grid.',
     ecranTitreAccueil: 'Judge the pattern behind a grid of icons',
     ecranTitreVerrou: 'Judge the pattern behind the lock screen clock',
   },

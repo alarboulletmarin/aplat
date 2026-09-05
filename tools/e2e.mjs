@@ -92,18 +92,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   });
   t(scale.every(d => d <= 6), 'moteur : même image à deux résolutions', 'écarts max ' + scale.join(','));
 
-  // --- 4 bis. la réserve de l'heure : ce que l'écran de verrouillage change
+  // --- 4 bis. la place de l'heure : ce que l'écran de verrouillage change
   //
-  // La sonde mesure sa bande APRÈS la réserve. Sur l'écran de verrouillage elle
-  // n'y trouve donc que le fond de la palette, dont le contraste est connu, et
-  // le voile n'a plus rien à corriger : il tombe à zéro. C'est tout l'intérêt
-  // du geste, et rien d'autre ne le dirait, une image voilée et une image
-  // composée se ressemblant assez pour qu'on ne les distingue pas à l'oeil.
-  //
-  // Ciel fait exception et reste dans la liste pour ça : son fond est un bleu
-  // moyen, et une heure claire posée dessus a besoin d'un appoint même sans
-  // motif derrière. La réserve ne le supprime pas, elle le confine au haut du
-  // cadre, ce que la pente du voile contrôle juste après.
+  // Sur le verrouillage, le motif compose sous la place de l'heure et rien
+  // n'en monte au-dessus : `lib/place.ts`. La sonde mesure sa bande là où
+  // l'heure tombe, et n'y trouve donc que le sol du motif. Le voile ne peut alors qu'être moindre que sur l'accueil, où la
+  // grille d'icônes couvre le motif entier. Rien d'autre ne le dirait, une
+  // image voilée et une image composée se ressemblant assez pour qu'on ne les
+  // distingue pas à l'oeil.
   const reserve = await page.evaluate(() => {
     const M = window.MOTEUR;
     const out = {};
@@ -115,33 +111,36 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     return out;
   });
   const palettes = Object.keys(reserve);
-  const voilees = palettes.filter(p => reserve[p].apres > 0);
-  t(voilees.length === 0, 'cartouche : le voile n\'a plus rien à corriger sous les chiffres',
-    voilees.join(', ') || palettes.length + ' palettes, voile nul partout');
-  const faibles = palettes.filter(p => reserve[p].contraste < 4.5);
-  t(faibles.length === 0, 'cartouche : le contraste tient sur les onze palettes',
+  const M_SEUIL_UI = await page.evaluate(() => window.MOTEUR.SEUIL_UI);
+  const pires = palettes.filter(p => reserve[p].apres > reserve[p].avant + 1e-9);
+  t(pires.length === 0,
+    'place de l\'heure : le voile du verrouillage ne fait jamais plus que celui de l\'accueil',
+    pires.join(', ') || palettes.length + ' palettes');
+  // Ciel est la borne : son fond est un bleu moyen, et le voile, plafonné pour
+  // ne pas ternir le fichier, ne le mène qu'à « juste ». C'était déjà vrai sous
+  // la grille d'icônes ; la place de l'heure ne peut pas faire mieux que le
+  // fond de la palette, et ne doit pas faire moins bien.
+  const faibles = palettes.filter(p => reserve[p].contraste < M_SEUIL_UI);
+  t(faibles.length === 0, 'place de l\'heure : le contraste reste au moins juste sous l\'heure, sur les onze palettes',
     faibles.map(p => `${p} ${reserve[p].contraste.toFixed(1)}`).join(', ')
     || 'le plus faible : ' + Math.min(...palettes.map(p => reserve[p].contraste)).toFixed(1) + ':1');
   const corriges = palettes.filter(p => reserve[p].avant > 0);
   t(corriges.length >= 8,
-    'cartouche : et l\'écran d\'accueil, lui, avait bien besoin de son voile',
+    'place de l\'heure : et l\'écran d\'accueil, lui, avait bien besoin de son voile',
     corriges.length + ' palettes sur ' + palettes.length);
 
-  // Et la garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
-  // familles et les trois densités, le cartouche couvre la bande des chiffres
-  // d'un seul aplat. Ce n'est plus un vide qu'on vérifie, c'est une forme : le
-  // motif court partout ailleurs, y compris au dessus et sur les côtés, et
-  // seule la bande où tombe l'heure doit être d'un ton unique. Une forme trop
-  // courte, trop haute ou trop étroite laisserait du motif sous les chiffres,
-  // et rien ne le dirait.
+  // La garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
+  // familles et les trois densités, la bande des chiffres est d'un seul ton,
+  // celui du sol du motif. Une forme qui remonterait dedans, par débordement
+  // ou par une coupe manquée, se verrait ici et nulle part ailleurs : la sonde fait une moyenne, et une moyenne pardonne.
   const couverture = await page.evaluate(() => {
     const M = window.MOTEUR, W = 300, H = 650, mauvaises = [];
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
-    /* Un cheveu en dedans du cartouche, dont les bornes sont dans
-       `lib/lisieres.ts` : cinq centièmes de retrait latéral, et de sept
-       centièmes et demi à trente et un et demi en hauteur. */
-    const x0 = Math.round(W * 0.07), x1 = Math.round(W * 0.93);
+    /* La bande des chiffres, un cheveu en dedans de ses bornes, qui sont dans
+       `lib/place.ts` : de sept centièmes et demi à trente et un et demi de la
+       hauteur, et d'un bord à l'autre, le sol n'ayant pas de retrait. */
+    const x0 = Math.round(W * 0.02), x1 = Math.round(W * 0.98);
     const y0 = Math.round(H * 0.09), y1 = Math.round(H * 0.3);
     for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
       M.dessiner(g, W, H, { famille: f.id, palette: 'lime', densite: d, graine: 7314 },
@@ -158,75 +157,39 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     return mauvaises;
   });
   const combien = await page.evaluate(() => window.MOTEUR.FAMILLES.length);
-  t(couverture.length === 0, 'cartouche : la bande des chiffres est d\'un seul aplat',
+  t(couverture.length === 0, 'place de l\'heure : la bande des chiffres est d\'un seul ton',
     couverture.slice(0, 6).join(', ') || 'les ' + combien + ' familles, trois densités');
 
-  // Le motif, lui, continue de courir au dessus du cartouche et sur ses côtés.
-  // C'est la moitié de l'idée, et celle qui se perd le plus facilement : un
-  // cartouche élargi jusqu'aux bords, ou remonté jusqu'en haut, redeviendrait
-  // le bandeau qu'on a mis trois essais à ne plus faire.
-  const autour = await page.evaluate(() => {
-    const M = window.MOTEUR, W = 300, H = 650, nus = [];
+  // Et le motif, lui, est bien là dessous : la place de l'heure est un
+  // recadrage, pas un effacement. Sur des familles denses, qui couvrent tout,
+  // les deux tiers bas doivent porter plus d'un ton, et le même nombre de
+  // tons qu'à l'accueil à peu de chose près : un élagage trop large viderait
+  // la moitié de l'image sans que rien ne le dise.
+  const dessous = await page.evaluate(() => {
+    const M = window.MOTEUR, W = 300, H = 650, delaves = [];
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
-    /* Des familles denses, qui couvrent tout : sur une famille clairsemée, une
-       marge sans motif ne prouverait rien. */
-    for (const f of ['carreaux', 'banquise', 'meandres', 'cubes', 'penrose']) {
-      M.dessiner(g, W, H, { famille: f, palette: 'lime', densite: 2, graine: 7314 },
-        { ecran: 'verrou', voile: false, arret: 'formes' });
-      const lu = (x, y) => {
-        const p = g.getImageData(x, y, 1, 1).data;
-        return p[0] + ',' + p[1] + ',' + p[2];
-      };
-      /* Le ton du cartouche, relevé en son milieu, puis les quatre points qui
-         l'entourent. Ce qu'on veut savoir n'est pas qu'ils soient variés, une
-         grande forme du motif pouvant très bien les couvrir tous les quatre
-         d'un même ton : c'est qu'ils ne soient pas le cartouche lui-même. Un
-         cartouche élargi jusqu'aux bords ou remonté jusqu'en haut les aurait
-         mangés, et c'est cela seul qu'on cherche. */
-      const ton = lu(Math.round(W / 2), Math.round(H * 0.2));
-      const coins = [[2, 2], [W - 2, 2], [2, Math.round(H * 0.2)], [W - 2, Math.round(H * 0.2)]];
-      if (coins.every(([x, y]) => lu(x, y) === ton)) nus.push(f);
-    }
-    return nus;
-  });
-  t(autour.length === 0, 'cartouche : le motif court toujours au dessus et sur les côtés',
-    autour.join(', ') || 'cinq familles denses');
-
-  // Et le cartouche appartient au geste : deux familles de gestes différents
-  // n'ont pas la même forme. C'est tout l'objet de `lib/lisieres.ts`, et c'est
-  // le genre de chose qui se défait sans bruit, un aiguillage manqué renvoyant
-  // tout le monde sur le blob des aplats sans qu'aucune erreur ne soit levée.
-  // On relève donc la silhouette du cartouche, colonne par colonne, sur la même
-  // graine pour que seule la famille change.
-  const silhouettes = await page.evaluate(() => {
-    const M = window.MOTEUR, W = 300, H = 650;
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
-    const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
-    const releve = (famille) => {
-      M.dessiner(g, W, H, { famille, palette: 'lime', densite: 1, graine: 7314 },
-        { ecran: 'verrou', voile: false, arret: 'formes' });
-      const px = g.getImageData(0, 0, W, H).data;
-      const lu = (x, y) => {
-        const i = (y * W + x) * 4;
-        return px[i] + ',' + px[i + 1] + ',' + px[i + 2];
-      };
-      const ton = lu(Math.round(W / 2), Math.round(H * 0.2));
-      const hauts = [];
-      for (let x = 4; x < W; x += 6) {
-        let y = 0;
-        while (y < H * 0.4 && lu(x, y) !== ton) y += 1;
-        hauts.push(y);
+    const tons = (ecran) => {
+      const vus = new Set();
+      const px = g.getImageData(0, Math.round(H * 0.55), W, Math.round(H * 0.4)).data;
+      for (let i = 0; i < px.length; i += 4 * 7) {
+        vus.add((px[i] >> 3) + ',' + (px[i + 1] >> 3) + ',' + (px[i + 2] >> 3));
       }
-      return hauts.join(',');
+      return vus.size;
     };
-    return ['vagues', 'banquise', 'carreaux', 'meandres', 'relief', 'cubes', 'tapis']
-      .map((f) => [f, releve(f)]);
+    for (const f of ['carreaux', 'banquise', 'meandres', 'cubes', 'penrose']) {
+      const compter = (ecran) => {
+        M.dessiner(g, W, H, { famille: f, palette: 'lime', densite: 2, graine: 7314 },
+          { ecran, voile: false, arret: 'formes' });
+        return tons(ecran);
+      };
+      const accueil = compter('accueil'), verrou = compter('verrou');
+      if (verrou < 2 || verrou < accueil * 0.5) delaves.push(`${f} ${verrou}/${accueil}`);
+    }
+    return delaves;
   });
-  const distinctes = new Set(silhouettes.map(([, p]) => p));
-  t(distinctes.size === silhouettes.length,
-    'cartouche : chaque geste a sa forme, pas deux pareilles',
-    distinctes.size + ' silhouettes pour ' + silhouettes.length + ' gestes');
+  t(dessous.length === 0, 'place de l\'heure : le motif court entier sous l\'heure',
+    dessous.join(', ') || 'cinq familles denses');
 
   const pente = await page.evaluate(() => {
     const M = window.MOTEUR;
@@ -237,10 +200,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     };
   });
   t(pente.dedans > 0.39 && pente.dessous === 0,
-    'réserve : le voile du verrouillage tient le cartouche et ne sort pas dessous',
+    'place de l\'heure : le voile du verrouillage tient la place et ne sort pas dessous',
     `dedans ${pente.dedans.toFixed(3)}, dessous ${pente.dessous.toFixed(3)}`);
   t(pente.accueilBas > 0.4,
-    'réserve : la pente de l\'écran d\'accueil n\'a pas bougé',
+    'place de l\'heure : la pente de l\'écran d\'accueil n\'a pas bougé',
     pente.accueilBas.toFixed(3));
 
   // --- 5. toutes les familles rendent sans erreur, et non vides
