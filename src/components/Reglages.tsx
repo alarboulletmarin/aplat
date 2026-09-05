@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 import {
-  estPaletteLivree, FAMILLES, ORDRE_PALETTES, palette as resoudrePalette, PALETTES,
-  type Densite, type Groupe, type IdFamille, type IdPaletteQuelconque, type Langue,
+  assainirMot, estPaletteLivree, FAMILLES, MOT_MAX, ORDRE_PALETTES,
+  palette as resoudrePalette, PALETTES,
+  type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
+  type Langue,
 } from '../lib/moteur'
 import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
 import { remplir, type Textes } from '../i18n'
@@ -450,6 +452,110 @@ export function ChoixDensite({
           </OptionRadio>
         ))}
       </GroupeRadio>
+    </div>
+  )
+}
+
+
+/**
+ * Le mot de l'affiche.
+ *
+ * Le seul champ libre du panneau, et la seule chaîne du produit qui vienne de
+ * quelqu'un. Il est donc assaini par le moteur à chaque frappe plutôt qu'à la
+ * validation : ce que le champ montre est exactement ce que l'image écrit, et
+ * une lettre que la fonte n'a pas disparaît sous le doigt au lieu d'être
+ * refusée plus tard. C'est plus honnête et ça se voit tout de suite.
+ *
+ * Il n'apparaît que sur l'affiche, la seule famille qui écrive. Le mettre
+ * partout aurait demandé aux soixante-dix-huit autres de porter un réglage
+ * qu'elles ignorent.
+ */
+export function ChoixMot({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  valeur: string
+  textes: Textes
+  onChoisir: (mot: string) => void
+}) {
+  const T = textes.reglages
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-mot">
+        <Arche />
+        <span>{T.mot}</span>
+      </h2>
+      <input
+        id="champ-mot"
+        className="champ champ-mot"
+        type="text"
+        value={valeur}
+        maxLength={MOT_MAX}
+        autoComplete="off"
+        spellCheck={false}
+        aria-labelledby="h-mot"
+        aria-describedby="note-mot"
+        onChange={(e) => onChoisir(assainirMot(e.target.value))}
+      />
+      <p className="bento-n" id="note-mot">{T.motNote}</p>
+    </div>
+  )
+}
+
+/**
+ * Accueil ou verrouillage : sur quel écran on juge le motif.
+ *
+ * Il est ici, avec la version et le voile, et non près de l'aperçu qu'il
+ * change, parce qu'il ne change pas que l'aperçu. La sonde mesure une bande
+ * différente selon l'écran, elle dose donc un autre voile, et ce voile est
+ * brûlé dans le PNG : deux écrans, deux fichiers. Le mettre au dessus de
+ * l'image, à côté du cadre, en aurait fait un bouton d'affichage, ce qu'il
+ * n'est pas.
+ *
+ * Deux puces plutôt qu'une bascule, pour la raison donnée à `ChoixVersion` :
+ * une bascule oblige à lire son état pour savoir ce qu'on regarde.
+ *
+ * Il ne paraît que sur un téléphone ou une tablette. Un ordinateur n'a pas
+ * d'écran de verrouillage à fond d'écran distinct dans cette maquette, et une
+ * puce qui ne changerait rien à ce qu'on voit serait un mensonge poli.
+ */
+export function ChoixEcran({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  valeur: Ecran
+  textes: Textes
+  onChoisir: (ecran: Ecran) => void
+}) {
+  const T = textes.reglages
+  const options: { ecran: Ecran; nom: string; titre: string }[] = [
+    { ecran: 'accueil', nom: T.ecranAccueil, titre: T.ecranTitreAccueil },
+    { ecran: 'verrou', nom: T.ecranVerrou, titre: T.ecranTitreVerrou },
+  ]
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-ecran">
+        <Arche />
+        <span>{T.ecran}</span>
+      </h2>
+      <GroupeRadio id="liste-ecran" etiquettes="h-ecran" className="rangee-densite">
+        {options.map((option) => (
+          <OptionRadio
+            key={option.ecran}
+            choisi={option.ecran === valeur}
+            onChoisir={() => onChoisir(option.ecran)}
+            className="opt opt-densite opt-ecran"
+            titre={option.titre}
+            data-ecran={option.ecran}
+          >
+            <span className="opt-ecran-p" aria-hidden="true" />
+            <span className="opt-densite-t">{option.nom}</span>
+          </OptionRadio>
+        ))}
+      </GroupeRadio>
+      <p className="bento-n">{T.ecranNote}</p>
     </div>
   )
 }

@@ -14,7 +14,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { ecrireUrl, lienAppDuMotif, lireUrl, REGLAGES_PAR_DEFAUT } from './url'
-import { enregistrerPalettes } from './moteur'
+import { enregistrerPalettes, MOT_PAR_DEFAUT } from './moteur'
 import { composer, versPalette } from './palettes'
 import { depuisSaisie } from './resolution'
 
@@ -137,6 +137,76 @@ describe('voile de lisibilité', () => {
     for (const brut of ['v=', 'v=1', 'v=non', 'v=00', 'v=false']) {
       expect(lireUrl(`?${brut}`, DETECTE).voile, brut).toBe(true)
     }
+  })
+})
+
+/**
+ * Le mot de l'affiche voyage comme le reste, et c'est la seule chaîne libre que
+ * l'adresse porte : elle vient du dehors, elle est donc assainie des deux
+ * côtés.
+ */
+describe('mot de l’affiche', () => {
+  it('vaut le mot par défaut, et ne s’écrit que s’il en diffère', () => {
+    expect(lireUrl('', DETECTE).mot).toBe(MOT_PAR_DEFAUT)
+    const defaut = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(defaut).not.toContain('t=')
+    const choisi = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, mot: 'CIAO' }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(choisi).toContain('t=CIAO')
+    expect(lireUrl(choisi, DETECTE).mot).toBe('CIAO')
+  })
+
+  it('assainit ce qui arrive de l’adresse', () => {
+    /* Une adresse hostile ne doit ni casser la composition ni faire passer un
+       signe que la fonte ignore. Rien n'est rejeté : on garde ce qui se
+       dessine, et un mot devenu vide retombe sur celui par défaut. */
+    expect(lireUrl('?t=ciao', DETECTE).mot).toBe('CIAO')
+    expect(lireUrl('?t=' + encodeURIComponent('<img src=x>'), DETECTE).mot).toBe('IMG SRCX')
+    expect(lireUrl('?t=' + encodeURIComponent('   '), DETECTE).mot).toBe(MOT_PAR_DEFAUT)
+    expect(lireUrl('?t=' + 'A'.repeat(200), DETECTE).mot.length).toBeLessThanOrEqual(24)
+  })
+
+  it('fait l’aller-retour sans se déformer', () => {
+    for (const mot of ['CIAO', 'OH MY GOODNESS', 'VOILÀ !', 'ÇA Y EST']) {
+      const ecrit = ecrireUrl({ ...REGLAGES_PAR_DEFAUT, mot }, depuisSaisie('', ''), DETECTE)
+      expect(lireUrl(ecrit, DETECTE).mot, mot).toBe(mot)
+    }
+  })
+})
+
+/**
+ * L'écran sur lequel on juge est un fichier lui aussi, et c'est pour cela qu'il
+ * voyage. La sonde ne mesure pas la même bande selon l'écran, elle dose donc un
+ * autre voile, et ce voile est brûlé dans le PNG : un lien qui ne le porterait
+ * pas rendrait chez le destinataire une image plus claire ou plus foncée que
+ * celle qu'on lui a envoyée.
+ */
+describe('écran de jugement', () => {
+  it('vaut l’accueil par défaut, et ne s’écrit qu’au verrouillage', () => {
+    expect(lireUrl('', DETECTE).ecran).toBe('accueil')
+    const accueil = ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)
+    expect(accueil).not.toContain('e=')
+    const verrou = ecrireUrl(
+      { ...REGLAGES_PAR_DEFAUT, ecran: 'verrou' }, depuisSaisie('', ''), DETECTE,
+    )
+    expect(verrou).toContain('e=1')
+    expect(lireUrl(verrou, DETECTE).ecran).toBe('verrou')
+  })
+
+  it('ne bascule que sur « 1 », jamais sur une valeur abîmée', () => {
+    /* Même prudence que le voile et la version, et pour la même raison : une
+       adresse abîmée doit rendre ce que le produit a toujours rendu, jamais
+       une image dosée pour une bande que personne n'a demandée. */
+    for (const brut of ['e=', 'e=0', 'e=verrou', 'e=true', 'e=01']) {
+      expect(lireUrl(`?${brut}`, DETECTE).ecran, brut).toBe('accueil')
+    }
+  })
+
+  it('n’a jamais existé avant, donc un vieux lien ouvre l’accueil', () => {
+    /* La garantie de compatibilité : tous les liens écrits avant ce réglage
+       rendent exactement le fichier qu'ils rendaient. */
+    expect(lireUrl('?m=vagues&p=lime&d=1&s=7314&n=1&v=0', DETECTE).ecran).toBe('accueil')
   })
 })
 

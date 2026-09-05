@@ -225,6 +225,48 @@
   box-shadow: inset 0 0 0 1.5px rgba(247, 243, 230, 0.5);
 }
 
+/* La pastille de l'écran : une vignette d'appareil, une grille de points pour
+   l'accueil et une barre haute pour l'heure du verrouillage. Elle dessine ce
+   qu'elle fait, comme celle de la version : le niveau ne se lit jamais à la
+   seule couleur. */
+.opt-ecran-p {
+  display: block;
+  position: relative;
+  width: 15px;
+  height: 22px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.opt-ecran-p::before,
+.opt-ecran-p::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+.opt-ecran[data-ecran='accueil'] .opt-ecran-p::before {
+  inset: 6px 3px 8px;
+  background: none;
+  box-shadow: 0 0 0 1.5px currentColor, 5px 0 0 0 currentColor, 0 5px 0 0 currentColor,
+    5px 5px 0 0 currentColor;
+  width: 1.5px;
+  height: 1.5px;
+}
+.opt-ecran[data-ecran='accueil'] .opt-ecran-p::after {
+  inset: auto 3px 3px;
+  height: 3px;
+  border-radius: 1px;
+}
+.opt-ecran[data-ecran='verrou'] .opt-ecran-p::before {
+  inset: 5px 3px auto;
+  height: 6px;
+  border-radius: 1px;
+}
+.opt-ecran[data-ecran='verrou'] .opt-ecran-p::after {
+  inset: auto 4.5px 3px;
+  height: 1.5px;
+  border-radius: 1px;
+}
+
 .opt-langue {
   flex: 1 1 auto;
   min-width: max-content;
@@ -1503,4 +1545,16 @@
 .btn-voile[data-voile='non']:not(:focus-visible) {
   outline: 2px solid transparent;
   outline-offset: -4px;
+}
+
+/* Le champ du mot de l'affiche. Il reprend le champ de résolution, à ceci près
+   qu'il est composé dans le caractère de titrage et en capitales : ce qu'on
+   tape et ce que l'affiche écrit doivent se ressembler, sans quoi on compose à
+   l'aveugle et on découvre le résultat dans l'aperçu. */
+.champ-mot {
+  width: 100%;
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }

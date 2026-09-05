@@ -9,6 +9,58 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : l'écran de verrouillage
+
+- **Un fond d'écran se regarde d'abord verrouillé.** On déverrouille des
+  dizaines de fois par jour, et à chaque fois on voit d'abord l'heure, énorme,
+  dans le tiers haut. L'aperçu montre désormais cet écran aussi : une puce
+  **Écran**, à côté de la version, bascule la maquette entre l'accueil et le
+  verrouillage, avec la date, l'heure et les deux raccourcis du bas.
+- **Le motif laisse la place à l'heure, sans rien poser dessus.** Sur le
+  verrouillage, il compose pour la surface qui commence sous l'heure, comme il
+  aurait composé pour le cadre entier : les vagues posent leur première houle
+  dessous et le fond devient leur ciel, un pavage y range des rangées
+  entières. Aucune forme n'est teintée ni coupée en deux : une case, une fleur,
+  une plaque est là ou n'est pas là, et le bord du motif est fait de ses
+  propres formes. Seules les formes hautes, une rayure, un anneau, un ruban,
+  sont coupées à la ligne, comme à un horizon. Quand une famille pose sa propre
+  base, c'est elle qui monte jusqu'en haut et porte l'heure.
+- **Quatre essais avant celui-là, et ils sont écrits pour ne pas y revenir.**
+  Un aplat de fond posé sur le tiers haut effaçait ; une lisière propre à
+  chaque geste coupait encore ; une grande forme du motif sous les chiffres
+  faisait un bandeau ; un fondu des formes vers le fond faisait un dégradé, et
+  ce produit n'en peint pas.
+- **La sonde juge là où l'heure tombe.** Sous le verrouillage, elle mesure la
+  bande des chiffres et n'y trouve que le sol du motif : le voile n'y est plus
+  qu'un appoint, pour les palettes dont le fond est moyen, et il s'arrête net
+  sous la place de l'heure au lieu de ternir toute l'image.
+- **L'écran est un réglage du fichier.** Il voyage dans le lien, `e=1`, au
+  même titre que la version sombre : deux écrans, deux fichiers. Son absence
+  vaut l'accueil, et tous les liens écrits avant lui ouvrent l'image qu'ils
+  ouvraient.
+
+### Ajouté : un lagon, une floraison, et une affiche qui écrit
+
+- **La fracture apprend la frontière courbe.** Elle ne savait tailler qu'au
+  demi-plan, et une droite est minérale. Le plan est maintenant gauchi sous
+  ses germes avant qu'ils ne le mesurent, et deux familles en sortent :
+  **Lagon**, de grandes dalles aux bords souples et le fond qui court entre
+  elles, chez les abstraits ; **Floraison**, où chaque pétale est la cellule
+  d'un germe et deux fleurs voisines s'engrènent doigt contre doigt, chez les
+  figures.
+- **L'affiche écrit pour de vrai.** Elle compose un mot dans le caractère de
+  titrage du produit, en contours extraits de la fonte avant la livraison,
+  étiré d'un bord à l'autre à chaque ligne et répété jusqu'à remplir la page,
+  comme les affiches sérigraphiées dont elle est tirée. Deux encres, et une
+  troisième à leurs croisements, calculée plutôt que fondue : trois aplats
+  opaques, exportables en vectoriel comme le reste.
+- **Le mot se tape.** Un champ paraît sous les réglages quand l'affiche est
+  choisie ; capitales, chiffres, accents du français, vingt-quatre signes au
+  plus, et ce que la fonte ne sait pas tracer disparaît sous le doigt. Le mot
+  voyage dans le lien, `t=`, et un mot vide retombe sur celui par défaut.
+- **Le catalogue passe à soixante-dix-neuf familles.** Deux mille six cent sept
+  combinaisons, avec les onze palettes et les trois densités.
+
 ### Changé : passer d'une page à l'autre ne recharge plus rien
 
 - **Le battement entre les trois pages a disparu.** Ouvrir l'application

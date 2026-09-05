@@ -33,8 +33,9 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  alea, formes, graineDeDessin, mesurer, palette, peindreOmbre, peindreVoile,
-  type Mesure, type Motif, type Pinceau,
+  mesurer, MOT_PAR_DEFAUT, palette, peindreOmbre,
+  peindreFormes, peindreVoile,
+  type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
 
 /**
@@ -419,16 +420,19 @@ class Notaire implements Pinceau {
  */
 export function svgDuMotif(
   motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
+  ecran: Ecran = 'accueil',
 ): RenduSVG {
   const P = palette(motif.palette)
   const notaire = new Notaire()
 
   notaire.fillStyle = P.fond
   notaire.fillRect(0, 0, largeur, hauteur)
-  formes(
-    notaire, largeur, hauteur, motif.famille, P.couleurs, motif.densite,
-    alea(graineDeDessin(motif.famille, motif.densite, motif.graine)),
-    Math.min(largeur, hauteur),
+  /* Le cadre et l'élagage de la place de l'heure, dans le même ordre que sur le
+     canevas : un SVG qui les ignorerait ne serait pas le même fichier dans un
+     autre format. */
+  peindreFormes(
+    notaire, largeur, hauteur, motif.famille, P, motif.densite, motif.graine,
+    motif.mot ?? MOT_PAR_DEFAUT, ecran,
   )
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
@@ -447,6 +451,7 @@ export function svgDuMotif(
   if (voile || sombre) {
     const mesure: Mesure = mesurer(
       motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
+      ecran, motif.mot ?? MOT_PAR_DEFAUT,
     )
     peindreOmbre(notaire, largeur, hauteur, mesure)
     if (voile) peindreVoile(notaire, largeur, hauteur, mesure)
@@ -479,12 +484,14 @@ let dernier: { cle: string; rendu: RenduSVG } | null = null
 
 export function rendreSVG(
   motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
+  ecran: Ecran = 'accueil',
 ): RenduSVG {
   const cle = [
     motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile, sombre,
+    ecran, motif.mot ?? MOT_PAR_DEFAUT,
   ].join('|')
   if (dernier && dernier.cle === cle) return dernier.rendu
-  const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre)
+  const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre, ecran)
   dernier = { cle, rendu }
   return rendu
 }

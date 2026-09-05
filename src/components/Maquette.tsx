@@ -169,5 +169,61 @@ function BureauNu({
   )
 }
 
+
+/**
+ * L'écran de verrouillage : le seul écran qu'on regarde sans rien y faire.
+ *
+ * C'est là qu'un fond d'écran est vu le plus souvent et le plus longtemps, et
+ * ce n'est pas l'accueil : on déverrouille des dizaines de fois par jour, et à
+ * chaque fois on voit d'abord ceci. La maquette d'accueil ne pouvait pas en
+ * rendre compte, parce que ce qui gêne n'y est pas le même : sous des icônes
+ * c'est une grille de petits libellés, ici c'est un bloc de chiffres énorme,
+ * haut placé, et rien d'autre sur les deux tiers du cadre.
+ *
+ * L'heure est démesurée à dessein. Sur un vrai téléphone elle occupe la
+ * largeur, et c'est précisément ce qui rend le verdict sévère : un motif agité
+ * derrière des chiffres de cette taille se voit, là où le même motif sous une
+ * grille d'icônes se serait fondu dans la moyenne. La sonde mesure la bande
+ * qu'on voit ici, et pas une autre : `BANDES_SONDE` dans `lib/moteur.ts`.
+ *
+ * Le bas porte deux raccourcis et la barre de saisie, sans quoi la maquette
+ * flotte : un écran de verrouillage vide ne se reconnaît pas, et on ne saurait
+ * pas où le motif a le droit d'être chargé.
+ */
+function VerrouNu({ instant }: { instant: Instant }) {
+  return (
+    <div className="maq maqv" id="maquette-verrou" aria-hidden="true">
+      <div className="maq-etat">
+        <span>{instant.heure}</span>
+        <span className="maq-etat-d">
+          <span className="maq-barres">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="maq-wifi" />
+          <span className="maq-pile">
+            <i />
+          </span>
+        </span>
+      </div>
+
+      <div className="maqv-cartouche">
+        <span className="maqv-date">
+          {instant.jour} {instant.quantieme} {instant.mois}
+        </span>
+        <span className="maqv-heure">{instant.heure}</span>
+      </div>
+
+      <div className="maqv-pied">
+        <span className="maqv-raccourci" />
+        <span className="maqv-raccourci" />
+      </div>
+      <span className="maqv-barre" />
+    </div>
+  )
+}
+
 export const MaquetteTelephone = memo(TelephoneNu)
 export const MaquetteBureau = memo(BureauNu)
+export const MaquetteVerrou = memo(VerrouNu)

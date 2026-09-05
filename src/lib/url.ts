@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import {
-  estDensite, estFamille, estPalette, palette, PREFIXE_PERSO,
-  type Densite, type IdFamille, type IdPaletteQuelconque, type Langue, type Motif,
+  assainirMot, estDensite, estFamille, estPalette, MOT_PAR_DEFAUT, palette, PREFIXE_PERSO,
+  type Densite, type Ecran, type IdFamille, type IdPaletteQuelconque, type Langue,
+  type Motif,
 } from './moteur'
 import { GRAINE_MAX } from './tirage'
 import { type Affichage, type Theme } from './affichage'
@@ -49,6 +50,30 @@ export interface Reglages {
    * que le produit a toujours livré.
    */
   sombre: boolean
+  /**
+   * L'écran sur lequel la lisibilité est jugée : l'accueil et sa grille
+   * d'icônes, ou le verrouillage et la place laissée à l'heure.
+   *
+   * Il est ici, avec le voile et la version, et pour exactement la même
+   * raison : la sonde ne mesure pas la même bande selon l'écran, elle dose
+   * donc un autre voile, et ce voile est brûlé dans le PNG. Deux écrans, deux
+   * fichiers. Ce n'est pas un réglage de l'aperçu, même si c'est l'aperçu qui
+   * le montre. Son absence vaut « accueil », qui est le seul écran que le
+   * produit ait jamais montré : les liens écrits avant lui ouvrent la même
+   * image qu'avant.
+   */
+  ecran: Ecran
+  /**
+   * Le mot que l'affiche écrit. Il ne concerne qu'une famille sur
+   * soixante-dix-neuf, et il est ici quand même : c'est un réglage du motif au
+   * même titre que la densité, il change l'image, donc un lien qui ne le
+   * porterait pas ouvrirait une autre affiche chez le destinataire.
+   *
+   * Il est toujours assaini à la lecture comme à l'écriture, `assainirMot`
+   * étant le seul point d'entrée : l'adresse est la seule partie du produit qui
+   * vienne du dehors, et la seule chaîne libre qu'elle porte désormais.
+   */
+  mot: string
   largeurSaisie: string
   hauteurSaisie: string
 }
@@ -62,6 +87,8 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   graine: 7314,
   voile: true,
   sombre: false,
+  ecran: 'accueil',
+  mot: MOT_PAR_DEFAUT,
   largeurSaisie: '',
   hauteurSaisie: '',
 }
@@ -122,6 +149,14 @@ export function lireUrl(
        assombrit. Une adresse abîmée rend l'image que le produit livre par
        défaut, jamais une plus sombre que celle qu'on croit avoir choisie. */
     sombre: q.get('n') === '1',
+    /* Même prudence que les deux précédents : seul « 1 » demande le
+       verrouillage, dont la bande est la plus sévère des deux. Une adresse
+       abîmée rend l'écran d'accueil, celui que le produit a toujours mesuré. */
+    ecran: q.get('e') === '1' ? 'verrou' : 'accueil',
+    /* Assaini, jamais rejeté : une adresse abîmée doit ouvrir une affiche, pas
+       une page vide. Ce qui n'est pas de la fonte tombe, et un mot devenu vide
+       retombe sur celui par défaut. */
+    mot: assainirMot(q.get('t') ?? ''),
     langue: affichage.langue,
     theme: affichage.theme,
     largeurSaisie: String(resolutionValide ? l : detecte.largeur),
@@ -150,6 +185,10 @@ export function ecrireUrl(
   q.set('s', String(reglages.graine))
   if (!reglages.voile) q.set('v', '0')
   if (reglages.sombre) q.set('n', '1')
+  if (reglages.ecran === 'verrou') q.set('e', '1')
+  /* Le mot par défaut ne s'écrit pas : une adresse ne porte que ce qu'on a
+     choisi, comme pour le voile et la version. */
+  if (reglages.mot !== MOT_PAR_DEFAUT) q.set('t', reglages.mot)
   /* Une palette composée à la main n'existe que sur l'appareil qui l'a
      composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre
      motif chez la personne qui le reçoit, ce qui est exactement ce que le

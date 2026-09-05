@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   enregistrerPalettes, FAMILLES, famille as trouverFamille, mesurer, ORDRE_PALETTES,
-  type Densite, type Groupe, type IdFamille, type IdPaletteQuelconque, type Langue, type Motif,
+  type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
+  type Langue, type Motif,
 } from './lib/moteur'
 import {
   ajouter as ajouterPalette, ecrire as ecrirePalettes, lire as lirePalettes,
@@ -31,7 +32,10 @@ import { useRevisionFenetre } from './hooks/useRevisionFenetre'
 import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
-import { ChoixDensite, ChoixFamille, ChoixPalette, ChoixVersion } from './components/Reglages'
+import {
+  ChoixDensite, ChoixEcran, ChoixFamille, ChoixMot, ChoixPalette, ChoixVersion,
+} from './components/Reglages'
+import { estSurimpression } from './lib/surimpression'
 import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
@@ -185,8 +189,9 @@ export function App() {
       palette: reglages.palette,
       densite: reglages.densite,
       graine: reglages.graine,
+      mot: reglages.mot,
     }),
-    [reglages.famille, reglages.palette, reglages.densite, reglages.graine],
+    [reglages.famille, reglages.palette, reglages.densite, reglages.graine, reglages.mot],
   )
 
   /* La sonde est mémoïsée deux fois : ici pour le rendu, et dans le moteur
@@ -196,8 +201,8 @@ export function App() {
       vide
         ? null
         : mesurer(motif.famille, motif.palette, motif.densite, motif.graine,
-            resolution.largeur, resolution.hauteur, reglages.sombre),
-    [motif, resolution.largeur, resolution.hauteur, vide, reglages.sombre],
+            resolution.largeur, resolution.hauteur, reglages.sombre, reglages.ecran),
+    [motif, resolution.largeur, resolution.hauteur, vide, reglages.sombre, reglages.ecran],
   )
 
   /** Un réglage touché efface le résultat précédent, mais jamais un export en cours. */
@@ -399,7 +404,8 @@ export function App() {
     }
 
     const travail = {
-      motif, largeur, hauteur, voile: reglages.voile, sombre: reglages.sombre, format,
+      motif, largeur, hauteur, voile: reglages.voile, sombre: reglages.sombre,
+      ecran: reglages.ecran, format,
     }
     const nom = nomFichier(travail.motif, largeur, hauteur, {
       format,
@@ -455,6 +461,7 @@ export function App() {
     const courant = motif
     const voile = reglages.voile
     const sombre = reglages.sombre
+    const ecran = reglages.ecran
     exportEnCours.current = true
     setEphemere((precedent) => ({ ...precedent, phase: 'calcul', echec: null }))
 
@@ -468,6 +475,7 @@ export function App() {
             hauteur: format.hauteur,
             voile,
             sombre,
+            ecran,
             format: 'png',
           }).then(
             (blob) =>
@@ -543,6 +551,7 @@ export function App() {
       hauteur: resolution.hauteur,
       voile: reglages.voile,
       sombre: reglages.sombre,
+      ecran: reglages.ecran,
       format: 'png' as const,
     }
     exportEnCours.current = true
@@ -568,7 +577,8 @@ export function App() {
     if (!ephemere.formats || vide) return false
     try {
       return (
-        rendreSVG(motif, resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre)
+        rendreSVG(motif, resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre,
+          reglages.ecran)
           .elements <= ELEMENTS_MAX
       )
     } catch {
@@ -576,7 +586,7 @@ export function App() {
     }
   }, [
     ephemere.formats, vide, motif,
-    resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre,
+    resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre, reglages.ecran,
   ])
 
   const webpPossible = useMemo(() => webpDisponible(), [])
@@ -649,6 +659,7 @@ export function App() {
             mesure={mesure}
             voile={reglages.voile}
             sombre={reglages.sombre}
+            ecran={reglages.ecran}
             langue={reglages.langue}
             textes={T}
             calculEnCours={ephemere.phase === 'calcul'}
@@ -708,6 +719,29 @@ export function App() {
               textes={T}
               onChoisir={(sombre: boolean) => changer({ sombre })}
             />
+            {/* Le mot ne paraît que pour l'affiche : c'est la seule famille qui
+                écrive, et un champ qui ne changerait rien à ce qu'on voit
+                serait un mensonge poli. Le réglage, lui, reste dans l'adresse :
+                revenir sur l'affiche avec le même lien retrouve le mot. */}
+            {estSurimpression(reglages.famille) && (
+              <ChoixMot
+                valeur={reglages.mot}
+                textes={T}
+                onChoisir={(mot: string) => changer({ mot })}
+              />
+            )}
+            {/* L'écran ne paraît que sur un téléphone ou une tablette : la
+                maquette d'ordinateur n'a pas de verrouillage à montrer, et une
+                puce qui ne changerait rien à ce qu'on voit serait un mensonge
+                poli. Le réglage, lui, reste dans l'adresse : revenir sur un
+                téléphone avec le même lien retrouve l'écran choisi. */}
+            {type !== 'ordinateur' && (
+              <ChoixEcran
+                valeur={reglages.ecran}
+                textes={T}
+                onChoisir={(ecran: Ecran) => changer({ ecran })}
+              />
+            )}
             <Historique
               liste={historique}
               courant={motif}

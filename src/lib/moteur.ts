@@ -19,6 +19,13 @@ import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
+import {
+  estSurimpression, peindreSurimpression, type IdSurimpression,
+} from './surimpression'
+import { CARACTERES } from './alphabet'
+import {
+  BAS as BAS_DE_L_HEURE, cadreDuMotif, elaguer, HAUT as HAUT_DE_L_HEURE,
+} from './place'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -57,6 +64,7 @@ export type IdFamille =
   | IdCoulee
   | IdRelief
   | IdMesure
+  | IdSurimpression
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
      déformée et l'interférence y mettent tout le reste */
   | IdChimie
@@ -113,6 +121,45 @@ export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
  * livrées, et le dire dans le type évite de le rattraper par des assertions.
  */
 export type IdPaletteQuelconque = IdPalette | IdPalettePerso
+
+/**
+ * Le mot de l'affiche, et ce que le moteur en accepte.
+ *
+ * Une seule famille écrit, et elle a besoin de quelque chose à écrire. Le mot
+ * est un réglage du motif au même titre que la densité : il change l'image,
+ * donc il voyage dans l'adresse, donc il arrive d'une saisie et il faut
+ * l'assainir. `assainirMot` est le seul point d'entrée, et il ne laisse passer
+ * que ce que la fonte sait tracer.
+ *
+ * La longueur est bornée à vingt-quatre signes. Ce n'est pas une limite
+ * technique, c'est une limite de composition : au delà, les lignes deviennent
+ * si basses que les lettres ne se lisent plus, et une affiche cesse d'en être
+ * une. Les affiches de référence tiennent toutes en trois mots.
+ */
+export const MOT_MAX = 24
+
+/** Le mot que l'affiche écrit quand personne n'en a choisi. */
+export const MOT_PAR_DEFAUT = 'APLAT'
+
+/**
+ * Le mot ramené à ce que le moteur sait écrire : capitales, chiffres, accents
+ * du français, ponctuation courante, et l'espace qui coupe les lignes.
+ *
+ * Ce qui n'est pas dans la fonte est retiré plutôt que remplacé : un signe
+ * inconnu rendu par un blanc couperait le mot en deux lignes sans qu'on
+ * comprenne pourquoi. Les espaces multiples se réduisent à un, et un mot vide
+ * retombe sur celui par défaut, l'affiche ne pouvant rien composer avec rien.
+ */
+export function assainirMot(brut: string): string {
+  const propre = [...brut.toUpperCase()]
+    .filter((c) => CARACTERES.includes(c))
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MOT_MAX)
+    .trim()
+  return propre.length > 0 ? propre : MOT_PAR_DEFAUT
+}
 
 /** 0 calme, 1 moyen, 2 dense. */
 export type Densite = 0 | 1 | 2
@@ -184,6 +231,12 @@ export interface Mesure {
    * à la même obscurité demande d'assombrir chacune différemment.
    */
   ombre: number
+  /**
+   * L'écran sur lequel la mesure a été prise. Il est ici parce que le voile en
+   * a besoin : sa pente n'est pas la même selon l'écran, et une mesure qui ne
+   * dirait pas d'où elle vient laisserait le voile la répartir au hasard.
+   */
+  ecran: Ecran
 }
 
 /* ---------- données ------------------------------------------------------- */
@@ -208,7 +261,7 @@ export const ORDRE_PALETTES: readonly IdPalette[] = [
 ]
 
 /**
- * Les soixante-seize familles, dans l'ordre de la liste : les quatre groupes
+ * Les soixante-dix-neuf familles, dans l'ordre de la liste : les quatre groupes
  * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
  * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
@@ -233,6 +286,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'kintsugi', groupe: 'abs', fr: 'Kintsugi', en: 'Kintsugi' },
   { id: 'banquise', groupe: 'abs', fr: 'Banquise', en: 'Ice floes' },
   { id: 'meandres', groupe: 'abs', fr: 'Méandres', en: 'Meanders' },
+  { id: 'lagon', groupe: 'abs', fr: 'Lagon', en: 'Lagoon' },
   /* pavages : une maille revient, et l'oeil la suit du doigt */
   { id: 'arches', groupe: 'pav', fr: 'Arches', en: 'Arches' },
   { id: 'pointille', groupe: 'pav', fr: 'Fondu pointillé', en: 'Dotted fade' },
@@ -250,6 +304,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'carreaux', groupe: 'pav', fr: 'Carreaux', en: 'Tiles' },
   { id: 'demilunes', groupe: 'pav', fr: 'Demi-lunes', en: 'Half-moons' },
   { id: 'jetons', groupe: 'pav', fr: 'Jetons', en: 'Tokens' },
+  { id: 'affiche', groupe: 'pav', fr: 'Affiche', en: 'Poster' },
   /* volumes : c'est plat, et on y voit pourtant un volume */
   { id: 'cubes', groupe: 'vol', fr: 'Cubes', en: 'Blocks' },
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
@@ -287,6 +342,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
   { id: 'corolle', groupe: 'fig', fr: 'Corolle', en: 'Corolla' },
+  { id: 'floraison', groupe: 'fig', fr: 'Floraison', en: 'Bloom' },
   { id: 'etoiles', groupe: 'fig', fr: 'Étoiles', en: 'Stars' },
   { id: 'rayons', groupe: 'fig', fr: 'Rayons', en: 'Sunbeams' },
   { id: 'lunes', groupe: 'fig', fr: 'Lunes', en: 'Moons' },
@@ -700,6 +756,7 @@ function palier(C: readonly string[], t: number): string {
 export function formes(
   ctx: Pinceau, W: number, H: number, id: IdFamille,
   C: readonly string[], densite: Densite, rnd: Alea, unite: number,
+  mot: string = MOT_PAR_DEFAUT,
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
 
@@ -767,6 +824,10 @@ export function formes(
   }
   if (estMesure(id)) {
     peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estSurimpression(id)) {
+    peindreSurimpression(ctx, W, H, id, C, densite, rnd, unite, mot)
     return
   }
 
@@ -2115,6 +2176,37 @@ export function luminanceAssombrie(L: number, force: number): number {
 
 /* ---------- sonde de lisibilité --------------------------------------------- */
 
+/**
+ * L'écran sur lequel on juge le motif, et donc la bande que la sonde regarde.
+ *
+ * L'accueil pose une grille d'icônes sur presque toute la hauteur, et c'est
+ * sous elle que le contraste se joue. L'écran de verrouillage ne pose rien de
+ * tout cela : l'heure et la date, hautes et larges, et le reste du cadre est
+ * nu. Le motif ne compose donc pas de la même façon pour les deux : sur le
+ * verrouillage il laisse le tiers haut à l'heure, et `lib/place.ts` dit
+ * comment.
+ *
+ * C'est pour cela que le choix de l'écran est un réglage du fichier et non un
+ * réglage de l'aperçu. Le cadre du motif change, la sonde dose le voile sur ce
+ * qu'elle mesure, et le voile est brûlé dans le PNG : deux écrans, deux
+ * fichiers. Le lien le porte, au même titre que la version sombre.
+ */
+export type Ecran = 'accueil' | 'verrou'
+
+/**
+ * La bande mesurée, en parts de la hauteur.
+ *
+ * Celle de l'accueil va du haut de la première rangée d'icônes au bas du dock.
+ * Celle du verrouillage est la place de l'heure, un cheveu en dedans de ses
+ * bornes : la sonde y trouve le sol du motif et rien d'autre, ce qui est
+ * exactement ce qu'on veut savoir, les chiffres n'étant posés que là. Le voile
+ * n'y est plus qu'un appoint, pour les palettes dont le fond est moyen.
+ */
+const BANDES_SONDE: Readonly<Record<Ecran, readonly [number, number]>> = {
+  accueil: [0.24, 0.92],
+  verrou: [HAUT_DE_L_HEURE + 0.01, BAS_DE_L_HEURE - 0.01],
+}
+
 /*
  * On mesure la luminance de la zone des icônes sur une petite sonde, jamais sur
  * l'image finale : mêmes chiffres pour l'aperçu et pour l'export, et aucun
@@ -2146,12 +2238,13 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 
 export function mesurer(
   id: IdFamille, idPalette: IdPaletteQuelconque, densite: Densite, graine: number,
-  largeur: number, hauteur: number, sombre = false,
+  largeur: number, hauteur: number, sombre = false, ecran: Ecran = 'accueil',
+  mot: string = MOT_PAR_DEFAUT,
 ): Mesure {
   const P = palette(idPalette)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
-  const cle =
-    `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}|${sombre ? 's' : 'c'}`
+  const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
+    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? mot : ''}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -2167,11 +2260,12 @@ export function mesurer(
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = P.fond
     ctx.fillRect(0, 0, PW, PH)
-    formes(ctx, PW, PH, id, P.couleurs, densite, alea(graineDeDessin(id, densite, graine)), Math.min(PW, PH))
+    peindreFormes(ctx, PW, PH, id, P, densite, graine, mot, ecran)
 
     try {
-      const y0 = Math.round(PH * 0.24)
-      const y1 = Math.round(PH * 0.92)
+      const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
+      const y0 = Math.round(PH * hautDeBande)
+      const y1 = Math.round(PH * basDeBande)
       const d = ctx.getImageData(0, y0, PW, Math.max(1, y1 - y0)).data
       const pixels = d.length / 4
       const pas = Math.max(1, Math.floor(pixels / 2600)) * 4
@@ -2215,7 +2309,7 @@ export function mesurer(
     : L * (1 - voile) + 0.95 * voile
   const contraste = libelles === 'clair' ? 1.05 / (apres + 0.05) : (apres + 0.05) / 0.068
 
-  const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre }
+  const mesure: Mesure = { libelles, voile, contraste, luminance: L, ombre, ecran }
   memoire.set(cle, mesure)
   /* Plafond simple : on évince la plus ancienne entrée, pas la moins
      utilisée. À quatre cents mesures, raffiner ne changerait rien. */
@@ -2224,6 +2318,34 @@ export function mesurer(
     if (!premiere.done) memoire.delete(premiere.value)
   }
   return mesure
+}
+
+/* ---------- la place de l'heure ---------------------------------------------- */
+
+/**
+ * Les formes du motif, composées pour l'écran.
+ *
+ * Sur l'accueil, le motif reçoit le cadre entier. Sur le verrouillage, il
+ * reçoit ce qui commence sous la place de l'heure, et le pinceau qu'on lui tend
+ * élague ce qui monterait au-dessus : le pourquoi et les bornes sont dans
+ * `lib/place.ts`. Le tirage est le même des deux côtés, si bien qu'un
+ * accueil et son verrouillage montrent le même motif, recadré et non redessiné.
+ *
+ * C'est le seul endroit où le cadre et l'élagage sont posés : le rendu, le SVG
+ * et la sonde passent tous par ici, et le fichier est donc le même dans les
+ * trois.
+ */
+export function peindreFormes(
+  ctx: Pinceau, W: number, H: number, id: IdFamille, P: Palette, densite: Densite,
+  graine: number, mot: string, ecran: Ecran,
+): void {
+  const { haut, hauteur } = cadreDuMotif(H, ecran)
+  const pinceau = ecran === 'verrou' ? elaguer(ctx, W, H) : ctx
+  pinceau.save()
+  pinceau.translate(0, haut)
+  formes(pinceau, W, hauteur, id, P.couleurs, densite,
+    alea(graineDeDessin(id, densite, graine)), Math.min(W, hauteur), mot)
+  pinceau.restore()
 }
 
 /* ---------- voile de lisibilité ---------------------------------------------- */
@@ -2238,17 +2360,41 @@ export function mesurer(
  * aucune marche ne dépasse un cran sur 255, et le grain se charge de la casser.
  */
 
-const PALIERS: readonly (readonly [number, number])[] = [
-  [0, 0.9], [0.2, 0.78], [0.78, 0.96], [1, 1.14],
-]
+/**
+ * La pente du voile, par écran : à quelle hauteur il appuie et où il lâche.
+ *
+ * La force est un seul nombre, dosé par la sonde sur la bande qu'elle a
+ * mesurée ; ces paliers disent comment ce nombre se répartit du haut au bas de
+ * l'image. C'est ce qui évite un voile uniforme, qui assombrit autant là où
+ * rien ne se lit.
+ *
+ * L'accueil appuie en bas : c'est là que le dock et la dernière rangée de
+ * libellés tombent, et c'est le bas d'un fond d'écran qu'on regarde le moins
+ * pour lui-même.
+ *
+ * Le verrouillage fait l'inverse et s'arrête net. Il tient plein la réserve de
+ * l'heure, puis tombe à rien sous le haut du cadre du motif : sous cette ligne il
+ * n'y a plus rien à lire, et un voile qui continuerait ternirait le motif pour
+ * personne. C'est la différence de fond entre les deux écrans. Sur l'accueil,
+ * les libellés sont partout et le voile doit être partout. Sur le
+ * verrouillage, la lisibilité est réglée par la place qu'on a laissée, pas par
+ * la couche qu'on ajoute : le voile n'y est plus qu'un appoint, à l'endroit
+ * exact des chiffres, et le fond d'écran garde ses couleurs sur les deux tiers
+ * qu'on regarde.
+ */
+const PENTES: Readonly<Record<Ecran, readonly (readonly [number, number])[]>> = {
+  accueil: [[0, 0.9], [0.2, 0.78], [0.78, 0.96], [1, 1.14]],
+  verrou: [[0, 1], [0.3, 1], [0.46, 0], [1, 0]],
+}
 const BANDES = 320
 
 /** L'opacité du voile à la hauteur `u`, de 0 en haut à 1 en bas. */
-export function alphaDuVoile(u: number, force: number): number {
+export function alphaDuVoile(u: number, force: number, ecran: Ecran = 'accueil'): number {
+  const paliers = PENTES[ecran]
   let i = 1
-  while (i < PALIERS.length - 1 && u > PALIERS[i][0]) i += 1
-  const p = PALIERS[i - 1]
-  const q = PALIERS[i]
+  while (i < paliers.length - 1 && u > paliers[i][0]) i += 1
+  const p = paliers[i - 1]
+  const q = paliers[i]
   const k = q[0] === p[0] ? 0 : (u - p[0]) / (q[0] - p[0])
   const facteur = p[1] + (q[1] - p[1]) * Math.max(0, Math.min(1, k))
   return Math.min(0.62, force * facteur)
@@ -2278,7 +2424,8 @@ export function peindreVoile(ctx: Pinceau, W: number, H: number, mesure: Mesure)
     const y1 = i === bandes - 1 ? H : Math.round(((i + 1) * H) / bandes)
     if (y1 <= y0) continue
     precedent = y1
-    ctx.fillStyle = `rgba(${rgb},${alphaDuVoile((y0 + y1) / 2 / H, force).toFixed(4)})`
+    ctx.fillStyle =
+      `rgba(${rgb},${alphaDuVoile((y0 + y1) / 2 / H, force, mesure.ecran).toFixed(4)})`
     ctx.fillRect(0, y0, W, y1 - y0)
   }
 }
@@ -2290,6 +2437,13 @@ export interface Motif {
   palette: IdPaletteQuelconque
   densite: Densite
   graine: number
+  /**
+   * Le mot que l'affiche écrit. Absent partout ailleurs, et c'est voulu : une
+   * seule famille sait écrire, et obliger les soixante-dix-huit autres à porter
+   * un champ qu'elles ignorent aurait fait payer à tout le catalogue le prix
+   * d'une famille. Son absence vaut `MOT_PAR_DEFAUT`.
+   */
+  mot?: string
 }
 
 /**
@@ -2335,6 +2489,13 @@ export interface OptionsRendu {
    * dans la démonstration, et à son rang.
    */
   arret?: Couche
+  /**
+   * L'écran sur lequel on juge la lisibilité, donc la bande que la sonde
+   * regarde et le voile qu'elle dose. L'accueil par défaut, comme depuis
+   * toujours : un lien écrit avant que le verrouillage n'existe rend
+   * exactement le fichier qu'il rendait.
+   */
+  ecran?: Ecran
 }
 
 /**
@@ -2349,10 +2510,14 @@ export interface OptionsRendu {
 export function dessiner(
   ctx: Ctx, W: number, H: number, motif: Motif, options: OptionsRendu = {},
 ): Mesure {
-  const { voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain' } = options
+  const {
+    voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain',
+    ecran = 'accueil',
+  } = options
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
-    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre,
+    mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre, ecran,
+    motif.mot ?? MOT_PAR_DEFAUT,
   )
   rendre(ctx, W, H, motif, mesure, voile, arret)
   /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
@@ -2395,8 +2560,8 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    formes(ctx, W, H, motif.famille, P.couleurs, motif.densite,
-      alea(graineDeDessin(motif.famille, motif.densite, motif.graine)), Math.min(W, H))
+    peindreFormes(ctx, W, H, motif.famille, P, motif.densite, motif.graine,
+      motif.mot ?? MOT_PAR_DEFAUT, mesure.ecran)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)

@@ -92,6 +92,120 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   });
   t(scale.every(d => d <= 6), 'moteur : même image à deux résolutions', 'écarts max ' + scale.join(','));
 
+  // --- 4 bis. la place de l'heure : ce que l'écran de verrouillage change
+  //
+  // Sur le verrouillage, le motif compose sous la place de l'heure et rien
+  // n'en monte au-dessus : `lib/place.ts`. La sonde mesure sa bande là où
+  // l'heure tombe, et n'y trouve donc que le sol du motif. Le voile ne peut alors qu'être moindre que sur l'accueil, où la
+  // grille d'icônes couvre le motif entier. Rien d'autre ne le dirait, une
+  // image voilée et une image composée se ressemblant assez pour qu'on ne les
+  // distingue pas à l'oeil.
+  const reserve = await page.evaluate(() => {
+    const M = window.MOTEUR;
+    const out = {};
+    for (const pal of M.ORDRE_PALETTES) {
+      const a = M.mesurer('meandres', pal, 1, 7314, 400, 900, false, 'accueil');
+      const v = M.mesurer('meandres', pal, 1, 7314, 400, 900, false, 'verrou');
+      out[pal] = { avant: a.voile, apres: v.voile, contraste: v.contraste };
+    }
+    return out;
+  });
+  const palettes = Object.keys(reserve);
+  const M_SEUIL_UI = await page.evaluate(() => window.MOTEUR.SEUIL_UI);
+  const pires = palettes.filter(p => reserve[p].apres > reserve[p].avant + 1e-9);
+  t(pires.length === 0,
+    'place de l\'heure : le voile du verrouillage ne fait jamais plus que celui de l\'accueil',
+    pires.join(', ') || palettes.length + ' palettes');
+  // Ciel est la borne : son fond est un bleu moyen, et le voile, plafonné pour
+  // ne pas ternir le fichier, ne le mène qu'à « juste ». C'était déjà vrai sous
+  // la grille d'icônes ; la place de l'heure ne peut pas faire mieux que le
+  // fond de la palette, et ne doit pas faire moins bien.
+  const faibles = palettes.filter(p => reserve[p].contraste < M_SEUIL_UI);
+  t(faibles.length === 0, 'place de l\'heure : le contraste reste au moins juste sous l\'heure, sur les onze palettes',
+    faibles.map(p => `${p} ${reserve[p].contraste.toFixed(1)}`).join(', ')
+    || 'le plus faible : ' + Math.min(...palettes.map(p => reserve[p].contraste)).toFixed(1) + ':1');
+  const corriges = palettes.filter(p => reserve[p].avant > 0);
+  t(corriges.length >= 8,
+    'place de l\'heure : et l\'écran d\'accueil, lui, avait bien besoin de son voile',
+    corriges.length + ' palettes sur ' + palettes.length);
+
+  // La garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
+  // familles et les trois densités, la bande des chiffres est d'un seul ton,
+  // celui du sol du motif. Une forme qui remonterait dedans, par débordement
+  // ou par une coupe manquée, se verrait ici et nulle part ailleurs : la sonde fait une moyenne, et une moyenne pardonne.
+  const couverture = await page.evaluate(() => {
+    const M = window.MOTEUR, W = 300, H = 650, mauvaises = [];
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
+    /* La bande des chiffres, un cheveu en dedans de ses bornes, qui sont dans
+       `lib/place.ts` : de sept centièmes et demi à trente et un et demi de la
+       hauteur, et d'un bord à l'autre, le sol n'ayant pas de retrait. */
+    const x0 = Math.round(W * 0.02), x1 = Math.round(W * 0.98);
+    const y0 = Math.round(H * 0.09), y1 = Math.round(H * 0.3);
+    for (const f of M.FAMILLES) for (const d of [0, 1, 2]) {
+      M.dessiner(g, W, H, { famille: f.id, palette: 'lime', densite: d, graine: 7314 },
+        { ecran: 'verrou', voile: false, arret: 'formes' });
+      const px = g.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+      const [r0, v0, b0] = [px[0], px[1], px[2]];
+      let n = 0;
+      for (let i = 0; i < px.length; i += 4 * 29) {
+        if (Math.abs(px[i] - r0) > 6 || Math.abs(px[i + 1] - v0) > 6
+          || Math.abs(px[i + 2] - b0) > 6) n += 1;
+      }
+      if (n > 0) mauvaises.push(f.id + '/d' + d);
+    }
+    return mauvaises;
+  });
+  const combien = await page.evaluate(() => window.MOTEUR.FAMILLES.length);
+  t(couverture.length === 0, 'place de l\'heure : la bande des chiffres est d\'un seul ton',
+    couverture.slice(0, 6).join(', ') || 'les ' + combien + ' familles, trois densités');
+
+  // Et le motif, lui, est bien là dessous : la place de l'heure est un
+  // recadrage, pas un effacement. Sur des familles denses, qui couvrent tout,
+  // les deux tiers bas doivent porter plus d'un ton, et le même nombre de
+  // tons qu'à l'accueil à peu de chose près : un élagage trop large viderait
+  // la moitié de l'image sans que rien ne le dise.
+  const dessous = await page.evaluate(() => {
+    const M = window.MOTEUR, W = 300, H = 650, delaves = [];
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { alpha: false, willReadFrequently: true });
+    const tons = (ecran) => {
+      const vus = new Set();
+      const px = g.getImageData(0, Math.round(H * 0.55), W, Math.round(H * 0.4)).data;
+      for (let i = 0; i < px.length; i += 4 * 7) {
+        vus.add((px[i] >> 3) + ',' + (px[i + 1] >> 3) + ',' + (px[i + 2] >> 3));
+      }
+      return vus.size;
+    };
+    for (const f of ['carreaux', 'banquise', 'meandres', 'cubes', 'penrose']) {
+      const compter = (ecran) => {
+        M.dessiner(g, W, H, { famille: f, palette: 'lime', densite: 2, graine: 7314 },
+          { ecran, voile: false, arret: 'formes' });
+        return tons(ecran);
+      };
+      const accueil = compter('accueil'), verrou = compter('verrou');
+      if (verrou < 2 || verrou < accueil * 0.5) delaves.push(`${f} ${verrou}/${accueil}`);
+    }
+    return delaves;
+  });
+  t(dessous.length === 0, 'place de l\'heure : le motif court entier sous l\'heure',
+    dessous.join(', ') || 'cinq familles denses');
+
+  const pente = await page.evaluate(() => {
+    const M = window.MOTEUR;
+    return {
+      dedans: M.alphaDuVoile(0.15, 0.4, 'verrou'),
+      dessous: M.alphaDuVoile(0.6, 0.4, 'verrou'),
+      accueilBas: M.alphaDuVoile(0.95, 0.4, 'accueil'),
+    };
+  });
+  t(pente.dedans > 0.39 && pente.dessous === 0,
+    'place de l\'heure : le voile du verrouillage tient la place et ne sort pas dessous',
+    `dedans ${pente.dedans.toFixed(3)}, dessous ${pente.dessous.toFixed(3)}`);
+  t(pente.accueilBas > 0.4,
+    'place de l\'heure : la pente de l\'écran d\'accueil n\'a pas bougé',
+    pente.accueilBas.toFixed(3));
+
   // --- 5. toutes les familles rendent sans erreur, et non vides
   const fams = await page.evaluate(() => {
     const M = window.MOTEUR;
@@ -269,8 +383,16 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   t(onglets.visibles === onglets.comptes[0],
     'onglets : la grille montre exactement ce que l\'onglet annonce',
     onglets.visibles + ' pour ' + onglets.comptes[0]);
-  t(onglets.comptes.reduce((a, b) => a + b, 0) === 76,
-    'onglets : les huit couvrent les soixante-seize familles', onglets.comptes.join(' + '));
+  /* Le total se lit dans le catalogue, jamais écrit ici : une famille ajoutée
+     au moteur faisait échouer ce contrôle sans que rien n'ait cassé, et le
+     nombre en dur ne disait plus que la date de sa dernière relecture. Ce qu'on
+     veut savoir est ailleurs : les huit onglets couvrent-ils la liste entière,
+     ou une famille se cache-t-elle derrière un groupe qu'aucun onglet ne
+     montre. */
+  const totalFamilles = await page.evaluate(() => window.MOTEUR.FAMILLES.length);
+  t(onglets.comptes.reduce((a, b) => a + b, 0) === totalFamilles,
+    'onglets : les huit couvrent le catalogue entier',
+    onglets.comptes.join(' + ') + ' pour ' + totalFamilles);
   /* Le panneau de ce téléphone fait 191 px de large : la barre s'y emballe sur
      quatre rangées de 44 px. Une colonne unique en ferait huit, soit 401 px,
      et la première vignette de famille en fait 86 : on ferait défiler un mur de
@@ -561,13 +683,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    /* Six, tant qu'aucune palette n'a été composée : la grille de familles de
-       l'onglet ouvert, les palettes livrées, les densités, la version, la
-       langue et le thème. La grille des palettes composées est la septième, et
-       elle n'apparaît que lorsqu'il y en a. Un groupe ajouté sans son
-       `radiogroup` casserait le parcours clavier sans rien changer à
+    /* Sept, tant qu'aucune palette n'a été composée : la grille de familles de
+       l'onglet ouvert, les palettes livrées, les densités, la version, l'écran,
+       la langue et le thème. L'écran ne paraît que sur un téléphone ou une
+       tablette, et ce cadrage en est un. La grille des palettes composées est
+       la huitième, et elle n'apparaît que lorsqu'il y en a. Un groupe ajouté
+       sans son `radiogroup` casserait le parcours clavier sans rien changer à
        l'affichage. */
-    t(kb.groups.length === 6, 'clavier : les six groupes sont des groupes radio', kb.groups.length + ' groupes');
+    t(kb.groups.length === 7, 'clavier : les sept groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
@@ -1561,7 +1684,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         id: g.id,
         stops: [...g.querySelectorAll('.opt')].filter(o => o.tabIndex >= 0).length
       })));
-    t(clavier.length === 7, 'palette : la grille des composées est un septième groupe radio',
+    t(clavier.length === 8, 'palette : la grille des composées est un huitième groupe radio',
       clavier.map(g => g.id).join(', '));
     t(clavier.every(g => g.stops === 1),
       'palette : chaque grille garde un arrêt de tabulation, celle de la sélection comme l\'autre',

@@ -82,7 +82,7 @@ export const en: Textes = {
     document: {
       titre: 'How Aplat draws',
       description:
-        'Four settings, fourteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
+        'Four settings, fifteen drawing mechanics, four layers and a readability probe. The Aplat mechanism, demonstrated by the engine itself, inside your browser.',
     },
     heros: {
       surtitre: 'The mechanism',
@@ -100,9 +100,9 @@ export const en: Textes = {
       deuxTitre: 'A seed is an address',
       deuxNote:
         'The same four settings always render the same image, at any size. Chance enters once, when the seed is drawn.',
-      troisTitre: 'Fourteen ways to lay down colour',
+      troisTitre: 'Fifteen ways to lay down colour',
       troisNote:
-        'A family does not pick a drawing, it picks a mechanic. The engine knows fourteen of them, and every family comes out of one.',
+        'A family does not pick a drawing, it picks a mechanic. The engine knows fifteen of them, and every family comes out of one.',
       quatreTitre: 'Four layers, in this order',
       quatreNote:
         'The image is painted over itself, and the order is not a detail: the scrim is dosed for what it covers, the grain comes after it.',
@@ -142,7 +142,7 @@ export const en: Textes = {
         'A relief is cut into steps, and each step becomes a closed flat. The shape comes out of the levels, never out of a stroke.',
       fracturesNom: 'Fracture',
       fracturesNote:
-        'Seeds share the surface out, each piece clipped by half-planes. The joints are not drawn, they show through.',
+        'Seeds share the surface out, each piece clipped by half-planes, or by curved frontiers when the plane is warped beneath them. The joints are not drawn, they show through.',
       reservesNom: 'Reserve',
       reservesNote:
         'The pattern is what you take away: the panel first, the openings after, in the colour of whatever shows through.',
@@ -173,6 +173,9 @@ export const en: Textes = {
       reliefsNom: 'Relief',
       reliefsNote:
         'The colour of a face states its orientation, under a light that never moves. Three well-chosen flats make a cube, without a single gradient.',
+      surimpressionsNom: 'Overprint',
+      surimpressionsNote:
+        'Two inks pulled one over the other, and a third colour wherever they cross, computed channel by channel. The intersection is clipped before it is painted: three opaque flats, no blending.',
       mesuresNom: 'Instruments',
       mesuresNote:
         'The pattern is a tool: cutting mat, graph paper, protractor, test chart. Made of graduations rather than shapes, and the only gesture that writes numbers.',
@@ -183,7 +186,7 @@ export const en: Textes = {
       fondNote: 'The palette’s background colour, edge to edge.',
       formesNom: 'The shapes',
       formesNote:
-        'The family itself. It is the only layer that changes from one family to the next, and the fourteen gestures that paint it are just above.',
+        'The family itself. It is the only layer that changes from one family to the next, and the fifteen gestures that paint it are just above.',
       ombreNom: 'The shade',
       ombreNote:
         'The dark version: a black flat dosed to bring any pattern to the same darkness.',
@@ -281,6 +284,16 @@ export const en: Textes = {
     versionNote: 'The dark version is dimmed inside the file: that is what you download.',
     versionTitreClaire: 'The pattern as the palette gives it',
     versionTitreSombre: 'The same pattern, dimmed inside the downloaded file',
+    mot: 'The word',
+    motNote:
+      'The poster sets this word, in capitals. Spaces break the lines, and the word repeats until the page is full.',
+    ecran: 'Screen',
+    ecranAccueil: 'Home',
+    ecranVerrou: 'Lock',
+    ecranNote:
+      'On the lock screen the pattern leaves the top third to the clock; readability is measured there, or under the home screen’s icon grid.',
+    ecranTitreAccueil: 'Judge the pattern behind a grid of icons',
+    ecranTitreVerrou: 'Judge the pattern behind the lock screen clock',
   },
   palettes: {
     miennes: 'My palettes',

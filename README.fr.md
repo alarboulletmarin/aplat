@@ -42,7 +42,7 @@ est installable et pleinement utilisable hors ligne.
 - **La résolution exacte.** La taille de l'écran est détectée ; n'importe
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
-- **76 familles de motifs** en huit groupes (abstraits, pavages, volumes,
+- **79 familles de motifs** en huit groupes (abstraits, pavages, volumes,
   instruments, matières, paysages, lieux, figures), **11 palettes composées à
   la main**, trois densités, et des palettes personnelles de trois à six
   couleurs.
@@ -62,7 +62,7 @@ est installable et pleinement utilisable hors ligne.
 
 ## Galerie
 
-Dix familles parmi les soixante-seize. Chaque image de ce README sort du
+Dix familles parmi les soixante-dix-neuf. Chaque image de ce README sort du
 moteur lui-même, graine fixe, et se régénère à l'identique avec
 `node tools/vitrine.mjs` : aucune ne peut promettre un rendu que l'application
 ne donnerait pas.
@@ -148,6 +148,7 @@ appliqué que s'il sert.
 | `r` | résolution, seulement si elle a été saisie à la main |
 | `v=0` | seulement si le voile de lisibilité a été retiré du fichier |
 | `n=1` | seulement si c'est la version sombre qui est exportée |
+| `e=1` | seulement si le fichier est composé pour l'écran de verrouillage, le tiers haut laissé à l'heure |
 | `k` | les teintes d'une palette personnelle, seulement si le motif en porte une |
 
 Copier le lien suffit à retrouver exactement la même image, sur n'importe

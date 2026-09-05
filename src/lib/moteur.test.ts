@@ -311,10 +311,10 @@ describe('version sombre', () => {
 
 describe('niveau de lisibilité', () => {
   it('suit les seuils WCAG, sans arrondi complaisant', () => {
-    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 4.5 })).toBe('bonne')
-    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 4.49 })).toBe('juste')
-    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 3 })).toBe('juste')
-    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste: 2.99 })).toBe('insuffisante')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, ecran: 'accueil', luminance: 0.4, contraste: 4.5 })).toBe('bonne')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, ecran: 'accueil', luminance: 0.4, contraste: 4.49 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, ecran: 'accueil', luminance: 0.4, contraste: 3 })).toBe('juste')
+    expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, ecran: 'accueil', luminance: 0.4, contraste: 2.99 })).toBe('insuffisante')
   })
 
   /* Le défaut que ce test tient fermé : le titre disait « correcte » pour
@@ -322,7 +322,7 @@ describe('niveau de lisibilité', () => {
      rassure au-dessous du seuil vaut moins que pas de mot du tout. */
   it('ne dit « bonne » qu’au-dessus du seuil AA du petit texte', () => {
     for (const contraste of [1, 2.5, 2.99, 3, 3.5, 4.49]) {
-      expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, luminance: 0.4, contraste }), String(contraste))
+      expect(niveau({ libelles: 'clair', voile: 0, ombre: 0, ecran: 'accueil', luminance: 0.4, contraste }), String(contraste))
         .not.toBe('bonne')
     }
     expect(SEUIL_AA).toBe(4.5)
@@ -338,10 +338,12 @@ describe('niveau de lisibilité', () => {
 describe('voile retiré', () => {
   it('recalcule le rapport sur la luminance d’avant voile', () => {
     const L = 0.62
-    const clair = sansVoile({ libelles: 'clair', voile: 0.3, ombre: 0, contraste: 4.2, luminance: L })
+    const clair = sansVoile({ libelles: 'clair', voile: 0.3, ombre: 0, ecran: 'accueil' as const, contraste: 4.2, luminance: L })
     expect(clair.voile).toBe(0)
     expect(clair.contraste).toBeCloseTo(1.05 / (L + 0.05), 6)
-    const fonce = sansVoile({ libelles: 'sombre', voile: 0.2, ombre: 0, contraste: 9, luminance: L })
+    const fonce = sansVoile({
+      libelles: 'sombre', voile: 0.2, ombre: 0, ecran: 'accueil', contraste: 9, luminance: L,
+    })
     expect(fonce.contraste).toBeCloseTo((L + 0.05) / 0.068, 6)
   })
 
@@ -349,19 +351,42 @@ describe('voile retiré', () => {
     /* Le sens de la variation est ce qui compte : le voile pousse le fond vers
        la couleur de libellé la plus sûre, donc le retirer fait toujours perdre
        du contraste. */
-    const avec = { libelles: 'clair' as const, voile: 0.4, ombre: 0, contraste: 4.9, luminance: 0.7 }
+    const avec = { libelles: 'clair' as const, voile: 0.4, ombre: 0, ecran: 'accueil' as const, contraste: 4.9, luminance: 0.7 }
     expect(sansVoile(avec).contraste).toBeLessThan(avec.contraste)
   })
 
   it('ne touche à rien quand la sonde n’a posé aucun voile', () => {
-    const mesure = { libelles: 'clair' as const, voile: 0, ombre: 0, contraste: 6, luminance: 0.1 }
+    const mesure = { libelles: 'clair' as const, voile: 0, ombre: 0, ecran: 'accueil' as const, contraste: 6, luminance: 0.1 }
     expect(sansVoile(mesure)).toBe(mesure)
   })
 
   it('ne change ni la couleur de libellé ni la luminance mesurée', () => {
-    const mesure = { libelles: 'sombre' as const, voile: 0.31, ombre: 0, contraste: 7, luminance: 0.5 }
+    const mesure = {
+      libelles: 'sombre' as const, voile: 0.31, ombre: 0, ecran: 'accueil' as const,
+      contraste: 7, luminance: 0.5,
+    }
     const nu = sansVoile(mesure)
     expect(nu.libelles).toBe(mesure.libelles)
     expect(nu.luminance).toBe(mesure.luminance)
+  })
+})
+
+/**
+ * La place de l'heure : ce que l'écran de verrouillage change au fichier.
+ *
+ * Le cadre et le fondu sont testés dans `place.test.ts`, sur un pinceau qui
+ * note. Ce qui reste ici est la pente du voile, qui est au moteur.
+ */
+describe('place de l’heure', () => {
+  it('range le voile du verrouillage dans la réserve, et l’en laisse sortir nul', () => {
+    /* La pente du voile n'est pas la même selon l'écran, et c'est ce qui
+       empêche un fond d'écran de verrouillage d'être terne sur toute sa
+       hauteur pour quatre chiffres posés en haut. Sous la houle qui ferme la
+       réserve, il ne reste rien à lire, donc rien à voiler. */
+    expect(alphaDuVoile(0.15, 0.4, 'verrou')).toBeCloseTo(0.4, 5)
+    expect(alphaDuVoile(0.95, 0.4, 'verrou')).toBe(0)
+    expect(alphaDuVoile(0.5, 0.4, 'verrou')).toBe(0)
+    /* L'accueil, lui, appuie en bas et n'a pas bougé. */
+    expect(alphaDuVoile(0.95, 0.4, 'accueil')).toBeGreaterThan(0.4)
   })
 })

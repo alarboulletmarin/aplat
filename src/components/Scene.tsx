@@ -3,7 +3,7 @@
 import { useRef, type CSSProperties } from 'react'
 import {
   famille, palette, sansVoile,
-  type Langue, type Mesure, type Motif,
+  type Ecran, type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
 import {
   geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
@@ -13,7 +13,7 @@ import { remplir, type Textes } from '../i18n'
 import { useTaille, useTailleFenetre } from '../hooks/useTaille'
 import { useHorloge } from '../hooks/useHorloge'
 import { Apercu } from './Apercu'
-import { MaquetteBureau, MaquetteTelephone } from './Maquette'
+import { MaquetteBureau, MaquetteTelephone, MaquetteVerrou } from './Maquette'
 import { Verdict } from './Verdict'
 
 /**
@@ -46,6 +46,7 @@ export function Scene({
   mesure,
   voile,
   sombre,
+  ecran,
   langue,
   textes,
   calculEnCours,
@@ -61,6 +62,12 @@ export function Scene({
   voile: boolean
   /** La version sombre est-elle demandée : le motif assombri, dans le fichier. */
   sombre: boolean
+  /**
+   * L'écran sur lequel on juge : il décide de la maquette montrée et de la
+   * bande que la sonde mesure. Les deux vont ensemble, et c'est tout l'enjeu :
+   * le verdict doit porter sur ce qu'on a sous les yeux.
+   */
+  ecran: Ecran
   langue: Langue
   textes: Textes
   calculEnCours: boolean
@@ -155,7 +162,8 @@ export function Scene({
 
   /* La maquette ne dépend que du type d'appareil, de la langue et de la
      géométrie : c'est ce qui remet son ajustement à zéro, rien d'autre. */
-  const signature = [type, langue, geometrie?.largeur, geometrie?.hauteur, instant.quantieme].join('|')
+  const signature =
+    [type, ecran, langue, geometrie?.largeur, geometrie?.hauteur, instant.quantieme].join('|')
 
   return (
     <section className="scene" ref={cadre as React.RefObject<HTMLElement>} aria-labelledby="scene-h">
@@ -176,6 +184,7 @@ export function Scene({
               resolution={resolution}
               voile={voile}
               sombre={sombre}
+              ecran={ecran}
               largeur={Math.max(0, (geometrie?.largeur ?? 0) - 8)}
               hauteur={Math.max(0, (geometrie?.hauteur ?? 0) - 8)}
               description={description}
@@ -183,13 +192,16 @@ export function Scene({
             />
           )}
 
-          {!vide && !calculEnCours && type !== 'ordinateur' && (
+          {!vide && !calculEnCours && type !== 'ordinateur' && ecran === 'accueil' && (
             <MaquetteTelephone
               textes={textes}
               instant={instant}
               colonnes={geometrie?.colonnes ?? 4}
               signature={signature}
             />
+          )}
+          {!vide && !calculEnCours && type !== 'ordinateur' && ecran === 'verrou' && (
+            <MaquetteVerrou instant={instant} />
           )}
           {!vide && !calculEnCours && type === 'ordinateur' && (
             <MaquetteBureau textes={textes} instant={instant} signature={signature} />

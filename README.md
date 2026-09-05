@@ -41,7 +41,7 @@ fully usable offline.
 - **Exact resolution.** Your screen size is detected; any resolution can be
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
-- **76 pattern families** in eight groups (abstract, tilings, volumes,
+- **79 pattern families** in eight groups (abstract, tilings, volumes,
   instruments, materials, landscapes, landmarks, figures), **11 hand-tuned
   palettes**, three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces
@@ -57,7 +57,7 @@ fully usable offline.
 
 ## Gallery
 
-Ten of the seventy-six families. Every image in this README comes out of the
+Ten of the seventy-nine families. Every image in this README comes out of the
 engine itself, with a fixed seed, and is regenerated identically by
 `node tools/vitrine.mjs`: none of them can promise a render the app would not
 produce.
@@ -141,6 +141,7 @@ contrast ratio is displayed, and the veil is applied only when it helps.
 | `r` | resolution, only when typed in by hand |
 | `v=0` | only when the readability veil was removed from the file |
 | `n=1` | only when the dark variant is exported |
+| `e=1` | only when the file is composed for the lock screen, the top third left to the clock |
 | `k` | the colors of a custom palette, only when the pattern uses one |
 
 Copying the link is enough to get exactly the same image on any device. A

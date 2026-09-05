@@ -397,7 +397,7 @@ document, pas une promesse.
 quelle résolution. Les formes sont tracées en coordonnées relatives : l'aperçu
 et le fichier exporté sont le même dessin, à deux échelles.
 
-**Soixante-seize familles, huit groupes.**
+**Soixante-dix-neuf familles, huit groupes.**
 
 Un groupe n'existe que si son critère tient en une phrase. « Abstraits » n'en
 avait pas : il était le bac de ce qui n'était rangé nulle part, et il a fini par
@@ -627,7 +627,7 @@ jamais demandé un nombre fixe.
 
 ### Poids et netteté des images produites
 
-Mesuré sur les **2 508 combinaisons** (76 familles × 11 palettes × 3 densités)
+Mesuré, au moment de ce changement, sur les **2 508 combinaisons** d'alors (76 familles × 11 palettes × 3 densités ; le catalogue en compte 2 607 aujourd'hui)
 en 1179 × 2556, soit 3,0 Mpx :
 
 | | avant | après |
@@ -862,9 +862,9 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/dither-check.mjs` | amplitude du grain sur toute la gamme tonale |
 | `tools/shot.mjs` | captures et absence de requête sortante |
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
-| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 508 combinaisons |
+| `tools/export-audit.mjs` | poids et durée des PNG sur les 2 607 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 76 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 79 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 
