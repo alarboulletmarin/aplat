@@ -8,6 +8,7 @@ import {
   type Langue,
 } from '../lib/moteur'
 import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
+import { TIRAGES, type Tirage } from '../lib/presse'
 import { remplir, type Textes } from '../i18n'
 import { Arche } from './Arche'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
@@ -617,6 +618,62 @@ export function ChoixVersion({
         ))}
       </GroupeRadio>
       <p className="bento-n">{T.versionNote}</p>
+    </div>
+  )
+}
+
+/**
+ * Le tirage : DESIGN_SYSTEM.md, section 7 (la puce de choix).
+ *
+ * Net, tramé, décalé, sur le gabarit de la densité, et à la même place que la
+ * version et l'écran : dans le panneau, avec les réglages qui décident du
+ * fichier. Ce n'est pas un filtre posé sur l'aperçu, c'est une couche de plus
+ * dans le PNG, et l'aperçu la montre pour la même raison qu'il montre le
+ * voile.
+ *
+ * Trois puces plutôt qu'une bascule et un curseur, parce que le tirage n'est
+ * pas une quantité : le décalé n'est pas « plus » de tramé, c'est une seconde
+ * couche. La pastille dessine ce qu'elle fait, un aplat franc, un aplat tramé,
+ * deux aplats l'un à côté de l'autre, et le mot le dit : le choix ne se lit
+ * jamais à la seule forme.
+ */
+export function ChoixTirage({
+  valeur,
+  textes,
+  onChoisir,
+}: {
+  valeur: Tirage
+  textes: Textes
+  onChoisir: (tirage: Tirage) => void
+}) {
+  const T = textes.reglages
+  const noms: Record<Tirage, { nom: string; titre: string }> = {
+    net: { nom: T.tirageNet, titre: T.tirageTitreNet },
+    trame: { nom: T.tirageTrame, titre: T.tirageTitreTrame },
+    decale: { nom: T.tirageDecale, titre: T.tirageTitreDecale },
+  }
+  return (
+    <div className="bento">
+      <h2 className="carte-h" id="h-tirage">
+        <Arche />
+        <span>{T.tirage}</span>
+      </h2>
+      <GroupeRadio id="liste-tirage" etiquettes="h-tirage" className="rangee-densite">
+        {TIRAGES.map((tirage) => (
+          <OptionRadio
+            key={tirage}
+            choisi={tirage === valeur}
+            onChoisir={() => onChoisir(tirage)}
+            className="opt opt-densite opt-tirage"
+            titre={noms[tirage].titre}
+            data-tirage={tirage}
+          >
+            <span className="opt-tirage-p" aria-hidden="true" />
+            <span className="opt-densite-t">{noms[tirage].nom}</span>
+          </OptionRadio>
+        ))}
+      </GroupeRadio>
+      <p className="bento-n">{T.tirageNote}</p>
     </div>
   )
 }

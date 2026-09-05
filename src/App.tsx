@@ -33,9 +33,10 @@ import { useThemeResolu } from './hooks/useThemeResolu'
 import { Entete } from './components/Entete'
 import { Scene } from './components/Scene'
 import {
-  ChoixDensite, ChoixEcran, ChoixFamille, ChoixMot, ChoixPalette, ChoixVersion,
+  ChoixDensite, ChoixEcran, ChoixFamille, ChoixMot, ChoixPalette, ChoixTirage, ChoixVersion,
 } from './components/Reglages'
 import { estSurimpression } from './lib/surimpression'
+import type { Tirage } from './lib/presse'
 import { Historique } from './components/Historique'
 import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
@@ -201,8 +202,10 @@ export function App() {
       vide
         ? null
         : mesurer(motif.famille, motif.palette, motif.densite, motif.graine,
-            resolution.largeur, resolution.hauteur, reglages.sombre, reglages.ecran),
-    [motif, resolution.largeur, resolution.hauteur, vide, reglages.sombre, reglages.ecran],
+            resolution.largeur, resolution.hauteur, reglages.sombre, reglages.ecran,
+            motif.mot, reglages.tirage),
+    [motif, resolution.largeur, resolution.hauteur, vide, reglages.sombre, reglages.ecran,
+      reglages.tirage],
   )
 
   /** Un réglage touché efface le résultat précédent, mais jamais un export en cours. */
@@ -405,12 +408,13 @@ export function App() {
 
     const travail = {
       motif, largeur, hauteur, voile: reglages.voile, sombre: reglages.sombre,
-      ecran: reglages.ecran, format,
+      ecran: reglages.ecran, tirage: reglages.tirage, format,
     }
     const nom = nomFichier(travail.motif, largeur, hauteur, {
       format,
       voile: reglages.voile,
       sombre: reglages.sombre,
+      tirage: reglages.tirage,
     })
 
     exportEnCours.current = true
@@ -421,7 +425,10 @@ export function App() {
     setTimeout(() => {
       if (format === 'svg') {
         try {
-          const rendu = rendreSVG(travail.motif, largeur, hauteur, travail.voile, travail.sombre)
+          const rendu = rendreSVG(
+            travail.motif, largeur, hauteur, travail.voile, travail.sombre,
+            travail.ecran, travail.tirage,
+          )
           if (rendu.elements > ELEMENTS_MAX) throw new ErreurExport('svgDense')
           const blob = encoderSVG(travail)
           telecharger(blob, nom)
@@ -462,6 +469,7 @@ export function App() {
     const voile = reglages.voile
     const sombre = reglages.sombre
     const ecran = reglages.ecran
+    const tirage = reglages.tirage
     exportEnCours.current = true
     setEphemere((precedent) => ({ ...precedent, phase: 'calcul', echec: null }))
 
@@ -476,6 +484,7 @@ export function App() {
             voile,
             sombre,
             ecran,
+            tirage,
             format: 'png',
           }).then(
             (blob) =>
@@ -483,7 +492,7 @@ export function App() {
                 total += blob.size
                 telecharger(
                   blob,
-                  nomFichier(courant, format.largeur, format.hauteur, { voile, sombre }),
+                  nomFichier(courant, format.largeur, format.hauteur, { voile, sombre, tirage }),
                 )
                 /* Un navigateur qui reçoit trois téléchargements dans la même
                    milliseconde n'en garde souvent qu'un. Un demi-battement
@@ -552,6 +561,7 @@ export function App() {
       voile: reglages.voile,
       sombre: reglages.sombre,
       ecran: reglages.ecran,
+      tirage: reglages.tirage,
       format: 'png' as const,
     }
     exportEnCours.current = true
@@ -578,7 +588,7 @@ export function App() {
     try {
       return (
         rendreSVG(motif, resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre,
-          reglages.ecran)
+          reglages.ecran, reglages.tirage)
           .elements <= ELEMENTS_MAX
       )
     } catch {
@@ -587,6 +597,7 @@ export function App() {
   }, [
     ephemere.formats, vide, motif,
     resolution.largeur, resolution.hauteur, reglages.voile, reglages.sombre, reglages.ecran,
+    reglages.tirage,
   ])
 
   const webpPossible = useMemo(() => webpDisponible(), [])
@@ -610,6 +621,7 @@ export function App() {
         voile={reglages.voile}
         voilePeint={Boolean(mesure && mesure.voile > 0.02)}
         sombre={reglages.sombre}
+        tirage={reglages.tirage}
         svgPossible={svgPossible}
         webpPossible={webpPossible}
         copiee={ephemere.copieImage}
@@ -635,6 +647,7 @@ export function App() {
         }
         onVoile={() => changer({ voile: !reglages.voile })}
         onSombre={(sombre) => changer({ sombre })}
+        onTirage={(tirage) => changer({ tirage })}
       />
   )
 
@@ -660,6 +673,7 @@ export function App() {
             voile={reglages.voile}
             sombre={reglages.sombre}
             ecran={reglages.ecran}
+            tirage={reglages.tirage}
             langue={reglages.langue}
             textes={T}
             calculEnCours={ephemere.phase === 'calcul'}
@@ -718,6 +732,14 @@ export function App() {
               valeur={reglages.sombre}
               textes={T}
               onChoisir={(sombre: boolean) => changer({ sombre })}
+            />
+            {/* Le tirage suit la version, et pour la même raison qu'elle suit
+                la densité : c'est une couche brûlée dans le fichier, pas un
+                réglage du dessin, et on y revient une fois le motif trouvé. */}
+            <ChoixTirage
+              valeur={reglages.tirage}
+              textes={T}
+              onChoisir={(tirage: Tirage) => changer({ tirage })}
             />
             {/* Le mot ne paraît que pour l'affiche : c'est la seule famille qui
                 écrive, et un champ qui ne changerait rien à ce qu'on voit

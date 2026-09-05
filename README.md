@@ -48,6 +48,11 @@ fully usable offline.
   the same image, at any resolution. Sharing a link is sharing the image.
 - **Several outputs**: PNG, PNG 2x, WebP, SVG, clipboard copy, and a
   phone-tablet-desktop batch from the same seed.
+- **Three prints.** The same drawing pulled clean, screened (the ink speckled,
+  the paper grained), or out of register (the same layer printed a second time
+  beside itself). It is a layer in the file, not a filter on the preview, and
+  its grain is measured on the pattern rather than on your screen: the preview
+  shows the file's own texture.
 - **Light and dark variants**, baked into the exported file, not simulated.
 - **Installable PWA**, fully functional offline, with React and React Router
   as the only runtime dependencies.
@@ -97,6 +102,22 @@ dark. Here `Peaks` on the `Sun` palette, light and dark:
 |:---:|:---:|
 | <img src="docs/vitrine/version-claire.png" alt="Peaks, light variant" width="180"> | <img src="docs/vitrine/version-sombre.png" alt="Peaks, dark variant" width="180"> |
 
+And every pattern can be **pulled three ways**. Clean is what the engine
+draws. Screened speckles the ink with a tenth of the paper and grains the
+whole sheet. Shifted does that and prints the layer a second time, one
+hundredth of the short side lower and to the left, in the palette ink
+furthest from the background: the ghost line of a poster pulled in two passes
+that did not line up. Here `Blobs` on the `Lime & cream` palette:
+
+| Clean, 126 KB | Screened, 213 KB | Shifted, 221 KB |
+|:---:|:---:|:---:|
+| <img src="docs/vitrine/tirage-net.png" alt="Blobs, clean print" width="180"> | <img src="docs/vitrine/tirage-trame.png" alt="Blobs, screened print" width="180"> | <img src="docs/vitrine/tirage-decale.png" alt="Blobs, shifted print" width="180"> |
+
+The texture is a layer of the file, not a filter on the preview, and its grain
+is measured on the pattern rather than on the screen: a noise cell is one three
+hundredth of the short side, so the preview shows the file's own texture
+instead of one four times finer.
+
 ## Try it
 
 ```bash
@@ -142,6 +163,7 @@ contrast ratio is displayed, and the veil is applied only when it helps.
 | `v=0` | only when the readability veil was removed from the file |
 | `n=1` | only when the dark variant is exported |
 | `e=1` | only when the file is composed for the lock screen, the top third left to the clock |
+| `i` | the print, `trame` or `decale`, only when it is not the clean one |
 | `k` | the colors of a custom palette, only when the pattern uses one |
 
 Copying the link is enough to get exactly the same image on any device. A

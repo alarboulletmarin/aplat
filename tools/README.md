@@ -30,7 +30,7 @@ propres tests l'ouvre à tout le monde. `banc.mjs` en construit une copie à par
 | `repli.mjs` | le repli de l'aperçu au défilement : ce qu'il rend aux grilles, le dépli du verdict, et que chaque contrôle se dégage entièrement des deux couches collantes |
 | `overflow.mjs` | débordements sur 12 cadrages (dont deux fenêtres couchées) × 2 langues × 4 résolutions cibles, avec et sans libellés allongés de 30 %. Les libellés de carte y sont tenus à deux lignes et à zéro ellipse |
 | `band-test.mjs` | hauteur des marches du voile sur 32 cas |
-| `dither-check.mjs` | amplitude du grain du `#101A2E` au `#FFFFFF` |
+| `dither-check.mjs` | amplitude des deux grains, celui du tirage net et celui du tramé, du `#101A2E` au `#FFFFFF` |
 | `shot.mjs` | captures et absence de requête sortante |
 | `perf.mjs` | coût de chaque action du geste à la peinture, processeur bridé six fois : médiane et max par scénario, budgets qui font échouer |
 | `soak.mjs` | 400 actions enchaînées, historique plein : dérive du tas, des nœuds, des canevas et des écouteurs |

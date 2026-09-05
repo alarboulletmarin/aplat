@@ -607,6 +607,66 @@ ligne le retire, du fichier comme de l'aperçu, l'écrit dans l'adresse (`v=0`) 
 dans le nom du fichier, et le verdict de lisibilité se recalcule pour l'image
 nue plutôt que pour celle qu'on n'exporte plus.
 
+**Le tirage.** Le moteur trace des aplats parfaits, et c'est ce qu'on lui
+demande. Une presse, non : l'encre ne couvre pas tout à fait, le papier a un
+grain, et deux couches ne tombent jamais exactement l'une sur l'autre. Ces
+trois accidents sont ce qui distingue une affiche sérigraphiée d'un aplat
+vectoriel, et le tirage les rejoue, à la demande, en trois positions.
+
+Le **net** est ce que le produit a toujours livré, au pixel près. Le **tramé**
+mouchette l'encre d'un dixième de fond et pose un grain de papier visible. Le
+**décalé** fait cela, et imprime en plus la couche entière une seconde fois, un
+centième du petit côté plus bas et à gauche.
+
+Quatre décisions tiennent le reste, et chacune évitait un piège.
+
+*Le grain se mesure sur le motif, pas sur l'appareil.* Le grain historique fait
+un pixel d'appareil de côté, et c'est le bon choix pour lui : il ne sert qu'à
+casser les marches du voile, il doit rester invisible. Celui du tirage doit se
+voir, et compté en pixels il aurait été quatre fois plus fin dans l'aperçu que
+dans le fichier, ce qui aurait fait mentir la règle centrale du produit. Une
+cellule vaut donc un trois-centième du petit côté, comme toutes les tailles du
+moteur.
+
+*L'encre manque, elle ne s'ajoute pas.* Le mouchetis est de la couleur du
+fond : c'est le papier qui reparaît sous une encre qui n'a pas couvert.
+Moucheter de blanc aurait éclairci les palettes sombres et moucheter de noir
+aurait terni les claires ; le fond est vrai pour les onze palettes livrées
+comme pour celles qu'on compose, et il ne change rien là où il n'y a pas
+d'encre à trouer.
+
+*Le hors repère est de la géométrie, pas une ombre portée.* Il ne floute rien,
+il imprime les mêmes formes à côté, dans l'encre de la palette la plus éloignée
+du fond en luminance. Prendre la plus sombre aurait marché sur les huit
+palettes claires et rendu un liseré invisible sur les trois autres, où le fond
+est déjà le plus sombre du lot. Aucune couleur n'est inventée : une palette dit
+toujours toutes les couleurs du fichier.
+
+*Le décalage passe par le pinceau, jamais par le contexte.* C'est le piège de
+tout le geste, et il n'aurait rien cassé du tout : sur l'écran de
+verrouillage, l'élagueur repeint en coordonnées d'image après avoir remis la
+transformation à l'identité, et un `translate` posé avant lui y meurt en
+silence. La seconde couche serait tombée pile sur la première, c'est-à-dire
+nulle part, sur un seul des deux écrans. Le pinceau décalé tient devant les
+deux, et devant le notaire du SVG par surcroît, ce qui fait que le hors repère
+s'exporte en vectoriel.
+
+Le verdict de lisibilité suit, et de deux façons différentes, parce que les
+deux couches ne sont pas de même nature. La seconde couche couvre du fond d'une
+encre : elle déplace la moyenne de la bande mesurée, et la sonde la peint. Le
+mouchetis ne déplace rien, il troue l'encre d'un dixième de fond ; un pixel y
+est soit une encre soit le fond, jamais un mélange, et la luminance relative est
+linéaire là où la sonde en fait la moyenne. La correction juste tient donc en
+une ligne, et elle est exacte, là où peindre le mouchetis n'aurait ajouté que du
+bruit à une sonde de trois mille pixels.
+
+Ce que cela coûte, mesuré sur six motifs en 1179 par 2556 : le PNG va de 216 à
+847 Ko en tirage net, et de 374 à 721 Ko en tramé. Les familles claires
+s'alourdissent de moitié, les familles très peuplées s'allègent, le mouchetis
+couvrant leurs propres variations mieux qu'il ne les ajoute. Le rendu passe de
+6 à 17 ms en net, de 7 à 22 ms en tramé, et jusqu'à 60 ms en décalé, qui
+dessine les formes deux fois.
+
 **Les palettes composées à la main.** Onze palettes suffisent à faire un fond
 d'écran, elles ne suffisent pas à faire *le sien* : une marque a ses deux
 teintes, un écran OLED demande un noir vrai. On en compose donc, de trois à six
@@ -678,7 +738,9 @@ Trois causes, trois correctifs, tous mesurés :
    elles sont maintenant calées sur des bornes entières.
 
 Le grain fait un pixel d'appareil de côté, quelle que soit la résolution : il ne
-forme jamais de blocs quand on agrandit l'image.
+forme jamais de blocs quand on agrandit l'image. Celui du tirage tramé est
+l'exception, et elle est raisonnée : il n'est pas là pour tramer une marche mais
+pour se voir, et il se compte donc en parts du motif.
 
 ### Ce qu'on peut emporter
 

@@ -5,6 +5,7 @@ import {
   type Densite, type Ecran, type IdFamille, type IdPaletteQuelconque, type Langue,
   type Motif,
 } from './moteur'
+import { estTirage, type Tirage } from './presse'
 import { GRAINE_MAX } from './tirage'
 import { type Affichage, type Theme } from './affichage'
 import { encoderTeintes } from './palettes'
@@ -64,6 +65,16 @@ export interface Reglages {
    */
   ecran: Ecran
   /**
+   * Le tirage : net, tramé, ou hors repère.
+   *
+   * Il est ici pour la même raison que le voile et la version : il ne change
+   * rien à l'interface et tout au fichier. C'est une couche brûlée dans le
+   * PNG, pas un habillage de l'aperçu, et un lien qui ne la porterait pas
+   * ouvrirait un autre fichier chez la personne qui le reçoit. Son absence
+   * vaut « net », le seul tirage que le produit ait jamais livré.
+   */
+  tirage: Tirage
+  /**
    * Le mot que l'affiche écrit. Il ne concerne qu'une famille sur
    * soixante-dix-neuf, et il est ici quand même : c'est un réglage du motif au
    * même titre que la densité, il change l'image, donc un lien qui ne le
@@ -88,6 +99,7 @@ export const REGLAGES_PAR_DEFAUT: Reglages = {
   voile: true,
   sombre: false,
   ecran: 'accueil',
+  tirage: 'net',
   mot: MOT_PAR_DEFAUT,
   largeurSaisie: '',
   hauteurSaisie: '',
@@ -153,6 +165,11 @@ export function lireUrl(
        verrouillage, dont la bande est la plus sévère des deux. Une adresse
        abîmée rend l'écran d'accueil, celui que le produit a toujours mesuré. */
     ecran: q.get('e') === '1' ? 'verrou' : 'accueil',
+    /* Le tirage s'écrit en toutes lettres, contrairement aux trois drapeaux
+       au-dessus : il a trois valeurs et non deux, et un lien se relit. Tout
+       ce qui n'est pas un nom connu retombe sur le tirage net, celui que le
+       produit livre par défaut. */
+    tirage: estTirage(q.get('i')) ? q.get('i') as Tirage : REGLAGES_PAR_DEFAUT.tirage,
     /* Assaini, jamais rejeté : une adresse abîmée doit ouvrir une affiche, pas
        une page vide. Ce qui n'est pas de la fonte tombe, et un mot devenu vide
        retombe sur celui par défaut. */
@@ -186,6 +203,7 @@ export function ecrireUrl(
   if (!reglages.voile) q.set('v', '0')
   if (reglages.sombre) q.set('n', '1')
   if (reglages.ecran === 'verrou') q.set('e', '1')
+  if (reglages.tirage !== 'net') q.set('i', reglages.tirage)
   /* Le mot par défaut ne s'écrit pas : une adresse ne porte que ce qu'on a
      choisi, comme pour le voile et la version. */
   if (reglages.mot !== MOT_PAR_DEFAUT) q.set('t', reglages.mot)

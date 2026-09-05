@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { dessiner, type Ecran, type Motif } from '../lib/moteur'
+import type { Tirage } from '../lib/presse'
 import type { Resolution } from '../lib/resolution'
 
 /**
@@ -18,6 +19,7 @@ export function Apercu({
   voile,
   sombre,
   ecran,
+  tirage,
   largeur,
   hauteur,
   description,
@@ -34,6 +36,13 @@ export function Apercu({
    * la bande mesurée, donc le voile brûlé, donc le fichier.
    */
   ecran: Ecran
+  /**
+   * Le tirage : net, tramé, ou hors repère. Même règle encore, et elle porte
+   * ici plus qu'ailleurs : la texture du tirage se compte en parts du petit
+   * côté, si bien que l'aperçu montre le grain du fichier et non un grain
+   * quatre fois plus fin que le sien.
+   */
+  tirage: Tirage
   /** Taille rendue de la boîte, en pixels CSS. */
   largeur: number
   hauteur: number
@@ -65,6 +74,7 @@ export function Apercu({
       voile,
       sombre,
       ecran,
+      tirage,
       mesureW: resolution.largeur,
       mesureH: resolution.hauteur,
     })
@@ -74,7 +84,7 @@ export function Apercu({
        fenêtre a bougé : sur téléphone, le repli de la barre d'URL pendant le
        défilement faisait clignoter l'aperçu. */
     const signature =
-      [motif.famille, motif.palette, motif.densite, motif.graine, voile, sombre, ecran]
+      [motif.famille, motif.palette, motif.densite, motif.graine, voile, sombre, ecran, tirage]
         .join('|')
     const change = precedent.current !== null && precedent.current !== signature
     precedent.current = signature
@@ -86,8 +96,8 @@ export function Apercu({
         noeud.style.opacity = '1'
       })
     }
-  }, [motif, resolution.largeur, resolution.hauteur, voile, sombre, ecran, largeur, hauteur,
-    revision])
+  }, [motif, resolution.largeur, resolution.hauteur, voile, sombre, ecran, tirage, largeur,
+    hauteur, revision])
 
   return (
     <canvas

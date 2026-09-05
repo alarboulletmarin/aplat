@@ -211,6 +211,35 @@ describe('écran de jugement', () => {
 })
 
 /**
+ * Le tirage voyage pour la même raison que les trois précédents : il est brûlé
+ * dans le PNG. Il s'écrit en toutes lettres et non en drapeau, parce qu'il a
+ * trois valeurs, et parce qu'un lien se relit.
+ */
+describe('tirage', () => {
+  it('vaut le net par défaut, et ne s’écrit que pour les deux autres', () => {
+    expect(lireUrl('', DETECTE).tirage).toBe('net')
+    expect(ecrireUrl(REGLAGES_PAR_DEFAUT, depuisSaisie('', ''), DETECTE)).not.toContain('i=')
+    for (const tirage of ['trame', 'decale'] as const) {
+      const requete = ecrireUrl(
+        { ...REGLAGES_PAR_DEFAUT, tirage }, depuisSaisie('', ''), DETECTE,
+      )
+      expect(requete, tirage).toContain(`i=${tirage}`)
+      expect(lireUrl(requete, DETECTE).tirage, tirage).toBe(tirage)
+    }
+  })
+
+  it('retombe sur le net devant un nom inconnu', () => {
+    for (const brut of ['i=', 'i=1', 'i=NET', 'i=serigraphie', 'i=decale%20', 'i=__proto__']) {
+      expect(lireUrl(`?${brut}`, DETECTE).tirage, brut).toBe('net')
+    }
+  })
+
+  it('n’a jamais existé avant, donc un vieux lien ouvre un tirage net', () => {
+    expect(lireUrl('?m=vagues&p=lime&d=1&s=7314&e=1&n=1', DETECTE).tirage).toBe('net')
+  })
+})
+
+/**
  * La version sombre est un fichier, pas un aperçu : elle voyage donc dans
  * l'adresse comme le voile. Elle a remplacé un rideau qu'on tirait sur
  * l'aperçu, qui ne voyageait nulle part parce qu'il ne montrait rien qu'on pût

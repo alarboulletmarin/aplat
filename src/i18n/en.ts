@@ -239,6 +239,9 @@ export const en: Textes = {
       'Pattern {famille}, palette {palette}, density {densite}, seed {graine}. Previewed behind a grid of placeholder icons.',
     note: 'Screen mock-up: the clock, widget and icons are placeholders, they are there to judge legibility.',
     alternativeSombre: 'Dark version: the pattern is dimmed inside the file.',
+    alternativeTrame: 'Screened print: the ink is speckled and the paper grained.',
+    alternativeDecale:
+      'Shifted print: the ink is speckled, and the same layer is printed a second time beside itself.',
     videTitre: 'Enter a resolution',
     videCorps: 'Width and height in pixels, or go back to detection.',
   },
@@ -294,6 +297,15 @@ export const en: Textes = {
       'On the lock screen the pattern leaves the top third to the clock; readability is measured there, or under the home screen’s icon grid.',
     ecranTitreAccueil: 'Judge the pattern behind a grid of icons',
     ecranTitreVerrou: 'Judge the pattern behind the lock screen clock',
+    tirage: 'Print',
+    tirageNet: 'Clean',
+    tirageTrame: 'Screened',
+    tirageDecale: 'Shifted',
+    tirageNote:
+      'Screened speckles the ink and grains the paper; shifted also prints the same layer beside itself, like a press out of register. Both live inside the file.',
+    tirageTitreNet: 'Plain flat tints, no texture',
+    tirageTitreTrame: 'Speckled ink on grained paper',
+    tirageTitreDecale: 'The speckle, and the same layer printed beside itself',
   },
   palettes: {
     miennes: 'My palettes',

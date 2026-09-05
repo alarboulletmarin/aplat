@@ -76,6 +76,14 @@ garde : les cartes flottantes avec ombre, les libellés minuscules en majuscules
 espacées, les formes décoratives posées derrière le titre, les dégradés, et les
 quatre coins au même rayon.
 
+Il porte sur l'interface, et sur elle seule. **Le fichier, lui, a le droit
+d'être imprimé.** Le tirage décalé pose une seconde couche à côté de la
+première, ce qui ressemble de loin à une ombre portée et n'en est pas une : une
+ombre portée est floue, elle est noire, et elle tombe sous une forme qui
+flotte. Celle-ci est nette, elle est une encre de la palette, et elle sort d'un
+bord pour rentrer par l'autre. C'est un défaut de repérage, celui d'une affiche
+tirée en deux passages, et la différence se voit sans qu'on ait à la nommer.
+
 ---
 
 ## 3. Les couleurs
@@ -642,7 +650,7 @@ de pixel.
 
 ### La puce de choix
 
-Les cinq groupes de réglage sont à choix unique et exclusif : ce sont des
+Les six groupes de réglage sont à choix unique et exclusif : ce sont des
 **boutons radio**, pas des bascules. `role="radio"`, `aria-checked`, un seul
 arrêt de tabulation par groupe, les flèches déplacent le choix.
 
@@ -780,6 +788,22 @@ l'aperçu en entier sans être le fichier**. Une aide à la lecture qui remplit
 le cadre cesse d'être une aide et devient un mensonge. La version sombre la
 respecte par construction : ce qu'elle met plein cadre est exactement ce que
 le téléchargement rend, et une vérification le compare pour de bon.
+
+**Le tirage se choisit au même endroit et de la même façon** : trois puces
+après la version, une pastille qui dessine ce qu'elle fait (un aplat franc, le
+même aplat percé d'une trame, deux aplats l'un à côté de l'autre), une note qui
+dit ce que la presse ajoute. Trois puces et non une bascule doublée d'un
+curseur, parce que le tirage n'est pas une quantité : le décalé n'est pas plus
+de tramé, c'est une couche de plus. Et comme la version, il est dans le fichier,
+dans l'adresse (`i=trame`, `i=decale`) et dans le nom du fichier.
+
+Une chose lui est propre, et elle tient à la règle « l'aperçu est le fichier » :
+**son grain se mesure sur le motif, pas sur l'appareil**. Le grain de papier du
+tirage net est d'un pixel d'appareil, ce qui est juste pour lui puisqu'il ne
+sert qu'à casser les marches du voile et doit rester invisible ; celui du tirage
+tramé doit se voir, et un grain compté en pixels aurait été quatre fois plus
+fin dans l'aperçu que dans le fichier. Il se compte donc en parts du petit côté,
+comme toutes les tailles du moteur.
 
 **Le voile de lisibilité est dans le fichier lui aussi**, et une ligne sous le
 bouton le dit. Elle

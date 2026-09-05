@@ -1558,3 +1558,52 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+/* La pastille du tirage : ce que la presse fait, en trois images. Un aplat
+   franc pour le net, le même aplat percé d'une trame de points pour le tramé,
+   et la seconde couche à côté, en bas à gauche, pour le décalé, dans le sens
+   exact où le fichier la pose. Comme les deux pastilles précédentes, elle
+   dessine son réglage au lieu de le teinter : le choix ne se lit jamais à la
+   seule couleur. */
+.opt-tirage-p {
+  display: block;
+  position: relative;
+  width: 22px;
+  height: 21px;
+}
+.opt-tirage-p::before,
+.opt-tirage-p::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px 5px 2px 2px;
+  background: currentColor;
+}
+.opt-tirage-p::after {
+  top: 0;
+  left: 4px;
+}
+/* La seconde couche n'existe que pour le décalé, et elle est dessous : plus
+   pâle, comme une encre que la première recouvre presque entièrement. */
+.opt-tirage-p::before {
+  top: 4px;
+  left: 0;
+  opacity: 0.42;
+}
+.opt-tirage[data-tirage='net'] .opt-tirage-p::before,
+.opt-tirage[data-tirage='trame'] .opt-tirage-p::before {
+  display: none;
+}
+.opt-tirage[data-tirage='net'] .opt-tirage-p::after,
+.opt-tirage[data-tirage='trame'] .opt-tirage-p::after {
+  left: 3px;
+}
+/* Le mouchetis : l'aplat devient une trame de points, cerné d'un filet pour
+   que la forme reste celle de l'aplat voisin. */
+.opt-tirage[data-tirage='trame'] .opt-tirage-p::after {
+  background:
+    radial-gradient(currentColor 1.1px, transparent 1.3px) 0 0 / 5px 5px,
+    radial-gradient(currentColor 1.1px, transparent 1.3px) 2.5px 2.5px / 5px 5px;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
