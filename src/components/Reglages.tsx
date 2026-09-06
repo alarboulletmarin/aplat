@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type KeyboardEvent } from 'react'
 import {
-  assainirMot, estPaletteLivree, FAMILLES, MOT_MAX, ORDRE_PALETTES,
+  assainirMot, estPaletteLivree, FAMILLES, MOT_MAX, MOT_PAR_DEFAUT, ORDRE_PALETTES,
   palette as resoudrePalette, PALETTES,
   type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
   type Langue,
@@ -467,6 +467,15 @@ export function ChoixDensite({
  * une lettre que la fonte n'a pas disparaît sous le doigt au lieu d'être
  * refusée plus tard. C'est plus honnête et ça se voit tout de suite.
  *
+ * **Le champ peut rester vide**, et il l'est le temps qu'on tape son mot.
+ * Assainir à chaque frappe et rendre le mot par défaut sur une saisie vide
+ * étaient deux règles justes prises séparément, et ensemble elles rendaient le
+ * champ ineffaçable : effacer `APLAT` lettre à lettre marchait quatre fois,
+ * puis la dernière frappe réécrivait `APLAT`. Le défaut n'appartient donc plus
+ * au champ mais au dessin (`motEcrit`), et le champ ne montre que ce qu'on y a
+ * mis. L'affiche continue d'écrire `APLAT` tant qu'il est vide, parce qu'elle
+ * ne peut rien composer avec rien.
+ *
  * Il n'apparaît que sur l'affiche, la seule famille qui écrive. Le mettre
  * partout aurait demandé aux soixante-dix-huit autres de porter un réglage
  * qu'elles ignorent.
@@ -492,6 +501,11 @@ export function ChoixMot({
         className="champ champ-mot"
         type="text"
         value={valeur}
+        /* Le mot par défaut en filigrane : le champ vide n'est pas une affiche
+           vide, et l'aperçu écrit `APLAT` juste à côté. Le filigrane dit ce que
+           l'image fait pendant qu'on cherche son mot, plutôt que de laisser
+           croire que le dessin a perdu ses lettres. */
+        placeholder={MOT_PAR_DEFAUT}
         maxLength={MOT_MAX}
         autoComplete="off"
         spellCheck={false}

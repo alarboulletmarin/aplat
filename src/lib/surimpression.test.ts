@@ -19,7 +19,9 @@
  */
 import { describe, expect, it } from 'vitest'
 import { estSurimpression, IDS_SURIMPRESSIONS, surimprimer } from './surimpression'
-import { assainirMot, FAMILLES, MOT_MAX, MOT_PAR_DEFAUT, PALETTES, type Densite } from './moteur'
+import {
+  assainirMot, FAMILLES, MOT_MAX, MOT_PAR_DEFAUT, motEcrit, PALETTES, type Densite,
+} from './moteur'
 import { svgDuMotif } from './svg'
 
 /** Les formes posées, teinte et chemin, dans l'ordre où elles le sont. */
@@ -191,9 +193,34 @@ describe('le mot', () => {
     expect(assainirMot('<script>')).toBe('SCRIPT')
     expect(assainirMot('a#b')).toBe('AB')
     expect(assainirMot('  oh   my  ')).toBe('OH MY')
-    expect(assainirMot('日本')).toBe(MOT_PAR_DEFAUT)
-    expect(assainirMot('')).toBe(MOT_PAR_DEFAUT)
-    expect(assainirMot('   ')).toBe(MOT_PAR_DEFAUT)
+    expect(assainirMot('日本')).toBe('')
+    expect(assainirMot('')).toBe('')
+    expect(assainirMot('   ')).toBe('')
+  })
+
+  it('se laisse effacer, et l’affiche écrit quand même', () => {
+    /* Le bug que ce test tient fermé : `assainirMot` rendait le mot par défaut
+       sur une saisie vide, et le champ l'appelant à chaque frappe, retirer la
+       dernière lettre de « APLAT » réécrivait « APLAT ». Le champ était
+       ineffaçable, et taper son propre mot demandait de tout sélectionner.
+       Assainir ne choisit donc plus de défaut ; `motEcrit` le fait, au bord du
+       dessin, et lui seul. */
+    for (const frappe of ['APLA', 'APL', 'AP', 'A', '']) {
+      expect(assainirMot(frappe), frappe).toBe(frappe)
+    }
+    expect(motEcrit('')).toBe(MOT_PAR_DEFAUT)
+    expect(motEcrit(undefined)).toBe(MOT_PAR_DEFAUT)
+    expect(motEcrit('CIAO')).toBe('CIAO')
+
+    /* Et le champ vidé ne rend pas une page nue : l'affiche écrit le mot par
+       défaut, exactement comme un motif qui ne porte pas de mot du tout. */
+    const vide = svgDuMotif(
+      { famille: 'affiche', palette: 'lime', densite: 1, graine: 3120, mot: '' }, 400, 900, false,
+    ).texte
+    const absent = svgDuMotif(
+      { famille: 'affiche', palette: 'lime', densite: 1, graine: 3120 }, 400, 900, false,
+    ).texte
+    expect(vide).toBe(absent)
   })
 
   it('borne la longueur, et ne rend jamais un mot qui finit par un blanc', () => {

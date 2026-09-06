@@ -151,18 +151,38 @@ export const MOT_PAR_DEFAUT = 'APLAT'
  *
  * Ce qui n'est pas dans la fonte est retiré plutôt que remplacé : un signe
  * inconnu rendu par un blanc couperait le mot en deux lignes sans qu'on
- * comprenne pourquoi. Les espaces multiples se réduisent à un, et un mot vide
- * retombe sur celui par défaut, l'affiche ne pouvant rien composer avec rien.
+ * comprenne pourquoi. Les espaces multiples se réduisent à un.
+ *
+ * **Le vide sort d'ici tel quel, et c'est ce qui a changé.** La fonction
+ * rendait le mot par défaut dès que la saisie devenait vide, ce qui empêchait
+ * purement et simplement d'effacer le champ : la dernière lettre retirée
+ * réécrivait « APLAT » sous le doigt, et il fallait deviner qu'il fallait
+ * sélectionner tout et taper par dessus. Assainir et choisir un défaut sont
+ * deux gestes, et un seul des deux appartient au champ. Le vide est donc une
+ * valeur légitime, celle de « personne n'a choisi de mot », et c'est
+ * `motEcrit`, au bord du dessin, qui décide de ce que l'affiche écrit alors.
  */
 export function assainirMot(brut: string): string {
-  const propre = [...brut.toUpperCase()]
+  return [...brut.toUpperCase()]
     .filter((c) => CARACTERES.includes(c))
     .join('')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, MOT_MAX)
     .trim()
-  return propre.length > 0 ? propre : MOT_PAR_DEFAUT
+}
+
+/**
+ * Le mot que l'affiche écrit vraiment, le vide retombant sur celui par défaut.
+ *
+ * L'affiche ne peut rien composer avec rien : une chaîne vide rendrait une
+ * page nue, sans lettres ni croisements, et personne ne lirait ça comme un
+ * choix. Le défaut est donc appliqué là où le mot sert, à la sonde, au rendu
+ * et à l'adresse, et nulle part ailleurs : surtout pas dans le champ, qui doit
+ * pouvoir rester vide le temps qu'on tape le sien.
+ */
+export function motEcrit(mot: string | undefined): string {
+  return mot !== undefined && mot.length > 0 ? mot : MOT_PAR_DEFAUT
 }
 
 /** 0 calme, 1 moyen, 2 dense. */
@@ -2303,9 +2323,15 @@ export function mesurer(
   mot: string = MOT_PAR_DEFAUT, tirage: Tirage = 'net',
 ): Mesure {
   const P = palette(idPalette)
+  /* Le vide retombe sur le défaut ici plutôt qu'à l'appel : la sonde et le
+     rendu doivent mesurer et peindre le même mot, et le seul moyen sûr est
+     qu'aucun des deux ne reçoive un mot que l'autre n'aurait pas normalisé. Il
+     entre aussi dans la clé sous cette forme, sans quoi le champ vidé et le
+     champ portant « APLAT » garderaient deux mesures pour une seule image. */
+  const ecrit = motEcrit(mot)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
   const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
-    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? mot : ''}|${tirage}`
+    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? ecrit : ''}|${tirage}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -2329,8 +2355,8 @@ export function mesurer(
        rien déplacer, et la correction juste tient en une ligne, plus bas. La
        peindre ici n'aurait ajouté que du bruit à une sonde de trois mille
        pixels. */
-    if (tirage === 'decale') peindreDessous(ctx, PW, PH, id, P, densite, graine, mot, ecran)
-    peindreFormes(ctx, PW, PH, id, P, densite, graine, mot, ecran)
+    if (tirage === 'decale') peindreDessous(ctx, PW, PH, id, P, densite, graine, ecrit, ecran)
+    peindreFormes(ctx, PW, PH, id, P, densite, graine, ecrit, ecran)
 
     try {
       const [hautDeBande, basDeBande] = BANDES_SONDE[ecran]
@@ -2544,7 +2570,8 @@ export interface Motif {
    * Le mot que l'affiche écrit. Absent partout ailleurs, et c'est voulu : une
    * seule famille sait écrire, et obliger les soixante-dix-huit autres à porter
    * un champ qu'elles ignorent aurait fait payer à tout le catalogue le prix
-   * d'une famille. Son absence vaut `MOT_PAR_DEFAUT`.
+   * d'une famille. Son absence, comme un mot vide, vaut `MOT_PAR_DEFAUT` :
+   * c'est `motEcrit` qui tranche, au bord du dessin.
    */
   mot?: string
 }
@@ -2630,7 +2657,7 @@ export function dessiner(
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
     mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre, ecran,
-    motif.mot ?? MOT_PAR_DEFAUT, tirage,
+    motEcrit(motif.mot), tirage,
   )
   rendre(ctx, W, H, motif, mesure, voile, arret, tirage)
   /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
@@ -2674,7 +2701,7 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    const mot = motif.mot ?? MOT_PAR_DEFAUT
+    const mot = motEcrit(motif.mot)
     /* Les trois gestes du tirage tiennent dans la couche des formes, et n'en
        font pas de nouvelles : la seconde couche est la couche des formes,
        imprimée deux fois, et le mouchetis est l'encre qui ne couvre pas. Les

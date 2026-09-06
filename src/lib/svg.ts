@@ -36,7 +36,7 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  mesurer, MOT_PAR_DEFAUT, palette, peindreDessous, peindreOmbre,
+  mesurer, motEcrit, palette, peindreDessous, peindreOmbre,
   peindreFormes, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
@@ -437,7 +437,7 @@ export function svgDuMotif(
   if (tirage === 'decale') {
     peindreDessous(
       notaire, largeur, hauteur, motif.famille, P, motif.densite, motif.graine,
-      motif.mot ?? MOT_PAR_DEFAUT, ecran,
+      motEcrit(motif.mot), ecran,
     )
   }
   /* Le cadre et l'élagage de la place de l'heure, dans le même ordre que sur le
@@ -445,7 +445,7 @@ export function svgDuMotif(
      autre format. */
   peindreFormes(
     notaire, largeur, hauteur, motif.famille, P, motif.densite, motif.graine,
-    motif.mot ?? MOT_PAR_DEFAUT, ecran,
+    motEcrit(motif.mot), ecran,
   )
   /* La sonde est appelée dans les deux cas, et non plus seulement quand le
      voile est demandé : c'est elle qui dose l'ombre de la version sombre, au
@@ -464,7 +464,7 @@ export function svgDuMotif(
   if (voile || sombre) {
     const mesure: Mesure = mesurer(
       motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
-      ecran, motif.mot ?? MOT_PAR_DEFAUT, tirage,
+      ecran, motEcrit(motif.mot), tirage,
     )
     peindreOmbre(notaire, largeur, hauteur, mesure)
     if (voile) peindreVoile(notaire, largeur, hauteur, mesure)
@@ -502,7 +502,7 @@ export function rendreSVG(
 ): RenduSVG {
   const cle = [
     motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile, sombre,
-    ecran, motif.mot ?? MOT_PAR_DEFAUT, tirage,
+    ecran, motEcrit(motif.mot), tirage,
   ].join('|')
   if (dernier && dernier.cle === cle) return dernier.rendu
   const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre, ecran, tirage)

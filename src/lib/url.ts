@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import {
-  assainirMot, estDensite, estFamille, estPalette, MOT_PAR_DEFAUT, palette, PREFIXE_PERSO,
+  assainirMot, estDensite, estFamille, estPalette, MOT_PAR_DEFAUT, motEcrit, palette,
+  PREFIXE_PERSO,
   type Densite, type Ecran, type IdFamille, type IdPaletteQuelconque, type Langue,
   type Motif,
 } from './moteur'
@@ -83,6 +84,12 @@ export interface Reglages {
    * Il est toujours assaini à la lecture comme à l'écriture, `assainirMot`
    * étant le seul point d'entrée : l'adresse est la seule partie du produit qui
    * vienne du dehors, et la seule chaîne libre qu'elle porte désormais.
+   *
+   * Il peut être vide, et seulement le temps d'une saisie : le champ vidé ne
+   * se réécrit pas tout seul, l'affiche écrit alors le mot par défaut, et
+   * l'adresse ne porte rien. Une adresse lue rend toujours un mot, elle : ce
+   * qui n'a pas été choisi vaut le défaut, et le champ le montre au lieu de
+   * s'ouvrir vide sur une affiche qui écrit.
    */
   mot: string
   largeurSaisie: string
@@ -172,8 +179,10 @@ export function lireUrl(
     tirage: estTirage(q.get('i')) ? q.get('i') as Tirage : REGLAGES_PAR_DEFAUT.tirage,
     /* Assaini, jamais rejeté : une adresse abîmée doit ouvrir une affiche, pas
        une page vide. Ce qui n'est pas de la fonte tombe, et un mot devenu vide
-       retombe sur celui par défaut. */
-    mot: assainirMot(q.get('t') ?? ''),
+       retombe sur celui par défaut : le champ s'ouvre sur ce que l'affiche
+       écrit, et c'est ensuite seulement qu'on peut le vider pour taper le
+       sien. */
+    mot: motEcrit(assainirMot(q.get('t') ?? '')),
     langue: affichage.langue,
     theme: affichage.theme,
     largeurSaisie: String(resolutionValide ? l : detecte.largeur),
@@ -205,8 +214,10 @@ export function ecrireUrl(
   if (reglages.ecran === 'verrou') q.set('e', '1')
   if (reglages.tirage !== 'net') q.set('i', reglages.tirage)
   /* Le mot par défaut ne s'écrit pas : une adresse ne porte que ce qu'on a
-     choisi, comme pour le voile et la version. */
-  if (reglages.mot !== MOT_PAR_DEFAUT) q.set('t', reglages.mot)
+     choisi, comme pour le voile et la version. Le champ vidé ne s'écrit pas
+     non plus, et pour la même raison : il vaut le défaut, et un `t=` vide
+     rendrait une adresse qui dit avoir choisi rien. */
+  if (motEcrit(reglages.mot) !== MOT_PAR_DEFAUT) q.set('t', reglages.mot)
   /* Une palette composée à la main n'existe que sur l'appareil qui l'a
      composée. Le lien porte donc ses teintes, sans quoi il ouvrirait un autre
      motif chez la personne qui le reçoit, ce qui est exactement ce que le
