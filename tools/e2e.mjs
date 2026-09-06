@@ -683,20 +683,24 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       }));
       return { stops: stops.length, groups };
     });
-    /* Sept, tant qu'aucune palette n'a été composée : la grille de familles de
-       l'onglet ouvert, les palettes livrées, les densités, la version, l'écran,
-       la langue et le thème. L'écran ne paraît que sur un téléphone ou une
-       tablette, et ce cadrage en est un. La grille des palettes composées est
-       la huitième, et elle n'apparaît que lorsqu'il y en a. Un groupe ajouté
-       sans son `radiogroup` casserait le parcours clavier sans rien changer à
-       l'affichage. */
-    t(kb.groups.length === 7, 'clavier : les sept groupes sont des groupes radio', kb.groups.length + ' groupes');
+    /* Huit, tant qu'aucune palette n'a été composée : la grille de familles de
+       l'onglet ouvert, les palettes livrées, les densités, la version, le
+       tirage, l'écran, la langue et le thème. L'écran ne paraît que sur un
+       téléphone ou une tablette, et ce cadrage en est un. La grille des
+       palettes composées est la neuvième, et elle n'apparaît que lorsqu'il y en
+       a. Un groupe ajouté sans son `radiogroup` casserait le parcours clavier
+       sans rien changer à l'affichage. */
+    t(kb.groups.length === 8, 'clavier : les huit groupes sont des groupes radio', kb.groups.length + ' groupes');
     t(kb.groups.every(g => g.stops === 1), 'clavier : un seul arrêt de tabulation par groupe',
       kb.groups.map(g => g.id + ':' + g.stops + '/' + g.opts).join(' '));
     t(kb.groups.every(g => g.roles), 'clavier : chaque option porte role="radio"');
     t(kb.groups.filter(g => g.checked === 1).length >= 4, 'clavier : le choix courant est marqué aria-checked',
       kb.groups.map(g => g.id + ':' + g.checked).join(' '));
-    t(kb.stops <= 22, 'clavier : parcours ramené sous 22 arrêts', kb.stops + ' arrêts (42 avant)');
+    /* Vingt-trois : le budget a monté d'un arrêt le jour du tirage, et c'est le
+       prix d'un réglage de plus, un seul, comme pour chacun des groupes qui
+       l'ont précédé. Quarante-deux avant que les puces ne deviennent des
+       groupes radio, ce qui reste le chiffre à ne pas retrouver. */
+    t(kb.stops <= 23, 'clavier : parcours ramené sous 23 arrêts', kb.stops + ' arrêts (42 avant)');
 
     // flèches : elles déplacent le choix dans le groupe
     await kp.evaluate(() => document.querySelector('#liste-densite .opt[aria-checked="true"]').focus());
@@ -1684,7 +1688,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
         id: g.id,
         stops: [...g.querySelectorAll('.opt')].filter(o => o.tabIndex >= 0).length
       })));
-    t(clavier.length === 8, 'palette : la grille des composées est un huitième groupe radio',
+    t(clavier.length === 9, 'palette : la grille des composées est un neuvième groupe radio',
       clavier.map(g => g.id).join(', '));
     t(clavier.every(g => g.stops === 1),
       'palette : chaque grille garde un arrêt de tabulation, celle de la sélection comme l\'autre',

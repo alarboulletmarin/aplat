@@ -9,6 +9,42 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : le tirage
+
+- **Le même dessin, sorti de presse.** Une puce **Tirage**, sous la version,
+  ajoute deux façons d'imprimer le motif. Le **tramé** mouchette l'encre, comme
+  une encre qui n'a pas tout couvert, et graine le papier. Le **décalé** fait
+  cela et imprime en plus la couche entière une seconde fois, un centième du
+  petit côté plus bas et à gauche, dans une encre de la palette : c'est le
+  liseré d'une affiche tirée en deux passages mal calés.
+- **La texture est dans le fichier, pas sur l'aperçu.** Elle se télécharge avec
+  le reste, elle voyage dans le lien (`i=trame`, `i=decale`) et elle s'écrit
+  dans le nom du fichier. Le tirage net reste ce qu'il a toujours été, au pixel
+  près : tous les liens écrits avant celui-ci ouvrent exactement le fichier
+  qu'ils ouvraient.
+- **Le grain se mesure sur le motif, pas sur l'écran.** Une cellule de bruit
+  vaut un trois-centième du petit côté, si bien que l'aperçu montre la texture
+  du fichier et non une texture quatre fois plus fine. C'est le contraire du
+  grain du tirage net, qui est d'un pixel d'appareil parce qu'il ne sert qu'à
+  casser les marches du voile.
+- **L'encre de dessous est une encre de la palette**, celle qui est la plus
+  loin du fond : le liseré ne se voit que contre le fond, et prendre la plus
+  sombre l'aurait fait disparaître sur les trois palettes de nuit. Aucune
+  couleur n'est inventée : une palette dit toujours toutes les couleurs du
+  fichier.
+- **Le verdict reste vrai.** La seconde couche couvre du fond, elle change donc
+  la moyenne mesurée : la sonde la peint. Le mouchetis, lui, ne déplace rien,
+  il troue l'encre d'un dixième de fond, et la sonde le corrige exactement
+  plutôt que d'ajouter du bruit à sa mesure.
+- **Le vectoriel en dit ce qu'il peut, et le dit.** Le décalé y est, c'est de
+  la géométrie ; le mouchetis et le grain n'y sont pas, comme le grain du PNG
+  ne s'y trouvait déjà pas, et la description du fichier le nomme.
+- **Ce que cela coûte.** Sur six motifs en 1179 par 2556, le PNG passe de 216 à
+  847 Ko en tirage net, et de 374 à 721 Ko en tramé : les familles claires
+  s'alourdissent de moitié, les familles très peuplées s'allègent, le mouchetis
+  couvrant leurs propres variations. Le rendu passe de 6 à 17 ms en net, de 7 à
+  22 ms en tramé, et jusqu'à 60 ms en décalé, qui dessine les formes deux fois.
+
 ### Ajouté : l'écran de verrouillage
 
 - **Un fond d'écran se regarde d'abord verrouillé.** On déverrouille des

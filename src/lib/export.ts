@@ -21,6 +21,7 @@
  * et l'aperçu reste le fichier.
  */
 import { dessiner, type Ecran, type Motif } from './moteur'
+import type { Tirage } from './presse'
 import { rendreSVG } from './svg'
 
 export type EchecExport = 'capacite' | 'generale' | 'formatRefuse' | 'presse' | 'svgDense'
@@ -64,12 +65,16 @@ export function extension(format: Format): string {
  */
 export function nomFichier(
   motif: Motif, largeur: number, hauteur: number,
-  { format = 'png', voile = true, sombre = false }:
-    { format?: Format; voile?: boolean; sombre?: boolean } = {},
+  { format = 'png', voile = true, sombre = false, tirage = 'net' }:
+    { format?: Format; voile?: boolean; sombre?: boolean; tirage?: Tirage } = {},
 ): string {
   const version = sombre ? '-sombre' : ''
   const sansVoile = voile ? '' : '-sansvoile'
-  return `aplat-${motif.famille}-${motif.palette}-${motif.graine}-${largeur}x${hauteur}${version}${sansVoile}.${extension(format)}`
+  /* Le tirage suit la même règle que les deux précédents : il ne se met dans
+     le nom que quand on l'a demandé, et il s'y met parce que deux tirages d'un
+     même motif sont deux fichiers qui se rangeraient sinon l'un sur l'autre. */
+  const presse = tirage === 'net' ? '' : `-${tirage}`
+  return `aplat-${motif.famille}-${motif.palette}-${motif.graine}-${largeur}x${hauteur}${version}${sansVoile}${presse}.${extension(format)}`
 }
 
 /**
@@ -151,6 +156,11 @@ export interface Travail {
    * l'export au même titre que la version.
    */
   ecran: Ecran
+  /**
+   * Le tirage : net, tramé, ou hors repère. Il traverse l'export au même titre
+   * que la version, et pour la même raison : il est brûlé dans le fichier.
+   */
+  tirage: Tirage
   format: Format
 }
 
@@ -162,7 +172,7 @@ export interface Travail {
  * c'est lui qui doit vérifier que le résultat tient sous le plafond.
  */
 export function encoderImage(travail: Travail): Promise<Blob> {
-  const { motif, largeur, hauteur, voile, sombre, ecran, format } = travail
+  const { motif, largeur, hauteur, voile, sombre, ecran, tirage, format } = travail
   return new Promise((resoudre, rejeter) => {
     if (format === 'webp' && !webpDisponible()) {
       rejeter(new ErreurExport('formatRefuse'))
@@ -175,7 +185,7 @@ export function encoderImage(travail: Travail): Promise<Blob> {
       canevas.height = hauteur
       const ctx = canevas.getContext('2d', { alpha: false })
       if (!ctx) throw new Error('pas de contexte 2d')
-      dessiner(ctx, largeur, hauteur, motif, { voile, sombre, ecran })
+      dessiner(ctx, largeur, hauteur, motif, { voile, sombre, ecran, tirage })
 
       if (canevasNoir(ctx, largeur, hauteur)) {
         relacher(canevas)
@@ -204,8 +214,8 @@ export function encoderImage(travail: Travail): Promise<Blob> {
  * pour que le fichier ait encore un sens.
  */
 export function encoderSVG(travail: Travail): Blob {
-  const { motif, largeur, hauteur, voile, sombre, ecran } = travail
-  const rendu = rendreSVG(motif, largeur, hauteur, voile, sombre, ecran)
+  const { motif, largeur, hauteur, voile, sombre, ecran, tirage } = travail
+  const rendu = rendreSVG(motif, largeur, hauteur, voile, sombre, ecran, tirage)
   if (!rendu.elements) throw new ErreurExport('generale')
   return new Blob([rendu.texte], { type: 'image/svg+xml;charset=utf-8' })
 }

@@ -52,6 +52,11 @@ est installable et pleinement utilisable hors ligne.
 - **Plusieurs sorties** : PNG, PNG 2x, WebP, SVG, copie dans le
   presse-papiers, et les trois appareils (téléphone, tablette, ordinateur)
   depuis la même graine.
+- **Trois tirages.** Le même dessin tiré net, tramé (l'encre mouchetée, le
+  papier grainé) ou décalé (la même couche imprimée une seconde fois à côté,
+  comme une presse mal calée). C'est une couche du fichier et non un filtre sur
+  l'aperçu, et son grain se mesure sur le motif et non sur l'écran : l'aperçu
+  montre la texture du fichier.
 - **Version claire et version sombre**, brûlées dans le fichier exporté, pas
   simulées.
 - **PWA installable**, pleinement fonctionnelle hors ligne, avec React et
@@ -103,6 +108,22 @@ sombre :
 |:---:|:---:|
 | <img src="docs/vitrine/version-claire.png" alt="Sommets, version claire" width="180"> | <img src="docs/vitrine/version-sombre.png" alt="Sommets, version sombre" width="180"> |
 
+Et chaque motif se **tire de trois façons**. Le net est ce que le moteur
+dessine. Le tramé mouchette l'encre d'un dixième de papier et graine toute la
+feuille. Le décalé fait cela et imprime la couche une seconde fois, un
+centième du petit côté plus bas et à gauche, dans l'encre de la palette la plus
+éloignée du fond : le liseré d'une affiche tirée en deux passages mal calés.
+Ici Blobs sur la palette Lime & crème :
+
+| Net, 126 Ko | Tramé, 213 Ko | Décalé, 221 Ko |
+|:---:|:---:|:---:|
+| <img src="docs/vitrine/tirage-net.png" alt="Blobs, tirage net" width="180"> | <img src="docs/vitrine/tirage-trame.png" alt="Blobs, tirage tramé" width="180"> | <img src="docs/vitrine/tirage-decale.png" alt="Blobs, tirage décalé" width="180"> |
+
+La texture est une couche du fichier et non un filtre sur l'aperçu, et son
+grain se mesure sur le motif et non sur l'écran : une cellule de bruit vaut un
+trois-centième du petit côté, si bien que l'aperçu montre la texture du fichier
+au lieu d'une texture quatre fois plus fine.
+
 ## Essayer
 
 ```bash
@@ -149,6 +170,7 @@ appliqué que s'il sert.
 | `v=0` | seulement si le voile de lisibilité a été retiré du fichier |
 | `n=1` | seulement si c'est la version sombre qui est exportée |
 | `e=1` | seulement si le fichier est composé pour l'écran de verrouillage, le tiers haut laissé à l'heure |
+| `i` | le tirage, `trame` ou `decale`, seulement s'il n'est pas net |
 | `k` | les teintes d'une palette personnelle, seulement si le motif en porte une |
 
 Copier le lien suffit à retrouver exactement la même image, sur n'importe

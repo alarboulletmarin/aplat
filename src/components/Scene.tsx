@@ -5,6 +5,7 @@ import {
   famille, palette, sansVoile,
   type Ecran, type Langue, type Mesure, type Motif,
 } from '../lib/moteur'
+import type { Tirage } from '../lib/presse'
 import {
   geometrieAppareil, hauteurScene, hauteurVignette, jetonsLibelle, paysageCourt,
 } from '../lib/geometrie'
@@ -47,6 +48,7 @@ export function Scene({
   voile,
   sombre,
   ecran,
+  tirage,
   langue,
   textes,
   calculEnCours,
@@ -68,6 +70,8 @@ export function Scene({
    * le verdict doit porter sur ce qu'on a sous les yeux.
    */
   ecran: Ecran
+  /** Le tirage brûlé dans le fichier. Même règle : l'aperçu le montre, ou il ment. */
+  tirage: Tirage
   langue: Langue
   textes: Textes
   calculEnCours: boolean
@@ -136,9 +140,15 @@ export function Scene({
   const nomDensite = [textes.reglages.calme, textes.reglages.moyen, textes.reglages.dense][
     motif.densite
   ]
-  /* Le texte alternatif dit la version parce que l'image en dépend vraiment :
-     ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne peut
-     pas le déduire des quatre réglages qu'il énumère. */
+  /* Le texte alternatif dit la version et le tirage parce que l'image en dépend
+     vraiment : ce n'est pas le même fichier, et quelqu'un qui ne voit pas
+     l'aperçu ne peut pas le déduire des quatre réglages qu'il énumère. */
+  const presse =
+    tirage === 'trame'
+      ? ` ${textes.scene.alternativeTrame}`
+      : tirage === 'decale'
+        ? ` ${textes.scene.alternativeDecale}`
+        : ''
   const description =
     vide || calculEnCours
       ? null
@@ -147,7 +157,7 @@ export function Scene({
           palette: palette(motif.palette)[langue],
           densite: nomDensite,
           graine: String(motif.graine),
-        })}${sombre ? ` ${textes.scene.alternativeSombre}` : ''}`
+        })}${sombre ? ` ${textes.scene.alternativeSombre}` : ''}${presse}`
 
   /* Le verdict porte sur le fichier tel qu'il sera, et il n'a qu'un chiffre à
      donner. Il en a annoncé deux un temps, celui du fichier et celui d'un fond
@@ -185,6 +195,7 @@ export function Scene({
               voile={voile}
               sombre={sombre}
               ecran={ecran}
+              tirage={tirage}
               largeur={Math.max(0, (geometrie?.largeur ?? 0) - 8)}
               hauteur={Math.max(0, (geometrie?.hauteur ?? 0) - 8)}
               description={description}

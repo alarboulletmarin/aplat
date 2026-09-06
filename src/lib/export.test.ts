@@ -31,6 +31,16 @@ describe('nom du fichier', () => {
       .toBe(nomFichier(motif, 1179, 2556))
   })
 
+  it('distingue les trois tirages, que la pellicule ne distinguerait pas non plus', () => {
+    const motif = { famille: 'vagues' as const, palette: 'lime' as const, densite: 1 as const, graine: 7314 }
+    expect(nomFichier(motif, 1179, 2556, { tirage: 'net' }))
+      .toBe(nomFichier(motif, 1179, 2556))
+    expect(nomFichier(motif, 1179, 2556, { tirage: 'trame' }))
+      .toBe('aplat-vagues-lime-7314-1179x2556-trame.png')
+    expect(nomFichier(motif, 1179, 2556, { tirage: 'decale', sombre: true, voile: false }))
+      .toBe('aplat-vagues-lime-7314-1179x2556-sombre-sansvoile-decale.png')
+  })
+
   it('ne contient rien qu’un système de fichiers refuserait', () => {
     const nom = nomFichier(
       { famille: 'decoupes', palette: 'ardoise', densite: 0, graine: 1 },

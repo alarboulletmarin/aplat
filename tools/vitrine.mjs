@@ -6,10 +6,11 @@
  * avec `node tools/vitrine.mjs` et qu'aucune ne peut promettre un rendu que
  * l'application ne donnerait pas.
  *
- * Trois séries, écrites dans `docs/vitrine/` :
+ * Quatre séries, écrites dans `docs/vitrine/` :
  * une galerie de familles, un thumbnail par groupe au moins ;
  * le même motif en PNG, WebP et SVG, pour montrer les formats d'export ;
- * le même motif en version claire et en version sombre.
+ * le même motif en version claire et en version sombre ;
+ * le même motif dans les trois tirages, net, tramé et décalé.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -42,10 +43,13 @@ const GALERIE = [
   { famille: 'constellations', palette: 'orage' },
 ]
 
-/* Les deux motifs mis en avant : l'un pour les formats, l'autre pour la
-   version claire et la version sombre. */
+/* Les trois motifs mis en avant : un pour les formats, un pour la version
+   claire et la version sombre, un pour les tirages. Celui du tirage est une
+   famille à grandes formes posées sur un fond nu : c'est là que le mouchetis,
+   le grain du papier et le liseré du hors repère se voient tous les trois. */
 const FORMATS = { famille: 'meandres', palette: 'nuit' }
 const VERSIONS = { famille: 'sommets', palette: 'soleil' }
+const TIRAGES = { famille: 'blobs', palette: 'lime' }
 
 function ecrire(nom, dataUri) {
   const fichier = path.join(OUT, nom)
@@ -62,14 +66,14 @@ function ecrire(nom, dataUri) {
   await page.goto(`http://127.0.0.1:${port}/app?l=fr`, { waitUntil: 'networkidle' })
   await poser(page)
 
-  const peindre = (motif, W, H, type, sombre = false) =>
-    page.evaluate(({ motif, W, H, type, sombre, graine }) => {
+  const peindre = (motif, W, H, type, sombre = false, tirage = 'net') =>
+    page.evaluate(({ motif, W, H, type, sombre, tirage, graine }) => {
       const c = document.createElement('canvas')
       c.width = W; c.height = H
       const g = c.getContext('2d', { alpha: false })
-      window.MOTEUR.dessiner(g, W, H, { densite: 1, graine, ...motif }, { sombre })
+      window.MOTEUR.dessiner(g, W, H, { densite: 1, graine, ...motif }, { sombre, tirage })
       return c.toDataURL(type)
-    }, { motif, W, H, type, sombre, graine: GRAINE })
+    }, { motif, W, H, type, sombre, tirage, graine: GRAINE })
 
   /* La galerie : 360 × 780, le rapport d'un téléphone. */
   for (const motif of GALERIE) {
@@ -93,6 +97,12 @@ function ecrire(nom, dataUri) {
      dans le fichier, comme au téléchargement. */
   ecrire('version-claire.png', await peindre(VERSIONS, 480, 1040))
   ecrire('version-sombre.png', await peindre(VERSIONS, 480, 1040, 'image/png', true))
+
+  /* Les trois tirages du même motif, à la même graine : la texture est dans
+     le fichier, et ces trois images sont exactement ce que l'export rend. */
+  for (const tirage of ['net', 'trame', 'decale']) {
+    ecrire(`tirage-${tirage}.png`, await peindre(TIRAGES, 480, 1040, 'image/png', false, tirage))
+  }
 
   await browser.close(); srv.close()
 })()

@@ -17,7 +17,10 @@
  * Deux choses ne passent pas, et le produit le dit plutôt que de faire semblant.
  *
  * *Le grain.* Il est peint avec un motif d'image de bruit ; un SVG ne le porte
- * pas. Le fichier vectoriel est donc légèrement plus lisse que le PNG.
+ * pas. Le fichier vectoriel est donc légèrement plus lisse que le PNG, et le
+ * mouchetis du tirage tramé, qui est du bruit lui aussi, en est absent pour la
+ * même raison. Le hors repère, lui, y est : c'est de la géométrie, une couche
+ * de formes de plus, et elle s'écrit comme les autres.
  *
  * *Les familles très peuplées.* Aucune ne l'est aujourd'hui : la plus dense du
  * catalogue, Mosaïque, compte moins de mille formes, et le nombre ne dépend pas
@@ -33,10 +36,11 @@
  * elle, et le fichier n'a pas de pile de groupes à relire.
  */
 import {
-  mesurer, MOT_PAR_DEFAUT, palette, peindreOmbre,
+  mesurer, MOT_PAR_DEFAUT, palette, peindreDessous, peindreOmbre,
   peindreFormes, peindreVoile,
   type Ecran, type Mesure, type Motif, type Pinceau,
 } from './moteur'
+import type { Tirage } from './presse'
 
 /**
  * Le plafond de formes au-delà duquel le vectoriel n'a plus de sens.
@@ -420,13 +424,22 @@ class Notaire implements Pinceau {
  */
 export function svgDuMotif(
   motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
-  ecran: Ecran = 'accueil',
+  ecran: Ecran = 'accueil', tirage: Tirage = 'net',
 ): RenduSVG {
   const P = palette(motif.palette)
   const notaire = new Notaire()
 
   notaire.fillStyle = P.fond
   notaire.fillRect(0, 0, largeur, hauteur)
+  /* La seconde couche du hors repère, sous les formes, comme sur le canevas.
+     Elle double le nombre d'éléments du fichier, et c'est le prix juste : elle
+     double aussi le nombre de formes imprimées. */
+  if (tirage === 'decale') {
+    peindreDessous(
+      notaire, largeur, hauteur, motif.famille, P, motif.densite, motif.graine,
+      motif.mot ?? MOT_PAR_DEFAUT, ecran,
+    )
+  }
   /* Le cadre et l'élagage de la place de l'heure, dans le même ordre que sur le
      canevas : un SVG qui les ignorerait ne serait pas le même fichier dans un
      autre format. */
@@ -451,7 +464,7 @@ export function svgDuMotif(
   if (voile || sombre) {
     const mesure: Mesure = mesurer(
       motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, sombre,
-      ecran, motif.mot ?? MOT_PAR_DEFAUT,
+      ecran, motif.mot ?? MOT_PAR_DEFAUT, tirage,
     )
     peindreOmbre(notaire, largeur, hauteur, mesure)
     if (voile) peindreVoile(notaire, largeur, hauteur, mesure)
@@ -459,7 +472,8 @@ export function svgDuMotif(
 
   const description =
     `Aplat, motif ${motif.famille}, palette ${motif.palette}, graine ${motif.graine}.` +
-    ' Sans grain : le grain du PNG est une trame d’image, elle n’a pas d’équivalent vectoriel.'
+    ' Sans grain : le grain du PNG est une trame d’image, elle n’a pas d’équivalent vectoriel.' +
+    (tirage === 'net' ? '' : ' Tirage ' + tirage + ', sans le mouchetis, qui est du bruit lui aussi.')
 
   const texte =
     '<?xml version="1.0" encoding="UTF-8"?>' +
@@ -484,14 +498,14 @@ let dernier: { cle: string; rendu: RenduSVG } | null = null
 
 export function rendreSVG(
   motif: Motif, largeur: number, hauteur: number, voile: boolean, sombre = false,
-  ecran: Ecran = 'accueil',
+  ecran: Ecran = 'accueil', tirage: Tirage = 'net',
 ): RenduSVG {
   const cle = [
     motif.famille, motif.palette, motif.densite, motif.graine, largeur, hauteur, voile, sombre,
-    ecran, motif.mot ?? MOT_PAR_DEFAUT,
+    ecran, motif.mot ?? MOT_PAR_DEFAUT, tirage,
   ].join('|')
   if (dernier && dernier.cle === cle) return dernier.rendu
-  const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre, ecran)
+  const rendu = svgDuMotif(motif, largeur, hauteur, voile, sombre, ecran, tirage)
   dernier = { cle, rendu }
   return rendu
 }

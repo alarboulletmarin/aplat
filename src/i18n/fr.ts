@@ -232,7 +232,7 @@ export const fr = {
         'La teinte d’une face dit son orientation, sous une lumière qui ne bouge jamais. Trois aplats bien choisis font un cube, sans un seul dégradé.',
       surimpressionsNom: 'La surimpression',
       surimpressionsNote:
-        'Deux encres tirées l’une sur l’autre, et une troisième couleur là où elles se croisent, calculée canal par canal. L’intersection est découpée avant d’être peinte : trois aplats opaques, aucun fondu.',
+        'Deux encres tirées l’une sur l’autre, et une troisième couleur là où elles se croisent, calculée canal par canal. L’intersection est découpée avant d’être peinte : trois aplats opaques, aucun fondu.',
       mesuresNom: 'La mesure',
       mesuresNote:
         'Le motif est un instrument\u00a0: tapis de coupe, papier millimétré, rapporteur, mire de réglage. Fait de graduations plutôt que de formes, et le seul geste qui écrive des nombres.',
@@ -316,6 +316,11 @@ export const fr = {
        ce n'est pas le même fichier, et quelqu'un qui ne voit pas l'aperçu ne
        peut pas le deviner du réglage. */
     alternativeSombre: 'Version sombre\u00a0: le motif est assombri dans le fichier.',
+    /* Le tirage aussi : la texture est dans le PNG, et elle ne se devine pas
+       plus que la version sombre quand on ne voit pas l'aperçu. */
+    alternativeTrame: 'Tirage tramé\u00a0: l’encre est mouchetée et le papier grainé.',
+    alternativeDecale:
+      'Tirage décalé\u00a0: l’encre est mouchetée, et la même couche est imprimée une seconde fois à côté.',
     videTitre: 'Indique une résolution',
     videCorps: 'Largeur et hauteur en pixels, ou reviens à la détection.',
   },
@@ -401,6 +406,20 @@ export const fr = {
       'Sur le verrouillage, le motif laisse le tiers haut à l’heure ; la lisibilité se mesure là, ou sous la grille d’icônes de l’accueil.',
     ecranTitreAccueil: 'Juger le motif derrière une grille d’icônes',
     ecranTitreVerrou: 'Juger le motif derrière l’heure de l’écran de verrouillage',
+    /* Le tirage, c'est-à-dire ce qui arrive à l'image entre le dessin et le
+       papier. Le mot est celui de l'imprimeur, et il dit exactement ce dont il
+       s'agit : on tire une image, on ne la filtre pas. « Texture » aurait
+       laissé croire à un habillage de l'aperçu, et « effet » à un filtre
+       posé après coup : c'est une couche de plus dans le fichier. */
+    tirage: 'Tirage',
+    tirageNet: 'Net',
+    tirageTrame: 'Tramé',
+    tirageDecale: 'Décalé',
+    tirageNote:
+      'Le tramé mouchette l’encre et graine le papier ; le décalé imprime en plus la même couche à côté, comme une presse mal calée. Les deux sont dans le fichier.',
+    tirageTitreNet: 'Des aplats francs, sans texture',
+    tirageTitreTrame: 'L’encre mouchetée et le papier grainé',
+    tirageTitreDecale: 'Le mouchetis, et la même couche imprimée à côté',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
      les onze livrées, parce que ce sont des palettes et non un autre réglage. */

@@ -4,6 +4,7 @@ import { useState, type ChangeEvent } from 'react'
 import { nombre } from '../lib/format'
 import type { Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
+import { TIRAGES, type Tirage } from '../lib/presse'
 import {
   chiffres, horsBornes, ORDINATEUR, TABLETTE, TELEPHONE, type Resolution,
 } from '../lib/resolution'
@@ -53,6 +54,24 @@ function prereglages(textes: Textes, detecte: Resolution): Prereglage[] {
   )
 }
 
+/**
+ * Les trois tirages, avec les mots du panneau.
+ *
+ * La table est recopiée de `Reglages.tsx` pour la raison qui a fait recopier
+ * les préréglages de taille juste au-dessus : un module de composant qui
+ * exporte autre chose perd le rafraîchissement à chaud. Les libellés, eux, ne
+ * sont pas recopiés, ils viennent du même dictionnaire des deux côtés, et la
+ * duplication ne porte que l'assemblage.
+ */
+function nomsDuTirage(textes: Textes): Record<Tirage, { nom: string; titre: string }> {
+  const T = textes.reglages
+  return {
+    net: { nom: T.tirageNet, titre: T.tirageTitreNet },
+    trame: { nom: T.tirageTrame, titre: T.tirageTitreTrame },
+    decale: { nom: T.tirageDecale, titre: T.tirageTitreDecale },
+  }
+}
+
 export function StudioExport({
   largeurSaisie,
   hauteurSaisie,
@@ -62,6 +81,7 @@ export function StudioExport({
   voile,
   voilePeint,
   sombre,
+  tirage,
   svgPossible,
   webpPossible,
   copiee,
@@ -76,6 +96,7 @@ export function StudioExport({
   onPreset,
   onVoile,
   onSombre,
+  onTirage,
 }: {
   largeurSaisie: string
   hauteurSaisie: string
@@ -85,6 +106,8 @@ export function StudioExport({
   voile: boolean
   voilePeint: boolean
   sombre: boolean
+  /** Le tirage brûlé dans le fichier : net, tramé, ou hors repère. */
+  tirage: Tirage
   svgPossible: boolean
   webpPossible: boolean
   copiee: boolean
@@ -100,10 +123,12 @@ export function StudioExport({
   onPreset: (largeur: number, hauteur: number) => void
   onVoile: () => void
   onSombre: (sombre: boolean) => void
+  onTirage: (tirage: Tirage) => void
 }) {
   const T = textes.studio
   const B = textes.barre
   const R = textes.resolution
+  const noms = nomsDuTirage(textes)
 
   const [edition, setEdition] = useState(false)
 
@@ -271,6 +296,26 @@ export function StudioExport({
           >
             {textes.reglages.versionSombre}
           </OptionRadio>
+        </GroupeRadio>
+      </div>
+
+      {/* Le tirage est ici pour la raison qui a mis la version ici : le studio
+          rassemble ce qui décide du fichier, et une surface qui en oublierait
+          une moitié obligerait à remonter le panneau au milieu du geste. */}
+      <div className="studio-groupe">
+        <span className="studio-libelle" id="studio-l-tirage">{textes.reglages.tirage}</span>
+        <GroupeRadio id="studio-tirage" etiquettes="studio-l-tirage" className="studio-formats">
+          {TIRAGES.map((choix) => (
+            <OptionRadio
+              key={choix}
+              choisi={choix === tirage}
+              onChoisir={() => onTirage(choix)}
+              className="opt studio-opt"
+              titre={noms[choix].titre}
+            >
+              {noms[choix].nom}
+            </OptionRadio>
+          ))}
         </GroupeRadio>
       </div>
 

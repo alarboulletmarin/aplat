@@ -26,6 +26,10 @@ import { CARACTERES } from './alphabet'
 import {
   BAS as BAS_DE_L_HEURE, cadreDuMotif, elaguer, HAUT as HAUT_DE_L_HEURE,
 } from './place'
+import {
+  decalageDuTirage, decaler, MOUCHETIS, peindreGrainDeTirage, peindreMouchetis,
+  type Tirage,
+} from './presse'
 import { estReseau, peindreReseau, type IdReseau } from './reseaux'
 import { estReserve, peindreReserve, type IdReserve } from './reserves'
 import { estTrame, peindreTrame, type IdTrame } from './trames'
@@ -502,6 +506,63 @@ export function luminance(r: number, v: number, b: number): number {
     return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
   }
   return 0.2126 * canal(r) + 0.7152 * canal(v) + 0.0722 * canal(b)
+}
+
+/** La luminance relative d'une couleur `#rrggbb`, noire si elle est illisible. */
+export function luminanceHex(hex: string): number {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return 0
+  return luminance(
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  )
+}
+
+/* ---------- l'encre de dessous ---------------------------------------------- */
+
+/**
+ * L'encre de la seconde couche, celle que le hors repère laisse voir.
+ *
+ * Une encre de la palette, jamais une couleur inventée : le produit promet
+ * qu'une palette dit toutes les couleurs du fichier, et un noir ajouté à
+ * l'impression aurait fait mentir les onze pastilles du panneau comme celles
+ * qu'on compose soi-même.
+ *
+ * Celle qui est la plus loin du fond en luminance, et c'est le point : le
+ * liseré ne se voit que contre le fond, puisque c'est là qu'il dépasse.
+ * Prendre la plus sombre aurait marché sur les huit palettes claires et
+ * disparu sur les trois autres, où le fond est déjà la couleur la plus sombre
+ * du lot ; la plus éloignée se voit sur les onze, et rend le liseré clair sur
+ * les palettes de nuit, ce qu'une presse fait aussi bien qu'un liseré sombre.
+ */
+export function encreDeDessous(P: Palette): string {
+  const fond = luminanceHex(P.fond)
+  let choisie = P.couleurs[0] ?? P.fond
+  let ecart = -1
+  for (const encre of P.couleurs) {
+    const distance = Math.abs(luminanceHex(encre) - fond)
+    if (distance > ecart) {
+      ecart = distance
+      choisie = encre
+    }
+  }
+  return choisie
+}
+
+/**
+ * La palette de la seconde couche : la même, toutes teintes ramenées à l'encre
+ * de dessous.
+ *
+ * Ramenée, et non réduite à une seule couleur : plusieurs familles lisent le
+ * nombre de teintes pour décider ce qu'elles dessinent, et l'une d'elles
+ * (les coulées) laisse même un ruban sans encre quand le tirage tombe au-delà
+ * de la liste. Une palette d'une seule couleur aurait donc donné une seconde
+ * couche qui n'est pas la silhouette de la première, ce qui est exactement ce
+ * qu'un hors repère ne doit pas être.
+ */
+export function plaqueDeDessous(P: Palette): Palette {
+  const encre = encreDeDessous(P)
+  return { ...P, couleurs: P.couleurs.map(() => encre) }
 }
 
 /* ---------- primitives de tracé -------------------------------------------- */
@@ -2239,12 +2300,12 @@ function canevasDeSonde(w: number, h: number): HTMLCanvasElement {
 export function mesurer(
   id: IdFamille, idPalette: IdPaletteQuelconque, densite: Densite, graine: number,
   largeur: number, hauteur: number, sombre = false, ecran: Ecran = 'accueil',
-  mot: string = MOT_PAR_DEFAUT,
+  mot: string = MOT_PAR_DEFAUT, tirage: Tirage = 'net',
 ): Mesure {
   const P = palette(idPalette)
   const rapport = largeur > 0 && hauteur > 0 ? largeur / hauteur : 0.5
   const cle = `${id}|${idPalette}|${densite}|${graine}|${Math.round(rapport * 1000)}`
-    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? mot : ''}`
+    + `|${sombre ? 's' : 'c'}|${ecran}|${estSurimpression(id) ? mot : ''}|${tirage}`
   const connue = memoire.get(cle)
   if (connue) return connue
 
@@ -2260,6 +2321,15 @@ export function mesurer(
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = P.fond
     ctx.fillRect(0, 0, PW, PH)
+    /* Le hors repère est peint, le mouchetis ne l'est pas, et la différence
+       n'est pas un oubli. Le premier est de la géométrie : il couvre du fond
+       d'une encre, il change donc la moyenne de la bande, et un verdict qui ne
+       l'aurait pas vu aurait porté sur une autre image que le fichier. Le
+       second est une texture : il troue l'encre d'un dixième de fond, sans
+       rien déplacer, et la correction juste tient en une ligne, plus bas. La
+       peindre ici n'aurait ajouté que du bruit à une sonde de trois mille
+       pixels. */
+    if (tirage === 'decale') peindreDessous(ctx, PW, PH, id, P, densite, graine, mot, ecran)
     peindreFormes(ctx, PW, PH, id, P, densite, graine, mot, ecran)
 
     try {
@@ -2276,6 +2346,13 @@ export function mesurer(
         n += 1
       }
       if (n) L = somme / n
+      /* Le mouchetis, exactement. Un pixel de la bande est soit une encre soit
+         le fond, jamais un mélange des deux, et la luminance relative est
+         linéaire dans l'espace où la sonde en fait la moyenne : troue un
+         dixième de l'image et sa moyenne se déplace d'un dixième vers le
+         fond. Le calcul est donc le même que celui d'une image peinte, sans le
+         bruit d'un tirage sur trois mille pixels. */
+      if (tirage !== 'net') L = L * (1 - MOUCHETIS) + luminanceHex(P.fond) * MOUCHETIS
     } catch {
       /* Canevas verrouillé : on garde la valeur neutre. */
     }
@@ -2346,6 +2423,32 @@ export function peindreFormes(
   formes(pinceau, W, hauteur, id, P.couleurs, densite,
     alea(graineDeDessin(id, densite, graine)), Math.min(W, hauteur), mot)
   pinceau.restore()
+}
+
+/**
+ * La seconde couche, hors repère : les mêmes formes, à côté, dans l'encre de
+ * dessous.
+ *
+ * Elle passe par `peindreFormes` et non par une copie du dessin : c'est le
+ * même tirage, la même graine et le même cadre, décalés. Une famille ajoutée
+ * demain a donc son hors repère le jour même, et une famille dont le dessin
+ * change ne peut pas voir sa seconde couche prendre du retard sur la première.
+ *
+ * Le décalage est posé deux fois, et les deux sont nécessaires : sur le
+ * contexte, pour tout ce qui se peint dans la transformation courante, et dans
+ * le pinceau, pour ce que l'élagueur du verrouillage repeint en coordonnées
+ * d'image après avoir remis la transformation à l'identité. `presse.ts` dit
+ * pourquoi de l'autre côté.
+ */
+export function peindreDessous(
+  ctx: Pinceau, W: number, H: number, id: IdFamille, P: Palette, densite: Densite,
+  graine: number, mot: string, ecran: Ecran,
+): void {
+  const { x, y } = decalageDuTirage(Math.min(W, H))
+  ctx.save()
+  ctx.translate(x, y)
+  peindreFormes(decaler(ctx, x, y), W, H, id, plaqueDeDessous(P), densite, graine, mot, ecran)
+  ctx.restore()
 }
 
 /* ---------- voile de lisibilité ---------------------------------------------- */
@@ -2496,6 +2599,16 @@ export interface OptionsRendu {
    * exactement le fichier qu'il rendait.
    */
   ecran?: Ecran
+  /**
+   * Le tirage : net, tramé, ou tramé et hors repère.
+   *
+   * Il est ici, avec le voile et la version, parce qu'il est de la même
+   * nature : il ne touche ni à la famille, ni à la palette, ni à la densité,
+   * ni à la graine, et il est brûlé dans le fichier. Net par défaut, comme
+   * depuis toujours : un lien écrit avant lui rend exactement le fichier qu'il
+   * rendait.
+   */
+  tirage?: Tirage
 }
 
 /**
@@ -2512,14 +2625,14 @@ export function dessiner(
 ): Mesure {
   const {
     voile = true, sombre = false, mesureW = 0, mesureH = 0, arret = 'grain',
-    ecran = 'accueil',
+    ecran = 'accueil', tirage = 'net',
   } = options
   const mesure = mesurer(
     motif.famille, motif.palette, motif.densite, motif.graine,
     mesureW > 0 ? mesureW : W, mesureH > 0 ? mesureH : H, sombre, ecran,
-    motif.mot ?? MOT_PAR_DEFAUT,
+    motif.mot ?? MOT_PAR_DEFAUT, tirage,
   )
-  rendre(ctx, W, H, motif, mesure, voile, arret)
+  rendre(ctx, W, H, motif, mesure, voile, arret, tirage)
   /* La mesure est celle de l'image entière, même quand le rendu s'arrête en
      chemin : elle ne dépend pas des couches peintes, et un arrêt qui la
      changerait ferait mentir le verdict affiché à côté de la démonstration. */
@@ -2544,9 +2657,10 @@ export function dessiner(
    plus tard prend sa place dans la démonstration sans que personne y pense. */
 function rendre(
   ctx: Ctx, W: number, H: number, motif: Motif, mesure: Mesure, voile: boolean,
-  arret: Couche,
+  arret: Couche, tirage: Tirage,
 ): void {
   const P = palette(motif.palette)
+  const unite = Math.min(W, H)
   /* Le rang de la dernière couche demandée. Les quatre conditions ci-dessous
      le comparent au leur, ce qui laisse l'ordre lisible d'un seul coup d'oeil
      plutôt qu'en quatre sorties anticipées. */
@@ -2560,13 +2674,28 @@ function rendre(
   ctx.fillRect(0, 0, W, H)
 
   if (rang >= 1) {
-    peindreFormes(ctx, W, H, motif.famille, P, motif.densite, motif.graine,
-      motif.mot ?? MOT_PAR_DEFAUT, mesure.ecran)
+    const mot = motif.mot ?? MOT_PAR_DEFAUT
+    /* Les trois gestes du tirage tiennent dans la couche des formes, et n'en
+       font pas de nouvelles : la seconde couche est la couche des formes,
+       imprimée deux fois, et le mouchetis est l'encre qui ne couvre pas. Les
+       poser dans `COUCHES` aurait ajouté deux marches vides à la démonstration
+       du mécanisme, qui montre le tirage net. */
+    if (tirage === 'decale') {
+      peindreDessous(ctx, W, H, motif.famille, P, motif.densite, motif.graine, mot, mesure.ecran)
+    }
+    peindreFormes(ctx, W, H, motif.famille, P, motif.densite, motif.graine, mot, mesure.ecran)
+    if (tirage !== 'net') peindreMouchetis(ctx, W, H, P.fond, unite)
   }
 
   if (rang >= 2) peindreOmbre(ctx, W, H, mesure)
   if (rang >= 3 && voile) peindreVoile(ctx, W, H, mesure)
-  if (rang >= 4) peindreGrain(ctx, W, H)
+  /* Deux grains, un par tirage, et le net garde le sien au pixel près : sa
+     tuile de huit pixels est ce qui casse les marches du voile depuis
+     toujours, et un lien écrit avant le tirage doit rendre le même fichier. */
+  if (rang >= 4) {
+    if (tirage === 'net') peindreGrain(ctx, W, H)
+    else peindreGrainDeTirage(ctx, W, H, unite)
+  }
   ctx.restore()
 }
 
