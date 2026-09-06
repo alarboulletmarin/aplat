@@ -167,6 +167,17 @@ describe('mot de l’affiche', () => {
     expect(lireUrl('?t=' + 'A'.repeat(200), DETECTE).mot.length).toBeLessThanOrEqual(24)
   })
 
+  it('ne porte pas le champ vidé, et le relit comme le mot par défaut', () => {
+    /* Le champ peut être vide le temps qu'on tape son mot : le défaut est
+       appliqué au dessin, pas à la saisie. L'adresse suit la même règle que le
+       voile et la version, celle de ne porter que ce qu'on a choisi, et un
+       `t=` vide dirait avoir choisi rien, ce qui n'existe pas : l'affiche
+       écrit toujours quelque chose. */
+    const vide = ecrireUrl({ ...REGLAGES_PAR_DEFAUT, mot: '' }, depuisSaisie('', ''), DETECTE)
+    expect(vide).not.toContain('t=')
+    expect(lireUrl(vide, DETECTE).mot).toBe(MOT_PAR_DEFAUT)
+  })
+
   it('fait l’aller-retour sans se déformer', () => {
     for (const mot of ['CIAO', 'OH MY GOODNESS', 'VOILÀ !', 'ÇA Y EST']) {
       const ecrit = ecrireUrl({ ...REGLAGES_PAR_DEFAUT, mot }, depuisSaisie('', ''), DETECTE)
