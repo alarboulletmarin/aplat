@@ -157,7 +157,7 @@ export const en: Textes = {
         'A scene described as a field of ink density, which a cross-hatched halftone screen turns into dots. Two tones only.',
       tramesNom: 'Warped screen',
       tramesNote:
-        'A regular screen folded by a smooth field, or two screens laid over each other whose interference is computed point by point, never through transparency.',
+        'A regular screen folded by a smooth field, two screens laid over each other whose interference is computed point by point, or a flowing sheet of colour printed as dots.',
       reseauxNom: 'Network',
       reseauxNote:
         'Nodes and edges, drawn to the conventions of a map: lines that turn at fixed angles, stations as dots, interchanges ringed.',

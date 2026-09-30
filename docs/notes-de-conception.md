@@ -926,7 +926,7 @@ npm run check    # build, puis les contrôles dans Chromium
 | `tools/soak.mjs` | endurance : 400 actions, dérive mémoire, nœuds, canevas et écouteurs |
 | `tools/export-audit.mjs` | poids et durée des PNG sur les 2 607 combinaisons |
 | `tools/perf.mjs` | coût de chaque action, processeur bridé six fois |
-| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 79 familles |
+| `tools/greyscale.mjs`, `tools/states.mjs`, `tools/planche.mjs` | captures en niveaux de gris, des cinq états, et des 80 familles |
 | `tools/cadrages.mjs`, `tools/wide.mjs` | ce qui tient au-dessus de la ligne de flottaison, et qui déborde à 320 px |
 | `tools/fidelity.mjs`, `tools/geo-diff.mjs`, `tools/pixel-diff.mjs` | maquette d'origine et portage, comparés de trois façons |
 

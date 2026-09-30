@@ -77,7 +77,7 @@ export interface Reglages {
   tirage: Tirage
   /**
    * Le mot que l'affiche écrit. Il ne concerne qu'une famille sur
-   * soixante-dix-neuf, et il est ici quand même : c'est un réglage du motif au
+   * quatre-vingts, et il est ici quand même : c'est un réglage du motif au
    * même titre que la densité, il change l'image, donc un lien qui ne le
    * porterait pas ouvrirait une autre affiche chez le destinataire.
    *

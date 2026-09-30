@@ -129,7 +129,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     'place de l\'heure : et l\'écran d\'accueil, lui, avait bien besoin de son voile',
     corriges.length + ' palettes sur ' + palettes.length);
 
-  // La garantie que le rendu doit à l'heure : sur les soixante-dix-neuf
+  // La garantie que le rendu doit à l'heure : sur les quatre-vingts
   // familles et les trois densités, la bande des chiffres est d'un seul ton,
   // celui du sol du motif. Une forme qui remonterait dedans, par débordement
   // ou par une coupe manquée, se verrait ici et nulle part ailleurs : la sonde fait une moyenne, et une moyenne pardonne.

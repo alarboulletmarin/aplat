@@ -9,6 +9,16 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : l'aurore
+
+- **Une nappe de couleur qui coule, tramée en points.** Une famille de plus
+  chez les matières, **Aurore** : un champ lisse fait serpenter les couleurs de
+  la palette et dit combien de papier elles couvrent, là où les points se
+  touchent, maigrissent, puis laissent le fond. Aucun dégradé : entre deux
+  couleurs voisines, chaque point choisit l'une ou l'autre par un seuil de
+  Bayer, si bien que le fichier, SVG compris, ne contient que des couleurs de
+  la palette.
+
 ### Ajouté : le tirage
 
 - **Le même dessin, sorti de presse.** Une puce **Tirage**, sous la version,

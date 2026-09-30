@@ -8,7 +8,7 @@
  * base d'une famille pour la monter jusqu'en haut.
  *
  * Ce qu'ils ne couvrent pas : les pixels. Que la bande des chiffres soit d'un
- * seul ton sur les soixante-dix-neuf familles se vérifie sur un canevas, donc
+ * seul ton sur les quatre-vingts familles se vérifie sur un canevas, donc
  * dans un navigateur ; c'est `tools/e2e.mjs`, section 4 bis.
  */
 import { describe, expect, it } from 'vitest'
