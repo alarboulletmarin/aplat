@@ -162,7 +162,7 @@ export const fr = {
       sixNote:
         'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
     },
-    /* Étape 01. Les huit groupes plutôt que les soixante-dix-neuf familles : une
+    /* Étape 01. Les huit groupes plutôt que les quatre-vingts familles : une
        liste complète referait le panneau de l'application dans un autre
        document, et « une autre famille » donne accès au reste sans ça. */
     reglages: {
@@ -214,7 +214,7 @@ export const fr = {
         'Une scène décrite par un champ de densité d’encre, qu’une trame de demi-teintes à hachures croisées transforme en points. Deux tons seulement.',
       tramesNom: 'La trame déformée',
       tramesNote:
-        'Une trame régulière pliée par un champ lisse, ou deux trames superposées dont l’interférence est calculée point par point, jamais par transparence.',
+        'Une trame régulière pliée par un champ lisse, deux trames superposées dont l’interférence est calculée point par point, ou une nappe de couleur qui coule, tramée en points.',
       reseauxNom: 'Le réseau',
       reseauxNote:
         'Des noeuds et des arêtes, tracés aux conventions du plan\u00a0: des lignes qui tournent à angle fixe, des stations en points, des correspondances cerclées.',
