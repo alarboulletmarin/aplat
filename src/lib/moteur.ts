@@ -2171,17 +2171,30 @@ function tuileDeGrain(): HTMLCanvasElement {
     const image = ctx.createImageData(TUILE_GRAIN, TUILE_GRAIN)
     const d = image.data
     const rnd = alea(0x41504c41)
-    for (let i = 0; i < d.length; i += 4) {
-      const k = Math.floor(rnd() * 3)
-      if (k === 0) {
-        d[i] = 255
-        d[i + 1] = 255
-        d[i + 2] = 255
-        d[i + 3] = ALPHA_GRAIN
-      } else if (k === 1) {
-        d[i + 3] = ALPHA_GRAIN
-      } else {
-        d[i + 3] = 0
+    /* Une ligne de base à somme nulle (2 blancs, 2 noirs, le reste vide), puis
+       chaque ligne de la tuile en est un décalage, les décalages couvrant une
+       fois chacun : toute ligne et toute colonne a alors la même somme, nulle.
+       Un tirage libre laissait des lignes à -5 ou +4 grains sur 8, et la tuile
+       se répétant tous les 8 px, cela se lisait comme des filets horizontaux. */
+    const melange = (a: number[]) => {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1))
+        ;[a[i], a[j]] = [a[j], a[i]]
+      }
+      return a
+    }
+    const base = melange([1, 1, -1, -1, 0, 0, 0, 0])
+    const decalages = melange([0, 1, 2, 3, 4, 5, 6, 7])
+    for (let y = 0; y < TUILE_GRAIN; y++) {
+      for (let x = 0; x < TUILE_GRAIN; x++) {
+        const k = base[(x + decalages[y]) % TUILE_GRAIN]
+        const i = (y * TUILE_GRAIN + x) * 4
+        if (k !== 0) {
+          d[i] = k > 0 ? 255 : 0
+          d[i + 1] = d[i]
+          d[i + 2] = d[i]
+          d[i + 3] = ALPHA_GRAIN
+        }
       }
     }
     ctx.putImageData(image, 0, 0)
