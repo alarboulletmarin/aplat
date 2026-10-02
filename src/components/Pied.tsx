@@ -112,6 +112,10 @@ export function Pied({
         <Soutien textes={textes} />
       </div>
 
+      {/* Ce que l'appareil garde, dit une fois, ici. Il vivait au bas du
+          panneau de réglages, dix lignes de prose au milieu de ce qui agit
+          sur l'image. C'est une mention : sa place est avec les autres. */}
+      <p className="pied-mentions pied-confidentialite">{textes.pied.confidentialite}</p>
       <p className="pied-mentions">
         {textes.pied.donnees} {textes.pied.hebergement}
       </p>

@@ -112,8 +112,8 @@ describe('promesses de l’interface', () => {
     /* Le Service Worker met bien quelque chose en cache : les fichiers de
        l'application. La phrase de confidentialité doit le dire, sinon elle
        promet plus que le produit ne tient. */
-    expect(fr.partage.confidentialite).toMatch(/fichiers de l’application/)
-    expect(en.partage.confidentialite).toMatch(/application’s own files/)
+    expect(fr.pied.confidentialite).toMatch(/fichiers de l’application/)
+    expect(en.pied.confidentialite).toMatch(/application’s own files/)
   })
 
   /* Le défaut que ce test tient fermé : la phrase disait « aucune donnée
@@ -121,8 +121,8 @@ describe('promesses de l’interface', () => {
      la fonctionnalité qui la contredit est pire que pas de promesse. */
   it('nomme ce que l’historique garde, plutôt que de promettre le vide', () => {
     for (const [langue, phrase] of [
-      ['fr', fr.partage.confidentialite],
-      ['en', en.partage.confidentialite],
+      ['fr', fr.pied.confidentialite],
+      ['en', en.pied.confidentialite],
     ] as const) {
       expect(phrase, langue).not.toMatch(/aucune donnée enregistrée|nothing stored/)
       expect(phrase, langue).toMatch(/dix derniers motifs|last ten patterns/)

@@ -82,7 +82,7 @@ const STRETCH = `(() => {
             out.hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
 
             // texte coupé : scrollWidth > clientWidth sans ellipsis prévue
-            for (const n of document.querySelectorAll('button, .carte-h, .grp, .verdict-t, .verdict-d, .res-val, .res-appareil, .partage-n, .note-t, .note-m, .note-h, .prefs h2, .accroche')) {
+            for (const n of document.querySelectorAll('button, .carte-h, .grp, .verdict-t, .verdict-d, .res-val, .res-appareil, .partage-n, .note-t, .note-m, .note-h, .prefs h2')) {
               const cs = getComputedStyle(n);
               if (n.offsetParent === null) continue;
               const okX = cs.textOverflow === 'ellipsis' || cs.overflowX !== 'visible';

@@ -59,7 +59,7 @@ const KEYS = ['m', 'p', 'd', 's', 'l', 'r', 't', 'v', 'n', 'k'];
           fam: !!document.querySelector('[data-famille][aria-checked="true"]') || true,
           injecte: !!window.x,
           boutons: document.querySelectorAll('.opt').length,
-          res: document.getElementById('res-valeur').textContent
+          res: document.getElementById('entete-res').textContent
         }));
       } catch (e) { problems.push(`${q} : ${e.message}`); continue; }
       if (!ok.peint) problems.push(`${q} : rien n'est peint`);

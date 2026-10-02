@@ -187,7 +187,9 @@ export function Scene({
         ref={boite}
         style={{ height: `${hauteurRendue}px` }}
       >
-        <div className="appareil" id="appareil" style={style}>
+        {/* `data-type` dit quel appareil la maquette représente : c'est la seule
+            trace, hors de l'image, de la classe que la résolution a donnée. */}
+        <div className="appareil" id="appareil" data-type={type} style={style}>
           {!vide && (
             <Apercu
               motif={motif}

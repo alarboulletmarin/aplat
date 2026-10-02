@@ -32,10 +32,16 @@ const BUDGET_MAX = 400;
     const out = {};
     const peinture = () => new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
 
-    const el = document.getElementById('res-select');
+    /* La saisie de la taille vit dans la feuille d'export : on l'ouvre par la
+       puce de synthèse, comme la personne, puis on la referme avant les autres
+       scénarios, qui mesurent la page et non la feuille. */
+    const puce = document.getElementById('synthese-sortie');
+    puce.click();
+    await new Promise(res => setTimeout(res, 300));
+    const el = document.getElementById('studio-select');
     el.value = 'surMesure'; el.dispatchEvent(new Event('change', { bubbles: true }));
     await new Promise(res => setTimeout(res, 200));
-    const inW = document.getElementById('res-largeur');
+    const inW = document.getElementById('studio-largeur');
 
     async function mesurer(label, fn, n) {
       const durees = [];
@@ -53,6 +59,18 @@ const BUDGET_MAX = 400;
       inW.value = String(1170 + i);
       inW.dispatchEvent(new Event('input', { bubbles: true }));
     }, 12);
+
+    puce.click();
+    await new Promise(res => setTimeout(res, 300));
+    /* En bas de page, comme l'était la personne qui venait de régler la
+       taille. Les scénarios ci-dessous ont toujours été mesurés vignettes hors
+       champ : la carte de résolution était au bas du panneau, et son focus y
+       emmenait la page. Sans ce défilement explicite, la même mesure faite
+       vignettes à l'écran donne environ 300 ms pour une palette ou une graine,
+       sur l'ancien panneau comme sur le nouveau : c'est le coût du
+       redessin des vignettes, pas celui du parcours. */
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await new Promise(res => setTimeout(res, 600));
 
     const pals = [...document.querySelectorAll('[data-palette]')];
     await mesurer('changement de palette', i => pals[i % pals.length].click(), 8);

@@ -229,8 +229,6 @@ export const en: Textes = {
     evitement: 'Skip to settings',
     titre: 'Aplat',
     accueil: 'Back to the overview',
-    accroche:
-      'Generative wallpapers, computed inside your browser. Phone, tablet, computer.',
     mention: 'No account, no network.',
   },
   scene: {
@@ -306,6 +304,7 @@ export const en: Textes = {
     tirageTitreNet: 'Plain flat tints, no texture',
     tirageTitreTrame: 'Speckled ink on grained paper',
     tirageTitreDecale: 'The speckle, and the same layer printed beside itself',
+    finition: 'Finish',
   },
   palettes: {
     miennes: 'My palettes',
@@ -368,8 +367,6 @@ export const en: Textes = {
     echec: 'Copying failed. The link is below, ready to copy by hand.',
     note: 'The link carries the settings, nothing else.',
     graine: 'Seed',
-    confidentialite:
-      'No account, no network. The last ten patterns are kept on this device, in the browser: four settings each, no image and no identifier, clearable with one button. The palettes you build are kept the same way, a name and colours, deletable one by one. Nothing else is stored; offline, the browser only keeps the application’s own files.',
   },
   preferences: {
     langue: 'Language',
@@ -388,7 +385,9 @@ export const en: Textes = {
     enregistre: 'Image saved',
     ko: 'kB',
     mo: 'MB',
-    astuce: 'On a phone: open the downloaded file, then “Save Image”.',
+    astuceIos: 'Open the image in Photos, tap Share, then “Use as Wallpaper”.',
+    astuceAndroid: 'Open the image in Photos or Gallery, then choose “Set as wallpaper” in the menu.',
+    astuceAutre: 'Then right-click the file and choose “Set as wallpaper”; the wording varies by system.',
     photos: 'Save to Photos',
     fermer: 'Close',
     erreurTitre: 'Rendering failed',
@@ -448,6 +447,8 @@ export const en: Textes = {
       'No account, no analytics: everything is computed in your browser and never leaves it.',
     hebergement:
       'Hosted by Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA, whose servers keep the usual technical logs, IP addresses included.',
+    confidentialite:
+      'No account, no network. The last ten patterns are kept on this device, in the browser: four settings each, no image and no identifier, clearable with one button. The palettes you build are kept the same way, a name and colours, deletable one by one. Nothing else is stored; offline, the browser only keeps the application’s own files.',
   },
   maquette: {
     recherche: 'Search',

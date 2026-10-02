@@ -24,8 +24,11 @@ import { Lien } from './Lien'
  * taille de l'enseigne de la présentation, et c'est la même déclaration : la
  * marque ne doit pas changer de taille quand on passe d'un document à l'autre.
  *
- * L'accroche et la mention sont rendues hors de la bande collante : elles se
- * lisent une fois, au départ, et n'ont rien à faire dans ce qui reste épinglé.
+ * Il n'y a plus d'accroche sous la bande : la personne qui ouvre l'outil a
+ * déjà choisi d'y venir, la présentation lui a dit ce qu'il fait, et la
+ * promesse (sans compte, sans réseau) vit dans le pied de page. Sur un
+ * téléphone, ces deux lignes coûtaient environ cent vingt pixels, pris avant
+ * le premier choix possible.
  */
 export function Entete({
   cadre,
@@ -41,31 +44,25 @@ export function Entete({
   resolution: string
 }) {
   return (
-    <>
-      <header className="entete" ref={cadre as React.RefObject<HTMLElement>}>
-        <div className="entete-haut">
-          {/* Le mot du titre nomme déjà le lien ; la mention cachée dit où il
-              mène, parce que « Aplat » tout seul ne l'annonce pas. */}
-          <Lien className="entete-marque" vers={accueil}>
-            <span className="marque" aria-hidden="true">
-              <i />
-              <b />
-            </span>
-            <h1 className="titre">{textes.entete.titre}</h1>
-            <span className="vh">{textes.entete.accueil}</span>
-          </Lien>
-          <p className="entete-res" id="entete-res">
-            {resolution}
-          </p>
-        </div>
-        {/* La même frise d'arches que la présentation : la marque ne change
-            pas de silhouette quand on passe d'un document à l'autre. */}
-        <Frise decalage={3} />
-      </header>
-      <div className="entete-pied">
-        <p className="accroche">{textes.entete.accroche}</p>
-        <p className="entete-mention">{textes.entete.mention}</p>
+    <header className="entete" ref={cadre as React.RefObject<HTMLElement>}>
+      <div className="entete-haut">
+        {/* Le mot du titre nomme déjà le lien ; la mention cachée dit où il
+            mène, parce que « Aplat » tout seul ne l'annonce pas. */}
+        <Lien className="entete-marque" vers={accueil}>
+          <span className="marque" aria-hidden="true">
+            <i />
+            <b />
+          </span>
+          <h1 className="titre">{textes.entete.titre}</h1>
+          <span className="vh">{textes.entete.accueil}</span>
+        </Lien>
+        <p className="entete-res" id="entete-res">
+          {resolution}
+        </p>
       </div>
-    </>
+      {/* La même frise d'arches que la présentation : la marque ne change
+          pas de silhouette quand on passe d'un document à l'autre. */}
+      <Frise decalage={3} />
+    </header>
   )
 }

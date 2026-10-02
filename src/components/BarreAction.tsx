@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { decimal, nombre, poids } from '../lib/format'
 import type { EchecExport, Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
 import type { Resolution } from '../lib/resolution'
+import { plateforme } from '../lib/plateforme'
 import { remplir, type Textes } from '../i18n'
 import { FeuilleModale } from './FeuilleModale'
 
@@ -35,8 +36,11 @@ export interface Fichier {
  * voir : « Variante » redessine le même motif avec une autre graine,
  * « Surprends-moi » tire aussi une famille et une palette. Les séparer, l'un
  * dans la barre et l'autre à mille pixels plus bas dans le panneau, revenait à
- * cacher la moitié du geste. Sous 420 px, les deux perdent leur mot et gardent
- * leur pictogramme : le libellé reste dans leur nom accessible, la place revient
+ * cacher la moitié du geste. Sous 600 px, « Variante » perd son mot et garde son
+ * pictogramme : le libellé reste dans son nom accessible. « Surprends-moi »
+ * garde le sien jusqu'à 360 px, parce que c'est le geste d'exploration du
+ * produit et qu'un pictogramme seul ne dit pas ce qu'il tire : le dé est le
+ * hasard entier, l'étincelle un autre éclat du même motif. La place revient
  * à « Télécharger », qui ne s'élide ni ne se coupe jamais.
  *
  * Tout le reste de l'export tient dans le studio (`StudioExport`), une feuille
@@ -142,6 +146,9 @@ export function BarreAction({
     if (!abandonne && descente > SEUIL_GLISSE) onFermerNote()
   }
 
+  const [systeme] = useState(plateforme)
+  const astuce = { ios: T.astuceIos, android: T.astuceAndroid, autre: T.astuceAutre }[systeme]
+
   const message =
     echec === 'trop'
       ? remplir(T.erreurTrop, {
@@ -208,7 +215,7 @@ export function BarreAction({
                   partage native prend le fichier, l'astuce en prose devient
                   un bouton qui fait la chose au lieu de la décrire ; sinon
                   la phrase reste, et décrit le chemin réel. */}
-              {fichier.photos ? (
+              {fichier.photos && (
                 <button
                   type="button"
                   id="note-photos"
@@ -217,9 +224,11 @@ export function BarreAction({
                 >
                   {T.photos}
                 </button>
-              ) : (
-                <p className="note-h">{T.astuce}</p>
               )}
+              {/* Le bouton fait le premier pas ; la phrase dit le second, celui
+                  qui change vraiment le fond d'écran. Un SVG n'est pas un fond
+                  d'écran, la phrase se tait alors. */}
+              {fichier.format !== 'svg' && <p className="note-h">{astuce}</p>}
             </div>
             <button
               type="button"
@@ -268,12 +277,15 @@ export function BarreAction({
         <button
           type="button"
           id="btn-surprise"
-          className="btn-graine btn-compact"
+          className="btn-graine btn-compact btn-mot"
           aria-keyshortcuts="s"
           title={T.surpriseTitre}
           onClick={onSurprise}
         >
-          <span className="ico-etincelle" aria-hidden="true" />
+          <span className="ico-encore" aria-hidden="true">
+            <i />
+            <b />
+          </span>
           <span className="btn-t">{T.surprise}</span>
         </button>
         <button
@@ -284,10 +296,7 @@ export function BarreAction({
           title={T.nouveauTitre}
           onClick={onGraine}
         >
-          <span className="ico-encore" aria-hidden="true">
-            <i />
-            <b />
-          </span>
+          <span className="ico-etincelle" aria-hidden="true" />
           <span className="btn-t">{T.nouveau}</span>
         </button>
         {/* Pendant le rendu, `disabled` retirerait le focus du bouton et le
