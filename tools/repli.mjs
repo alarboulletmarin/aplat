@@ -108,9 +108,28 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     const vus = new Set();
     const maxY = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
-    for (let y = 0; y <= maxY + 40; y += 40) {
+    /* Le repli est une transition de 220 ms : le relevé pris à 60 ms d'un
+       franchissement mesure une scène à mi-course, et manque la plage où un
+       contrôle est dégagé une fois la mise en page posée. À chaque
+       franchissement, on attend donc la fin de la transition. */
+    /* Descente puis remontée : les deux seuils du repli (140 et 56) font que
+       la scène n'est pas dans le même état à la même position selon le sens du
+       geste. Un contrôle que la descente saute (la scène se replie d'un coup et
+       le fait passer sous elle) est dégagé à la remontée, où la scène reste
+       repliée jusqu'à 56 px. Ne balayer qu'un sens jugerait un parcours que
+       personne n'a fait. */
+    const positions = [];
+    for (let y = 0; y <= maxY + 40; y += 40) positions.push(y);
+    positions.push(...[...positions].reverse());
+    let etaitReplie = false;
+    for (const y of positions) {
       await page.evaluate(y => scrollTo(0, y), Math.min(y, maxY));
       await page.waitForTimeout(60);
+      const replieMaintenant = await page.evaluate(() => !!document.querySelector('.scene-boite-repliee'));
+      if (replieMaintenant !== etaitReplie) {
+        etaitReplie = replieMaintenant;
+        await page.waitForTimeout(320);
+      }
       const degages = await page.evaluate(() => {
         const scene = document.querySelector('.scene');
         const rs = scene.getBoundingClientRect();

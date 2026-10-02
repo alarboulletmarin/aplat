@@ -35,10 +35,10 @@ import { Scene } from './components/Scene'
 import {
   ChoixDensite, ChoixEcran, ChoixFamille, ChoixMot, ChoixPalette, ChoixTirage, ChoixVersion,
 } from './components/Reglages'
+import { Finition } from './components/Finition'
 import { estSurimpression } from './lib/surimpression'
 import type { Tirage } from './lib/presse'
 import { Historique } from './components/Historique'
-import { ChoixResolution } from './components/ChoixResolution'
 import { Partage } from './components/Partage'
 import { BarreAction, type Echec, type Fichier, type Phase } from './components/BarreAction'
 import { StudioExport } from './components/StudioExport'
@@ -53,7 +53,6 @@ interface Ephemere {
   echecCopie: boolean
   copieImage: boolean
   formats: boolean
-  edition: boolean
 }
 
 const EPHEMERE_INITIAL: Ephemere = {
@@ -64,7 +63,6 @@ const EPHEMERE_INITIAL: Ephemere = {
   echecCopie: false,
   copieImage: false,
   formats: false,
-  edition: false,
 }
 
 /**
@@ -184,6 +182,13 @@ export function App() {
     () => trouverFamille(reglages.famille)?.groupe ?? 'abs',
   )
 
+  /* La finition s'ouvre d'elle-même quand le motif sort des valeurs d'origine :
+     un lien qui porte une version sombre ne doit pas la cacher. Ensuite elle
+     ne bouge que sous le doigt. */
+  const [finition, setFinition] = useState(
+    () => reglages.sombre || reglages.tirage !== 'net' || reglages.ecran !== 'accueil',
+  )
+
   const motif: Motif = useMemo(
     () => ({
       famille: reglages.famille,
@@ -208,8 +213,21 @@ export function App() {
       reglages.tirage],
   )
 
+  const nomTirage = {
+    net: T.reglages.tirageNet,
+    trame: T.reglages.tirageTrame,
+    decale: T.reglages.tirageDecale,
+  }[reglages.tirage]
+  const resumeFinition = [
+    reglages.sombre ? T.reglages.versionSombre : T.reglages.versionClaire,
+    nomTirage,
+    ...(type === 'ordinateur'
+      ? []
+      : [reglages.ecran === 'verrou' ? T.reglages.ecranVerrou : T.reglages.ecranAccueil]),
+  ].join(', ')
+
   /** Un réglage touché efface le résultat précédent, mais jamais un export en cours. */
-  const changer = useCallback((patch: Partial<Reglages>, edition?: boolean) => {
+  const changer = useCallback((patch: Partial<Reglages>) => {
     setReglages((precedent) => ({ ...precedent, ...patch }))
     setEphemere((precedent) => ({
       ...precedent,
@@ -218,7 +236,6 @@ export function App() {
       copie: false,
       echecCopie: false,
       copieImage: false,
-      ...(edition === undefined ? {} : { edition }),
     }))
   }, [])
 
@@ -234,8 +251,21 @@ export function App() {
      compte ne peut pas voir sa note emportée par la minuterie du précédent. */
   useEffect(() => {
     if (ephemere.phase !== 'faite') return
-    const minuterie = setTimeout(fermerNote, NOTE_VISIBLE_MS)
-    return () => clearTimeout(minuterie)
+    /* Le compte ne tourne que page visible. La carte porte maintenant le
+       chemin vers le fond d'écran, et la personne qui le suit quitte l'onglet
+       pour la galerie : revenue douze secondes plus tard, elle ne retrouverait
+       ni la carte ni la consigne. */
+    let minuterie: ReturnType<typeof setTimeout> | undefined
+    const armer = () => {
+      clearTimeout(minuterie)
+      if (!document.hidden) minuterie = setTimeout(fermerNote, NOTE_VISIBLE_MS)
+    }
+    armer()
+    document.addEventListener('visibilitychange', armer)
+    return () => {
+      clearTimeout(minuterie)
+      document.removeEventListener('visibilitychange', armer)
+    }
   }, [ephemere.phase, fermerNote])
 
   /* La mémoire de motifs. Elle n'entre pas dans `Reglages` : ce qui est dans
@@ -395,7 +425,9 @@ export function App() {
   const exporter = (format: Format) => {
     if (exportEnCours.current) return
     if (vide) {
-      setEphemere((precedent) => ({ ...precedent, edition: true }))
+      /* Sans résolution, il n'y a rien à produire : la feuille s'ouvre sur le
+         champ qui manque. */
+      setEphemere((precedent) => ({ ...precedent, formats: true }))
       return
     }
     const echelle = facteur(format)
@@ -462,7 +494,7 @@ export function App() {
   const exporterTrois = () => {
     if (exportEnCours.current) return
     if (vide) {
-      setEphemere((precedent) => ({ ...precedent, edition: true }))
+      setEphemere((precedent) => ({ ...precedent, formats: true }))
       return
     }
     const courant = motif
@@ -621,7 +653,6 @@ export function App() {
         voile={reglages.voile}
         voilePeint={Boolean(mesure && mesure.voile > 0.02)}
         sombre={reglages.sombre}
-        tirage={reglages.tirage}
         svgPossible={svgPossible}
         webpPossible={webpPossible}
         copiee={ephemere.copieImage}
@@ -643,12 +674,19 @@ export function App() {
         }}
         onSaisir={(largeurSaisie, hauteurSaisie) => changer({ largeurSaisie, hauteurSaisie })}
         onPreset={(largeur, hauteur) =>
-          changer({ largeurSaisie: String(largeur), hauteurSaisie: String(hauteur) }, false)
+          changer({ largeurSaisie: String(largeur), hauteurSaisie: String(hauteur) })
         }
         onVoile={() => changer({ voile: !reglages.voile })}
-        onSombre={(sombre) => changer({ sombre })}
-        onTirage={(tirage) => changer({ tirage })}
-      />
+      >
+        <Partage
+          lien={lien}
+          copie={ephemere.copie}
+          echecCopie={ephemere.echecCopie}
+          graine={reglages.graine}
+          textes={T}
+          onCopier={copier}
+        />
+      </StudioExport>
   )
 
   return (
@@ -725,22 +763,6 @@ export function App() {
               textes={T}
               onChoisir={(densite: Densite) => changer({ densite })}
             />
-            {/* La version vient après la densité et avant l'historique : c'est
-                le dernier réglage qui décide de l'image, et le premier qu'on
-                revoit une fois le motif trouvé. */}
-            <ChoixVersion
-              valeur={reglages.sombre}
-              textes={T}
-              onChoisir={(sombre: boolean) => changer({ sombre })}
-            />
-            {/* Le tirage suit la version, et pour la même raison qu'elle suit
-                la densité : c'est une couche brûlée dans le fichier, pas un
-                réglage du dessin, et on y revient une fois le motif trouvé. */}
-            <ChoixTirage
-              valeur={reglages.tirage}
-              textes={T}
-              onChoisir={(tirage: Tirage) => changer({ tirage })}
-            />
             {/* Le mot ne paraît que pour l'affiche : c'est la seule famille qui
                 écrive, et un champ qui ne changerait rien à ce qu'on voit
                 serait un mensonge poli. Le réglage, lui, reste dans l'adresse :
@@ -752,18 +774,40 @@ export function App() {
                 onChoisir={(mot: string) => changer({ mot })}
               />
             )}
-            {/* L'écran ne paraît que sur un téléphone ou une tablette : la
-                maquette d'ordinateur n'a pas de verrouillage à montrer, et une
-                puce qui ne changerait rien à ce qu'on voit serait un mensonge
-                poli. Le réglage, lui, reste dans l'adresse : revenir sur un
-                téléphone avec le même lien retrouve l'écran choisi. */}
-            {type !== 'ordinateur' && (
-              <ChoixEcran
-                valeur={reglages.ecran}
+            {/* Le reste de ce qui décide du fichier, sous une seule ligne. La
+                version, le tirage et l'écran changent l'aperçu, et c'est pour
+                cela qu'ils sont ici et non dans la feuille d'export, qui le
+                recouvre. La résolution et le lien, eux, n'y changent rien :
+                ils sont dans la feuille. */}
+            <Finition
+              ouverte={finition}
+              resume={resumeFinition}
+              textes={T}
+              onBascule={() => setFinition((precedent) => !precedent)}
+            >
+              <ChoixVersion
+                valeur={reglages.sombre}
                 textes={T}
-                onChoisir={(ecran: Ecran) => changer({ ecran })}
+                onChoisir={(sombre: boolean) => changer({ sombre })}
               />
-            )}
+              <ChoixTirage
+                valeur={reglages.tirage}
+                textes={T}
+                onChoisir={(tirage: Tirage) => changer({ tirage })}
+              />
+              {/* L'écran ne paraît que sur un téléphone ou une tablette : la
+                  maquette d'ordinateur n'a pas de verrouillage à montrer, et
+                  une puce qui ne changerait rien à ce qu'on voit serait un
+                  mensonge poli. Le réglage, lui, reste dans l'adresse : revenir
+                  sur un téléphone avec le même lien retrouve l'écran choisi. */}
+              {type !== 'ordinateur' && (
+                <ChoixEcran
+                  valeur={reglages.ecran}
+                  textes={T}
+                  onChoisir={(ecran: Ecran) => changer({ ecran })}
+                />
+              )}
+            </Finition>
             <Historique
               liste={historique}
               courant={motif}
@@ -780,30 +824,6 @@ export function App() {
               }
               onEpingler={epingler}
               onOublier={oublier}
-            />
-            <ChoixResolution
-              largeurSaisie={reglages.largeurSaisie}
-              hauteurSaisie={reglages.hauteurSaisie}
-              resolution={resolution}
-              detecte={detecte}
-              edition={ephemere.edition}
-              langue={reglages.langue}
-              textes={T}
-              onSaisir={(largeurSaisie, hauteurSaisie) =>
-                changer({ largeurSaisie, hauteurSaisie })
-              }
-              onPreset={(largeur, hauteur) =>
-                changer({ largeurSaisie: String(largeur), hauteurSaisie: String(hauteur) }, false)
-              }
-              onEditer={() => setEphemere((precedent) => ({ ...precedent, edition: true }))}
-            />
-            <Partage
-              lien={lien}
-              copie={ephemere.copie}
-              echecCopie={ephemere.echecCopie}
-              graine={reglages.graine}
-              textes={T}
-              onCopier={copier}
             />
           </section>
         </main>

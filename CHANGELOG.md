@@ -9,6 +9,31 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Changé : le parcours
+
+Une revue du parcours sur un téléphone a trouvé un panneau trop long, des
+réglages en double et un dernier mètre laissé à la personne. Rien du moteur ne
+bouge, tout l'écran se range.
+
+- **Trois réglages d'abord.** Le panneau ouvre sur la famille, la palette et la
+  densité. La version claire ou sombre, le tirage et l'écran sont repliés dans
+  une section **Finition** qui dit ses valeurs sur une ligne (« Claire, Net,
+  Accueil ») et s'ouvre d'elle-même quand un lien en sort. La page perd plus de
+  mille pixels de défilement sur un téléphone.
+- **Une seule surface par réglage.** La taille et le lien du motif ne sont plus
+  dans le panneau : ils sont dans la feuille d'export, où la taille était déjà.
+  La version et le tirage ne sont plus dans la feuille, qui recouvre l'aperçu
+  qu'ils changent.
+- **« Surprends-moi » dit son mot** jusqu'à 380 px, avec le dé du hasard ;
+  « Variante » prend l'étincelle. La rangée d'action tient sur une ligne.
+- **Moins avant le premier choix.** L'accroche sous la marque disparaît, le
+  verdict de lisibilité replié est plus discret, et les dix lignes sur ce que
+  l'appareil garde passent dans le pied de page.
+- **La carte de succès dit le dernier mètre**, pour ton système : Photos puis
+  « Utiliser comme fond d'écran » sur iPhone, « Définir comme fond d'écran » sous
+  Android, le clic droit sur un ordinateur. Le compte à rebours de la carte ne
+  tourne que page visible.
+
 ### Ajouté : l'aurore
 
 - **Une nappe de couleur qui coule, tramée en points.** Une famille de plus

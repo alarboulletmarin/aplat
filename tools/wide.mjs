@@ -7,6 +7,7 @@
  */
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
+import { surMesure } from './studio.mjs'
 let PORT = 0;
 /* Même allongement que overflow.js : sur le DOM, parce que React rend depuis
    ses modules et qu'une donnée modifiée après coup serait réécrite. */
@@ -28,7 +29,8 @@ const STRETCH = `(() => {
   const ctx = await browser.newContext({ viewport: { width: 320, height: 568 }, deviceScaleFactor: 2, locale: 'fr-FR', hasTouch: true, isMobile: true });
   const page = await ctx.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/app?l=fr`, { waitUntil: 'networkidle' });
-  await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+  await page.$eval('#finition-bascule', e => e.click());
+  await surMesure(page);
   await page.waitForTimeout(300);
   await page.evaluate(STRETCH);
   await page.waitForTimeout(200);

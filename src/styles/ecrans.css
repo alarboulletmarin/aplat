@@ -125,29 +125,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* L'accroche et la mention sortent de l'en-tête collant : elles se lisent une
-   fois, au départ, et n'ont rien à faire dans la bande épinglée. La marge
-   négative reprend onze des vingt-deux pixels de l'espacement de `.page`. */
-.entete-pied {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 20px;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-top: -11px;
-}
-.accroche {
-  max-width: 44ch;
-  font-size: 15px;
-  color: var(--encre-douce);
-}
-.entete-mention {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--encre-douce);
-  white-space: nowrap;
-}
-
 /* Deux colonnes dès 360 px : l'aperçu tient dans la sienne, épinglé, pendant
    que les réglages défilent à côté sans jamais passer dessous. C'est la mise
    en page de la maquette, tenue jusqu'au téléphone.
@@ -755,6 +732,12 @@
   min-width: 0;
   hyphens: auto;
   overflow-wrap: anywhere;
+  /* Un résumé, pas un titre : à 15 px il faisait trois lignes de gras dans la
+     colonne d'un téléphone, le plus gros texte de la scène pour une
+     information d'expert. À 13 px il tient sur deux, et le détail reste à un
+     appui. */
+  font-size: 13px;
+  line-height: 1.3;
 }
 .verdict-chevron {
   flex: 0 0 auto;
@@ -1066,6 +1049,62 @@
   padding: 18px;
 }
 
+/* --- La finition : version, tirage et écran sous une seule ligne -------------
+   Le bouton est le titre de la section. La ligne qui résume les trois choix
+   passe sous le mot, et non à sa droite : le panneau d'un téléphone fait 207 px,
+   et « Claire, Net, Verrouillage » ne tient pas à côté d'un titre. Les cartes de
+   dessous gardent leur rembourrage : elles se découpent par les mêmes filets
+   qu'avant, le dépli ne change que leur présence. */
+.bento.finition {
+  padding: 0;
+}
+.finition-h {
+  margin: 0;
+}
+.finition-bascule {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 9px;
+  row-gap: 1px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 18px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  background: transparent;
+  border: 0;
+}
+.finition-t {
+  grid-column: 2;
+}
+.finition-r {
+  grid-column: 2;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--encre-douce);
+  overflow-wrap: anywhere;
+}
+.finition-chevron {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  width: 13px;
+  height: 8px;
+  background: var(--encre);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transition: transform 180ms ease;
+}
+.finition-bascule[aria-expanded='true'] .finition-chevron {
+  transform: rotate(180deg);
+}
+.finition-bascule .ico-arche {
+  grid-row: 1;
+}
+
 /* --- Derniers motifs -------------------------------------------------------- */
 /* Dix vignettes au plus, dans une grille qui se replie. Pas de défilement
    horizontal : une liste bornée n'a pas besoin d'être cachée. */
@@ -1232,6 +1271,9 @@
   font-size: 12.5px;
   line-height: 1.5;
   max-width: 68ch;
+  /* Trois phrases en petit, dont une adresse : à 320 px, un mot trop long
+     coupe plutôt que de pousser la page de côté. */
+  overflow-wrap: anywhere;
 }
 
 /* --- Le panneau dans une colonne étroite -------------------------------------
@@ -1252,6 +1294,16 @@
   .bento,
   .res-carte,
   .partage {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  /* La finition n'a pas de rembourrage propre : ce sont ses cartes et son
+     bouton qui en portent, au même gabarit que leurs voisines. */
+  .bento.finition {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .finition-bascule {
     padding-left: 10px;
     padding-right: 10px;
   }
@@ -1317,9 +1369,6 @@
      `ENTETE_PAYSAGE` de `geometrie.ts` est bâtie dessus. */
   .entete .frise {
     height: 10px;
-  }
-  .accroche {
-    font-size: 14px;
   }
 
   .scene {

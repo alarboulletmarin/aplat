@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
+import { surMesure as ouvrirSurMesure } from './studio.mjs'
 import { fileURLToPath } from 'node:url'
 
 /* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
@@ -19,13 +20,7 @@ const OUT = path.resolve(ICI, '../.shots');
   const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
 
-  const surMesure = async (page) => {
-    await page.$eval('#res-select', s => {
-      s.value = 'surMesure';
-      s.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    await page.waitForSelector('#res-largeur');
-  };
+  const surMesure = (page) => ouvrirSurMesure(page);
   const tap = (page, sel) => page.$eval(sel, e => e.click());
 
   async function shot(nom, scheme, prep) {
@@ -43,7 +38,7 @@ const OUT = path.resolve(ICI, '../.shots');
 
   await shot('vide', 'light', async p => {
     await surMesure(p);
-    await p.fill('#res-largeur', '');
+    await p.fill('#studio-largeur', '');
     await p.waitForTimeout(400);
   });
 
@@ -51,8 +46,8 @@ const OUT = path.resolve(ICI, '../.shots');
      assez court pour que la vérification ne s'éternise pas. */
   await shot('chargement', 'light', async p => {
     await surMesure(p);
-    await p.fill('#res-largeur', '5000');
-    await p.fill('#res-hauteur', '5000');
+    await p.fill('#studio-largeur', '5000');
+    await p.fill('#studio-hauteur', '5000');
     await p.waitForTimeout(300);
     await tap(p, '#btn-export');
     await p.waitForSelector('#etat-calcul', { timeout: 5000 });
@@ -60,8 +55,8 @@ const OUT = path.resolve(ICI, '../.shots');
 
   await shot('erreur', 'light', async p => {
     await surMesure(p);
-    await p.fill('#res-largeur', '7000');
-    await p.fill('#res-hauteur', '7000');
+    await p.fill('#studio-largeur', '7000');
+    await p.fill('#studio-hauteur', '7000');
     await p.waitForTimeout(250);
     await tap(p, '#btn-export');
     await p.waitForSelector('#note-erreur', { timeout: 5000 });

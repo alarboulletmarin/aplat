@@ -46,7 +46,7 @@ const PLEIN = JSON.stringify(
     }, PLEIN);
 
     await page.goto(`http://127.0.0.1:${PORT}/app?l=fr`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });   // ouvre l'éditeur de résolution
+    await page.$eval('#finition-bascule', e => e.click());   // la finition est repliée : on l'ouvre pour éprouver ses puces
     await page.waitForTimeout(300);
 
     const report = await page.evaluate(() => {

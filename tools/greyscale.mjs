@@ -5,6 +5,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
+import { surMesure } from './studio.mjs'
 import { fileURLToPath } from 'node:url'
 
 /* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
@@ -31,7 +32,8 @@ const OUT = path.resolve(ICI, '../.shots');
       } catch (e) { /* stockage refusé */ }
     });
     await page.goto(`http://127.0.0.1:${PORT}/app?l=fr&m=vagues&p=lime&d=1&s=1`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await page.$eval('#finition-bascule', e => e.click());
+    await surMesure(page);
     await page.waitForTimeout(300);
     // désature toute la page
     await page.addStyleTag({ content: 'html{filter:grayscale(1) !important}' });

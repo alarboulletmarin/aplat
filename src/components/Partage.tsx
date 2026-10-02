@@ -79,7 +79,6 @@ export function Partage({
         </label>
       )}
 
-      <p className="partage-p">{textes.partage.confidentialite}</p>
     </div>
   )
 }

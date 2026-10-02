@@ -5,6 +5,7 @@
    lisibilité est mesurée par le moteur, pas par cette sonde. */
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
+import { fermerStudio, ouvrirStudio, surMesure } from './studio.mjs'
 let PORT = 0;
 
 const CASES = [
@@ -122,10 +123,35 @@ const PROBE = () => {
   return out;
 };
 
+let bad = 0, sawErr = false;
+const rapporter = (nom, r) => {
+  console.log(`\n=== ${nom} === (${r.vus.texte} textes, ${r.vus.bordure} bordures, ${r.vus.forme} formes ; témoins : ${[...new Set(r.temoins)].join(', ') || 'AUCUN'})`);
+  if (!r.text.length) console.log('  texte : tous les rapports tiennent');
+  else {
+    bad += r.text.length;
+    const seen = new Set();
+    for (const t of r.text) {
+      const k = t.sel + t.ratio;
+      if (seen.has(k)) continue; seen.add(k);
+      console.log(`  TEXTE ${t.ratio}:1 (min ${t.need}) | ${t.sel}, ${t.size}/${t.weight}, "${t.txt}"`);
+    }
+  }
+  if (!r.border.length) console.log('  bordures : toutes >= 3:1');
+  else {
+    bad += r.border.length;
+    const seen = new Set();
+    for (const b of r.border) {
+      const k = b.sel + b.rIn;
+      if (seen.has(k)) continue; seen.add(k);
+      console.log(`  BORDURE int ${b.rIn}:1 / ext ${b.rOut}:1 | ${b.sel}, ${b.color}, "${b.txt}"`);
+    }
+  }
+};
+
 (async () => {
   const { srv, port } = await ouvrir(); PORT = port;
   const browser = await launch();
-  let bad = 0, sawErr = false;
+  sawErr = false;
 
   for (const c of CASES) {
     const ctx = await browser.newContext({
@@ -134,37 +160,25 @@ const PROBE = () => {
     });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}/app${c.q}`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    /* La finition est repliée : on l'ouvre, sans quoi ses trois groupes de
+       puces ne seraient jamais éprouvés. La résolution et le lien vivent dans
+       la feuille, qui a donc son propre passage. */
+    await page.$eval('#finition-bascule', e => e.click());
+    await surMesure(page);
     await page.waitForTimeout(200);
-    await page.fill('#res-largeur', '7000');
-    await page.fill('#res-hauteur', '7000');
+    await page.fill('#studio-largeur', '7000');
+    await page.fill('#studio-hauteur', '7000');
     await page.waitForTimeout(200);
+    await fermerStudio(page);
     await page.$eval('#btn-export', e => e.click());   // fait apparaître la carte d'erreur
     await page.waitForTimeout(500);
     const r = await page.evaluate(PROBE);
     if (r.temoins.indexOf('note-erreur') >= 0) sawErr = true;
+    rapporter(c.name, r);
 
-    console.log(`\n=== ${c.name} === (${r.vus.texte} textes, ${r.vus.bordure} bordures, ${r.vus.forme} formes ; témoins : ${[...new Set(r.temoins)].join(', ') || 'AUCUN'})`);
-    if (!r.text.length) console.log('  texte : tous les rapports tiennent');
-    else {
-      bad += r.text.length;
-      const seen = new Set();
-      for (const t of r.text) {
-        const k = t.sel + t.ratio;
-        if (seen.has(k)) continue; seen.add(k);
-        console.log(`  TEXTE ${t.ratio}:1 (min ${t.need}) | ${t.sel}, ${t.size}/${t.weight}, "${t.txt}"`);
-      }
-    }
-    if (!r.border.length) console.log('  bordures : toutes >= 3:1');
-    else {
-      bad += r.border.length;
-      const seen = new Set();
-      for (const b of r.border) {
-        const k = b.sel + b.rIn;
-        if (seen.has(k)) continue; seen.add(k);
-        console.log(`  BORDURE int ${b.rIn}:1 / ext ${b.rOut}:1 | ${b.sel}, ${b.color}, "${b.txt}"`);
-      }
-    }
+    await ouvrirStudio(page);
+    await page.waitForTimeout(300);
+    rapporter(c.name + ' + studio', await page.evaluate(PROBE));
     await ctx.close();
   }
 

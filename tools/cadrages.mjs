@@ -10,6 +10,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { launch } from './pw.mjs'
 import { ouvrir } from './serveur.mjs'
+import { ouvrirStudio } from './studio.mjs'
 import { fileURLToPath } from 'node:url'
 
 /* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
@@ -45,9 +46,8 @@ let PORT = 0;
   await grab('vp-desk-en', desk, '?l=en');
   await grab('vp-desk-target', desk, '?l=fr&r=2560x1440');
   await grab('vp-tablet-target', desk, '?l=fr&r=2048x2732');
-  await grab('vp-phone-resedit', phone, '?l=fr', async p => {
-    await p.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await p.waitForTimeout(300);
-    await p.mouse.wheel(0, 2600); await p.waitForTimeout(300);
+  await grab('vp-phone-studio', phone, '?l=fr', async p => {
+    await ouvrirStudio(p); await p.waitForTimeout(300);
   });
 
   await browser.close();

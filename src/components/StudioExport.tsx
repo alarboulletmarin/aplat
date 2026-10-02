@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useState, type ChangeEvent } from 'react'
+import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { nombre } from '../lib/format'
 import type { Format } from '../lib/export'
 import type { Langue } from '../lib/moteur'
-import { TIRAGES, type Tirage } from '../lib/presse'
 import {
   chiffres, horsBornes, ORDINATEUR, TABLETTE, TELEPHONE, type Resolution,
 } from '../lib/resolution'
@@ -12,14 +11,20 @@ import type { Textes } from '../i18n'
 import { GroupeRadio, OptionRadio } from './GroupeRadio'
 
 /**
- * Le studio d'export : tout ce qui décide du fichier, rassemblé dans la
- * feuille basse que la puce de synthèse ouvre, valeurs courantes
- * présélectionnées, un bouton qui confirme. Le scénario complet, taille sur
- * mesure, version, voile et format, se règle sans jamais quitter la zone du
- * pouce ni remonter le panneau.
+ * Le studio d'export : tout ce qui décide du fichier sans changer l'image,
+ * rassemblé dans la feuille basse que la puce de synthèse ouvre, valeurs
+ * courantes présélectionnées, un bouton qui confirme. Le format, la taille sur
+ * mesure et le voile se règlent sans jamais quitter la zone du pouce ni
+ * remonter le panneau, et le lien du motif est au bas de la feuille.
  *
- * Le studio ne possède rien : l'état vit dans `App`, les mêmes réglages que
- * le panneau, si bien que les deux surfaces ne peuvent pas diverger. Le
+ * La version, le tirage et l'écran n'y sont plus : ils changent ce qu'on voit,
+ * et la feuille recouvre l'aperçu. Les régler ici revenait à les régler à
+ * l'aveugle, et à tenir deux surfaces pour un même réglage. Ils vivent dans la
+ * section Finition du panneau (`Finition.tsx`), et la puce de synthèse dit
+ * toujours ce qu'ils ont donné.
+ *
+ * Le studio ne possède rien : l'état vit dans `App`, et chaque réglage n'a
+ * plus qu'une surface où se faire. Le
  * format aussi vient d'`App` : c'est un réglage de session, qui tient
  * jusqu'au rechargement, que la puce de synthèse écrit sous le bouton et
  * que Télécharger produit. Il ne part ni dans l'adresse ni sur l'appareil :
@@ -54,24 +59,6 @@ function prereglages(textes: Textes, detecte: Resolution): Prereglage[] {
   )
 }
 
-/**
- * Les trois tirages, avec les mots du panneau.
- *
- * La table est recopiée de `Reglages.tsx` pour la raison qui a fait recopier
- * les préréglages de taille juste au-dessus : un module de composant qui
- * exporte autre chose perd le rafraîchissement à chaud. Les libellés, eux, ne
- * sont pas recopiés, ils viennent du même dictionnaire des deux côtés, et la
- * duplication ne porte que l'assemblage.
- */
-function nomsDuTirage(textes: Textes): Record<Tirage, { nom: string; titre: string }> {
-  const T = textes.reglages
-  return {
-    net: { nom: T.tirageNet, titre: T.tirageTitreNet },
-    trame: { nom: T.tirageTrame, titre: T.tirageTitreTrame },
-    decale: { nom: T.tirageDecale, titre: T.tirageTitreDecale },
-  }
-}
-
 export function StudioExport({
   largeurSaisie,
   hauteurSaisie,
@@ -81,7 +68,6 @@ export function StudioExport({
   voile,
   voilePeint,
   sombre,
-  tirage,
   svgPossible,
   webpPossible,
   copiee,
@@ -95,8 +81,7 @@ export function StudioExport({
   onSaisir,
   onPreset,
   onVoile,
-  onSombre,
-  onTirage,
+  children,
 }: {
   largeurSaisie: string
   hauteurSaisie: string
@@ -106,8 +91,6 @@ export function StudioExport({
   voile: boolean
   voilePeint: boolean
   sombre: boolean
-  /** Le tirage brûlé dans le fichier : net, tramé, ou hors repère. */
-  tirage: Tirage
   svgPossible: boolean
   webpPossible: boolean
   copiee: boolean
@@ -122,13 +105,12 @@ export function StudioExport({
   onSaisir: (largeur: string, hauteur: string) => void
   onPreset: (largeur: number, hauteur: number) => void
   onVoile: () => void
-  onSombre: (sombre: boolean) => void
-  onTirage: (tirage: Tirage) => void
+  /** Le bas de la feuille : le lien du motif, câblé par App. */
+  children?: ReactNode
 }) {
   const T = textes.studio
   const B = textes.barre
   const R = textes.resolution
-  const noms = nomsDuTirage(textes)
 
   const [edition, setEdition] = useState(false)
 
@@ -277,48 +259,6 @@ export function StudioExport({
         )}
       </div>
 
-      <div className="studio-groupe">
-        <span className="studio-libelle" id="studio-l-version">{textes.reglages.version}</span>
-        <GroupeRadio id="studio-version" etiquettes="studio-l-version" className="studio-formats">
-          <OptionRadio
-            choisi={!sombre}
-            onChoisir={() => onSombre(false)}
-            className="opt studio-opt"
-            titre={textes.reglages.versionTitreClaire}
-          >
-            {textes.reglages.versionClaire}
-          </OptionRadio>
-          <OptionRadio
-            choisi={sombre}
-            onChoisir={() => onSombre(true)}
-            className="opt studio-opt"
-            titre={textes.reglages.versionTitreSombre}
-          >
-            {textes.reglages.versionSombre}
-          </OptionRadio>
-        </GroupeRadio>
-      </div>
-
-      {/* Le tirage est ici pour la raison qui a mis la version ici : le studio
-          rassemble ce qui décide du fichier, et une surface qui en oublierait
-          une moitié obligerait à remonter le panneau au milieu du geste. */}
-      <div className="studio-groupe">
-        <span className="studio-libelle" id="studio-l-tirage">{textes.reglages.tirage}</span>
-        <GroupeRadio id="studio-tirage" etiquettes="studio-l-tirage" className="studio-formats">
-          {TIRAGES.map((choix) => (
-            <OptionRadio
-              key={choix}
-              choisi={choix === tirage}
-              onChoisir={() => onTirage(choix)}
-              className="opt studio-opt"
-              titre={noms[choix].titre}
-            >
-              {noms[choix].nom}
-            </OptionRadio>
-          ))}
-        </GroupeRadio>
-      </div>
-
       <p className="studio-voile">
         <span>{voile ? (voilePeint ? B.voileInclus : B.voileNul) : B.voileAbsent}</span>
         <button
@@ -369,6 +309,8 @@ export function StudioExport({
           <span className="feuille-n">{B.formatCopieNote}</span>
         </button>
       </div>
+
+      {children}
     </div>
   )
 }

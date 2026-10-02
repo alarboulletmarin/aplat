@@ -300,11 +300,8 @@ export const fr = {
     /* La marque est un lien vers « / ». Le mot du titre le nomme déjà ; cette
        mention, lue par les seules technologies d'assistance, dit où il mène. */
     accueil: 'Retour à la présentation',
-    accroche:
-      'Des fonds d’écran génératifs, calculés dans ton navigateur. Téléphone, tablette, ordinateur.',
-    /* Au bout de la ligne de l'accroche : la promesse en trois mots, celle que
-       le pied de page détaille et que le partage répète en entier. Elle est
-       écrite courte parce qu'elle ne revient pas à la ligne. */
+    /* La promesse en trois mots. L'application ne l'affiche plus sous la
+       marque ; le pied de la présentation la reprend. */
     mention: 'Sans compte, sans réseau.',
   },
   scene: {
@@ -420,6 +417,9 @@ export const fr = {
     tirageTitreNet: 'Des aplats francs, sans texture',
     tirageTitreTrame: 'L’encre mouchetée et le papier grainé',
     tirageTitreDecale: 'Le mouchetis, et la même couche imprimée à côté',
+    /* Version, tirage et écran, repliés sous une ligne qui les résume. Le mot
+       est celui de l'atelier : ce qui vient après le dessin, avant de livrer. */
+    finition: 'Finition',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
      les onze livrées, parce que ce sont des palettes et non un autre réglage. */
@@ -494,12 +494,6 @@ export const fr = {
     echec: 'Copie impossible. Le lien est ci-dessous, à copier à la main.',
     note: 'Le lien contient les réglages, rien d’autre.',
     graine: 'Graine',
-    /* La formule doit rester exacte des deux côtés : le Service Worker met
-       bien quelque chose en cache, à savoir les fichiers de l'application, et
-       l'historique garde bien quelque chose, à savoir dix fois quatre
-       réglages. Une promesse plus large que le produit ne vaut rien. */
-    confidentialite:
-      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur\u00a0: quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Les palettes que tu composes y sont gardées de la même façon, un nom et des couleurs, supprimables une à une. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   preferences: {
     langue: 'Langue',
@@ -525,8 +519,14 @@ export const fr = {
     enregistre: 'Image enregistrée',
     ko: 'Ko',
     mo: 'Mo',
-    astuce:
-      'Sur téléphone\u00a0: ouvre le fichier téléchargé, puis « Enregistrer l’image ».',
+    /* Le dernier mètre, dit par système : l'image est téléchargée, le fond
+       d'écran n'a pas changé, et le chemin n'est pas le même sur un iPhone,
+       sous Android et sur un ordinateur. */
+    astuceIos: 'Ouvre l’image dans Photos, touche Partager, puis « Utiliser comme fond d’écran ».',
+    astuceAndroid:
+      'Ouvre l’image dans Photos ou Galerie, puis « Définir comme fond d’écran » dans le menu.',
+    astuceAutre:
+      'Ensuite, clic droit sur le fichier puis « Définir comme fond d’écran » ; le mot varie selon le système.',
     /* Le bouton qui remplace l'astuce quand la feuille de partage native
        prend le fichier : il fait la chose au lieu de la décrire. */
     photos: 'Enregistrer dans les photos',
@@ -617,6 +617,12 @@ export const fr = {
       'Aucun compte, aucune mesure d’audience\u00a0: tout est calculé dans ton navigateur et n’en sort pas.',
     hebergement:
       'Hébergé par Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis, dont les serveurs tiennent les journaux techniques habituels, adresses IP comprises.',
+    /* La formule doit rester exacte des deux côtés : le Service Worker met
+       bien quelque chose en cache, à savoir les fichiers de l'application, et
+       l'historique garde bien quelque chose, à savoir dix fois quatre
+       réglages. Une promesse plus large que le produit ne vaut rien. */
+    confidentialite:
+      'Aucun compte, aucun réseau. Les dix derniers motifs sont gardés sur cet appareil, dans le navigateur\u00a0: quatre réglages chacun, ni image ni identifiant, effaçables d’un bouton. Les palettes que tu composes y sont gardées de la même façon, un nom et des couleurs, supprimables une à une. Rien d’autre n’est enregistré ; hors ligne, le navigateur ne garde que les fichiers de l’application.',
   },
   maquette: {
     recherche: 'Rechercher',

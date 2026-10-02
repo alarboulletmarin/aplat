@@ -37,12 +37,39 @@ transports. Debout, en mouvement, l'écran peut-être en plein soleil.
 - *Secondaire* : dans la même barre, les deux raccourcis de hasard, côte à côte
   parce qu'on ne sait pas lequel on veut avant de voir. « Variante » ne change
   que la graine, « Surprends-moi » tire aussi une famille et une palette. Puis
-  les quatre réglages (famille, palette, densité, version claire ou sombre) et
-  la résolution, déjà détectée, repliée tant qu'on n'y touche pas.
-- *Caché* : les autres formats, derrière un dépli attaché au bouton
-  Télécharger ; le lien de partage, en bas du bloc ; puis, dans le pied de page,
-  la langue, le thème, la version, la source et le lien de soutien. Pour qui
-  les cherche.
+  les trois réglages qui décident de l'image (famille, palette, densité).
+- *Caché* : la finition (version claire ou sombre, tirage, écran), repliée sous
+  une ligne qui dit ses valeurs ; le studio d'export, derrière la puce de
+  synthèse (format, taille déjà détectée, voile, les trois appareils, le
+  presse-papiers, le lien du motif) ; puis, dans le pied de page, la langue, le
+  thème, la version, la source, le lien de soutien et ce que l'appareil garde.
+  Pour qui les cherche.
+
+### Ce que l'usage a corrigé
+
+Une revue du parcours sur un téléphone de 390 px a trouvé que le panneau
+empilait dix cartes de même poids, que la version, le tirage et la taille
+existaient deux fois (panneau et feuille d'export), que les deux boutons de
+hasard n'avaient plus de mot sous 600 px, que l'accroche prenait cent vingt
+pixels avant tout choix possible, et que la carte de succès laissait la
+personne devant un dossier de téléchargements sans lui dire comment en faire un
+fond d'écran. D'où :
+
+- **Une seule surface par réglage.** Ce qui change l'image est dans le panneau,
+  parce que la feuille d'export la recouvre ; ce qui n'est que du fichier est
+  dans la feuille. La finition se replie sous une ligne (« Claire, Net,
+  Accueil ») et s'ouvre d'elle-même quand le motif sort des valeurs d'origine,
+  pour qu'un lien portant une version sombre ne la cache pas.
+- **« Surprends-moi » garde son mot jusqu'à 380 px**, avec le dé du hasard
+  entier ; « Variante » prend l'étincelle. Le pictogramme du primaire cède sous
+  420 px pour que la rangée tienne sur une ligne, plutôt que de passer sur deux.
+- **L'en-tête perd son accroche**, le verdict replié passe à 13 px, et les dix
+  lignes de confidentialité vont au pied de page.
+- **La carte de succès dit le dernier mètre**, par système : Photos puis
+  « Utiliser comme fond d'écran » sur iPhone, « Définir comme fond d'écran »
+  sous Android, le clic droit ailleurs. Le compte à rebours des douze secondes
+  ne tourne que page visible : la personne qui suit la consigne quitte l'onglet
+  pour sa galerie.
 
 ### Pourquoi une seule section
 

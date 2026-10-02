@@ -25,9 +25,9 @@ Debout, en mouvement, l'écran peut-être en plein soleil.
 | Primaire | le motif derrière de vraies icônes, et **Télécharger** | sous l'en-tête, épinglé ; le bouton en bas, dans la zone du pouce |
 | Primaire | ce que le fichier sera : taille, format, version, voile | la puce de synthèse, sous le bouton ; un tap l'ouvre en studio |
 | Secondaire | **Surprends-moi** et **Variante**, les deux tirages au sort | la même rangée, à gauche du primaire |
-| Secondaire | famille, palette, densité, version claire ou sombre, l'historique des motifs regardés, puis la résolution déjà détectée | le bloc de réglages, sous l'aperçu |
-| Caché | le studio d'export : format, taille, version, voile, les trois appareils, le presse-papiers | une feuille basse, ouverte par la puce de synthèse |
-| Caché | lien de partage | en bas du bloc, sous un filet |
+| Secondaire | famille, palette, densité, puis l'historique des motifs regardés | le bloc de réglages, sous l'aperçu |
+| Caché | la finition : version claire ou sombre, tirage, écran | une section du bloc de réglages, repliée sous une ligne qui la résume |
+| Caché | le studio d'export : format, taille (la résolution déjà détectée), voile, les trois appareils, le presse-papiers, le lien du motif | une feuille basse, ouverte par la puce de synthèse |
 | Caché | langue, thème, version, licence, licences tierces, source, soutien, mentions légales | le pied de page : rien de ce qui s'y trouve n'agit sur le fichier |
 
 Un seul appel primaire. **Télécharger** ne partage sa place avec rien : les deux
@@ -39,12 +39,18 @@ question et qu'on ne sait pas laquelle on veut avant de voir : « Variante » ne
 change que la graine, « Surprends-moi » tire aussi une famille et une palette.
 Les séparer, l'un dans la barre et l'autre à mille pixels plus bas dans le
 panneau, revenait à cacher la moitié du geste. La place se trouve sans toucher
-au primaire : sous 600 px les deux gardent leur pictogramme et rendent leur mot,
-qui reste dans leur nom accessible ; sous 360 px, c'est le pictogramme du
-primaire qui cède, et lui seul.
+au primaire : sous 600 px « Variante » garde son pictogramme et rend son mot,
+qui reste dans son nom accessible. « Surprends-moi » garde le sien jusqu'à
+380 px, parce que c'est le geste d'exploration du produit et qu'un pictogramme
+seul ne dit pas ce qu'il tire ; sous 420 px, le pictogramme du primaire cède
+pour que la rangée tienne sur une ligne, et lui seul. Le dé est le hasard
+entier, l'étincelle un autre éclat du même motif.
 
 Tout le reste de l'export tient dans le studio, une feuille basse ouverte par
-la puce de synthèse. Un PNG doublé, un WebP, un SVG, le presse-papiers et les
+la puce de synthèse. Le studio ne contient que ce qui ne change pas l'image :
+la feuille recouvre l'aperçu, et régler à l'aveugle un réglage qui le change
+(la version, le tirage, l'écran) est ce que le produit refuse. Ceux-là sont
+dans la finition du panneau, une seule surface par réglage. Un PNG doublé, un WebP, un SVG, le presse-papiers et les
 trois appareils sont des façons de finir la même tâche : elles n'ont pas à
 disputer sa place à celle qui la finit dans neuf cas sur dix. Et le partage des
 rôles est celui des mots : **Télécharger** télécharge, la puce décrit et ouvre.
@@ -317,11 +323,21 @@ maquette ne se réajuste pas. Deux seuils, 140 px pour replier et 56 px pour
 déplier : avec un seul, le repli raccourcit le document, la position retombe
 sous le seuil, et l'aperçu clignote.
 
-**Deux natures de réglage, deux endroits.** Le panneau ne contient que ce qui
-agit sur le fichier téléchargé : famille, palette, densité, version claire ou
-sombre, résolution. La langue et le thème sont dans le pied de page, à côté du
-numéro de version et du lien vers la source, parce qu'ils ne changent que
-l'affichage. La règle tient en une phrase, et se vérifie d'un coup d'œil.
+**Trois natures de réglage, trois endroits.** Le panneau ne contient que ce qui
+agit sur l'image qu'on regarde : famille, palette, densité, puis la finition
+(version claire ou sombre, tirage, écran), repliée sous une ligne qui la résume
+(« Claire, Net, Accueil ») et dépliée d'elle-même quand le motif sort des
+valeurs d'origine. Le studio d'export ne contient que ce qui décide du fichier
+sans changer l'image : format, taille, voile, lien. La langue et le thème sont
+dans le pied de page, à côté du numéro de version et du lien vers la source,
+parce qu'ils ne changent que l'affichage. La règle tient en une phrase, et se
+vérifie d'un coup d'œil : ce qu'on juge est dans le panneau, ce qu'on livre est
+dans la feuille.
+
+L'en-tête ne porte plus d'accroche : la personne qui ouvre l'outil a déjà
+choisi d'y venir, et la promesse vit dans le pied de page. Le droit à la
+confidentialité y est dit une fois, au lieu de dix lignes de prose au bas du
+panneau.
 
 Pas de navigation : il n'y a qu'une section.
 
@@ -720,9 +736,9 @@ teinte seule ne suffit jamais.
   sortie choisie la ferment aussi. Le focus y est bouclé, le reste du document est retiré
   (`inert`), et le focus revient à la puce en sortant : autant de chemins de
   sortie que d'entrées. Dedans, le studio : les formats en puces avec la note
-  du format choisi, la taille et ses préréglages, la version, le voile, la
-  synthèse, **Exporter**, puis deux actions, les trois appareils et le
-  presse-papiers, au costume complet de bouton. Un format indisponible garde
+  du format choisi, la taille et ses préréglages, le voile, la synthèse,
+  **Exporter**, puis deux actions, les trois appareils et le presse-papiers, au
+  costume complet de bouton, et enfin le lien du motif. Un format indisponible garde
   sa puce et sa raison s'écrit dessous, avant qu'on appuie.
 
 ### Les notes
@@ -746,7 +762,7 @@ Chaque écran a cinq états, tous dessinés.
 | **Vide** | hachure diagonale à la place de la maquette, « Indique une résolution », bouton désactivé |
 | **Chargement** | trois points au centre, bouton en « Rendu en cours » et `aria-busy` |
 | **Erreur** | carte à trait d'alerte et triangle, **la cause exacte**, bouton Réessayer |
-| **Succès** | carte lime : dimensions, format, poids réel, le geste pour finir, un bouton Fermer ; elle se retire seule après douze secondes, ou d'un glissement vers le bas |
+| **Succès** | carte lime : dimensions, format, poids réel, le chemin vers le fond d'écran dit pour le système de la personne (iPhone, Android, ordinateur), un bouton Fermer ; elle se retire seule après douze secondes de page visible, ou d'un glissement vers le bas |
 | **Données trop longues** | libellés de carte sur deux lignes, jamais élidés ; ellipse sur les icônes de la maquette ; `overflow-wrap` sur les valeurs ; rangées retirées de la maquette |
 
 Le verdict de lisibilité est affiché **en permanence**, pas seulement en cas de

@@ -5,6 +5,7 @@ import path from 'node:path'
 import { launch } from './pw.mjs'
 import { poser } from './banc.mjs'
 import { ouvrir } from './serveur.mjs'
+import { fermerStudio, ouvrirStudio, surMesure } from './studio.mjs'
 import { fileURLToPath } from 'node:url'
 
 /* Le dossier de ce fichier : `__dirname` n'existe pas dans un module ES. */
@@ -43,8 +44,8 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     fam: document.querySelector('[data-famille][aria-checked="true"]').dataset.famille,
     pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
     dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
-    res: document.getElementById('res-valeur').textContent,
-    seed: document.getElementById('partage-note').textContent
+    res: document.getElementById('entete-res').textContent,
+    seed: location.search
   }));
   t(st.fam === 'blobs', 'URL : famille lue', st.fam);
   t(st.pal === 'nuit', 'URL : palette lue', st.pal);
@@ -251,22 +252,22 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     graines.join(' ') || 'aucune');
 
   // --- 6. état vide
-  await page.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+  await surMesure(page);
   await page.waitForTimeout(200);
-  await page.fill('#res-largeur', '');
+  await page.fill('#studio-largeur', '');
   await page.waitForTimeout(250);
   const empty = await page.evaluate(() => ({
     shown: !!document.getElementById('etat-vide'),
     disabled: document.getElementById('btn-export').disabled,
-    res: document.getElementById('res-valeur').textContent
+    res: document.getElementById('entete-res').textContent
   }));
   t(empty.shown, 'état vide : hachure affichée');
   t(empty.disabled, 'état vide : téléchargement désactivé');
   t(/Aucune/.test(empty.res), 'état vide : la résolution est dite absente', empty.res);
 
   // --- 7. état erreur : au-delà de 40 Mpx
-  await page.fill('#res-largeur', '7000');
-  await page.fill('#res-hauteur', '7000');
+  await page.fill('#studio-largeur', '7000');
+  await page.fill('#studio-hauteur', '7000');
   await page.waitForTimeout(250);
   await tap('#btn-export');
   await page.waitForTimeout(400);
@@ -283,8 +284,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     'état erreur : Réessayer se tait quand seule la résolution peut changer');
 
   // --- 9. téléchargement réel
-  await page.fill('#res-largeur', '1179');
-  await page.fill('#res-hauteur', '2556');
+  await page.fill('#studio-largeur', '1179');
+  await page.fill('#studio-hauteur', '2556');
+  await fermerStudio(page);
   /* Un vrai doigt quitte le champ en allant taper Télécharger ; le `tap`
      logique de ce banc, lui, ne déplace jamais le focus. Or la barre cesse
      de coller pendant la saisie (voir ecrans.css, `pointer: coarse`) : sans
@@ -880,14 +882,14 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
 
     // un téléphone récent doit être classé comme un téléphone
     const classe = [];
-    for (const [w, h, attendu] of [[1179, 2556, 'Téléphone'], [1290, 2796, 'Téléphone'], [1440, 3200, 'Téléphone'],
-                                   [2048, 2732, 'Tablette'], [1536, 2048, 'Tablette'], [2560, 1440, 'Ordinateur']]) {
+    for (const [w, h, attendu] of [[1179, 2556, 'telephone'], [1290, 2796, 'telephone'], [1440, 3200, 'telephone'],
+                                   [2048, 2732, 'tablette'], [1536, 2048, 'tablette'], [2560, 1440, 'ordinateur']]) {
       await ap.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=' + w + 'x' + h, { waitUntil: 'domcontentloaded' });
       /* L'application arrive par un chunk paresseux depuis la découpe du
          bundle : au domcontentloaded le DOM n'est pas encore monté, et un
          délai fixe parie sur l'horloge. On attend l'élément lui-même. */
-      await ap.waitForSelector('#res-appareil');
-      const got = await ap.evaluate(() => document.getElementById('res-appareil').textContent.split(', ')[0]);
+      await ap.waitForSelector('#appareil[data-type]');
+      const got = await ap.evaluate(() => document.getElementById('appareil').dataset.type);
       if (got !== attendu) classe.push(w + 'x' + h + ': ' + got + ' au lieu de ' + attendu);
     }
     t(classe.length === 0, 'aperçu : le type d\'appareil est correct, téléphones récents compris', classe.join(' | ') || '6 formats');
@@ -900,15 +902,15 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const sp2 = await sctx2.newPage();
     await sp2.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await sp2.waitForTimeout(400);
-    await sp2.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await surMesure(sp2);
     await sp2.waitForTimeout(200);
 
-    await sp2.fill('#res-largeur', '');
-    await sp2.type('#res-largeur', '9999');
+    await sp2.fill('#studio-largeur', '');
+    await sp2.type('#studio-largeur', '9999');
     await sp2.waitForTimeout(300);
     const clamp = await sp2.evaluate(() => ({
-      champ: document.getElementById('res-largeur').value,
-      carte: document.getElementById('res-valeur').textContent,
+      champ: document.getElementById('studio-largeur').value,
+      carte: document.getElementById('entete-res').textContent,
       url: location.search
     }));
     t(clamp.champ === '8000' && /8\s*000/.test(clamp.carte) && /8000x/.test(clamp.url),
@@ -916,24 +918,24 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       clamp.champ + ' / ' + clamp.carte + ' / ' + clamp.url);
 
     // saisie mal formée : le champ montre ce que l'app utilise
-    await sp2.fill('#res-largeur', '');
-    await sp2.type('#res-largeur', '19e20');
+    await sp2.fill('#studio-largeur', '');
+    await sp2.type('#studio-largeur', '19e20');
     await sp2.waitForTimeout(300);
     const mal = await sp2.evaluate(() => ({
-      champ: document.getElementById('res-largeur').value,
-      carte: document.getElementById('res-valeur').textContent
+      champ: document.getElementById('studio-largeur').value,
+      carte: document.getElementById('entete-res').textContent
     }));
     t(mal.champ === '1920' && /1\s*920/.test(mal.carte),
       'saisie : un caractère non numérique est filtré sans vider l\'état',
       mal.champ + ' / ' + mal.carte);
 
     // borne basse : signalée, et visible
-    await sp2.fill('#res-largeur', '');
-    await sp2.type('#res-largeur', '5');
+    await sp2.fill('#studio-largeur', '');
+    await sp2.type('#studio-largeur', '5');
     await sp2.waitForTimeout(300);
     const bas = await sp2.evaluate(() => {
-      const i = document.getElementById('res-largeur'), j = document.getElementById('res-hauteur');
-      const h = document.getElementById('res-aide');
+      const i = document.getElementById('studio-largeur'), j = document.getElementById('studio-hauteur');
+      const h = document.getElementById('studio-aide');
       const cs = getComputedStyle(i), csOk = getComputedStyle(j);
       return {
         invalide: i.getAttribute('aria-invalid'),
@@ -961,7 +963,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     await lp2.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await lp2.waitForTimeout(600);
     const churn = await lp2.evaluate(async () => {
-      const cibles = ['verdict-titre', 'verdict-detail', 'partage-note', 'res-valeur', 'cta-libelle'];
+      const cibles = ['verdict-titre', 'verdict-detail', 'entete-res', 'cta-libelle'];
       let ecritures = 0;
       const obs = new MutationObserver(ms => { ecritures += ms.length; });
       for (const id of cibles) obs.observe(document.getElementById(id), { childList: true, characterData: true, subtree: true });
@@ -974,9 +976,9 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(churn === 0, 'régions live : rien n\'est réécrit quand rien ne change', churn + ' écritures');
 
     // et l'état vide n'affiche aucun chiffre inventé
-    await lp2.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await surMesure(lp2);
     await lp2.waitForTimeout(200);
-    await lp2.fill('#res-largeur', '');
+    await lp2.fill('#studio-largeur', '');
     await lp2.waitForTimeout(400);
     const vide2 = await lp2.evaluate(() => ({
       detail: document.getElementById('verdict-detail').textContent,
@@ -1013,11 +1015,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
       await up.goto('http://127.0.0.1:' + PORT + '/app?l=fr&' + q, { waitUntil: 'networkidle' });
       await up.waitForTimeout(300);
       const v = await up.evaluate(() => ({
-        res: document.getElementById('res-valeur').textContent,
-        dev: document.getElementById('res-appareil').textContent,
+        res: document.getElementById('entete-res').textContent,
         url: location.search
       }));
-      t(/détecté/.test(v.dev) && !/Aucune/.test(v.res), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.dev);
+      /* Une résolution détectée ne s'écrit pas dans le lien : l'absence de `r`
+         après correction dit que la détection a repris la main. */
+      t(!/Aucune/.test(v.res) && !/[?&]r=/.test(v.url), 'URL : résolution ' + label + ' ignorée', v.res + ' / ' + v.url);
     }
 
     // la résolution détectée ne part pas dans le lien
@@ -1027,10 +1030,10 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(!/[?&]r=/.test(propre), 'URL : la résolution détectée ne part pas dans le lien partagé', propre);
 
     // une résolution saisie à la main, elle, est transmise
-    await up.evaluate(() => { const s = document.getElementById('res-select'); s.value = 'surMesure'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await surMesure(up);
     await up.waitForTimeout(200);
-    await up.fill('#res-largeur', '2560');
-    await up.fill('#res-hauteur', '1440');
+    await up.fill('#studio-largeur', '2560');
+    await up.fill('#studio-hauteur', '1440');
     await up.waitForTimeout(400);
     const manuel = await up.evaluate(() => location.search);
     t(/[?&]r=2560x1440/.test(manuel), 'URL : une résolution saisie à la main est transmise', manuel);
@@ -1049,6 +1052,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     });
     await sp.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await sp.waitForTimeout(400);
+    await ouvrirStudio(sp);
     await sp.$eval('#partage-bouton', e => e.click());
     await sp.waitForTimeout(400);
     const echec = await sp.evaluate(() => ({
@@ -1069,6 +1073,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     const op = await octx.newPage();
     await op.goto('http://127.0.0.1:' + PORT + '/app?l=fr', { waitUntil: 'networkidle' });
     await op.waitForTimeout(400);
+    await ouvrirStudio(op);
     await op.$eval('#partage-bouton', e => e.click());
     await op.waitForTimeout(400);
     const ok2 = await op.evaluate(() => ({
@@ -1904,6 +1909,76 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
     t(/Téléphone/.test(note) && /(Mo|Ko)/.test(note),
       'trois appareils : la note dit ce qui a été enregistré', note);
     await tctx.close();
+  }
+
+  // --- 20. le parcours simplifié : finition repliée, une surface par réglage, chemin vers le fond d'écran
+  {
+    const fctx = await browser.newContext({
+      viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'fr-FR', hasTouch: true, isMobile: true,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148', acceptDownloads: true
+    });
+    const fp = await fctx.newPage();
+    await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
+    await fp.waitForTimeout(500);
+
+    const plie = await fp.evaluate(() => ({
+      ouvert: document.getElementById('finition-bascule').getAttribute('aria-expanded'),
+      corpsCache: document.getElementById('finition-corps').hidden,
+      resume: document.querySelector('.finition-r').textContent,
+      resCarte: !!document.getElementById('res-select'),
+      partageDansPanneau: !!document.querySelector('.panneau #partage-bouton'),
+      accroche: !!document.querySelector('.accroche')
+    }));
+    t(plie.ouvert === 'false' && plie.corpsCache, 'finition : repliée par défaut', plie.ouvert);
+    t(/Claire/.test(plie.resume) && /Net/.test(plie.resume) && /Accueil/.test(plie.resume),
+      'finition : la ligne résume version, tirage et écran', plie.resume);
+    t(!plie.resCarte && !plie.partageDansPanneau && !plie.accroche,
+      'panneau : plus de carte de résolution, de partage ni d\'accroche', JSON.stringify(plie));
+
+    await fp.$eval('#finition-bascule', e => e.click());
+    await fp.waitForTimeout(150);
+    t(await fp.evaluate(() => !document.getElementById('finition-corps').hidden
+      && !!document.querySelector('#finition-corps #liste-version')
+      && !!document.querySelector('#finition-corps #liste-tirage')
+      && !!document.querySelector('#finition-corps #liste-ecran')),
+      'finition : le dépli porte la version, le tirage et l\'écran');
+
+    // un lien qui sort des valeurs d'origine ouvre la finition de lui-même
+    await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=1179x2556&n=1&i=trame', { waitUntil: 'networkidle' });
+    await fp.waitForTimeout(400);
+    const ouvre = await fp.evaluate(() => ({
+      ouvert: document.getElementById('finition-bascule').getAttribute('aria-expanded'),
+      resume: document.querySelector('.finition-r').textContent
+    }));
+    t(ouvre.ouvert === 'true' && /Sombre/.test(ouvre.resume) && /Tramé/.test(ouvre.resume),
+      'finition : un lien sombre et tramé s\'ouvre déjà dépliée', ouvre.resume);
+
+    // le studio n'a plus de version ni de tirage : une seule surface par réglage
+    await ouvrirStudio(fp);
+    t(await fp.evaluate(() => !document.getElementById('studio-version') && !document.getElementById('studio-tirage')),
+      'studio : ni version ni tirage, ils vivent dans la finition');
+    t(await fp.evaluate(() => !!document.getElementById('partage-bouton') && !!document.getElementById('studio-select')),
+      'studio : la taille et le lien du motif y sont');
+    await fermerStudio(fp);
+
+    // la rangée d'action tient sur une ligne, « Surprends-moi » garde son mot
+    const rangee = await fp.evaluate(() => {
+      const ids = ['btn-surprise', 'btn-graine', 'btn-export'];
+      const bs = ids.map(i => document.getElementById(i).getBoundingClientRect());
+      const mot = getComputedStyle(document.querySelector('#btn-surprise .btn-t')).position;
+      return { lignes: new Set(bs.map(b => Math.round(b.top))).size, mot };
+    });
+    t(rangee.lignes === 1, 'barre : les trois boutons tiennent sur une ligne à 390 px', String(rangee.lignes));
+    t(rangee.mot !== 'absolute', 'barre : « Surprends-moi » garde son mot à 390 px', rangee.mot);
+
+    // la carte de succès dit le chemin vers le fond d'écran pour ce système (iPhone)
+    await fp.goto('http://127.0.0.1:' + PORT + '/app?l=fr&r=1179x2556', { waitUntil: 'networkidle' });
+    await fp.waitForTimeout(400);
+    await Promise.all([fp.waitForEvent('download', { timeout: 30000 }), fp.$eval('#btn-export', e => e.click())]);
+    await fp.waitForSelector('#note-faite', { timeout: 10000 });
+    const consigne = await fp.evaluate(() => document.querySelector('#note-faite .note-h')?.textContent || '');
+    t(/Photos/.test(consigne) && /fond d’écran/.test(consigne), 'succès : la consigne iPhone nomme Photos et le fond d\'écran', consigne);
+    await fctx.close();
   }
 
   await browser.close();
