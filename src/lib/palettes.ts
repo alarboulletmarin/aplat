@@ -3,7 +3,7 @@
 /**
  * Les palettes composées à la main, gardées sur l'appareil.
  *
- * Onze palettes livrées suffisent à faire un fond d'écran, elles ne suffisent
+ * Les palettes livrées suffisent à faire un fond d'écran, elles ne suffisent
  * pas à faire *le sien* : une marque a ses deux teintes, un écran OLED demande
  * un noir vrai, un bureau demande le calme. C'est la seule chose du produit
  * qu'on ne peut pas choisir dans une liste, donc la seule qu'on doit pouvoir

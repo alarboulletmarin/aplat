@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { useEffect, useRef, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
-  assainirMot, estPaletteLivree, FAMILLES, MOT_MAX, MOT_PAR_DEFAUT, ORDRE_PALETTES,
-  palette as resoudrePalette, PALETTES,
-  type Densite, type Ecran, type Groupe, type IdFamille, type IdPaletteQuelconque,
-  type Langue,
+  assainirMot, estPaletteLivree, FAMILLES, groupeDePalette, GROUPES_PALETTES, MOT_MAX,
+  MOT_PAR_DEFAUT, palette as resoudrePalette, PALETTES,
+  type Densite, type Ecran, type Groupe, type GroupePalettes, type IdFamille,
+  type IdPaletteQuelconque, type Langue,
 } from '../lib/moteur'
 import { MAX_PALETTES, teintes, type PalettePerso } from '../lib/palettes'
 import { TIRAGES, type Tirage } from '../lib/presse'
@@ -32,6 +32,32 @@ const GROUPES = [
   { id: 'lieu', cle: 'groupeLieux' },
   { id: 'fig', cle: 'groupeFigures' },
 ] as const satisfies readonly { id: Groupe; cle: keyof Textes['reglages'] }[]
+
+/**
+ * Les flèches parcourent une rangée d'onglets sans les ouvrir : ouvrir au
+ * passage remplacerait toute la grille à chaque touche, et le clavier
+ * traverserait plusieurs rendus complets pour atteindre le dernier onglet. Les
+ * familles et les palettes ont le même geste, donc le même code.
+ */
+function parcourirOnglets(
+  evenement: KeyboardEvent<HTMLDivElement>, cadre: HTMLDivElement | null, selecteur: string,
+) {
+  const deplacements = ['ArrowRight', 'ArrowLeft', 'Home', 'End']
+  if (!deplacements.includes(evenement.key) || !cadre) return
+  const boutons = Array.from(cadre.querySelectorAll<HTMLButtonElement>(selecteur))
+  const courant = boutons.indexOf(document.activeElement as HTMLButtonElement)
+  if (courant < 0) return
+  evenement.preventDefault()
+  const suivant =
+    evenement.key === 'Home'
+      ? 0
+      : evenement.key === 'End'
+        ? boutons.length - 1
+        : evenement.key === 'ArrowRight'
+          ? (courant + 1) % boutons.length
+          : (courant - 1 + boutons.length) % boutons.length
+  boutons[suivant].focus()
+}
 
 /**
  * Les familles, en quatre onglets.
@@ -76,28 +102,8 @@ export function ChoixFamille({
   const liste = FAMILLES.filter((f) => f.groupe === groupe)
   const contient = liste.some((f) => f.id === valeur)
 
-  /* Les flèches parcourent les onglets sans les ouvrir : ouvrir au passage
-     remplacerait toutes les vignettes du groupe à chaque touche, et le clavier
-     traverserait plusieurs rendus complets pour atteindre le dernier onglet. */
-  const surTouche = (evenement: KeyboardEvent<HTMLDivElement>) => {
-    const deplacements = ['ArrowRight', 'ArrowLeft', 'Home', 'End']
-    if (!deplacements.includes(evenement.key)) return
-    const cadre = onglets.current
-    if (!cadre) return
-    const boutons = Array.from(cadre.querySelectorAll<HTMLButtonElement>('.onglet'))
-    const courant = boutons.indexOf(document.activeElement as HTMLButtonElement)
-    if (courant < 0) return
-    evenement.preventDefault()
-    const suivant =
-      evenement.key === 'Home'
-        ? 0
-        : evenement.key === 'End'
-          ? boutons.length - 1
-          : evenement.key === 'ArrowRight'
-            ? (courant + 1) % boutons.length
-            : (courant - 1 + boutons.length) % boutons.length
-    boutons[suivant].focus()
-  }
+  const surTouche = (evenement: KeyboardEvent<HTMLDivElement>) =>
+    parcourirOnglets(evenement, onglets.current, '.onglet')
 
   return (
     <div className="carte">
@@ -180,10 +186,14 @@ export function ChoixFamille({
   )
 }
 
-/** L'échantillon d'une palette : le fond, puis trois teintes au plus. */
+/**
+ * L'échantillon d'une palette : le fond, puis ses quatre premières encres.
+ * Les livrées en ont quatre, et en cacher une ferait choisir une palette sur
+ * trois de ses couleurs.
+ */
 function Echantillon({ id }: { id: IdPaletteQuelconque }) {
   const p = resoudrePalette(id)
-  const suite = teintes(p).slice(0, 4)
+  const suite = teintes(p).slice(0, 5)
   return (
     <span className="opt-palette-s" aria-hidden="true">
       {suite.map((teinte, i) => (
@@ -194,7 +204,14 @@ function Echantillon({ id }: { id: IdPaletteQuelconque }) {
 }
 
 /**
- * Les onze palettes livrées, puis celles qu'on a composées.
+ * Les palettes livrées, en huit onglets, puis celles qu'on a composées.
+ *
+ * Les livrées sont quarante-sept : une grille plate les rendrait aussi
+ * lointaines que l'étaient les familles, et « Octobre » et « Néon » ne se
+ * compareraient plus. Les onglets suivent le même principe que ceux des
+ * familles, et la même règle : l'onglet s'ouvre sur le groupe de la palette
+ * de l'adresse, puis ne bouge que sous le doigt, parce qu'un onglet qui
+ * suivrait « Surprends-moi » ferait sauter le panneau au milieu du geste.
  *
  * Les composées sont des palettes, pas un autre réglage : elles vivent dans la
  * même carte, sous le même titre, et se choisissent avec la même puce. Ce qui
@@ -256,6 +273,13 @@ export function ChoixPalette({
      `tabIndex -1` et le groupe deviendrait injoignable au clavier. */
   const livreeChoisie = estPaletteLivree(valeur)
 
+  const [groupe, setGroupe] = useState<GroupePalettes>(
+    () => groupeDePalette(valeur) ?? 'classiques',
+  )
+  const entree = GROUPES_PALETTES.find((g) => g.id === groupe) ?? GROUPES_PALETTES[0]
+  const contient = (entree.ids as readonly string[]).includes(valeur)
+  const onglets = useRef<HTMLDivElement>(null)
+
   /* L'éditeur focalise son premier champ à l'ouverture ; voici le geste
      symétrique. Sa fermeture, comme la suppression de la palette choisie,
      démonte le bouton qui portait le focus, et le navigateur le rend au
@@ -304,11 +328,68 @@ export function ChoixPalette({
         <Arche />
         <span>{textes.reglages.palette}</span>
       </h2>
-      <GroupeRadio id="liste-palettes" etiquettes="h-palette" className="grille-palettes">
-        {ORDRE_PALETTES.map((id, indice) =>
-          puce(id, PALETTES[id][langue], !livreeChoisie && indice === 0),
-        )}
-      </GroupeRadio>
+
+      <div
+        className="onglets-pal"
+        id="onglets-palettes"
+        ref={onglets}
+        role="tablist"
+        aria-label={T.onglets}
+        onKeyDown={(evenement) => parcourirOnglets(evenement, onglets.current, '.onglet-pal')}
+      >
+        {GROUPES_PALETTES.map((g) => {
+          const actif = g.id === groupe
+          return (
+            <button
+              key={g.id}
+              type="button"
+              role="tab"
+              id={`onglet-palettes-${g.id}`}
+              className="onglet-pal"
+              data-groupe-palettes={g.id}
+              aria-selected={actif}
+              aria-controls="panneau-palettes"
+              tabIndex={actif ? 0 : -1}
+              onClick={() => setGroupe(g.id)}
+            >
+              <span>
+                {/* L'onglet ne suit pas les tirages, et la palette choisie peut
+                    donc être dans un groupe que la grille ne montre pas. Ce
+                    carré dit où la trouver, en forme et en mot, jamais en
+                    couleur seule. */}
+                {(g.ids as readonly string[]).includes(valeur) && (
+                  <>
+                    <span className="onglet-pal-pt" aria-hidden="true" />
+                    <span className="vh">{T.choisieIci}</span>
+                  </>
+                )}
+                {g[langue]}
+              </span>
+              {/* Le compte entre dans le nom accessible de l'onglet, comme pour
+                  les familles : il est sous les yeux, il doit être à l'oreille. */}
+              <span className="onglet-pal-n">{g.ids.length}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        className="onglet-corps"
+        id="panneau-palettes"
+        role="tabpanel"
+        aria-labelledby={`onglet-palettes-${groupe}`}
+      >
+        {groupe === 'accessibles' && <p className="palette-groupe-note">{T.noteAccessibles}</p>}
+        <GroupeRadio
+          id="liste-palettes"
+          etiquettes={`h-palette onglet-palettes-${groupe}`}
+          className="grille-palettes"
+        >
+          {entree.ids.map((id, indice) =>
+            puce(id, PALETTES[id][langue], !contient && indice === 0),
+          )}
+        </GroupeRadio>
+      </div>
 
       <h3 className="groupe groupe-2" id="h-palettes-perso">
         <span className="groupe-carre" aria-hidden="true" />

@@ -43,8 +43,9 @@ est installable et pleinement utilisable hors ligne.
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
 - **80 familles de motifs** en huit groupes (abstraits, pavages, volumes,
-  instruments, matières, paysages, lieux, figures), **11 palettes composées à
-  la main**, trois densités, et des palettes personnelles de trois à six
+  instruments, matières, paysages, lieux, figures), **47 palettes composées à
+  la main** (saisons, rouges, verts, bleus, roses, et un groupe pensé pour le
+  daltonisme), trois densités, et des palettes personnelles de trois à six
   couleurs.
 - **Un moteur déterministe.** `(famille, palette, densité, graine)` donne
   toujours la même image, à n'importe quelle résolution. Partager un lien,

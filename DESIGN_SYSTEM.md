@@ -491,9 +491,29 @@ C'est aussi le filet qui rattrape la faute de frappe la plus probable de la
 liste, `pav` écrit `pay` : les deux existent, le compilateur laisse passer, et
 la famille se retrouverait dans les paysages.
 
+### Les palettes livrées : huit onglets
+
+Quarante-sept palettes en une grille plate seraient aussi lointaines que
+l'étaient les familles : « Octobre » et « Néon » ne se compareraient plus. Les
+palettes ont donc les onglets des familles, avec les mêmes règles : le compte
+sur chaque onglet, l'ouverture sur le groupe de la palette de l'adresse, et un
+onglet qui ne bouge ensuite que sous le doigt. Les classes sont distinctes
+(`onglets-pal`, `onglet-pal`), pour que les deux rangées ne se comptent pas l'une
+dans l'autre, mais le dessin est le même.
+
+L'échantillon montre le fond et les quatre encres. En cacher une ferait choisir
+une palette sur trois de ses couleurs.
+
+Le groupe « Accessibles » est pensé pour le daltonisme : ses teintes diffèrent
+par leur clarté autant que par leur couleur. Toutes les palettes ajoutées après
+les onze d'origine tiennent d'ailleurs la même mesure, vérifiée par
+`palettes-livrees.test.ts` : en vision normale, en protanopie et en
+deutéranopie, deux teintes de la palette, fond compris, restent à vingt unités
+au moins l'une de l'autre dans CIELAB.
+
 ### Les palettes qu'on écrit soi-même
 
-Onze palettes suffisent à faire un fond d'écran, elles ne suffisent pas à faire
+Les palettes livrées suffisent à faire un fond d'écran, elles ne suffisent pas à faire
 *le sien*. On en compose donc, de trois à six couleurs, fond compris, douze au
 plus.
 

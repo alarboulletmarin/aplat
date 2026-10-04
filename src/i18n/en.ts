@@ -307,6 +307,10 @@ export const en: Textes = {
     finition: 'Finish',
   },
   palettes: {
+    onglets: 'Palette groups',
+    choisieIci: 'Chosen palette is in this group: ',
+    noteAccessibles:
+      'Made with colour blindness in mind: the colours also differ in lightness, not only in hue.',
     miennes: 'My palettes',
     composer: 'Build a palette',
     modifier: 'Edit {nom}',

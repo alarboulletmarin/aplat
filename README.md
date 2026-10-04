@@ -42,8 +42,9 @@ fully usable offline.
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
 - **80 pattern families** in eight groups (abstract, tilings, volumes,
-  instruments, materials, landscapes, landmarks, figures), **11 hand-tuned
-  palettes**, three density levels, and custom palettes of three to six colors.
+  instruments, materials, landscapes, landmarks, figures), **47 hand-tuned
+  palettes** (seasons, reds, greens, blues, pinks, and a group built for color
+  blindness), three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces
   the same image, at any resolution. Sharing a link is sharing the image.
 - **Several outputs**: PNG, PNG 2x, WebP, SVG, clipboard copy, and a

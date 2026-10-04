@@ -122,7 +122,7 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   // la grille d'icônes ; la place de l'heure ne peut pas faire mieux que le
   // fond de la palette, et ne doit pas faire moins bien.
   const faibles = palettes.filter(p => reserve[p].contraste < M_SEUIL_UI);
-  t(faibles.length === 0, 'place de l\'heure : le contraste reste au moins juste sous l\'heure, sur les onze palettes',
+  t(faibles.length === 0, 'place de l\'heure : le contraste reste au moins juste sous l\'heure, sur toutes les palettes',
     faibles.map(p => `${p} ${reserve[p].contraste.toFixed(1)}`).join(', ')
     || 'le plus faible : ' + Math.min(...palettes.map(p => reserve[p].contraste)).toFixed(1) + ':1');
   const corriges = palettes.filter(p => reserve[p].avant > 0);
@@ -1165,12 +1165,12 @@ const t = (cond, label, extra) => (cond ? ok : ko).push(label + (extra ? ' -> ' 
   {
     const sctx3 = await browser.newContext({ viewport: { width: 900, height: 1000 }, locale: 'fr-FR' });
     const sp = await sctx3.newPage();
-    /* La famille se lit dans l'adresse et non dans la grille : l'onglet ne
-       suit plus les tirages, et la famille tirée peut donc être cochée dans
-       un groupe que la grille ne montre pas. */
+    /* La famille et la palette se lisent dans l'adresse et non dans la grille :
+       les onglets ne suivent plus les tirages, et la famille ou la palette
+       tirée peut donc être cochée dans un groupe que la grille ne montre pas. */
     const etat = () => sp.evaluate(() => ({
       fam: new URLSearchParams(location.search).get('m'),
-      pal: document.querySelector('[data-palette][aria-checked="true"]').dataset.palette,
+      pal: new URLSearchParams(location.search).get('p'),
       dens: document.querySelector('[data-densite][aria-checked="true"]').dataset.densite,
       graine: new URLSearchParams(location.search).get('s')
     }));

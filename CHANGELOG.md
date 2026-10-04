@@ -9,6 +9,39 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : trente-six palettes
+
+Onze palettes, c'était peu pour une application dont le choix de la couleur est
+la moitié du geste. Elles sont quarante-sept, rangées en huit onglets.
+
+- **Les saisons** : Octobre, Automne, Hiver, Printemps, Été, et Halloween pour
+  la nuit qui ferme octobre.
+- **Des rouges** (Bordeaux, Rubis, Fraise, Amour, Coquelicot), **des verts**
+  (Sauge, Pistache, Feuillage, Forêt, Émeraude), **des bleus** (Lagon, Cobalt,
+  Glacier, Marine, Piscine) et **des roses** (Dragée, Fuchsia, Pivoine,
+  Flamant), du plus sombre au plus tendre.
+- **Des mélanges** : Lavande, Bauhaus, Terrazzo, Désert, Crépuscule, Néon.
+- **Un groupe pensé pour le daltonisme** : Okabe-Ito (la suite publiée en 2008
+  pour cet usage, en clair et en nuit), Bleu & ambre, Graphite, Café. Leurs
+  teintes diffèrent par leur clarté autant que par leur couleur.
+- **Les onze d'origine ne bougent pas**, ni leur ordre, ni leurs couleurs : les
+  liens et l'historique qui les portent montrent la même image. Elles ouvrent
+  l'onglet « Classiques ».
+- **Toutes les nouvelles passent une mesure de daltonisme.** En vision normale,
+  en protanopie et en deutéranopie, deux teintes d'une même palette, fond
+  compris, restent à vingt unités CIELAB au moins l'une de l'autre. Un test le
+  vérifie, et il refuse une palette qui ferait confondre un rouge et un vert de
+  même clarté.
+- **L'échantillon de chaque puce montre les quatre encres**, et non plus trois.
+  Avec trente-six palettes de plus, la quatrième ne pouvait plus rester cachée.
+- **« Surprends-moi » tire dans les quarante-sept**, et dans celles qu'on a
+  composées.
+- **Le papier millimétré ne devient plus gris.** Une encre presque noire,
+  tirée au sort pour teinter la feuille, la ramenait à un gris pour certaines
+  graines. Le papier ne descend plus sous une clarté de 0,6, et une feuille
+  déjà assez claire n'est pas touchée : seule « Argile » frôlait ce seuil
+  parmi les onze d'origine, et sur quelques graines seulement.
+
 ### Changé : le parcours
 
 Une revue du parcours sur un téléphone a trouvé un panneau trop long, des
