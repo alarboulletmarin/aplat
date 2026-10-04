@@ -422,8 +422,16 @@ export const fr = {
     finition: 'Finition',
   },
   /* Les palettes composées à la main. Elles vivent dans la carte Palette, sous
-     les onze livrées, parce que ce sont des palettes et non un autre réglage. */
+     les palettes livrées, parce que ce sont des palettes et non un autre
+     réglage. */
   palettes: {
+    /* Les groupes de palettes livrées sont des onglets, comme ceux des familles.
+       Leurs noms sont dans le moteur, avec leurs palettes ; seuls ce libellé de
+       barre et la note du groupe pensé pour le daltonisme sont ici. */
+    onglets: 'Groupes de palettes',
+    choisieIci: 'Palette choisie dans ce groupe\u00a0: ',
+    noteAccessibles:
+      'Pensées pour le daltonisme\u00a0: les teintes se distinguent aussi par leur clarté, pas seulement par leur couleur.',
     miennes: 'Mes palettes',
     composer: 'Composer une palette',
     modifier: 'Modifier {nom}',

@@ -35,7 +35,7 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
-  arcEpais, duClairAuSombre, hacher, melangeHex, pointille, ruban, type Point,
+  arcEpais, duClairAuSombre, hacher, luminanceHex, melangeHex, pointille, ruban, type Point,
 } from './trace'
 
 export const IDS_MESURES = ['tapis', 'millimetre', 'rapporteur', 'mire'] as const
@@ -137,6 +137,27 @@ function ecrire(
 
 /* ---------- les teintes ------------------------------------------------------ */
 
+/** La clarté sous laquelle une feuille cesse d'être du papier. */
+const PAPIER_MIN = 0.6
+
+/**
+ * Le papier ne descend jamais sous `PAPIER_MIN`.
+ *
+ * Il est teinté par une encre tirée au sort, et une encre presque noire, que
+ * plusieurs palettes ont, ramène la feuille à un gris : « Graphite » tombait à
+ * 0,55 pour certaines graines, et même « Argile », une des onze d'origine,
+ * frôlait 0,59. Le papier est donc éclairci par pas de dix pour cent, juste ce
+ * qu'il faut. Une feuille déjà assez claire n'est pas touchée, si bien que
+ * presque aucun fichier existant ne change.
+ */
+function papierClair(papier: string): string {
+  let clair = papier
+  for (let part = 0.1; luminanceHex(clair) < PAPIER_MIN && part < 1; part += 0.1) {
+    clair = melangeHex(papier, '#FFFFFF', part)
+  }
+  return clair
+}
+
 /**
  * Le fond d'un instrument, et ses deux encres.
  *
@@ -157,7 +178,7 @@ function instrument(
   const teinte = C[Math.floor(rnd() * C.length)]
   const fond = sombre
     ? melangeHex(melangeHex(teintes[teintes.length - 1], '#000000', 0.62), teinte, 0.17)
-    : melangeHex(melangeHex(teintes[0], '#FFFFFF', 0.62), teinte, 0.14)
+    : papierClair(melangeHex(melangeHex(teintes[0], '#FFFFFF', 0.62), teinte, 0.14))
   const ordre = sombre ? teintes : [...teintes].reverse()
   return { fond, encre: ordre[0], appui: ordre[Math.min(1, ordre.length - 1)] }
 }

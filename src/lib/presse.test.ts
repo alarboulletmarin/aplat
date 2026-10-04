@@ -110,7 +110,7 @@ describe('l’encre de dessous', () => {
     }
   })
 
-  it('est la plus éloignée du fond, donc visible sur les onze', () => {
+  it('est la plus éloignée du fond, donc visible sur toutes', () => {
     for (const id of ORDRE_PALETTES) {
       const P = palette(id)
       const fond = luminanceHex(P.fond)

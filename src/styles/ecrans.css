@@ -888,13 +888,15 @@
    « Instruments », plus son compte et ses marges. Un onglet plus long à venir
    les augmente : c'est une longueur de texte, pas un nombre d'onglets, et
    c'est ce qui fait qu'ajouter un groupe ne demande pas de retoucher ceci. */
-.onglets {
+.onglets,
+.onglets-pal {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 7px;
   margin-bottom: 13px;
 }
-.onglet {
+.onglet,
+.onglet-pal {
   flex: 1 1 auto;
   min-width: 0;
   min-height: 44px;
@@ -914,10 +916,12 @@
 /* Le mot à gauche, le compte au bout, alignés d'une case à l'autre : la grille
    ayant des colonnes de largeur égale, la lecture en liste tient aussi bien à
    une colonne qu'à quatre. */
-.onglet {
+.onglet,
+.onglet-pal {
   justify-content: space-between;
 }
-.onglet > span:first-child {
+.onglet > span:first-child,
+.onglet-pal > span:first-child {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -926,28 +930,32 @@
 /* Même règle que l'interrupteur du voile : l'aplat inversé suffit, et un trait
    qui s'épaissit déplacerait les deux autres onglets d'un pixel à chaque
    changement, la rangée étant à largeurs partagées. */
-.onglet[aria-selected='true'] {
+.onglet[aria-selected='true'],
+.onglet-pal[aria-selected='true'] {
   border-color: var(--encre);
   background: var(--encre);
   color: var(--papier);
 }
 /* Le compte n'est pas décoratif : il dit ce qu'on trouvera derrière l'onglet
    avant de l'ouvrir, et c'est ce qui remplace la vue d'ensemble perdue. */
-.onglet-n {
+.onglet-n,
+.onglet-pal-n {
   flex: 0 0 auto;
   font-size: 12.5px;
   font-weight: 700;
   color: var(--encre-douce);
   font-variant-numeric: tabular-nums;
 }
-.onglet[aria-selected='true'] .onglet-n {
+.onglet[aria-selected='true'] .onglet-n,
+.onglet-pal[aria-selected='true'] .onglet-pal-n {
   color: var(--papier);
   opacity: 0.72;
 }
 /* Même raison que le bloc « Contraste forcé » de composants.css : l'aplat
    inversé disparaît en contraste forcé, ce contour transparent y devient
    visible et continue de dire l'onglet ouvert. */
-.onglet[aria-selected='true']:not(:focus-visible) {
+.onglet[aria-selected='true']:not(:focus-visible),
+.onglet-pal[aria-selected='true']:not(:focus-visible) {
   outline: 2px solid transparent;
   outline-offset: -4px;
 }
@@ -1003,7 +1011,8 @@
    L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
    pas de le savoir. */
 @container panneau (max-width: 320px) {
-  .onglets {
+  .onglets,
+  .onglets-pal {
     display: flex;
     flex-wrap: wrap;
     gap: 3px;
@@ -1021,14 +1030,16 @@
      Le plancher va avec : quand la moitié d'une rangée étroite est plus courte
      que « Instruments », c'est le mot qui gagne et la rangée déborde un peu de
      part et d'autre, plutôt qu'un libellé abrégé. */
-  .onglet {
+  .onglet,
+  .onglet-pal {
     padding: 0 4px;
     font-size: 12.5px;
     gap: 3px;
     min-width: min-content;
     max-width: calc(50% - 1.5px);
   }
-  .onglet-n {
+  .onglet-n,
+  .onglet-pal-n {
     font-size: 11.5px;
   }
 }
@@ -1038,6 +1049,28 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(102px, 100%), 1fr));
   gap: 9px;
+}
+/* Le repère de l'onglet qui contient la palette choisie : le carré de la
+   puce choisie, avec le même filet à la couleur du texte, pour qu'il tienne
+   aussi sur l'onglet inversé. */
+.onglet-pal-pt {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1.5px currentColor;
+  vertical-align: 0.5px;
+}
+
+/* La note d'un groupe de palettes : une phrase sous les onglets, pour dire ce
+   que le groupe a de particulier. Elle n'existe que pour lui. */
+.palette-groupe-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--encre-douce);
 }
 .grille-palettes {
   display: grid;

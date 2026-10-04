@@ -108,9 +108,9 @@ describe('la fonte des graduations', () => {
 })
 
 describe('le fond d’un instrument', () => {
-  it('garde le tapis sombre et le papier clair, sur les onze palettes', () => {
+  it('garde le tapis sombre et le papier clair, sur toutes les palettes', () => {
     /* C'est la promesse du geste : la palette teinte le fond, elle ne décide
-       pas de sa clarté. Sans ce contrôle, quatre palettes sur onze rendraient
+       pas de sa clarté. Sans ce contrôle, les palettes claires rendraient
        un tapis de coupe en papier blanc, et le motif cesserait d'être l'objet
        qu'il dit être. */
     for (const palette of ORDRE_PALETTES) {

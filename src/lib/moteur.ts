@@ -101,6 +101,7 @@ export type IdFamille =
   | IdGrammaire
 
 export type IdPalette =
+  /* les onze d'origine */
   | 'lime'
   | 'soleil'
   | 'argile'
@@ -112,6 +113,49 @@ export type IdPalette =
   | 'nuit'
   | 'orage'
   | 'encre'
+  /* les saisons */
+  | 'octobre'
+  | 'automne'
+  | 'hiver'
+  | 'printemps'
+  | 'ete'
+  | 'halloween'
+  /* les rouges */
+  | 'bordeaux'
+  | 'rubis'
+  | 'fraise'
+  | 'amour'
+  | 'coquelicot'
+  /* les verts */
+  | 'sauge'
+  | 'pistache'
+  | 'feuillage'
+  | 'foret'
+  | 'emeraude'
+  /* les bleus */
+  | 'lagon'
+  | 'cobalt'
+  | 'glacier'
+  | 'marine'
+  | 'piscine'
+  /* les roses */
+  | 'dragee'
+  | 'fuchsia'
+  | 'pivoine'
+  | 'flamant'
+  /* les palettes pensées pour le daltonisme */
+  | 'okabe'
+  | 'okabenuit'
+  | 'bleuambre'
+  | 'graphite'
+  | 'cafe'
+  /* les mélanges */
+  | 'lavande'
+  | 'bauhaus'
+  | 'terrazzo'
+  | 'desert'
+  | 'crepuscule'
+  | 'neon'
 
 /**
  * L'identifiant d'une palette composée : le préfixe, puis l'empreinte des
@@ -121,7 +165,7 @@ export type IdPalettePerso = `${typeof PREFIXE_PERSO}${string}`
 
 /**
  * Une palette quelconque, livrée ou composée. C'est lui que l'adresse, les
- * réglages et l'historique portent : `IdPalette` ne nomme que les onze
+ * réglages et l'historique portent : `IdPalette` ne nomme que les
  * livrées, et le dire dans le type évite de le rattraper par des assertions.
  */
 export type IdPaletteQuelconque = IdPalette | IdPalettePerso
@@ -195,7 +239,7 @@ export interface Palette {
   en: string
   fond: string
   /**
-   * Deux à cinq teintes posées sur le fond. Les onze palettes livrées en
+   * Deux à cinq teintes posées sur le fond. Les palettes livrées en
    * comptent quatre ; une palette personnalisée en compte ce que la personne a
    * choisi, et `formes()` les prend par un modulo, ce qui n'a jamais demandé
    * un nombre fixe.
@@ -266,6 +310,7 @@ export interface Mesure {
 /* ---------- données ------------------------------------------------------- */
 
 export const PALETTES: Readonly<Record<IdPalette, Palette>> = {
+  /* Les onze d'origine, du plus clair au plus sombre. */
   lime: { fr: 'Lime & crème', en: 'Lime & cream', fond: '#F7F3E6', couleurs: ['#DFF478', '#92BAD5', '#17243F', '#FF6648'] },
   soleil: { fr: 'Soleil', en: 'Sun', fond: '#F6E6B4', couleurs: ['#EFA22B', '#17243F', '#788CE3', '#F7F3E6'] },
   argile: { fr: 'Argile', en: 'Clay', fond: '#F0E2D2', couleurs: ['#C9552F', '#17243F', '#E9B44C', '#788CE3'] },
@@ -277,12 +322,122 @@ export const PALETTES: Readonly<Record<IdPalette, Palette>> = {
   nuit: { fr: 'Nuit', en: 'Night', fond: '#17243F', couleurs: ['#788CE3', '#DFF478', '#92BAD5', '#F7F3E6'] },
   orage: { fr: 'Orage', en: 'Storm', fond: '#1D2140', couleurs: ['#788CE3', '#FF6648', '#92BAD5', '#F7F3E6'] },
   encre: { fr: 'Encre', en: 'Ink', fond: '#101A2E', couleurs: ['#F7F3E6', '#92BAD5', '#DFF478', '#FF6648'] },
+
+  /* Les saisons. Octobre est le mois où elles ont été ajoutées, et Halloween
+     la nuit qui le ferme. */
+  octobre: { fr: 'Octobre', en: 'October', fond: '#F4E4C8', couleurs: ['#C9551A', '#5C1A2A', '#F0B93A', '#3A7C6B'] },
+  automne: { fr: 'Automne', en: 'Autumn', fond: '#EFDCC0', couleurs: ['#B4491F', '#E4B04A', '#4F2D1E', '#2F5D5A'] },
+  hiver: { fr: 'Hiver', en: 'Winter', fond: '#E6EDF3', couleurs: ['#2B4468', '#8DB2CF', '#B1384A', '#141C2B'] },
+  printemps: { fr: 'Printemps', en: 'Spring', fond: '#F4F6E2', couleurs: ['#3F8F3A', '#F08BA8', '#6FB9E3', '#F2D24B'] },
+  ete: { fr: 'Été', en: 'Summer', fond: '#FFF2D9', couleurs: ['#FFB81F', '#10A2B3', '#FF5F45', '#0D3B5C'] },
+  halloween: { fr: 'Halloween', en: 'Halloween', fond: '#1B1420', couleurs: ['#FF7A1A', '#9A5CC6', '#D6F560', '#F3E9D2'] },
+
+  /* Les rouges, du plus sombre au plus tendre, puis le coquelicot qui tranche. */
+  bordeaux: { fr: 'Bordeaux', en: 'Burgundy', fond: '#3A0F1B', couleurs: ['#D24A5E', '#EE8F9B', '#FAEBDD', '#E79B5B'] },
+  rubis: { fr: 'Rubis', en: 'Ruby', fond: '#F8EAE3', couleurs: ['#B3202F', '#E8606A', '#4A0E1A', '#F6C94F'] },
+  fraise: { fr: 'Fraise', en: 'Strawberry', fond: '#FBE9E4', couleurs: ['#E5484D', '#F59A8A', '#7A1F2B', '#F4D06F'] },
+  amour: { fr: 'Amour', en: 'Love', fond: '#FFF3F6', couleurs: ['#D9366F', '#F59BB5', '#6E0F33', '#F2C14E'] },
+  coquelicot: { fr: 'Coquelicot', en: 'Poppy', fond: '#F8EFE2', couleurs: ['#E5322D', '#1E1B1B', '#F29B80', '#F0C24B'] },
+
+  /* Les verts : le gris des sauges, le vif des pistaches, le plein des
+     feuillages, puis les deux profonds. */
+  sauge: { fr: 'Sauge', en: 'Sage', fond: '#EEF1E6', couleurs: ['#8AA17A', '#4F6B4A', '#D9A441', '#243324'] },
+  pistache: { fr: 'Pistache', en: 'Pistachio', fond: '#F2F6DC', couleurs: ['#A3C95B', '#5C8A3A', '#D9577A', '#2F4A2B'] },
+  feuillage: { fr: 'Feuillage', en: 'Foliage', fond: '#EAF2E3', couleurs: ['#2E7D4F', '#7DBA6A', '#14452F', '#D7E86B'] },
+  foret: { fr: 'Forêt', en: 'Forest', fond: '#14261C', couleurs: ['#3E8F5C', '#8CCB86', '#FFF8E6', '#E3B04B'] },
+  emeraude: { fr: 'Émeraude', en: 'Emerald', fond: '#0E3B2E', couleurs: ['#22B07D', '#7CC4F0', '#F2EBD5', '#E8C15A'] },
+
+  /* Les bleus : l'eau claire, le cobalt, la glace, puis le large. */
+  lagon: { fr: 'Lagon', en: 'Lagoon', fond: '#DDF1EE', couleurs: ['#1FA3A8', '#0B5563', '#F4D58D', '#E8594A'] },
+  cobalt: { fr: 'Cobalt', en: 'Cobalt', fond: '#EEF1FA', couleurs: ['#2447C9', '#7C95F0', '#0B1B52', '#FFC857'] },
+  glacier: { fr: 'Glacier', en: 'Glacier', fond: '#EAF4F8', couleurs: ['#8FC1DE', '#3C7DA6', '#16435F', '#F2A65A'] },
+  marine: { fr: 'Marine', en: 'Navy', fond: '#0B1F3A', couleurs: ['#3E7CB1', '#9CC6E6', '#F2E9D8', '#F2A65A'] },
+  piscine: { fr: 'Piscine', en: 'Pool', fond: '#E0F7FA', couleurs: ['#00B8D9', '#0077B6', '#FFD166', '#EF476F'] },
+
+  /* Les roses, de la confiserie à la fleur. */
+  dragee: { fr: 'Dragée', en: 'Candy', fond: '#FDEBF1', couleurs: ['#F27AA5', '#B8325F', '#5C2A5E', '#F4C542'] },
+  fuchsia: { fr: 'Fuchsia', en: 'Fuchsia', fond: '#FFF0F6', couleurs: ['#D81B84', '#FF8DC0', '#5A0E3A', '#FFD43B'] },
+  pivoine: { fr: 'Pivoine', en: 'Peony', fond: '#F8E6E7', couleurs: ['#E7869A', '#B83D63', '#E8B04A', '#4A1D30'] },
+  flamant: { fr: 'Flamant', en: 'Flamingo', fond: '#FFEFE9', couleurs: ['#FF8C98', '#C81E45', '#3FA7C9', '#2E2142'] },
+
+  /* Pensées pour le daltonisme. Ici les teintes ne se distinguent pas
+     seulement par leur couleur : elles diffèrent aussi par leur clarté, si bien
+     que l'image se lit même quand le rouge et le vert se confondent.
+     Okabe-Ito est la suite de huit teintes que Masataka Okabe et Kei Ito ont
+     publiée en 2008 pour cet usage. */
+  okabe: { fr: 'Okabe-Ito', en: 'Okabe-Ito', fond: '#F5F2EA', couleurs: ['#0072B2', '#E69F00', '#009E73', '#56B4E9'] },
+  okabenuit: { fr: 'Okabe-Ito nuit', en: 'Okabe-Ito night', fond: '#14181F', couleurs: ['#56B4E9', '#F0E442', '#D55E00', '#CC79A7'] },
+  bleuambre: { fr: 'Bleu & ambre', en: 'Blue & amber', fond: '#F7F1E3', couleurs: ['#1F3FA8', '#F2A900', '#0E1B4D', '#7EA0F2'] },
+  graphite: { fr: 'Graphite', en: 'Graphite', fond: '#EDEDEA', couleurs: ['#1A1A1A', '#5A5A58', '#A8A8A4', '#F0562F'] },
+  cafe: { fr: 'Café', en: 'Coffee', fond: '#F4EADB', couleurs: ['#6F4E37', '#C4956A', '#2B1D14', '#3F7F7A'] },
+
+  /* Les mélanges : des accords qui ne rentrent dans aucune couleur. */
+  lavande: { fr: 'Lavande', en: 'Lavender', fond: '#EDE8F7', couleurs: ['#9C86D6', '#5B43A6', '#E8B84A', '#2A1F5A'] },
+  bauhaus: { fr: 'Bauhaus', en: 'Bauhaus', fond: '#F2EDE1', couleurs: ['#D7263D', '#1B4B9B', '#F6B200', '#111111'] },
+  terrazzo: { fr: 'Terrazzo', en: 'Terrazzo', fond: '#F1EAE0', couleurs: ['#E4572E', '#29335C', '#F3A712', '#A8C686'] },
+  desert: { fr: 'Désert', en: 'Desert', fond: '#F1DEC6', couleurs: ['#C8603A', '#8B4A3A', '#F0C98A', '#5E7F83'] },
+  crepuscule: { fr: 'Crépuscule', en: 'Dusk', fond: '#241B3A', couleurs: ['#F2603F', '#FFD36E', '#B96FB5', '#F4E9DD'] },
+  neon: { fr: 'Néon', en: 'Neon', fond: '#0E0E1A', couleurs: ['#33F5C0', '#E8266F', '#F9F871', '#7B72FF'] },
 }
 
-/** L'ordre d'affichage, du plus clair au plus sombre. */
-export const ORDRE_PALETTES: readonly IdPalette[] = [
-  'lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'ardoise', 'prune', 'nuit', 'orage', 'encre',
+/**
+ * Les groupes de palettes, dans l'ordre des onglets, et ce que chacun
+ * rassemble. L'ordre des identifiants dans un groupe est celui de la grille.
+ *
+ * Chaque palette livrée est dans un groupe, et dans un seul : le test du moteur
+ * le vérifie, puisque `ORDRE_PALETTES` en dérive et que l'onglet d'une palette
+ * qui ne serait nulle part n'existerait pas.
+ */
+export type GroupePalettes =
+  | 'classiques' | 'saisons' | 'rouges' | 'verts' | 'bleus' | 'roses' | 'accessibles' | 'melanges'
+
+export const GROUPES_PALETTES: readonly {
+  id: GroupePalettes
+  fr: string
+  en: string
+  ids: readonly IdPalette[]
+}[] = [
+  {
+    id: 'classiques', fr: 'Classiques', en: 'Classics',
+    ids: ['lime', 'soleil', 'argile', 'corail', 'menthe', 'ciel', 'ardoise', 'prune', 'nuit', 'orage', 'encre'],
+  },
+  {
+    id: 'saisons', fr: 'Saisons', en: 'Seasons',
+    ids: ['octobre', 'automne', 'hiver', 'printemps', 'ete', 'halloween'],
+  },
+  {
+    id: 'rouges', fr: 'Rouges', en: 'Reds',
+    ids: ['bordeaux', 'rubis', 'fraise', 'amour', 'coquelicot'],
+  },
+  {
+    id: 'verts', fr: 'Verts', en: 'Greens',
+    ids: ['sauge', 'pistache', 'feuillage', 'foret', 'emeraude'],
+  },
+  {
+    id: 'bleus', fr: 'Bleus', en: 'Blues',
+    ids: ['lagon', 'cobalt', 'glacier', 'marine', 'piscine'],
+  },
+  {
+    id: 'roses', fr: 'Roses', en: 'Pinks',
+    ids: ['dragee', 'fuchsia', 'pivoine', 'flamant'],
+  },
+  {
+    id: 'accessibles', fr: 'Accessibles', en: 'Accessible',
+    ids: ['okabe', 'okabenuit', 'bleuambre', 'graphite', 'cafe'],
+  },
+  {
+    id: 'melanges', fr: 'Mélanges', en: 'Mixes',
+    ids: ['lavande', 'bauhaus', 'terrazzo', 'desert', 'crepuscule', 'neon'],
+  },
 ]
+
+/** L'ordre d'affichage : les groupes bout à bout, les onze d'origine en tête. */
+export const ORDRE_PALETTES: readonly IdPalette[] = GROUPES_PALETTES.flatMap((g) => g.ids)
+
+/** Le groupe d'une palette livrée, pour ouvrir l'onglet qui la contient. */
+export function groupeDePalette(id: IdPaletteQuelconque): GroupePalettes | undefined {
+  return GROUPES_PALETTES.find((g) => (g.ids as readonly string[]).includes(id))?.id
+}
 
 /**
  * Les quatre-vingts familles, dans l'ordre de la liste : les quatre groupes
@@ -456,13 +611,13 @@ export function estFamille(valeur: unknown): valeur is IdFamille {
   return FAMILLES.some((famille) => famille.id === valeur)
 }
 
-/** Vrai pour les onze palettes livrées, et pour elles seules. */
+/** Vrai pour les palettes livrées, et pour elles seules. */
 export function estPaletteLivree(valeur: unknown): valeur is IdPalette {
   return ORDRE_PALETTES.includes(valeur as IdPalette)
 }
 
 /**
- * Vrai pour les onze palettes livrées et pour celles qui sont enregistrées.
+ * Vrai pour les palettes livrées et pour celles qui sont enregistrées.
  *
  * Le registre fait donc partie de la liste blanche : une adresse qui nomme une
  * palette composée que cet appareil ne connaît pas retombe sur la valeur par
@@ -546,14 +701,14 @@ export function luminanceHex(hex: string): number {
  *
  * Une encre de la palette, jamais une couleur inventée : le produit promet
  * qu'une palette dit toutes les couleurs du fichier, et un noir ajouté à
- * l'impression aurait fait mentir les onze pastilles du panneau comme celles
+ * l'impression aurait fait mentir les pastilles du panneau comme celles
  * qu'on compose soi-même.
  *
  * Celle qui est la plus loin du fond en luminance, et c'est le point : le
  * liseré ne se voit que contre le fond, puisque c'est là qu'il dépasse.
- * Prendre la plus sombre aurait marché sur les huit palettes claires et
- * disparu sur les trois autres, où le fond est déjà la couleur la plus sombre
- * du lot ; la plus éloignée se voit sur les onze, et rend le liseré clair sur
+ * Prendre la plus sombre aurait marché sur les palettes claires et
+ * disparu sur les palettes de nuit, où le fond est déjà la couleur la plus
+ * sombre du lot ; la plus éloignée se voit partout, et rend le liseré clair sur
  * les palettes de nuit, ce qu'une presse fait aussi bien qu'un liseré sombre.
  */
 export function encreDeDessous(P: Palette): string {
