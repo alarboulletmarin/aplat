@@ -13,8 +13,8 @@
  * champ lisse dit, en chaque point, quelle couleur de la palette passe et
  * combien de papier elle couvre, et chaque cellule en tire un point.
  *
- * Le sablier pince une famille de filets parallèles autour d'une gorge, sur
- * un fond qui fond d'une couleur à l'autre par paliers serrés.
+ * Le sablier tend des filets autour de deux lobes sombres qui entrent par
+ * les bords, et laisse leur pli dire où le fond s'éclaire.
  *
  * Le champ du drapé est une fonction pure de (x, y), aux phases près, tirées
  * une fois ; celui du moiré se juge cellule par cellule sur une grille
@@ -24,7 +24,8 @@
  */
 import type { Alea, Densite, Pinceau } from './moteur'
 import {
-  bruiteur, duClairAuSombre, lisse, peindreChampSeuille, type Point, rampe, ruban,
+  bruiteur, duClairAuSombre, lisse, melangeHex, peindreChampSeuille, type Point, rampe,
+  ruban,
 } from './trace'
 
 export const IDS_TRAMES = ['drape', 'moire', 'aurore', 'sablier'] as const
@@ -221,88 +222,193 @@ function aurore(
   }
 }
 
+/** Une teinte hexadécimale en teinte, saturation, luminosité. */
+function versTsl(hex: string): [number, number, number] {
+  const r = Number.parseInt(hex.slice(1, 3), 16) / 255
+  const g = Number.parseInt(hex.slice(3, 5), 16) / 255
+  const b = Number.parseInt(hex.slice(5, 7), 16) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const l = (max + min) / 2
+  if (max === min) return [0, 0, l]
+  const d = max - min
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return [h * 60, s, l]
+}
+
+/** Le chemin inverse, vers une teinte hexadécimale. */
+function depuisTsl(h: number, s: number, l: number): string {
+  const k = (n: number) => (n + h / 30) % 12
+  const a = s * Math.min(l, 1 - l)
+  const canal = (n: number) => {
+    const v = l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))
+    return Math.round(v * 255).toString(16).padStart(2, '0')
+  }
+  return `#${canal(0)}${canal(8)}${canal(4)}`.toUpperCase()
+}
+
 /* ---------- sablier ---------------------------------------------------------- */
 
 /**
- * Des filets qui se pincent autour d'une gorge, sur une nappe sans arête.
+ * Un tunnel de filets : deux lobes sombres qui entrent par les bords, et des
+ * fils tendus autour d'eux.
  *
- * Chaque filet est la courbe p = c (1 + k (cosh(q / s) - 1)) dans le repère de
- * la gorge, légèrement incliné : droit au milieu, il s'ouvre vers les bords en
- * haut et en bas, d'autant plus vite qu'il partait loin de l'axe. Les filets
- * sont régulièrement espacés au col, et c'est leur seul espacement régulier :
- * l'oeil lit un volume, un tube vu de face, là où il n'y a que des traits.
+ * Chaque lobe a un noyau, une demi-droite couchée qui vient du bord de
+ * l'image et s'arrête avant le milieu. La distance à ce noyau se mesure dans une norme un
+ * peu plus carrée que l'euclidienne : ses lignes de niveau sont des courbes
+ * parallèles au noyau, horizontales au-dessus, debout à côté, horizontales
+ * dessous, avec des coins larges et francs. Les deux familles se raccordent
+ * par le champ g = dG / (dG + dD), nul sur le noyau de gauche, un sur celui de
+ * droite : près d'un lobe ses lignes sont les parallèles à son noyau, au
+ * milieu elles sont droites, et vers le haut et le bas elles s'écartent en
+ * éventail. Ce sont elles, les filets, régulièrement espacés au col.
  *
- * Le fond est le seul de la liste à vouloir de la douceur. Il n'est pas un
- * dégradé : un champ lisse, rapporté au même repère que les filets, est
- * seuillé en paliers serrés, chacun un aplat pris sur la rampe de la palette,
- * du plus sombre au plus clair. Deux masses sombres de part et d'autre du col,
- * une veine claire le long de l'axe ; le grain casse les marches qui restent.
+ * La lumière sort du même champ. Le noyau est un creux noir ; une bande
+ * éclairée l'entoure à quelque distance, comme le bord d'un tunnel qui prend
+ * le jour ; le milieu reste en demi-teinte. Comme la lumière ne dépend que de
+ * g, elle est la même tout le long d'un filet, et chaque filet en tire son
+ * éclat : il brille dans la bande, il se perd près du creux.
  *
- * Tous les tirages sont faits avant les boucles ; le pas d'échantillonnage
- * des filets est rapporté à `unite`, jamais à la résolution.
+ * Deux humeurs, tirées par la graine. La nuit reste dans la couleur la plus
+ * sombre de la palette, presque monochrome. La nacre part de la plus claire,
+ * et des voiles irisés, très dilués, longent le bord des lobes comme le reflet
+ * changeant d'une coquille.
+ *
+ * Le fond n'est pas un dégradé : chaque champ est seuillé en paliers serrés,
+ * un aplat chacun, dont le bord est interpolé entre deux échantillons d'une
+ * même rangée. Le grain casse ce qui reste de marche. Tous les tirages sont
+ * faits avant les boucles ; les filets sont suivis pas à pas le long de leur
+ * ligne de niveau, à un pas rapporté à `unite`.
  */
 function sablier(
   ctx: Pinceau, W: number, H: number, C: readonly string[],
   densite: Densite, rnd: Alea, unite: number,
 ): void {
-  const filets = [18, 26, 36][densite]
-  const cx = W * (0.42 + 0.16 * rnd())
-  const cy = H * (0.4 + 0.2 * rnd())
-  const inclinaison = (rnd() - 0.5) * 0.24
-  const cos = Math.cos(inclinaison)
-  const sin = Math.sin(inclinaison)
-  /* Le pincement n'est pas le même en haut et en bas : une gorge parfaitement
-     symétrique se lit comme un schéma. */
-  const sHaut = unite * (0.26 + 0.12 * rnd())
-  const sBas = unite * (0.26 + 0.12 * rnd())
-  const evasement = 0.7 + 0.5 * rnd()
-  const lobe = 0.62 + 0.22 * rnd()
+  const filets = [56, 76, 100][densite]
+  /* Les deux noyaux : où ils s'arrêtent, à quelle hauteur ils entrent.
+     Jamais tout à fait symétriques. */
+  const pointeG = W * (0.14 + 0.1 * rnd())
+  const pointeD = W * (0.76 + 0.1 * rnd())
+  const hauteurG = H * (0.44 + 0.12 * rnd())
+  const hauteurD = H * (0.44 + 0.12 * rnd())
+  /* Le noyau n'a pas d'épaisseur : c'est une demi-droite, et les filets les
+     plus profonds sont des épingles qui la serrent. La distance est étirée
+     en hauteur, un peu plus sur un écran debout : le tunnel y prend la
+     hauteur au lieu de laisser des éventails vides en haut et en bas. */
+  const debout = 1 + 0.9 * Math.max(0, H / W - 1)
+  const etireG = debout * (1 + 0.5 * rnd())
+  const etireD = debout * (1 + 0.5 * rnd())
+  const NORME = 2.6
+  const nuit = rnd() < 0.5
+  const cote_lumiere = (rnd() - 0.5) * 0.5
   const bruit = bruiteur(Math.floor(rnd() * 1e9))
 
-  /* Du repère de la gorge (p en travers, q le long de l'axe) à l'image. */
-  const versImage = (p: number, q: number): Point => [cx + p * cos - q * sin, cy + p * sin + q * cos]
+  /* La distance à un noyau, dans la norme un peu carrée. Le noyau de gauche
+     regarde vers la droite, celui de droite vers la gauche. */
+  const distance = (x: number, y: number, pointe: number, hauteur: number, etire: number,
+    sens: 1 | -1): number => {
+    const dx = Math.max(0, (x - pointe) * sens)
+    const dy = Math.abs(y - hauteur) / etire
+    return dx === 0 || dy === 0 ? dx + dy : (dx ** NORME + dy ** NORME) ** (1 / NORME)
+  }
+  const champ = (x: number, y: number): number => {
+    const g = distance(x, y, pointeG, hauteurG, etireG, 1)
+    const d = distance(x, y, pointeD, hauteurD, etireD, -1)
+    return g + d === 0 ? 0.5 : g / (g + d)
+  }
+  /* L'ombre du creux, sans bord : elle monte à l'approche d'un noyau, et
+     les filets qui s'y emboîtent s'y perdent. De 0 loin des lobes à 1 sur un
+     noyau. */
+  const portee_ombre = unite * 0.24
+  const creux = (x: number, y: number): number => {
+    const g = distance(x, y, pointeG, hauteurG, etireG, 1) / portee_ombre
+    const d = distance(x, y, pointeD, hauteurD, etireD, -1) / portee_ombre
+    return Math.exp(-(Math.min(g, d) ** 2))
+  }
+  /* La lumière d'un filet, de 0 à 1, selon sa place entre les deux lobes. */
+  const eclat = (g: number): number => {
+    const e = 2 * Math.min(g, 1 - g)
+    const cote = 1 + cote_lumiere * (g < 0.5 ? 1 : -1) * Math.min(1, Math.abs(g - 0.5) * 8)
+    return Math.max(0, Math.min(1, (0.1 + 0.7 * Math.exp(-(((e - 0.34) / 0.24) ** 2)) + 0.22 * e) * cote))
+  }
 
-  /* La nappe ne parcourt pas toute la palette : une moitié de la rampe,
-     sombre ou claire selon la graine, pour que le fond reste un fond et que
-     les filets portent le dessin. */
-  const teintes = duClairAuSombre(C).reverse()
-  const sombre = rnd() < 0.5
-  const depart = sombre ? 0 : 0.42
-  const etendue = 0.5
+  /* La palette est d'abord éteinte : un satin n'a pas la couleur franche
+     d'un aplat, il a une couleur et son gris. */
+  const eteindre = (teinte: string, part: number): string => {
+    const canal = (i: number) => Number.parseInt(teinte.slice(1 + i * 2, 3 + i * 2), 16)
+    const gris = Math.round((canal(0) + canal(1) + canal(2)) / 3).toString(16).padStart(2, '0')
+    return melangeHex(teinte, `#${gris}${gris}${gris}`, part)
+  }
+  /* La teinte tournée de `degres` autour du cercle chromatique, à
+     saturation `saturation`, luminosité gardée. */
+  const tourner = (teinte: string, degres: number, saturation: number): string => {
+    const [h, , l] = versTsl(teinte)
+    return depuisTsl((h + degres) % 360, saturation, l)
+  }
+  const teintes = duClairAuSombre(C)
+  const clair = eteindre(teintes[0], nuit ? 0.3 : 0.55)
+  const sombre = eteindre(teintes[teintes.length - 1], 0.35)
+  const milieu = eteindre(teintes[1] ?? clair, 0.25)
+  const noir = '#000000'
+  const etapes = nuit
+    ? [
+        melangeHex(sombre, noir, 0.78), melangeHex(sombre, noir, 0.6),
+        melangeHex(sombre, noir, 0.4), melangeHex(sombre, noir, 0.18), sombre,
+        melangeHex(sombre, milieu, 0.14), melangeHex(sombre, clair, 0.26),
+      ]
+    : (() => {
+        const papier = melangeHex(clair, sombre, 0.24)
+        return [
+          melangeHex(papier, sombre, 0.5), melangeHex(papier, sombre, 0.32),
+          melangeHex(papier, sombre, 0.14), papier, melangeHex(papier, clair, 0.45),
+          melangeHex(papier, clair, 0.8),
+        ]
+      })()
+  const encre = nuit ? melangeHex(sombre, clair, 0.66) : melangeHex(teintes[0], '#FFFFFF', 0.75)
 
-  /* La nappe. Le champ se lit en unités du petit côté, dans le repère de la
-     gorge, pour que les masses suivent les filets quand la gorge penche. Il
-     est échantillonné en colonnes larges et en rangées fines : le bord d'un
-     palier est interpolé entre deux échantillons d'une même rangée, si bien
-     que seule la hauteur de rangée peut faire marche. */
-  const colonnes = 64
+  /* Les champs du fond, échantillonnés en colonnes larges et en rangées
+     fines : le bord d'un palier est interpolé entre deux échantillons d'une
+     même rangée, si bien que seule la hauteur de rangée pourrait faire marche. */
+  const colonnes = 96
   const cote = W / (colonnes - 1)
-  const hauteur = unite / 160
+  const hauteur = unite / 180
   const rangees = Math.ceil(H / hauteur)
-  const champ = new Float32Array(colonnes * rangees)
+  const lumiere = new Float32Array(colonnes * rangees)
+  const REFLETS = 6
+  const reflets = Array.from({ length: REFLETS }, () => new Float32Array(colonnes * rangees))
+  const tour = rnd() * REFLETS
   for (let r = 0; r < rangees; r += 1) {
     for (let c = 0; c < colonnes; c += 1) {
-      const dx = cote * c - cx
-      const dy = hauteur * (r + 0.5) - cy
-      const p = (dx * cos + dy * sin) / unite
-      const q = (-dx * sin + dy * cos) / unite
-      const masses = Math.exp(-(((Math.abs(p) - lobe) / 0.36) ** 2) - (q / 0.5) ** 2)
-      const veine = Math.exp(-((p / 0.22) ** 2)) * (0.6 + 0.4 * (1 - Math.exp(-((q / 0.55) ** 2))))
-      const houle = bruit(p * 1.4 + 3.1, q * 1.4 + 7.7) - 0.5
-      champ[r * colonnes + c] = Math.max(0, Math.min(1, 0.55 + 0.32 * veine - 0.5 * masses + 0.25 * houle))
+      const i = r * colonnes + c
+      const x = cote * c
+      const y = hauteur * (r + 0.5)
+      const g = champ(x, y)
+      /* La moire du satin, lue le long des filets. */
+      const moire = bruit(g * 9 + 3.1, (y / unite) * 0.8 + 7.7) - 0.5
+      lumiere[i] = Math.max(0, Math.min(1,
+        0.04 + 0.9 * eclat(g) * (1 - 0.92 * creux(x, y)) + 0.06 * moire))
+
+      if (nuit) continue
+      /* La nacre : un voile qui longe le bord des lobes et traîne un peu
+         partout, et dont la teinte tourne lentement d'un endroit à l'autre.
+         Chaque reflet ne prend que sa part du tour. */
+      const e = 2 * Math.min(g, 1 - g)
+      const voile = (0.8 * Math.exp(-(((e - 0.2) / 0.16) ** 2))
+        + 0.3 * bruit(x / unite * 1.1 + 11.3, y / unite * 1.1 + 2.9)) * (1 - 0.7 * creux(x, y))
+      const teinte = (tour + e * 7 + (y / unite) * 1.3
+        + 2.2 * bruit(x / unite * 0.9 + 21.7, y / unite * 0.9 + 5.3)) % REFLETS
+      for (let j = 0; j < REFLETS; j += 1) {
+        const ecartTeinte = Math.min(Math.abs(teinte - j), REFLETS - Math.abs(teinte - j))
+        reflets[j][i] = voile * Math.max(0, 1 - ecartTeinte / 1.2)
+      }
     }
   }
 
-  /* Chaque palier est un seul chemin, un rectangle par traversée de rangée,
-     un peu plus haut que la rangée pour qu'aucun fil de fond ne passe entre
-     deux. Les paliers se peignent du plus bas au plus haut, chacun
-     recouvrant ce qui le dépasse. */
-  const PALIERS = 32
-  ctx.fillStyle = rampe(teintes, depart)
-  ctx.fillRect(0, 0, W, H)
-  for (let k = 1; k < PALIERS; k += 1) {
-    const seuil = k / PALIERS
-    ctx.fillStyle = rampe(teintes, depart + etendue * (k + 0.5) / PALIERS)
+  /* Une nappe : un champ seuillé, un seul chemin, un rectangle par traversée
+     de rangée, un peu plus haut que la rangée pour qu'aucun fil de fond ne
+     passe entre deux. */
+  const nappe = (valeurs: Float32Array, seuil: number): void => {
     ctx.beginPath()
     for (let r = 0; r < rangees; r += 1) {
       const ligne = r * colonnes
@@ -310,16 +416,16 @@ function sablier(
       const y1 = (r + 1) * hauteur + hauteur * 0.1
       /* Où la rangée franchit le seuil entre deux échantillons. */
       const franchit = (c: number): number => {
-        const a = champ[ligne + c - 1]
-        const b = champ[ligne + c]
-        return cote * (c - 1 + (seuil - a) / (b - a))
+        const g = valeurs[ligne + c - 1]
+        const d = valeurs[ligne + c]
+        return cote * (c - 1 + (seuil - g) / (d - g))
       }
-      let debut = champ[ligne] > seuil ? 0 : -1
-      for (let c = 1; c < colonnes; c += 1) {
-        const plein = champ[ligne + c] > seuil
+      let debut = valeurs[ligne] > seuil ? 0 : -1
+      for (let c = 1; c <= colonnes; c += 1) {
+        const plein = c < colonnes && valeurs[ligne + c] > seuil
         if (plein && debut < 0) debut = franchit(c)
         if (!plein && debut >= 0) {
-          const fin = franchit(c)
+          const fin = c < colonnes ? franchit(c) : W
           ctx.moveTo(debut, y0)
           ctx.lineTo(fin, y0)
           ctx.lineTo(fin, y1)
@@ -328,44 +434,87 @@ function sablier(
           debut = -1
         }
       }
-      if (debut >= 0) {
-        ctx.moveTo(debut, y0)
-        ctx.lineTo(W, y0)
-        ctx.lineTo(W, y1)
-        ctx.lineTo(debut, y1)
-        ctx.closePath()
-      }
     }
     ctx.fill()
   }
 
-  /* Les filets, du plus clair de la palette. Au-delà de `portee`, plus rien
-     n'est dans l'image, quelle que soit l'inclinaison. */
-  const portee = Math.hypot(W, H)
-  const pas = unite / filets
-  const N = Math.ceil(portee / pas)
-  const segment = unite * 0.01
-  const epaisseur = unite * 0.0026
-  ctx.fillStyle = teintes[teintes.length - 1]
-  for (let i = -N; i <= N; i += 1) {
-    const c0 = i * pas
-    const moitie = (signe: 1 | -1): Point[] => {
-      const s = signe > 0 ? sBas : sHaut
-      const points: Point[] = []
-      let q = 0
-      for (let garde = 0; garde < 4000; garde += 1) {
-        const p = c0 * (1 + evasement * (Math.cosh(q / s) - 1))
-        points.push(versImage(p, signe * q))
-        if (Math.abs(p) > portee || q > portee) break
-        const pente = (c0 * evasement * Math.sinh(q / s)) / s
-        q += segment / Math.sqrt(1 + pente * pente)
-      }
-      return points
+  const PALIERS = 64
+  ctx.fillStyle = rampe(etapes, 0)
+  ctx.fillRect(0, 0, W, H)
+  for (let k = 1; k < PALIERS; k += 1) {
+    ctx.fillStyle = rampe(etapes, (k + 0.5) / PALIERS)
+    nappe(lumiere, k / PALIERS)
+  }
+
+  /* Les reflets se posent en voiles fins empilés : chaque palier franchi
+     ajoute un peu de la teinte, et le bord du voile se perd dans le papier. */
+  if (!nuit) {
+    const papier = rampe(etapes, 0.5)
+    const VOILES = 10
+    ctx.globalAlpha = 0.04
+    for (let j = 0; j < REFLETS; j += 1) {
+      ctx.fillStyle = tourner(papier, (j * 360) / REFLETS, 0.6)
+      for (let k = 1; k <= VOILES; k += 1) nappe(reflets[j], k / (VOILES + 1))
     }
-    const points = [...moitie(-1).reverse(), ...moitie(1).slice(1)]
-    /* Les filets loin de l'axe s'effacent un peu : la lumière tient au col. */
-    ctx.globalAlpha = 0.45 + 0.4 * Math.exp(-((c0 / unite) ** 2))
-    ruban(ctx, points, epaisseur)
+    ctx.globalAlpha = 1
+  }
+
+  /* Les filets : chacun est une ligne de niveau de g, suivie pas à pas dans
+     les deux sens depuis le col, et ramenée sur son niveau à chaque pas. Ils
+     partent régulièrement espacés de la rangée qui joint les deux pointes. */
+  const pas = W / filets
+  const largeur = pointeD - pointeG
+  const yCol = (hauteurG + hauteurD) / 2
+  const marge = unite * 0.05
+  const segment = unite * 0.004
+  const h = unite * 1e-3
+  const epaisseurFilet = W * 0.0016
+  const suivre = (niveau: number, x0: number, sens: 1 | -1): Point[] => {
+    const points: Point[] = []
+    let x = x0
+    let y = yCol
+    for (let garde = 0; garde < 20000; garde += 1) {
+      points.push([x, y])
+      if (x < -marge || x > W + marge || y < -marge || y > H + marge) break
+      /* Un filet qui fait le tour de son noyau sans sortir se referme. */
+      if (garde > 40 && Math.hypot(x - x0, y - yCol) < segment * 1.5) break
+      const gx = (champ(x + h, y) - champ(x - h, y)) / (2 * h)
+      const gy = (champ(x, y + h) - champ(x, y - h)) / (2 * h)
+      const n = Math.hypot(gx, gy) || 1
+      /* Le long de la ligne : perpendiculaire au gradient, vers le haut ou
+         vers le bas selon `sens`. */
+      let tx = -gy / n
+      let ty = gx / n
+      if (ty * sens < 0 || (garde === 0 && ty === 0)) {
+        tx = -tx
+        ty = -ty
+      }
+      const precedent = points.length > 1 ? points[points.length - 2] : null
+      if (precedent && (x - precedent[0]) * tx + (y - precedent[1]) * ty < 0 && garde > 0) {
+        tx = -tx
+        ty = -ty
+      }
+      x += tx * segment
+      y += ty * segment
+      /* Retour sur le niveau, un pas de Newton. */
+      const ecart = champ(x, y) - niveau
+      const gx2 = (champ(x + h, y) - champ(x - h, y)) / (2 * h)
+      const gy2 = (champ(x, y + h) - champ(x, y - h)) / (2 * h)
+      const n2 = gx2 * gx2 + gy2 * gy2
+      if (n2 > 0) {
+        x -= (ecart * gx2) / n2
+        y -= (ecart * gy2) / n2
+      }
+    }
+    return points
+  }
+  ctx.fillStyle = encre
+  for (let k = 0; (k + 0.5) * pas < largeur; k += 1) {
+    const x0 = pointeG + (k + 0.5) * pas
+    const niveau = champ(x0, yCol)
+    const points = [...suivre(niveau, x0, -1).reverse(), ...suivre(niveau, x0, 1).slice(1)]
+    ctx.globalAlpha = nuit ? 0.06 + 0.66 * eclat(niveau) : 0.3 + 0.65 * eclat(niveau)
+    ruban(ctx, points, epaisseurFilet)
     ctx.fill()
   }
   ctx.globalAlpha = 1

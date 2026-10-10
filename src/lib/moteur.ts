@@ -440,7 +440,7 @@ export function groupeDePalette(id: IdPaletteQuelconque): GroupePalettes | undef
 }
 
 /**
- * Les quatre-vingts familles, dans l'ordre de la liste : les quatre groupes
+ * Les quatre-vingt-une familles, dans l'ordre de la liste : les quatre groupes
  * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
  * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
  * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
