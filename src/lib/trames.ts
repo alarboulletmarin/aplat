@@ -288,18 +288,22 @@ function sablier(
   const filets = [56, 76, 100][densite]
   /* Les deux noyaux : où ils s'arrêtent, à quelle hauteur ils entrent.
      Jamais tout à fait symétriques. */
-  const pointeG = W * (0.14 + 0.1 * rnd())
-  const pointeD = W * (0.76 + 0.1 * rnd())
+  const pointeG = W * (0.24 + 0.08 * rnd())
+  const pointeD = W * (0.68 + 0.08 * rnd())
   const hauteurG = H * (0.44 + 0.12 * rnd())
   const hauteurD = H * (0.44 + 0.12 * rnd())
   /* Le noyau n'a pas d'épaisseur : c'est une demi-droite, et les filets les
      plus profonds sont des épingles qui la serrent. La distance est étirée
      en hauteur, un peu plus sur un écran debout : le tunnel y prend la
      hauteur au lieu de laisser des éventails vides en haut et en bas. */
-  const debout = 1 + 0.9 * Math.max(0, H / W - 1)
-  const etireG = debout * (1 + 0.5 * rnd())
-  const etireD = debout * (1 + 0.5 * rnd())
-  const NORME = 2.6
+  const demiCol = (pointeD - pointeG) / 2
+  /* Les bras horizontaux des filets du milieu longent le haut et le bas de
+     l'image ; sur un écran debout, l'étirement est plafonné, sans quoi le
+     col se pincerait en losange. */
+  const etirement = Math.min(2.2, H / 2 / demiCol)
+  const etireG = etirement * (0.8 + 0.3 * rnd())
+  const etireD = etirement * (0.8 + 0.3 * rnd())
+  const NORME = 3
   const nuit = rnd() < 0.5
   const cote_lumiere = (rnd() - 0.5) * 0.5
   const bruit = bruiteur(Math.floor(rnd() * 1e9))
@@ -320,7 +324,7 @@ function sablier(
   /* L'ombre du creux, sans bord : elle monte à l'approche d'un noyau, et
      les filets qui s'y emboîtent s'y perdent. De 0 loin des lobes à 1 sur un
      noyau. */
-  const portee_ombre = unite * 0.24
+  const portee_ombre = unite * 0.3
   const creux = (x: number, y: number): number => {
     const g = distance(x, y, pointeG, hauteurG, etireG, 1) / portee_ombre
     const d = distance(x, y, pointeD, hauteurD, etireD, -1) / portee_ombre
@@ -330,7 +334,8 @@ function sablier(
   const eclat = (g: number): number => {
     const e = 2 * Math.min(g, 1 - g)
     const cote = 1 + cote_lumiere * (g < 0.5 ? 1 : -1) * Math.min(1, Math.abs(g - 0.5) * 8)
-    return Math.max(0, Math.min(1, (0.1 + 0.7 * Math.exp(-(((e - 0.34) / 0.24) ** 2)) + 0.22 * e) * cote))
+    return Math.max(0, Math.min(1,
+      (0.85 * Math.exp(-(((e - 0.3) / 0.2) ** 2)) + 0.38 * lisse(Math.min(1, e / 0.7))) * cote))
   }
 
   /* La palette est d'abord éteinte : un satin n'a pas la couleur franche
@@ -353,9 +358,9 @@ function sablier(
   const noir = '#000000'
   const etapes = nuit
     ? [
-        melangeHex(sombre, noir, 0.78), melangeHex(sombre, noir, 0.6),
-        melangeHex(sombre, noir, 0.4), melangeHex(sombre, noir, 0.18), sombre,
-        melangeHex(sombre, milieu, 0.14), melangeHex(sombre, clair, 0.26),
+        melangeHex(sombre, noir, 0.88), melangeHex(sombre, noir, 0.72),
+        melangeHex(sombre, noir, 0.48), melangeHex(sombre, noir, 0.2), sombre,
+        melangeHex(sombre, milieu, 0.18), melangeHex(sombre, clair, 0.34),
       ]
     : (() => {
         const papier = melangeHex(clair, sombre, 0.24)
@@ -365,7 +370,9 @@ function sablier(
           melangeHex(papier, clair, 0.8),
         ]
       })()
-  const encre = nuit ? melangeHex(sombre, clair, 0.66) : melangeHex(teintes[0], '#FFFFFF', 0.75)
+  /* Les filets sont presque blancs : une pointe de la palette, pas plus. */
+  const encre = nuit ? melangeHex(eteindre(teintes[0], 0.7), '#FFFFFF', 0.35)
+    : melangeHex(teintes[0], '#FFFFFF', 0.85)
 
   /* Les champs du fond, échantillonnés en colonnes larges et en rangées
      fines : le bord d'un palier est interpolé entre deux échantillons d'une
@@ -387,15 +394,15 @@ function sablier(
       /* La moire du satin, lue le long des filets. */
       const moire = bruit(g * 9 + 3.1, (y / unite) * 0.8 + 7.7) - 0.5
       lumiere[i] = Math.max(0, Math.min(1,
-        0.04 + 0.9 * eclat(g) * (1 - 0.92 * creux(x, y)) + 0.06 * moire))
+        0.02 + 0.96 * eclat(g) * (1 - 0.95 * creux(x, y)) + 0.1 * moire * eclat(g)))
 
       if (nuit) continue
       /* La nacre : un voile qui longe le bord des lobes et traîne un peu
          partout, et dont la teinte tourne lentement d'un endroit à l'autre.
          Chaque reflet ne prend que sa part du tour. */
       const e = 2 * Math.min(g, 1 - g)
-      const voile = (0.8 * Math.exp(-(((e - 0.2) / 0.16) ** 2))
-        + 0.3 * bruit(x / unite * 1.1 + 11.3, y / unite * 1.1 + 2.9)) * (1 - 0.7 * creux(x, y))
+      const voile = (Math.exp(-(((e - 0.22) / 0.14) ** 2))
+        + 0.2 * bruit(x / unite * 1.1 + 11.3, y / unite * 1.1 + 2.9)) * (1 - 0.6 * creux(x, y))
       const teinte = (tour + e * 7 + (y / unite) * 1.3
         + 2.2 * bruit(x / unite * 0.9 + 21.7, y / unite * 0.9 + 5.3)) % REFLETS
       for (let j = 0; j < REFLETS; j += 1) {
@@ -451,9 +458,9 @@ function sablier(
   if (!nuit) {
     const papier = rampe(etapes, 0.5)
     const VOILES = 10
-    ctx.globalAlpha = 0.04
+    ctx.globalAlpha = 0.075
     for (let j = 0; j < REFLETS; j += 1) {
-      ctx.fillStyle = tourner(papier, (j * 360) / REFLETS, 0.6)
+      ctx.fillStyle = tourner(papier, (j * 360) / REFLETS, 0.75)
       for (let k = 1; k <= VOILES; k += 1) nappe(reflets[j], k / (VOILES + 1))
     }
     ctx.globalAlpha = 1
@@ -462,7 +469,9 @@ function sablier(
   /* Les filets : chacun est une ligne de niveau de g, suivie pas à pas dans
      les deux sens depuis le col, et ramenée sur son niveau à chaque pas. Ils
      partent régulièrement espacés de la rangée qui joint les deux pointes. */
-  const pas = W / filets
+  /* Les filets sont comptés sur toute la largeur, mais ne partent que de la
+     bande qui sépare les deux pointes : ils y sont donc serrés. */
+  const pas = W / (filets * 1.5)
   const largeur = pointeD - pointeG
   const yCol = (hauteurG + hauteurD) / 2
   const marge = unite * 0.05
@@ -513,7 +522,7 @@ function sablier(
     const x0 = pointeG + (k + 0.5) * pas
     const niveau = champ(x0, yCol)
     const points = [...suivre(niveau, x0, -1).reverse(), ...suivre(niveau, x0, 1).slice(1)]
-    ctx.globalAlpha = nuit ? 0.06 + 0.66 * eclat(niveau) : 0.3 + 0.65 * eclat(niveau)
+    ctx.globalAlpha = nuit ? 0.04 + 0.7 * eclat(niveau) : 0.35 + 0.6 * eclat(niveau)
     ruban(ctx, points, epaisseurFilet)
     ctx.fill()
   }
