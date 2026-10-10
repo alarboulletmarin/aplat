@@ -502,6 +502,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
   { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
   { id: 'aurore', groupe: 'mat', fr: 'Aurore', en: 'Aurora' },
+  { id: 'sablier', groupe: 'mat', fr: 'Sablier', en: 'Hourglass' },
   /* paysages : ils ont un haut et un bas */
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },

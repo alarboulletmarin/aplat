@@ -60,3 +60,31 @@ describe('aurore', () => {
     expect(chemins(400, 880).length).toBeLessThanOrEqual(PALETTES[PALETTE].couleurs.length)
   })
 })
+
+describe('sablier', () => {
+  const SABLIER = { famille: 'sablier', palette: 'ardoise', densite: 1, graine: 4242 } as const
+  const rendu = (largeur: number, hauteur: number, densite: 0 | 1 | 2 = 1, graine = 4242) =>
+    svgDuMotif({ ...SABLIER, densite, graine }, largeur, hauteur, false).texte
+
+  it('est une trame, rangée chez les matières', () => {
+    expect(IDS_TRAMES).toContain('sablier')
+    expect(estTrame('sablier')).toBe(true)
+    expect(FAMILLES.find((f) => f.id === 'sablier')?.groupe).toBe('mat')
+  })
+
+  it('rend toujours la même image pour la même graine', () => {
+    expect(rendu(400, 880)).toBe(rendu(400, 880))
+    expect(rendu(400, 880, 1, 4243)).not.toBe(rendu(400, 880))
+  })
+
+  it('tend plus de filets quand la densité monte', () => {
+    /* Les filets sont les seuls chemins posés avec une opacité. */
+    const filets = (densite: 0 | 1 | 2) => (rendu(400, 880, densite).match(/fill-opacity/g) ?? []).length
+    expect(filets(0)).toBeLessThan(filets(1))
+    expect(filets(1)).toBeLessThan(filets(2))
+  })
+
+  it('peint la nappe en un chemin par palier, pas en une forme par cellule', () => {
+    expect((rendu(1290, 2796).match(/<path /g) ?? []).length).toBeLessThan(400)
+  })
+})

@@ -13,6 +13,9 @@
  * champ lisse dit, en chaque point, quelle couleur de la palette passe et
  * combien de papier elle couvre, et chaque cellule en tire un point.
  *
+ * Le sablier pince une famille de filets parallèles autour d'une gorge, sur
+ * un fond qui fond d'une couleur à l'autre par paliers serrés.
+ *
  * Le champ du drapé est une fonction pure de (x, y), aux phases près, tirées
  * une fois ; celui du moiré se juge cellule par cellule sur une grille
  * rapportée au petit côté, la discipline exacte de la trame des lieux. Dans
@@ -20,9 +23,11 @@
  * format.
  */
 import type { Alea, Densite, Pinceau } from './moteur'
-import { bruiteur, lisse, peindreChampSeuille } from './trace'
+import {
+  bruiteur, duClairAuSombre, lisse, peindreChampSeuille, type Point, rampe, ruban,
+} from './trace'
 
-export const IDS_TRAMES = ['drape', 'moire', 'aurore'] as const
+export const IDS_TRAMES = ['drape', 'moire', 'aurore', 'sablier'] as const
 
 export type IdTrame = (typeof IDS_TRAMES)[number]
 
@@ -216,6 +221,156 @@ function aurore(
   }
 }
 
+/* ---------- sablier ---------------------------------------------------------- */
+
+/**
+ * Des filets qui se pincent autour d'une gorge, sur une nappe sans arête.
+ *
+ * Chaque filet est la courbe p = c (1 + k (cosh(q / s) - 1)) dans le repère de
+ * la gorge, légèrement incliné : droit au milieu, il s'ouvre vers les bords en
+ * haut et en bas, d'autant plus vite qu'il partait loin de l'axe. Les filets
+ * sont régulièrement espacés au col, et c'est leur seul espacement régulier :
+ * l'oeil lit un volume, un tube vu de face, là où il n'y a que des traits.
+ *
+ * Le fond est le seul de la liste à vouloir de la douceur. Il n'est pas un
+ * dégradé : un champ lisse, rapporté au même repère que les filets, est
+ * seuillé en paliers serrés, chacun un aplat pris sur la rampe de la palette,
+ * du plus sombre au plus clair. Deux masses sombres de part et d'autre du col,
+ * une veine claire le long de l'axe ; le grain casse les marches qui restent.
+ *
+ * Tous les tirages sont faits avant les boucles ; le pas d'échantillonnage
+ * des filets est rapporté à `unite`, jamais à la résolution.
+ */
+function sablier(
+  ctx: Pinceau, W: number, H: number, C: readonly string[],
+  densite: Densite, rnd: Alea, unite: number,
+): void {
+  const filets = [18, 26, 36][densite]
+  const cx = W * (0.42 + 0.16 * rnd())
+  const cy = H * (0.4 + 0.2 * rnd())
+  const inclinaison = (rnd() - 0.5) * 0.24
+  const cos = Math.cos(inclinaison)
+  const sin = Math.sin(inclinaison)
+  /* Le pincement n'est pas le même en haut et en bas : une gorge parfaitement
+     symétrique se lit comme un schéma. */
+  const sHaut = unite * (0.26 + 0.12 * rnd())
+  const sBas = unite * (0.26 + 0.12 * rnd())
+  const evasement = 0.7 + 0.5 * rnd()
+  const lobe = 0.62 + 0.22 * rnd()
+  const bruit = bruiteur(Math.floor(rnd() * 1e9))
+
+  /* Du repère de la gorge (p en travers, q le long de l'axe) à l'image. */
+  const versImage = (p: number, q: number): Point => [cx + p * cos - q * sin, cy + p * sin + q * cos]
+
+  /* La nappe ne parcourt pas toute la palette : une moitié de la rampe,
+     sombre ou claire selon la graine, pour que le fond reste un fond et que
+     les filets portent le dessin. */
+  const teintes = duClairAuSombre(C).reverse()
+  const sombre = rnd() < 0.5
+  const depart = sombre ? 0 : 0.42
+  const etendue = 0.5
+
+  /* La nappe. Le champ se lit en unités du petit côté, dans le repère de la
+     gorge, pour que les masses suivent les filets quand la gorge penche. Il
+     est échantillonné en colonnes larges et en rangées fines : le bord d'un
+     palier est interpolé entre deux échantillons d'une même rangée, si bien
+     que seule la hauteur de rangée peut faire marche. */
+  const colonnes = 64
+  const cote = W / (colonnes - 1)
+  const hauteur = unite / 160
+  const rangees = Math.ceil(H / hauteur)
+  const champ = new Float32Array(colonnes * rangees)
+  for (let r = 0; r < rangees; r += 1) {
+    for (let c = 0; c < colonnes; c += 1) {
+      const dx = cote * c - cx
+      const dy = hauteur * (r + 0.5) - cy
+      const p = (dx * cos + dy * sin) / unite
+      const q = (-dx * sin + dy * cos) / unite
+      const masses = Math.exp(-(((Math.abs(p) - lobe) / 0.36) ** 2) - (q / 0.5) ** 2)
+      const veine = Math.exp(-((p / 0.22) ** 2)) * (0.6 + 0.4 * (1 - Math.exp(-((q / 0.55) ** 2))))
+      const houle = bruit(p * 1.4 + 3.1, q * 1.4 + 7.7) - 0.5
+      champ[r * colonnes + c] = Math.max(0, Math.min(1, 0.55 + 0.32 * veine - 0.5 * masses + 0.25 * houle))
+    }
+  }
+
+  /* Chaque palier est un seul chemin, un rectangle par traversée de rangée,
+     un peu plus haut que la rangée pour qu'aucun fil de fond ne passe entre
+     deux. Les paliers se peignent du plus bas au plus haut, chacun
+     recouvrant ce qui le dépasse. */
+  const PALIERS = 32
+  ctx.fillStyle = rampe(teintes, depart)
+  ctx.fillRect(0, 0, W, H)
+  for (let k = 1; k < PALIERS; k += 1) {
+    const seuil = k / PALIERS
+    ctx.fillStyle = rampe(teintes, depart + etendue * (k + 0.5) / PALIERS)
+    ctx.beginPath()
+    for (let r = 0; r < rangees; r += 1) {
+      const ligne = r * colonnes
+      const y0 = r * hauteur - hauteur * 0.1
+      const y1 = (r + 1) * hauteur + hauteur * 0.1
+      /* Où la rangée franchit le seuil entre deux échantillons. */
+      const franchit = (c: number): number => {
+        const a = champ[ligne + c - 1]
+        const b = champ[ligne + c]
+        return cote * (c - 1 + (seuil - a) / (b - a))
+      }
+      let debut = champ[ligne] > seuil ? 0 : -1
+      for (let c = 1; c < colonnes; c += 1) {
+        const plein = champ[ligne + c] > seuil
+        if (plein && debut < 0) debut = franchit(c)
+        if (!plein && debut >= 0) {
+          const fin = franchit(c)
+          ctx.moveTo(debut, y0)
+          ctx.lineTo(fin, y0)
+          ctx.lineTo(fin, y1)
+          ctx.lineTo(debut, y1)
+          ctx.closePath()
+          debut = -1
+        }
+      }
+      if (debut >= 0) {
+        ctx.moveTo(debut, y0)
+        ctx.lineTo(W, y0)
+        ctx.lineTo(W, y1)
+        ctx.lineTo(debut, y1)
+        ctx.closePath()
+      }
+    }
+    ctx.fill()
+  }
+
+  /* Les filets, du plus clair de la palette. Au-delà de `portee`, plus rien
+     n'est dans l'image, quelle que soit l'inclinaison. */
+  const portee = Math.hypot(W, H)
+  const pas = unite / filets
+  const N = Math.ceil(portee / pas)
+  const segment = unite * 0.01
+  const epaisseur = unite * 0.0026
+  ctx.fillStyle = teintes[teintes.length - 1]
+  for (let i = -N; i <= N; i += 1) {
+    const c0 = i * pas
+    const moitie = (signe: 1 | -1): Point[] => {
+      const s = signe > 0 ? sBas : sHaut
+      const points: Point[] = []
+      let q = 0
+      for (let garde = 0; garde < 4000; garde += 1) {
+        const p = c0 * (1 + evasement * (Math.cosh(q / s) - 1))
+        points.push(versImage(p, signe * q))
+        if (Math.abs(p) > portee || q > portee) break
+        const pente = (c0 * evasement * Math.sinh(q / s)) / s
+        q += segment / Math.sqrt(1 + pente * pente)
+      }
+      return points
+    }
+    const points = [...moitie(-1).reverse(), ...moitie(1).slice(1)]
+    /* Les filets loin de l'axe s'effacent un peu : la lumière tient au col. */
+    ctx.globalAlpha = 0.45 + 0.4 * Math.exp(-((c0 / unite) ** 2))
+    ruban(ctx, points, epaisseur)
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
+}
+
 /* ---------- aiguillage ------------------------------------------------------- */
 
 export function peindreTrame(
@@ -224,5 +379,6 @@ export function peindreTrame(
 ): void {
   if (id === 'drape') drape(ctx, W, H, C, densite, rnd, unite)
   else if (id === 'moire') moire(ctx, W, H, C, densite, rnd, unite)
-  else aurore(ctx, W, H, C, densite, rnd, unite)
+  else if (id === 'aurore') aurore(ctx, W, H, C, densite, rnd, unite)
+  else sablier(ctx, W, H, C, densite, rnd, unite)
 }
