@@ -48,6 +48,12 @@ describe('recevabilité d’une entrée', () => {
 })
 
 describe('relecture du stockage', () => {
+  it('écarte les motifs des groupes retirés, même épinglés', () => {
+    const retires = ['tapis', 'millimetre', 'rapporteur', 'mire', 'acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins']
+    const brut = JSON.stringify([A, ...retires.map(m => ({ ...A, m, f: 1 })), B])
+    expect(analyser(brut)).toEqual([A, B])
+  })
+
   it('rend une liste vide sur du vide, du bruit ou une forme inattendue', () => {
     for (const brut of [null, '', 'pas du json', '{"m":"vagues"}', '42', 'null']) {
       expect(analyser(brut), String(brut)).toEqual([])

@@ -885,7 +885,7 @@
    que le panneau s'élargit ; jamais un mot coupé.
 
    Les 132 pixels sont la mesure du plus long libellé des deux langues,
-   « Instruments », plus son compte et ses marges. Un onglet plus long à venir
+   « Landscapes », plus son compte et ses marges. Un onglet plus long à venir
    les augmente : c'est une longueur de texte, pas un nombre d'onglets, et
    c'est ce qui fait qu'ajouter un groupe ne demande pas de retoucher ceci. */
 .onglets,
@@ -980,7 +980,7 @@
    deux cents, et le panneau d'un téléphone de 360 px n'en offre que 176. La
    grille repassait donc à une colonne exactement là où le mur était le plus
    haut. Emballés, les onglets se répartissent sur ce que chacun mesure :
-   « Lieux » et « Figures » tiennent ensemble aussi bien qu'« Instruments »
+   « Volumes » et « Figures » tiennent ensemble aussi bien que « Landscapes »
    seul, et `flex: 1 1 auto` étire chaque rangée jusqu'au bord, ce qui rend
    l'inégalité des largeurs invisible.
 
@@ -990,7 +990,7 @@
    personne ne compare deux blocs.
 
    Le corps du libellé enfin, à 12,5 px. C'est la seule commande du portage dont
-   le texte descende sous 13 px, et c'est assumé : ce sont huit noms communs, en
+   le texte descende sous 13 px, et c'est assumé : ce sont six noms communs, en
    gras, sur un aplat contrasté, pas de la prose.
 
    La barre tombe ainsi à quatre rangées sur tous les téléphones, trois à 320 et
@@ -1008,7 +1008,7 @@
    matière qui fait charnière et les trois figurations. Elle se marquerait par
    un écart, or la fin d'une rangée dépend maintenant de la longueur des mots et
    de la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
-   L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
+   L'ordre des six dit déjà ce qu'il a à dire, et choisir un groupe ne demande
    pas de le savoir. */
 @container panneau (max-width: 320px) {
   .onglets,
@@ -1028,7 +1028,7 @@
      onglet resté seul garde la largeur de la colonne au-dessus de lui.
 
      Le plancher va avec : quand la moitié d'une rangée étroite est plus courte
-     que « Instruments », c'est le mot qui gagne et la rangée déborde un peu de
+     que « Landscapes », c'est le mot qui gagne et la rangée déborde un peu de
      part et d'autre, plutôt qu'un libellé abrégé. */
   .onglet,
   .onglet-pal {

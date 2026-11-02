@@ -21,6 +21,16 @@ import { depuisSaisie } from './resolution'
 const DETECTE = { largeur: 1179, hauteur: 2556 }
 
 describe('lecture de l’URL', () => {
+  it('ramène les motifs retirés au défaut sans perdre les autres réglages', () => {
+    for (const id of ['tapis', 'millimetre', 'rapporteur', 'mire', 'acropole', 'phare', 'pyramides', 'torii', 'aqueduc', 'moulins']) {
+      const lu = lireUrl(`?m=${id}&p=nuit&d=2&s=4242&r=1179x2556`, DETECTE)
+      expect(lu.famille, id).toBe(REGLAGES_PAR_DEFAUT.famille)
+      expect(lu.palette).toBe('nuit')
+      expect(lu.densite).toBe(2)
+      expect(lu.graine).toBe(4242)
+    }
+  })
+
   it('relit ce qu’elle a écrit', () => {
     const reglages = {
       ...REGLAGES_PAR_DEFAUT,

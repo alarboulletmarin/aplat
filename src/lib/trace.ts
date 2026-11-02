@@ -15,9 +15,8 @@
  * S'y trouvent aussi le bruit de valeur et la teinte mélangée, parce que les
  * modules de gestes ne peuvent rien importer d'autre que des types depuis le
  * moteur : c'est le moteur qui les importe, eux, pour son aiguillage, et un
- * aller-retour de valeurs ferait un cycle. `lieux.ts` avait recopié la
- * luminance pour cette raison exacte ; le bruit et elle vivent désormais ici,
- * une seule fois.
+ * aller-retour de valeurs ferait un cycle. Le bruit et la luminance vivent
+ * donc ici, une seule fois.
  */
 import type { Alea, Pinceau } from './moteur'
 
@@ -225,7 +224,7 @@ export function ruban(ctx: Pinceau, points: readonly Point[], epaisseur: number)
  * Le pinceau ne connaît pas le trait, alors une bande courbe se construit
  * comme une surface, exactement comme `ruban` construit une bande droite. La
  * coulée y fait serpenter ses rubans, la mesure y trace ses arcs de
- * rapporteur.
+ * secteurs circulaires.
  */
 export function arcEpais(
   ctx: Pinceau, cx: number, cy: number, rayon: number,
@@ -287,9 +286,8 @@ export function capsule(ctx: Pinceau, x: number, y: number, largeur: number, hau
  * Un champ seuillé, vectorisé rangée par rangée : les cellules pleines
  * consécutives d'une même ligne deviennent une capsule. C'est le procédé qui
  * ramène une grille de dizaines de milliers de cellules à quelques milliers
- * de chemins, celui que la trame des lieux pratique avec des rectangles ;
- * ici les bouts sont ronds, parce que les gestes qui s'en servent dessinent
- * des matières, pas des gravures.
+ * de chemins. Les bouts sont ronds, parce que les gestes qui s'en servent
+ * dessinent des matières.
  */
 export function peindreChampSeuille(
   ctx: Pinceau, valeurs: ArrayLike<number>, colonnes: number, rangees: number,

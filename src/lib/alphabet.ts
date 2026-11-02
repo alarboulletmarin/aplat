@@ -3,13 +3,10 @@
 /**
  * L'écriture du moteur : Anton, en contours, posée comme n'importe quel aplat.
  *
- * Le moteur ne savait pas écrire, et c'était un choix documenté dans
- * `mesures.ts` : `Pinceau` n'a pas de `fillText`, parce qu'un `fillText`
+ * Le pinceau n'a pas de `fillText`, parce qu'un `fillText`
  * obligerait le vectoriel à embarquer une police ou à en nommer une que le
  * destinataire n'a peut-être pas, et parce qu'un fichier qui dépend d'une
- * police installée n'est plus le fichier qu'on a vu. La mesure s'en tirait avec
- * dix chiffres tramés dans une grille de trois cases sur cinq, ce qui suffit à
- * un instrument et à rien d'autre.
+ * police installée n'est plus le fichier qu'on a vu.
  *
  * L'affiche demandait de vraies lettres, à la carrure d'un titrage. Elles ne
  * sont ni dessinées à la main ni tracées par le navigateur : ce sont les

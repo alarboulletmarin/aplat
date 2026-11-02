@@ -999,3 +999,9 @@ Ces trois motifs entrent dans les abstraits. Méandres rejoint désormais les
 pavages avec Truchet, puisque leurs raccords partagent la même maille malgré
 l'absence de répétition des couleurs. Ce classement conserve les limites de navigation,
 quatre rangées au plus sur téléphone et vingt familles au plus par groupe.
+
+Les groupes Instruments et Lieux sont ensuite retirés du moteur et des
+démonstrations pour recentrer la sélection sur les motifs et matières. Avec
+les trois courbes de champ, le catalogue compte 73 familles en six groupes.
+Les anciennes adresses retombent sur la famille par défaut ; les anciennes
+entrées correspondantes sont écartées à la relecture de l’historique.

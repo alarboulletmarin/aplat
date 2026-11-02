@@ -2,10 +2,11 @@
 
 Trois variantes dans l'onglet Abstraits : Courants dessine des lignes fines,
 Rubans des bandes épaisses et Sillage des lignes interrompues. Le catalogue
-compte désormais 83 motifs en huit groupes, chacun avec vingt familles au plus.
+compte désormais 73 motifs en six groupes, chacun avec vingt familles au plus.
 Méandres rejoint les pavages avec Truchet : ses rubans se raccordent sur une
 maille répétée. Les abstraits restent ainsi sous le plafond sans ajouter de
-rangée à la navigation sur téléphone.
+rangée à la navigation sur téléphone. Les groupes Instruments et Lieux sont
+retirés pour recentrer le catalogue sur les motifs et matières.
 
 Le geste suit l'essai [Flow Fields de Tyler Hobbs](https://www.tylerxhobbs.com/words/flow-fields).
 Le champ propre à Aplat combine une déformation sinusoïdale orientée et quatre

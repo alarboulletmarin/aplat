@@ -16,7 +16,7 @@ fully usable offline.
   <img src="docs/vitrine/vagues.png" alt="Waves pattern, Lime and cream palette" width="140">
   <img src="docs/vitrine/demilunes.png" alt="Half-moons pattern, Sun palette" width="140">
   <img src="docs/vitrine/cubes.png" alt="Blocks pattern, Slate palette" width="140">
-  <img src="docs/vitrine/torii.png" alt="Torii pattern, Night palette" width="140">
+  <img src="docs/vitrine/rubans.png" alt="Ribbons pattern, Night palette" width="140">
   <img src="docs/vitrine/constellations.png" alt="Constellations pattern, Storm palette" width="140">
 </p>
 
@@ -41,8 +41,8 @@ fully usable offline.
 - **Exact resolution.** Your screen size is detected; any resolution can be
   typed in. The preview and the exported file are the same drawing at two
   scales, and that equality is verified by tests.
-- **83 pattern families** in eight groups (abstract, tilings, volumes,
-  instruments, materials, landscapes, landmarks, figures), **47 hand-tuned
+- **73 pattern families** in six groups (abstract, tilings, volumes,
+  materials, landscapes, figures), **47 hand-tuned
   palettes** (seasons, reds, greens, blues, pinks, and a group built for color
   blindness), three density levels, and custom palettes of three to six colors.
 - **Deterministic engine.** `(family, palette, density, seed)` always produces
@@ -63,7 +63,7 @@ fully usable offline.
 
 ## Gallery
 
-Ten of the eighty families. Every image in this README comes out of the
+Ten of the seventy-three families. Every image in this README comes out of the
 engine itself, with a fixed seed, and is regenerated identically by
 `node tools/vitrine.mjs`: none of them can promise a render the app would not
 produce.
@@ -72,8 +72,8 @@ produce.
 |:---:|:---:|:---:|:---:|:---:|
 | <img src="docs/vitrine/vagues.png" alt="Waves" width="150"> | <img src="docs/vitrine/demilunes.png" alt="Half-moons" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Blocks" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
 | Waves | Half-moons | Penrose | Blocks | Kintsugi |
-| <img src="docs/vitrine/cernes.png" alt="Growth rings" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
-| Growth rings | Moiré | Dunes | Torii | Constellations |
+| <img src="docs/vitrine/cernes.png" alt="Growth rings" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/rubans.png" alt="Ribbons" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
+| Growth rings | Moiré | Dunes | Ribbons | Constellations |
 
 ## One pattern, several formats
 

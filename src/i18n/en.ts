@@ -152,9 +152,6 @@ export const en: Textes = {
       pavagesNom: 'Aperiodic tiling',
       pavagesNote:
         'Ten golden triangles in a sun, then successive subdivisions: the surface is covered entirely without ever repeating.',
-      lieuxNom: 'Halftone engraving',
-      lieuxNote:
-        'A scene described as a field of ink density, which a cross-hatched halftone screen turns into dots. Two tones only.',
       tramesNom: 'Warped screen',
       tramesNote:
         'A regular screen folded by a smooth field, two screens laid over each other whose interference is computed point by point, or a flowing sheet of colour printed as dots.',
@@ -179,9 +176,6 @@ export const en: Textes = {
       surimpressionsNom: 'Overprint',
       surimpressionsNote:
         'Two inks pulled one over the other, and a third colour wherever they cross, computed channel by channel. The intersection is clipped before it is painted: three opaque flats, no blending.',
-      mesuresNom: 'Instruments',
-      mesuresNote:
-        'The pattern is a tool: cutting mat, graph paper, protractor, test chart. Made of graduations rather than shapes, and the only gesture that writes numbers.',
     },
     couches: {
       arreter: 'Stop the drawing after {couche}',
@@ -271,10 +265,8 @@ export const en: Textes = {
     groupeAbstraits: 'Abstract',
     groupePavages: 'Tilings',
     groupeVolumes: 'Volumes',
-    groupeInstruments: 'Instruments',
     groupeMatieres: 'Materials',
     groupePaysages: 'Landscapes',
-    groupeLieux: 'Places',
     groupeFigures: 'Figures',
     onglets: 'Family groups',
     palette: 'Palette',

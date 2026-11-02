@@ -91,6 +91,6 @@ export const GALERIE: readonly Motif[] = [
   { famille: 'agrumes', palette: 'menthe', densite: 1, graine: 7726 },
   { famille: 'persiennes', palette: 'orage', densite: 1, graine: 3095 },
   { famille: 'tresse', palette: 'prune', densite: 1, graine: 1663 },
-  { famille: 'acropole', palette: 'ardoise', densite: 1, graine: 4870 },
+  { famille: 'rubans', palette: 'ardoise', densite: 1, graine: 7314 },
   { famille: 'vases', palette: 'soleil', densite: 1, graine: 2231 },
 ]

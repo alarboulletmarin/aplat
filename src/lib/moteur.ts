@@ -15,8 +15,6 @@ import { estCourant, peindreCourant, type IdCourant } from './courants'
 import { estCoulee, peindreCoulee, type IdCoulee } from './coulees'
 import { estFracture, peindreFracture, type IdFracture } from './fractures'
 import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
-import { estLieu, peindreLieu, type IdLieu } from './lieux'
-import { estMesure, peindreMesure, type IdMesure } from './mesures'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
@@ -61,7 +59,7 @@ export type IdFamille =
   | 'bassin'
   | 'strates'
   /* abstraits venus des nouveaux gestes : la fracture, la réserve, le
-     pavage savant, le carreau, la coulée, le relief, la mesure */
+     pavage savant, le carreau, le courant, la coulée, le relief */
   | IdFracture
   | IdReserve
   | IdPavage
@@ -69,7 +67,6 @@ export type IdFamille =
   | IdCourant
   | IdCoulee
   | IdRelief
-  | IdMesure
   | IdSurimpression
   /* matières : la ligne de niveau y met les cernes, la chimie, la grille
      déformée et l'interférence y mettent tout le reste */
@@ -84,8 +81,6 @@ export type IdFamille =
   | 'archipel'
   /* la ligne de niveau : reliefs, cernes, estran, empreinte (lib/niveaux.ts) */
   | IdNiveau
-  /* lieux : les gravures tramées de lib/lieux.ts */
-  | IdLieu
   /* figures */
   | 'fleurs'
   | 'tournesol'
@@ -250,7 +245,7 @@ export interface Palette {
 }
 
 /**
- * Les huit groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
+ * Les six groupes de la liste, et le mot qui dit ce qu'ils rassemblent.
  *
  * Un groupe n'existe que si son critère tient en une phrase. C'est la règle du
  * système de design, et elle sert à quelque chose : « abstraits » n'en avait
@@ -259,15 +254,14 @@ export interface Palette {
  * inventés contre exactement ça.
  *
  * `abs` des formes libres sur un aplat, `pav` une maille qui revient, `vol` du
- * volume en aplats, `ins` des instruments gradués, `mat` ce que la main
- * reconnaît, `pay` ce qui a un haut et un bas, `lieu` des gravures tramées,
- * `fig` des objets reconnaissables un par un.
+ * volume en aplats, `mat` ce que la main reconnaît, `pay` ce qui a un haut
+ * et un bas, `fig` des objets reconnaissables un par un.
  *
  * Ils sont devenus des onglets dans le panneau, et le type est donc nommé :
  * l'interface en tient un dans son état, et une chaîne libre y aurait laissé
  * passer un groupe qui n'existe pas.
  */
-export type Groupe = 'abs' | 'pav' | 'vol' | 'ins' | 'mat' | 'pay' | 'lieu' | 'fig'
+export type Groupe = 'abs' | 'pav' | 'vol' | 'mat' | 'pay' | 'fig'
 
 export interface Famille {
   id: IdFamille
@@ -442,11 +436,11 @@ export function groupeDePalette(id: IdPaletteQuelconque): GroupePalettes | undef
 }
 
 /**
- * Les quatre-vingts familles, dans l'ordre de la liste : les quatre groupes
- * géométriques d'abord, abstraits, pavages, volumes, instruments ; puis les
- * matières, qui sont entre les deux mondes ; puis les trois figuratifs,
- * paysages, lieux, figures. L'ordre compte : on descend du plus géométrique au
- * plus figuratif, et le premier de chaque groupe en donne le ton.
+ * Les familles, dans l'ordre de la liste : les trois groupes géométriques
+ * d'abord, abstraits, pavages, volumes ; puis les matières, qui sont entre
+ * les deux mondes ; puis les deux figuratifs, paysages et figures. L'ordre
+ * compte : on descend du plus géométrique au plus figuratif, et le premier
+ * de chaque groupe en donne le ton.
  */
 export const FAMILLES: readonly Famille[] = [
   /* abstraits : des formes libres sur un aplat, rien n'y revient à intervalle régulier */
@@ -494,11 +488,6 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'plis', groupe: 'vol', fr: 'Plis', en: 'Folds' },
   { id: 'bossage', groupe: 'vol', fr: 'Bossage', en: 'Bosses' },
   { id: 'tuyaux', groupe: 'vol', fr: 'Tuyaux', en: 'Pipes' },
-  /* instruments : le motif est gradué, il mesure */
-  { id: 'tapis', groupe: 'ins', fr: 'Tapis de coupe', en: 'Cutting mat' },
-  { id: 'millimetre', groupe: 'ins', fr: 'Millimétré', en: 'Graph paper' },
-  { id: 'rapporteur', groupe: 'ins', fr: 'Rapporteur', en: 'Protractor' },
-  { id: 'mire', groupe: 'ins', fr: 'Mire', en: 'Test chart' },
   /* matières : la main les reconnaît avant l'oeil */
   { id: 'cernes', groupe: 'mat', fr: 'Cernes', en: 'Growth rings' },
   { id: 'pelage', groupe: 'mat', fr: 'Pelage', en: 'Spots' },
@@ -516,13 +505,6 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'archipel', groupe: 'pay', fr: 'Archipel', en: 'Archipelago' },
   { id: 'relief', groupe: 'pay', fr: 'Relief', en: 'Contours' },
   { id: 'maree', groupe: 'pay', fr: 'Marée', en: 'Tideline' },
-  /* lieux : des gravures tramées, deux tons seulement */
-  { id: 'acropole', groupe: 'lieu', fr: 'Acropole', en: 'Acropolis' },
-  { id: 'phare', groupe: 'lieu', fr: 'Phare', en: 'Lighthouse' },
-  { id: 'pyramides', groupe: 'lieu', fr: 'Pyramides', en: 'Pyramids' },
-  { id: 'torii', groupe: 'lieu', fr: 'Torii', en: 'Torii' },
-  { id: 'aqueduc', groupe: 'lieu', fr: 'Aqueduc', en: 'Aqueduct' },
-  { id: 'moulins', groupe: 'lieu', fr: 'Moulins', en: 'Windmills' },
   /* figures : des objets posés sur un fond, reconnaissables un par un */
   { id: 'fleurs', groupe: 'fig', fr: 'Marguerites', en: 'Daisies' },
   { id: 'tournesol', groupe: 'fig', fr: 'Tournesol', en: 'Sunflower' },
@@ -1002,24 +984,15 @@ export function formes(
 ): void {
   const col = (i: number) => C[((i % C.length) + C.length) % C.length]
 
-  /* Les lieux ont leur propre geste, la gravure tramée, et leur propre
-     module : six scènes décrites par un champ, une trame qui les grave.
-     Ils passent par le même pinceau, la même graine et la même palette que
-     tout le monde ; seul le dessin change de nature. */
-  if (estLieu(id)) {
-    peindreLieu(ctx, W, H, id, C, densite, rnd, unite)
-    return
-  }
-
-  /* Les gestes suivants ont chacun leur module, sur le modèle des lieux :
+  /* Les gestes suivants ont chacun leur module :
      même pinceau, même graine, même palette, un dessin d'une autre nature.
      La ligne de niveau révèle des paliers, la fracture brise la surface, la
      réserve perce un aplat, la chimie cultive une réaction, le réseau trace
      une carte, le pavage subdivise sans période, la trame déforme ou fait
      interférer des grilles, la grammaire fait pousser des plantes, le carreau
      remplit une grille d'un alphabet de signes, la coulée fait serpenter des
-     rubans larges, le relief fait dire l'orientation à la teinte, et la
-     mesure dessine des instruments gradués. */
+     rubans larges, le courant suit un champ sans croiser ses voisins,
+     le relief fait dire l'orientation à la teinte. */
   if (estNiveau(id)) {
     peindreNiveau(ctx, W, H, id, C, densite, rnd, unite)
     return
@@ -1066,10 +1039,6 @@ export function formes(
   }
   if (estRelief(id)) {
     peindreRelief(ctx, W, H, id, C, densite, rnd, unite)
-    return
-  }
-  if (estMesure(id)) {
-    peindreMesure(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
   if (estSurimpression(id)) {
@@ -2746,7 +2715,7 @@ export interface Motif {
   graine: number
   /**
    * Le mot que l'affiche écrit. Absent partout ailleurs, et c'est voulu : une
-   * seule famille sait écrire, et obliger les soixante-dix-huit autres à porter
+   * seule famille sait écrire, et obliger les autres familles à porter
    * un champ qu'elles ignorent aurait fait payer à tout le catalogue le prix
    * d'une famille. Son absence, comme un mot vide, vaut `MOT_PAR_DEFAUT` :
    * c'est `motEcrit` qui tranche, au bord du dessin.

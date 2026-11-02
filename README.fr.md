@@ -16,7 +16,7 @@ est installable et pleinement utilisable hors ligne.
   <img src="docs/vitrine/vagues.png" alt="Motif Vagues, palette Lime et crème" width="140">
   <img src="docs/vitrine/demilunes.png" alt="Motif Demi-lunes, palette Soleil" width="140">
   <img src="docs/vitrine/cubes.png" alt="Motif Cubes, palette Ardoise" width="140">
-  <img src="docs/vitrine/torii.png" alt="Motif Torii, palette Nuit" width="140">
+  <img src="docs/vitrine/rubans.png" alt="Motif Rubans, palette Nuit" width="140">
   <img src="docs/vitrine/constellations.png" alt="Motif Constellations, palette Orage" width="140">
 </p>
 
@@ -42,8 +42,8 @@ est installable et pleinement utilisable hors ligne.
 - **La résolution exacte.** La taille de l'écran est détectée ; n'importe
   quelle résolution se saisit à la main. L'aperçu et le fichier exporté sont
   le même dessin à deux échelles, et cette égalité est vérifiée par des tests.
-- **83 familles de motifs** en huit groupes (abstraits, pavages, volumes,
-  instruments, matières, paysages, lieux, figures), **47 palettes composées à
+- **73 familles de motifs** en six groupes (abstraits, pavages, volumes,
+  matières, paysages, figures), **47 palettes composées à
   la main** (saisons, rouges, verts, bleus, roses, et un groupe pensé pour le
   daltonisme), trois densités, et des palettes personnelles de trois à six
   couleurs.
@@ -68,7 +68,7 @@ est installable et pleinement utilisable hors ligne.
 
 ## Galerie
 
-Dix familles parmi les quatre-vingts. Chaque image de ce README sort du
+Dix familles parmi les soixante-treize. Chaque image de ce README sort du
 moteur lui-même, graine fixe, et se régénère à l'identique avec
 `node tools/vitrine.mjs` : aucune ne peut promettre un rendu que l'application
 ne donnerait pas.
@@ -77,8 +77,8 @@ ne donnerait pas.
 |:---:|:---:|:---:|:---:|:---:|
 | <img src="docs/vitrine/vagues.png" alt="Vagues" width="150"> | <img src="docs/vitrine/demilunes.png" alt="Demi-lunes" width="150"> | <img src="docs/vitrine/penrose.png" alt="Penrose" width="150"> | <img src="docs/vitrine/cubes.png" alt="Cubes" width="150"> | <img src="docs/vitrine/kintsugi.png" alt="Kintsugi" width="150"> |
 | Vagues | Demi-lunes | Penrose | Cubes | Kintsugi |
-| <img src="docs/vitrine/cernes.png" alt="Cernes" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/torii.png" alt="Torii" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
-| Cernes | Moiré | Dunes | Torii | Constellations |
+| <img src="docs/vitrine/cernes.png" alt="Cernes" width="150"> | <img src="docs/vitrine/moire.png" alt="Moiré" width="150"> | <img src="docs/vitrine/dunes.png" alt="Dunes" width="150"> | <img src="docs/vitrine/rubans.png" alt="Rubans" width="150"> | <img src="docs/vitrine/constellations.png" alt="Constellations" width="150"> |
+| Cernes | Moiré | Dunes | Rubans | Constellations |
 
 ## Un motif, plusieurs formats
 

@@ -7,8 +7,6 @@ import { IDS_COURANTS } from '../../lib/courants'
 import { IDS_COULEES } from '../../lib/coulees'
 import { IDS_FRACTURES } from '../../lib/fractures'
 import { IDS_GRAMMAIRES } from '../../lib/grammaires'
-import { IDS_LIEUX } from '../../lib/lieux'
-import { IDS_MESURES } from '../../lib/mesures'
 import { IDS_NIVEAUX } from '../../lib/niveaux'
 import { IDS_PAVAGES } from '../../lib/pavages'
 import { IDS_RESEAUX } from '../../lib/reseaux'
@@ -18,14 +16,14 @@ import { IDS_SURIMPRESSIONS } from '../../lib/surimpression'
 import { IDS_TRAMES } from '../../lib/trames'
 
 /**
- * Les seize mécaniques de dessin, et les familles qui en sortent.
+ * Les quatorze mécaniques de dessin, et les familles qui en sortent.
  *
  * C'est le pendant de `accueil/choix.ts` pour la page du moteur : ce qu'elle
  * montre, choisi une fois, plutôt que tiré au sort à l'ouverture.
  *
  * **Aucune liste de familles n'est recopiée ici.** Chaque fiche prend la liste
  * que son module publie déjà (`IDS_NIVEAUX`, `IDS_FRACTURES`, etc.), et la
- * première, celle des gestes d'origine, est ce qui reste une fois les quinze
+ * première, celle des gestes d'origine, est ce qui reste une fois les treize
  * autres retirées de `FAMILLES`. Une famille ajoutée au moteur se range donc
  * d'elle-même dans la bonne fiche, et aucune fiche ne peut citer une famille
  * qui n'existe pas.
@@ -37,7 +35,7 @@ import { IDS_TRAMES } from '../../lib/trames'
  * `cle` est la clé du libellé dans le dictionnaire, `exemple` le motif que la
  * fiche peint. Les exemples sont figés, palette comprise : ils démontrent une
  * mécanique, pas le motif qu'on est en train de composer plus haut dans la
- * page, et les faire suivre reviendrait à redessiner seize toiles à chaque
+ * page, et les faire suivre reviendrait à redessiner quatorze toiles à chaque
  * pastille de palette touchée.
  */
 export interface Mecanique {
@@ -48,13 +46,13 @@ export interface Mecanique {
   exemple: Motif
 }
 
-/* Les quinze gestes venus d'un module, dans l'ordre où ils sont arrivés dans le
+/* Les treize gestes venus d'un module, dans l'ordre où ils sont arrivés dans le
    moteur. Le premier de la liste publiée ci-dessous n'en est pas : il est ce
    qui restait avant eux. */
 const VENUES_DES_MODULES: readonly IdFamille[] = [
   ...IDS_NIVEAUX, ...IDS_FRACTURES, ...IDS_RESERVES, ...IDS_CHIMIE,
-  ...IDS_PAVAGES, ...IDS_LIEUX, ...IDS_TRAMES, ...IDS_RESEAUX, ...IDS_GRAMMAIRES,
-  ...IDS_CARREAUX, ...IDS_COULEES, ...IDS_RELIEFS, ...IDS_MESURES,
+  ...IDS_PAVAGES, ...IDS_TRAMES, ...IDS_RESEAUX, ...IDS_GRAMMAIRES,
+  ...IDS_CARREAUX, ...IDS_COULEES, ...IDS_RELIEFS,
   ...IDS_SURIMPRESSIONS, ...IDS_COURANTS,
 ]
 
@@ -101,12 +99,6 @@ export const MECANIQUES: readonly Mecanique[] = [
     exemple: { famille: 'penrose', palette: 'menthe', densite: 1, graine: 1509 },
   },
   {
-    cle: 'lieux',
-    module: 'lib/lieux.ts',
-    familles: IDS_LIEUX,
-    exemple: { famille: 'phare', palette: 'encre', densite: 1, graine: 7042 },
-  },
-  {
     cle: 'trames',
     module: 'lib/trames.ts',
     familles: IDS_TRAMES,
@@ -147,12 +139,6 @@ export const MECANIQUES: readonly Mecanique[] = [
     module: 'lib/reliefs.ts',
     familles: IDS_RELIEFS,
     exemple: { famille: 'cubes', palette: 'argile', densite: 1, graine: 6614 },
-  },
-  {
-    cle: 'mesures',
-    module: 'lib/mesures.ts',
-    familles: IDS_MESURES,
-    exemple: { famille: 'tapis', palette: 'menthe', densite: 1, graine: 7314 },
   },
   {
     cle: 'surimpressions',

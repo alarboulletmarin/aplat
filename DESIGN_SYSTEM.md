@@ -341,11 +341,12 @@ panneau.
 
 Pas de navigation : il n'y a qu'une section.
 
-### Les huit groupes de familles, en huit onglets
+### Les six groupes de familles, en six onglets
 
-La liste des familles est longue, et une liste longue se range. Huit groupes :
-les **abstraits**, les **pavages**, les **volumes**, les **instruments**, les
-**matières**, les **paysages**, les **lieux**, les **figures**.
+La liste des familles est longue, et une liste longue se range. Six groupes :
+les **abstraits**, les **pavages**, les **volumes**, les **matières**, les
+**paysages**, les **figures**. Les instruments gradués et les gravures de lieux
+sont retirés : le catalogue privilégie les compositions de motifs et de matières.
 
 **Un groupe n'existe que si son critère tient en une phrase.** C'est la règle,
 et elle sert à quelque chose : « abstraits » n'en avait pas, il était le bac de
@@ -358,10 +359,8 @@ familles sur soixante-seize. Les onglets avaient été inventés contre exacteme
 | Abstraits | des formes libres sur un aplat, rien n'y revient à intervalle régulier |
 | Pavages | une maille revient, et l'oeil la suit du doigt |
 | Volumes | c'est plat, et on y voit pourtant un volume |
-| Instruments | le motif est gradué, il mesure |
 | Matières | la main les reconnaît avant l'oeil |
 | Paysages | ils ont un haut et un bas |
-| Lieux | des gravures tramées, deux tons seulement |
 | Figures | des objets posés sur un fond, reconnaissables un par un |
 
 **Un plafond tient la règle.** Un test (`src/lib/moteur.test.ts`) refuse qu'un
@@ -390,7 +389,7 @@ qui ramène chaque liste à ce qu'un écran montre et met le passage de l'une à
 l'autre à un appui.
 
 Rien n'est caché pour autant, et c'est la contrainte qui décide du dessin : les
-huit onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
+six onglets sont visibles ensemble, chacun porte **le nombre de familles qu'il
 contient**, et l'aplat inversé de la puce de choix sert ici aussi, pour que
 « ouvert » se lise au remplissage et non à la teinte. Le compte n'est pas
 décoratif : il dit ce qu'on trouvera derrière avant d'ouvrir, et c'est lui qui
@@ -413,12 +412,12 @@ de 360 px n'en offre que cent quatre-vingt-douze. La grille y retombait donc à
 une colonne, soit huit rangées et quatre cents pixels de navigation avant la
 première vignette, pour des vignettes de quatre-vingts. Sur ce panneau, les
 onglets sont donc **emballés** plutôt qu'alignés : chacun prend la largeur de
-son mot, la rangée s'étire jusqu'au bord, et « Lieux » et « Figures » tiennent
-ensemble aussi bien qu'« Instruments » seul. La barre tombe à quatre rangées
+son mot, la rangée s'étire jusqu'au bord, et « Volumes » et « Figures » se partagent une rangée
+sans imposer leur largeur aux autres onglets. La barre tombe à quatre rangées
 sur tous les téléphones, trois à 320 px.
 
 Deux mesures l'accompagnent, à ne pas défaire. Son libellé descend à 12,5 px,
-seul texte de commande du portage sous 13 px, ce qui s'assume sur huit noms
+seul texte de commande du portage sous 13 px, ce qui s'assume sur six noms
 communs en gras. Et **un onglet ne prend jamais plus de la moitié d'une rangée,
 ni moins que ce que son mot demande** : sans le plafond, la dernière rangée
 d'un panneau de 430 px ne porte que « Figures », étiré sur toute la largeur,
@@ -435,11 +434,11 @@ colonne, le panneau y fait 308 px, et la grille y tenait encore à un pixel prè
 sous ses deux colonnes. Le mur de 401 px revenait dans cette bande, entre deux
 largeurs qu'on avait regardées et qui allaient bien toutes les deux.
 
-Ce qui n'est **pas** dessiné : la coupure entre les quatre géométries, la
-matière qui fait charnière et les trois figurations. Elle se marquerait par un
+Ce qui n'est **pas** dessiné : la coupure entre les trois géométries, la
+matière qui fait charnière et les deux figurations. Elle se marquerait par un
 écart, or la fin d'une rangée dépend maintenant de la longueur des mots et de
 la langue : l'écart tomberait au milieu d'une rangée et la désalignerait.
-L'ordre des huit dit déjà ce qu'il a à dire, et choisir un groupe ne demande
+L'ordre des six dit déjà ce qu'il a à dire, et choisir un groupe ne demande
 pas de le savoir.
 
 ### La gouttière du panneau
@@ -482,9 +481,9 @@ l'adresse. Les flèches parcourent les onglets sans les ouvrir, sans quoi le
 clavier traverserait un rendu complet de grille par onglet pour atteindre le
 dernier.
 
-Les huit groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
-les quatre géométriques, puis les matières qui sont entre les deux mondes, puis
-les trois figuratifs. Un test le tient fermé (`src/lib/moteur.test.ts`) : le
+Les six groupes se suivent d'un seul tenant dans le moteur, dans cet ordre :
+les trois géométriques, puis les matières qui sont entre les deux mondes, puis
+les deux figuratifs. Un test le tient fermé (`src/lib/moteur.test.ts`) : le
 panneau construit ses grilles en filtrant sur le groupe, et une famille rangée
 hors de son bloc sauterait de place à l'écran sans que rien ne le signale.
 C'est aussi le filet qui rattrape la faute de frappe la plus probable de la

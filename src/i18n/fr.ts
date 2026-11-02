@@ -162,7 +162,7 @@ export const fr = {
       sixNote:
         'Aucune forme n’a de taille en pixels\u00a0: tout se rapporte au petit côté. Le motif est recalculé aux dimensions demandées, jamais agrandi.',
     },
-    /* Étape 01. Les huit groupes plutôt que les quatre-vingts familles : une
+    /* Étape 01. Les six groupes plutôt que toutes les familles : une
        liste complète referait le panneau de l'application dans un autre
        document, et « une autre famille » donne accès au reste sans ça. */
     reglages: {
@@ -209,9 +209,6 @@ export const fr = {
       pavagesNom: 'Le pavage apériodique',
       pavagesNote:
         'Dix triangles d’or en soleil, puis des subdivisions successives\u00a0: la surface se couvre entièrement sans jamais se répéter.',
-      lieuxNom: 'La gravure tramée',
-      lieuxNote:
-        'Une scène décrite par un champ de densité d’encre, qu’une trame de demi-teintes à hachures croisées transforme en points. Deux tons seulement.',
       tramesNom: 'La trame déformée',
       tramesNote:
         'Une trame régulière pliée par un champ lisse, deux trames superposées dont l’interférence est calculée point par point, ou une nappe de couleur qui coule, tramée en points.',
@@ -236,9 +233,6 @@ export const fr = {
       surimpressionsNom: 'La surimpression',
       surimpressionsNote:
         'Deux encres tirées l’une sur l’autre, et une troisième couleur là où elles se croisent, calculée canal par canal. L’intersection est découpée avant d’être peinte : trois aplats opaques, aucun fondu.',
-      mesuresNom: 'La mesure',
-      mesuresNote:
-        'Le motif est un instrument\u00a0: tapis de coupe, papier millimétré, rapporteur, mire de réglage. Fait de graduations plutôt que de formes, et le seul geste qui écrive des nombres.',
     },
     /* Étape 04. Les noms des couches viennent d'ici, mais leur ordre vient du
        moteur (`COUCHES`) : une couche ajoutée là-bas manque ici, et la
@@ -364,14 +358,12 @@ export const fr = {
     groupeAbstraits: 'Abstraits',
     groupePavages: 'Pavages',
     groupeVolumes: 'Volumes',
-    groupeInstruments: 'Instruments',
     /* Bois, peau, tissu, interférence : ce que la main reconnaît avant
        l'oeil. Entre l'abstrait et le paysage, comme dans la liste. */
     groupeMatieres: 'Matières',
     groupePaysages: 'Paysages',
     /* Les gravures tramées : des endroits, pas des motifs. Le mot est court et
        dit exactement ça. */
-    groupeLieux: 'Lieux',
     groupeFigures: 'Figures',
     onglets: 'Groupes de familles',
     palette: 'Palette',

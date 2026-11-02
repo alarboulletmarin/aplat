@@ -15,7 +15,7 @@
  *
  * Le champ du drapé est une fonction pure de (x, y), aux phases près, tirées
  * une fois ; celui du moiré se juge cellule par cellule sur une grille
- * rapportée au petit côté, la discipline exacte de la trame des lieux. Dans
+ * rapportée au petit côté, indépendante des pixels de sortie. Dans
  * les deux cas, rien n'est tiré dans une boucle dont le compte dépendrait du
  * format.
  */

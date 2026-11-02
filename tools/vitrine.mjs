@@ -39,7 +39,7 @@ const GALERIE = [
   { famille: 'cernes', palette: 'corail' },
   { famille: 'moire', palette: 'encre' },
   { famille: 'dunes', palette: 'ciel' },
-  { famille: 'torii', palette: 'nuit' },
+  { famille: 'rubans', palette: 'nuit' },
   { famille: 'constellations', palette: 'orage' },
 ]
 

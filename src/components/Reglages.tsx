@@ -21,15 +21,13 @@ import { EditeurPalette } from './EditeurPalette'
  * modifiable si besoin.
  */
 
-/** Les huit groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
+/** Les six groupes, dans l'ordre du moteur, avec la clé de leur libellé. */
 const GROUPES = [
   { id: 'abs', cle: 'groupeAbstraits' },
   { id: 'pav', cle: 'groupePavages' },
   { id: 'vol', cle: 'groupeVolumes' },
-  { id: 'ins', cle: 'groupeInstruments' },
   { id: 'mat', cle: 'groupeMatieres' },
   { id: 'pay', cle: 'groupePaysages' },
-  { id: 'lieu', cle: 'groupeLieux' },
   { id: 'fig', cle: 'groupeFigures' },
 ] as const satisfies readonly { id: Groupe; cle: keyof Textes['reglages'] }[]
 
@@ -558,7 +556,7 @@ export function ChoixDensite({
  * ne peut rien composer avec rien.
  *
  * Il n'apparaît que sur l'affiche, la seule famille qui écrive. Le mettre
- * partout aurait demandé aux soixante-dix-huit autres de porter un réglage
+ * partout aurait demandé aux autres familles de porter un réglage
  * qu'elles ignorent.
  */
 export function ChoixMot({

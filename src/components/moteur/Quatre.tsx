@@ -13,19 +13,17 @@ import { Appareil } from '../accueil/Appareil'
 import { GroupeRadio, OptionRadio } from '../GroupeRadio'
 import { Etape } from './Etape'
 
-/* Les huit groupes, dans l'ordre du moteur, avec la clé du mot qui les nomme
+/* Les six groupes, dans l'ordre du moteur, avec la clé du mot qui les nomme
    dans le panneau de l'application. Le classement est le même, montré
    autrement : la page n'invente pas un second vocabulaire. */
 const GROUPES: readonly { id: Groupe; cle: 'groupeAbstraits' | 'groupePavages'
-  | 'groupeVolumes' | 'groupeInstruments' | 'groupeMatieres'
-  | 'groupePaysages' | 'groupeLieux' | 'groupeFigures' }[] = [
+  | 'groupeVolumes' | 'groupeMatieres'
+  | 'groupePaysages' | 'groupeFigures' }[] = [
   { id: 'abs', cle: 'groupeAbstraits' },
   { id: 'pav', cle: 'groupePavages' },
   { id: 'vol', cle: 'groupeVolumes' },
-  { id: 'ins', cle: 'groupeInstruments' },
   { id: 'mat', cle: 'groupeMatieres' },
   { id: 'pay', cle: 'groupePaysages' },
-  { id: 'lieu', cle: 'groupeLieux' },
   { id: 'fig', cle: 'groupeFigures' },
 ]
 
@@ -47,7 +45,7 @@ function autreFamille(groupe: Groupe, courante: string) {
  * Le motif derrière une vraie grille d'icônes, et sous lui les réglages qui le
  * font. C'est l'application en trois rangées, pas en quatre-vingts vignettes :
  * une liste complète des familles referait le panneau de l'outil dans un autre
- * document, ce que le design refuse. Les huit groupes disent le classement, et
+ * document, ce que le design refuse. Les six groupes disent le classement, et
  * « une autre famille » donne accès au reste sans construire un second
  * éditeur.
  *
