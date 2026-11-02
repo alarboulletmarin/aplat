@@ -445,7 +445,7 @@ quatre, avec quatre phrases.
   dégradé.
 - **Instruments** (quatre) : le motif est gradué, il mesure. Les quatre de la
   mesure, tapis de coupe, papier millimétré, rapporteur, mire de réglage.
-- La coulée reste chez les abstraits : ses rubans serpentent, et rien n'y
+- À cette étape, la coulée reste chez les abstraits : ses rubans serpentent, et rien n'y
   revient.
 - **Matières** (six) : bois, peau, tissu, interférence, ce que la main
   reconnaît avant l'oeil. Cernes pose des anneaux de croissance ; Pelage et
@@ -988,3 +988,14 @@ Le pied porte aussi les mentions légales : ce que l'application ne collecte pas
 | [`SECURITY.md`](../SECURITY.md) | comment signaler une faille, et ce qui n'en est pas une |
 | [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md) | ce qu'on attend dans les échanges |
 | [`tools/README.md`](../tools/README.md) | ce que chaque vérification vérifie, et comment la rejouer |
+
+### Les courbes de champ
+
+Courants, Rubans et Sillage suivent une grille d'angles déterministe, avec
+espacement contrôlé par une grille de voisinage. Les choix et les mesures
+sont dans [courants.md](courants.md).
+
+Ces trois motifs entrent dans les abstraits. Méandres rejoint désormais les
+pavages avec Truchet, puisque leurs raccords partagent la même maille malgré
+l'absence de répétition des couleurs. Ce classement conserve les limites de navigation,
+quatre rangées au plus sur téléphone et vingt familles au plus par groupe.

@@ -51,15 +51,15 @@ function abscisses(d: string): number[] {
 }
 
 describe('liste des familles neuves', () => {
-  it('range le carreau dans les pavages et la coulée dans les abstraits', () => {
-    /* Les deux gestes ne rangent pas au même endroit, et c'est le sens même
-       des groupes : le carreau pose une maille qui revient, la coulée fait
-       serpenter des rubans dont rien ne se répète. */
+  it('range le carreau et les rubans Truchet dans les pavages', () => {
+    /* La couleur d'un ruban n'est pas périodique, mais ses raccords suivent
+       la même maille de quarts de cercle que Truchet. Les ranger ensemble
+       laisse les courbes de champ dans les abstraits sans dépasser vingt. */
     for (const id of IDS_CARREAUX) {
       expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('pav')
     }
     for (const id of IDS_COULEES) {
-      expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('abs')
+      expect(FAMILLES.find((f) => f.id === id)?.groupe, id).toBe('pav')
     }
   })
 

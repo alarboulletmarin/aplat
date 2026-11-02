@@ -3,6 +3,7 @@
 import { FAMILLES, type IdFamille, type Motif } from '../../lib/moteur'
 import { IDS_CARREAUX } from '../../lib/carreaux'
 import { IDS_CHIMIE } from '../../lib/chimie'
+import { IDS_COURANTS } from '../../lib/courants'
 import { IDS_COULEES } from '../../lib/coulees'
 import { IDS_FRACTURES } from '../../lib/fractures'
 import { IDS_GRAMMAIRES } from '../../lib/grammaires'
@@ -17,14 +18,14 @@ import { IDS_SURIMPRESSIONS } from '../../lib/surimpression'
 import { IDS_TRAMES } from '../../lib/trames'
 
 /**
- * Les quinze mécaniques de dessin, et les familles qui en sortent.
+ * Les seize mécaniques de dessin, et les familles qui en sortent.
  *
  * C'est le pendant de `accueil/choix.ts` pour la page du moteur : ce qu'elle
  * montre, choisi une fois, plutôt que tiré au sort à l'ouverture.
  *
  * **Aucune liste de familles n'est recopiée ici.** Chaque fiche prend la liste
  * que son module publie déjà (`IDS_NIVEAUX`, `IDS_FRACTURES`, etc.), et la
- * première, celle des gestes d'origine, est ce qui reste une fois les treize
+ * première, celle des gestes d'origine, est ce qui reste une fois les quinze
  * autres retirées de `FAMILLES`. Une famille ajoutée au moteur se range donc
  * d'elle-même dans la bonne fiche, et aucune fiche ne peut citer une famille
  * qui n'existe pas.
@@ -36,7 +37,7 @@ import { IDS_TRAMES } from '../../lib/trames'
  * `cle` est la clé du libellé dans le dictionnaire, `exemple` le motif que la
  * fiche peint. Les exemples sont figés, palette comprise : ils démontrent une
  * mécanique, pas le motif qu'on est en train de composer plus haut dans la
- * page, et les faire suivre reviendrait à redessiner quinze toiles à chaque
+ * page, et les faire suivre reviendrait à redessiner seize toiles à chaque
  * pastille de palette touchée.
  */
 export interface Mecanique {
@@ -47,14 +48,14 @@ export interface Mecanique {
   exemple: Motif
 }
 
-/* Les quatorze gestes venus d'un module, dans l'ordre où ils sont arrivés dans le
+/* Les quinze gestes venus d'un module, dans l'ordre où ils sont arrivés dans le
    moteur. Le premier de la liste publiée ci-dessous n'en est pas : il est ce
    qui restait avant eux. */
 const VENUES_DES_MODULES: readonly IdFamille[] = [
   ...IDS_NIVEAUX, ...IDS_FRACTURES, ...IDS_RESERVES, ...IDS_CHIMIE,
   ...IDS_PAVAGES, ...IDS_LIEUX, ...IDS_TRAMES, ...IDS_RESEAUX, ...IDS_GRAMMAIRES,
   ...IDS_CARREAUX, ...IDS_COULEES, ...IDS_RELIEFS, ...IDS_MESURES,
-  ...IDS_SURIMPRESSIONS,
+  ...IDS_SURIMPRESSIONS, ...IDS_COURANTS,
 ]
 
 /** Tout ce que `formes()` dessine encore lui-même, sans passer par un module. */
@@ -128,6 +129,12 @@ export const MECANIQUES: readonly Mecanique[] = [
     module: 'lib/carreaux.ts',
     familles: IDS_CARREAUX,
     exemple: { famille: 'bauhaus', palette: 'corail', densite: 1, graine: 5821 },
+  },
+  {
+    cle: 'courants',
+    module: 'lib/courants.ts',
+    familles: IDS_COURANTS,
+    exemple: { famille: 'rubans', palette: 'argile', densite: 1, graine: 7314 },
   },
   {
     cle: 'coulees',

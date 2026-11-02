@@ -224,6 +224,9 @@ export const fr = {
       carreauxNom: 'Le carreau',
       carreauxNote:
         'Une grille de cases carrées, et dans chacune un signe pris dans un jeu fini. Deux quarts de disque voisins font un demi, quatre font un rond.',
+      courantsNom: 'Le champ de directions',
+      courantsNote:
+        'Une grille d’angles dévie les courbes pas à pas. Chacune garde sa teinte et sa distance aux autres, en trait fin, en ruban ou en pointillés.',
       couleesNom: 'La coulée',
       couleesNote:
         'Des arcs épais qui entrent et sortent par le milieu des côtés d’une tuile, et se prolongent d’une tuile à l’autre. Un ruban garde sa teinte sur toute sa longueur.',

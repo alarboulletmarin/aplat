@@ -104,3 +104,12 @@ Sans `REF_DIR`, ces trois outils s'arrêtent proprement.
 Ces scripts sont des modules ES, comme le reste du dépôt, d'où l'extension
 `.mjs`. Ils n'ont aucune dépendance en dehors de Playwright, et `eslint` les
 couvre au même titre que le code de l'application.
+
+## Champs de directions
+
+Après `npm run build`, `node tools/courants.mjs` vérifie Courants, Rubans et
+Sillage sur les onze palettes. Il enregistre dans `.exports/courants/` les
+33 aperçus derrière les icônes de l'application, leur planche, les PNG à
+1179 × 2556, trois détails natifs de 400 × 400 et les mesures de poids, temps
+de dessin et contraste dans `mesures.json`. Cet audit ciblé se lance à part
+de `check`, pour conserver ses images et comparer les bords à taille réelle.

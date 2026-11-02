@@ -167,6 +167,9 @@ export const en: Textes = {
       carreauxNom: 'Tile alphabet',
       carreauxNote:
         'A grid of square cells, each holding one sign drawn from a finite set. Two neighbouring quarter discs make a half, four make a circle.',
+      courantsNom: 'The direction field',
+      courantsNote:
+        'A grid of angles guides each curve step by step. Every curve keeps its colour and its distance from the others, as a fine line, a ribbon or a dashed line.',
       couleesNom: 'Flow',
       couleesNote:
         'Thick arcs entering and leaving through the midpoints of a tile’s sides, carrying on from one tile to the next. A ribbon keeps its colour along its whole length.',

@@ -11,6 +11,7 @@
 
 import { estCarreau, peindreCarreau, type IdCarreau } from './carreaux'
 import { estChimie, peindreChimie, type IdChimie } from './chimie'
+import { estCourant, peindreCourant, type IdCourant } from './courants'
 import { estCoulee, peindreCoulee, type IdCoulee } from './coulees'
 import { estFracture, peindreFracture, type IdFracture } from './fractures'
 import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
@@ -65,6 +66,7 @@ export type IdFamille =
   | IdReserve
   | IdPavage
   | IdCarreau
+  | IdCourant
   | IdCoulee
   | IdRelief
   | IdMesure
@@ -464,8 +466,10 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'strates', groupe: 'abs', fr: 'Strates', en: 'Strata' },
   { id: 'kintsugi', groupe: 'abs', fr: 'Kintsugi', en: 'Kintsugi' },
   { id: 'banquise', groupe: 'abs', fr: 'Banquise', en: 'Ice floes' },
-  { id: 'meandres', groupe: 'abs', fr: 'Méandres', en: 'Meanders' },
   { id: 'lagon', groupe: 'abs', fr: 'Lagon', en: 'Lagoon' },
+  { id: 'courants', groupe: 'abs', fr: 'Courants', en: 'Currents' },
+  { id: 'rubans', groupe: 'abs', fr: 'Rubans', en: 'Ribbons' },
+  { id: 'sillage', groupe: 'abs', fr: 'Sillage', en: 'Wake' },
   /* pavages : une maille revient, et l'oeil la suit du doigt */
   { id: 'arches', groupe: 'pav', fr: 'Arches', en: 'Arches' },
   { id: 'pointille', groupe: 'pav', fr: 'Fondu pointillé', en: 'Dotted fade' },
@@ -473,6 +477,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'ecailles', groupe: 'pav', fr: 'Écailles', en: 'Scales' },
   { id: 'arcade', groupe: 'pav', fr: 'Arcade', en: 'Arcade' },
   { id: 'truchet', groupe: 'pav', fr: 'Truchet', en: 'Truchet' },
+  { id: 'meandres', groupe: 'pav', fr: 'Méandres', en: 'Meanders' },
   { id: 'azulejos', groupe: 'pav', fr: 'Azulejos', en: 'Azulejos' },
   { id: 'mosaique', groupe: 'pav', fr: 'Mosaïque', en: 'Mosaic' },
   { id: 'tresse', groupe: 'pav', fr: 'Tresse', en: 'Weave' },
@@ -1049,6 +1054,10 @@ export function formes(
   }
   if (estCarreau(id)) {
     peindreCarreau(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estCourant(id)) {
+    peindreCourant(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
   if (estCoulee(id)) {
