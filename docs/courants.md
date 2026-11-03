@@ -1,7 +1,8 @@
-# Courants, rubans et sillage
+# Courants, rubans, sillage et faisceaux
 
-Trois variantes dans l'onglet Abstraits : Courants dessine des lignes fines,
-Rubans des bandes épaisses et Sillage des lignes interrompues. Le catalogue
+Quatre variantes dans l'onglet Abstraits : Courants dessine des lignes fines,
+Rubans des bandes épaisses, Sillage des lignes interrompues et Faisceaux des
+bandes collées qui s'effilent (voir plus bas). Le catalogue
 compte désormais 73 motifs en six groupes, chacun avec vingt familles au plus.
 Méandres rejoint les pavages avec Truchet : ses rubans se raccordent sur une
 maille répétée. Les abstraits restent ainsi sous le plafond sans ajouter de
@@ -58,3 +59,29 @@ autres palettes dépassent 4,5:1 dans cet échantillon.
 Les tests unitaires couvrent le déterminisme, les listes blanches, le groupe,
 la densité, la conservation des coordonnées relatives, les onze palettes en
 SVG et la distance exacte entre segments aux trois densités, en fin et épais.
+
+## Faisceaux
+
+Les trois premières variantes suivent la moitié « espacée » de l'essai : les
+traits ne se touchent jamais et gardent leur épaisseur. Faisceaux prend
+l'autre moitié. Les traits sont peu nombreux, se croisent et se recouvrent, et
+leur largeur varie le long du tracé.
+
+- **Même champ.** `champDeDirections(cle)` est partagé : une graine donne la
+  même circulation à Courants et à Faisceaux.
+- **Une enveloppe.** La largeur totale vaut `sin(pi t)^0.6`, nulle aux deux
+  bouts, modulée par une houle lente : le faisceau gonfle, se pince en fil,
+  puis repart, et finit en pointe.
+- **Des brins collés.** Chaque faisceau porte un à quatre brins de couleurs
+  voisines dans la palette. La part de chaque brin varie le long du trait, et
+  les bords sont des sommes cumulées des mêmes parts : le bord droit d'un brin
+  est, point pour point, le bord gauche du suivant, sans jour entre eux.
+- **Convergence.** Un faisceau sur trois ou quatre part près du précédent :
+  les deux suivent des lignes voisines du champ, se rejoignent, se séparent.
+  Un sur quatre reste un fil fin.
+- **Densité.** 8, 14 ou 22 faisceaux pour un cadre de téléphone, nombre
+  proportionnel à l'aire du cadre en unités du petit côté.
+
+Sur Chromium, 1179 × 2556, le dessin prend 30 à 60 ms. Le SVG pèse 0,3 à
+0,8 Mo, en moins de cent chemins.
+

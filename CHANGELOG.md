@@ -9,6 +9,21 @@ celles de la publication.
 Première version. Aplat répond à une question : **à quoi ressemblera ce fond
 d'écran derrière mes icônes ?**
 
+### Ajouté : Faisceaux, Poudre, Lames et Lin
+
+- **Faisceaux**, chez les abstraits : des bandes de couleurs collées côte à
+  côte qui suivent le champ de Courants, gonflent, se pincent en fil et
+  finissent en pointe. Les faisceaux voisins se rejoignent et se recouvrent.
+- **Poudre**, chez les matières : une masse d'encre pulvérisée dont le bord
+  monte et descend comme une crête, grain par grain, comme sous un aérographe.
+- **Lames** : des traînées de grain empilées, chacune avec un bord net qui
+  s'évapore jusqu'à sa pointe.
+- **Lin** : un dégradé doux entre les deux couleurs les plus proches de la
+  palette, sous une toile tissée de fils clairs et sombres.
+- **Terrazzo passe chez les matières**, pour laisser à Faisceaux sa place chez
+  les abstraits sans dépasser vingt familles par onglet. Les liens et
+  l'historique qui le portent montrent la même image.
+
 ### Ajouté : trente-six palettes
 
 Onze palettes, c'était peu pour une application dont le choix de la couleur est

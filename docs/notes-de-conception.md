@@ -1002,6 +1002,20 @@ quatre rangées au plus sur téléphone et vingt familles au plus par groupe.
 
 Les groupes Instruments et Lieux sont ensuite retirés du moteur et des
 démonstrations pour recentrer la sélection sur les motifs et matières. Avec
-les trois courbes de champ, le catalogue compte 73 familles en six groupes.
+les trois courbes de champ, le catalogue compte alors 73 familles en six groupes.
 Les anciennes adresses retombent sur la famille par défaut ; les anciennes
 entrées correspondantes sont écartées à la relecture de l’historique.
+
+### Faisceaux, et trois matières grenées
+
+Faisceaux rejoint les courbes de champ : même grille d'angles, mais des bandes
+de couleurs collées qui gonflent, se pincent et finissent en pointe, sans
+collision. Pour l'accueillir sous le plafond des abstraits, Terrazzo passe chez
+les matières : c'est une pierre, la main la reconnaît avant l'oeil.
+
+Poudre, Lames et Lin entrent aussi chez les matières. Les deux premières sont
+des semis de grains tirés contre un champ lisse ; le troisième pose un dégradé
+sous une toile tissée. Le catalogue compte 77 familles en six groupes, les
+abstraits à vingt, les matières à onze. Les choix et les mesures sont dans
+[poudres.md](poudres.md) et [courants.md](courants.md).
+
