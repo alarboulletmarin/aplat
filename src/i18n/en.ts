@@ -176,6 +176,9 @@ export const en: Textes = {
       surimpressionsNom: 'Overprint',
       surimpressionsNote:
         'Two inks pulled one over the other, and a third colour wherever they cross, computed channel by channel. The intersection is clipped before it is painted: three opaque flats, no blending.',
+      poudresNom: 'Powder',
+      poudresNote:
+        'A grid of very fine grains, and a smooth field saying how much of the paper the ink covers at each point. Every grain is a coin toss against it, as under an airbrush. Linen adds a gradient under a woven canvas.',
     },
     couches: {
       arreter: 'Stop the drawing after {couche}',

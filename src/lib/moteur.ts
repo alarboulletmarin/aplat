@@ -17,6 +17,7 @@ import { estFracture, peindreFracture, type IdFracture } from './fractures'
 import { estGrammaire, peindreGrammaire, type IdGrammaire } from './grammaires'
 import { estNiveau, peindreNiveau, type IdNiveau } from './niveaux'
 import { estPavage, peindrePavage, type IdPavage } from './pavages'
+import { estPoudre, peindrePoudre, type IdPoudre } from './poudres'
 import { estRelief, peindreRelief, type IdRelief } from './reliefs'
 import {
   estSurimpression, peindreSurimpression, type IdSurimpression,
@@ -72,6 +73,7 @@ export type IdFamille =
      déformée et l'interférence y mettent tout le reste */
   | IdChimie
   | IdTrame
+  | IdPoudre
   /* paysages */
   | 'sommets'
   | 'horizon'
@@ -450,7 +452,6 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'obliques', groupe: 'abs', fr: 'Obliques', en: 'Diagonals' },
   { id: 'ondes', groupe: 'abs', fr: 'Ondes', en: 'Ripples' },
   { id: 'colonnes', groupe: 'abs', fr: 'Colonnes', en: 'Columns' },
-  { id: 'terrazzo', groupe: 'abs', fr: 'Terrazzo', en: 'Terrazzo' },
   { id: 'confettis', groupe: 'abs', fr: 'Confettis', en: 'Confetti' },
   { id: 'vitrail', groupe: 'abs', fr: 'Vitrail', en: 'Stained glass' },
   { id: 'persiennes', groupe: 'abs', fr: 'Persiennes', en: 'Shutters' },
@@ -464,6 +465,7 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'courants', groupe: 'abs', fr: 'Courants', en: 'Currents' },
   { id: 'rubans', groupe: 'abs', fr: 'Rubans', en: 'Ribbons' },
   { id: 'sillage', groupe: 'abs', fr: 'Sillage', en: 'Wake' },
+  { id: 'faisceaux', groupe: 'abs', fr: 'Faisceaux', en: 'Bundles' },
   /* pavages : une maille revient, et l'oeil la suit du doigt */
   { id: 'arches', groupe: 'pav', fr: 'Arches', en: 'Arches' },
   { id: 'pointille', groupe: 'pav', fr: 'Fondu pointillé', en: 'Dotted fade' },
@@ -496,6 +498,10 @@ export const FAMILLES: readonly Famille[] = [
   { id: 'sashiko', groupe: 'mat', fr: 'Boro', en: 'Boro' },
   { id: 'moire', groupe: 'mat', fr: 'Moiré', en: 'Moiré' },
   { id: 'aurore', groupe: 'mat', fr: 'Aurore', en: 'Aurora' },
+  { id: 'terrazzo', groupe: 'mat', fr: 'Terrazzo', en: 'Terrazzo' },
+  { id: 'poudre', groupe: 'mat', fr: 'Poudre', en: 'Powder' },
+  { id: 'lames', groupe: 'mat', fr: 'Lames', en: 'Blades' },
+  { id: 'lin', groupe: 'mat', fr: 'Lin', en: 'Linen' },
   /* paysages : ils ont un haut et un bas */
   { id: 'sommets', groupe: 'pay', fr: 'Sommets', en: 'Peaks' },
   { id: 'horizon', groupe: 'pay', fr: 'Horizon', en: 'Horizon' },
@@ -1031,6 +1037,10 @@ export function formes(
   }
   if (estCourant(id)) {
     peindreCourant(ctx, W, H, id, C, densite, rnd, unite)
+    return
+  }
+  if (estPoudre(id)) {
+    peindrePoudre(ctx, W, H, id, C, densite, rnd, unite)
     return
   }
   if (estCoulee(id)) {

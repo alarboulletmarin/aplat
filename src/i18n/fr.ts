@@ -233,6 +233,9 @@ export const fr = {
       surimpressionsNom: 'La surimpression',
       surimpressionsNote:
         'Deux encres tirées l’une sur l’autre, et une troisième couleur là où elles se croisent, calculée canal par canal. L’intersection est découpée avant d’être peinte : trois aplats opaques, aucun fondu.',
+      poudresNom: 'La poudre',
+      poudresNote:
+        'Une grille de grains très fins, et un champ lisse qui dit en chaque point quelle part du papier l’encre couvre. Chaque grain est tiré à pile ou face contre lui, comme sous un aérographe. Le lin y ajoute un dégradé sous une toile tissée.',
     },
     /* Étape 04. Les noms des couches viennent d'ici, mais leur ordre vient du
        moteur (`COUCHES`) : une couche ajoutée là-bas manque ici, et la

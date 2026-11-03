@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { describe, expect, it } from 'vitest'
-import { composerCourants, estCourant, IDS_COURANTS, peindreCourant } from './courants'
+import { composerCourants, composerFaisceaux, estCourant, IDS_COURANTS, peindreCourant } from './courants'
 import { alea, estFamille, FAMILLES, PALETTES, type Pinceau } from './moteur'
 import { svgDuMotif } from './svg'
 import type { Point } from './trace'
@@ -22,7 +22,7 @@ function distanceSegments(a: Point, b: Point, c: Point, d: Point): number {
 }
 
 describe('le champ de directions', () => {
-  it('inscrit les trois variantes dans le catalogue abstrait et les listes blanches', () => {
+  it('inscrit les quatre variantes dans le catalogue abstrait et les listes blanches', () => {
     for (const id of IDS_COURANTS) {
       expect(estCourant(id) && estFamille(id)).toBe(true)
       expect(FAMILLES.find((f) => f.id === id)?.groupe).toBe('abs')
@@ -105,7 +105,7 @@ describe('le champ de directions', () => {
     }
   })
 
-  it.each(Object.entries(PALETTES))('exporte les trois variantes avec la palette %s sans couleur étrangère', (palette, P) => {
+  it.each(Object.entries(PALETTES))('exporte les quatre variantes avec la palette %s sans couleur étrangère', (palette, P) => {
     for (const famille of IDS_COURANTS) {
       const rendu = svgDuMotif({ famille, palette: palette as keyof typeof PALETTES, densite: 1, graine: 7314 }, 360, 780, false)
       expect(rendu.texte).not.toMatch(/NaN|Infinity|undefined/)
@@ -113,5 +113,48 @@ describe('le champ de directions', () => {
       expect(teintes.length).toBeGreaterThan(2)
       for (const teinte of teintes) expect([P.fond, ...P.couleurs]).toContain(teinte)
     }
+  })
+})
+
+describe('les faisceaux', () => {
+  it('reproduit une graine et la distingue des autres', () => {
+    const a = composerFaisceaux(1, 2, 1, 7314, 4)
+    expect(a.length).toBeGreaterThan(10)
+    expect(composerFaisceaux(1, 2, 1, 7314, 4)).toEqual(a)
+    expect(composerFaisceaux(1, 2, 1, 7315, 4)).not.toEqual(a)
+  })
+
+  it('finit chaque brin en pointe, aux deux bouts', () => {
+    for (const { bords: [gauche, droite] } of composerFaisceaux(1, 2, 1, 4242, 4)) {
+      const n = gauche.length
+      expect(droite.length).toBe(n)
+      for (const k of [0, n - 1]) {
+        expect(Math.hypot(gauche[k][0] - droite[k][0], gauche[k][1] - droite[k][1])).toBeLessThan(1e-9)
+      }
+    }
+  })
+
+  it('colle les brins d’un faisceau sans jour entre eux', () => {
+    /* Les bords sont des sommes cumulées : le bord droit d'un brin est, point
+       pour point, le bord gauche du suivant. */
+    const brins = composerFaisceaux(1, 2, 2, 4242, 4)
+    let collages = 0
+    for (let i = 1; i < brins.length; i += 1) {
+      if (brins[i].bords[0] === brins[i - 1].bords[1]) collages += 1
+    }
+    expect(collages).toBeGreaterThan(5)
+  })
+
+  it('ne pose que des couleurs de la palette, voisines dans un même faisceau', () => {
+    for (const brin of composerFaisceaux(1, 2, 1, 7314, 3)) {
+      expect(brin.couleur).toBeGreaterThanOrEqual(0)
+      expect(brin.couleur).toBeLessThan(3)
+    }
+  })
+
+  it('augmente le nombre de brins avec la densité', () => {
+    const nombres = ([0, 1, 2] as const).map((d) => composerFaisceaux(1, 2, d, 7314, 4).length)
+    expect(nombres[1]).toBeGreaterThan(nombres[0])
+    expect(nombres[2]).toBeGreaterThan(nombres[1])
   })
 })
